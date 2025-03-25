@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What the Ai</title>
+    <style>
+        /* Reset and base styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        /* Header styles */
+        header {
+            padding: 10px 20px;
+            background-color: #fff;
+            text-align: left;
+        }
+        header h1 {
+            font-size: 1.2em; /* Small font as requested */
+            margin: 0;
+            color: #333;
+        }
+        /* Game grid styles */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 columns on desktop */
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .game-item {
+            text-align: left;
+        }
+        .game-item img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1; /* Ensures square thumbnails */
+            object-fit: cover;
+            background-color: #add8e6; /* Light blue placeholder color from mockup */
+        }
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .game-title {
+            margin: 0;
+            font-size: 1em;
+            color: #333;
+            flex-grow: 1;
+        }
+        .version-select {
+            margin-left: 10px;
+            padding: 4px;
+            font-size: 0.9em;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(1, 1fr); /* 1 column on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>What the Ai</h1>
+    </header>
+    <div class="grid" id="game-grid"></div>
+    <script>
+        // Game data array with versions
+        const games = [
+            { 
+                id: 1, 
+                title: "Cosmic Dodge", 
+                thumbnail: "/images/CosmicDodge.png",
+                versions: [
+                    { name: "ChatGPT o3-mini-high", url: "/games/cosmic_dodge_chatgpt_o3_mini_high.html" }
+                    , { name: "Grok 3 w/ Reasoning", url: "/games/cosmic_dodge_grok3_with_reasoning.html" }
+                ]
+            },
+            // Add more games as needed
+            // {
+            //    id: 2,
+            //    title: "Game 2", 
+            //    thumbnail: "https://via.placeholder.com/150",
+            //    versions: [
+            //        { name: "Example Version", url: "/games/game2.html" }
+            //    ]
+            // }
+        ];
+
+        // Generate game grid dynamically
+        const grid = document.getElementById("game-grid");
+        
+        games.forEach(game => {
+            const item = document.createElement("div");
+            item.className = "game-item";
+            
+            // Create the image with link to the first version
+            const imgLink = document.createElement("a");
+            imgLink.href = game.versions[0].url;
+            imgLink.id = `game-link-${game.id}`;
+            
+            const img = document.createElement("img");
+            img.src = game.thumbnail;
+            img.alt = game.title;
+            
+            imgLink.appendChild(img);
+            item.appendChild(imgLink);
+            
+            // Create the info container with title and version selector
+            const infoDiv = document.createElement("div");
+            infoDiv.className = "game-info";
+            
+            const title = document.createElement("p");
+            title.className = "game-title";
+            title.textContent = game.title;
+            
+            const versionSelect = document.createElement("select");
+            versionSelect.className = "version-select";
+            versionSelect.id = `version-select-${game.id}`;
+            
+            // Add options to the select
+            game.versions.forEach((version, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = version.name;
+                versionSelect.appendChild(option);
+            });
+            
+            // Add event listener to update the link when version changes
+            versionSelect.addEventListener('change', function() {
+                const selectedIndex = this.value;
+                const gameLink = document.getElementById(`game-link-${game.id}`);
+                gameLink.href = game.versions[selectedIndex].url;
+            });
+            
+            infoDiv.appendChild(title);
+            infoDiv.appendChild(versionSelect);
+            item.appendChild(infoDiv);
+            
+            grid.appendChild(item);
+        });
+    </script>
+</body>
+</html>
