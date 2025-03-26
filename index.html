@@ -17,6 +17,7 @@
             padding: 10px 20px;
             background-color: #fff;
             text-align: left;
+            border-bottom: 1px solid #ccc; /* Added a subtle separator */
         }
         header h1 {
             font-size: 1.2em; /* Small font as requested */
@@ -26,45 +27,62 @@
         /* Game grid styles */
         .grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 columns on desktop */
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive columns */
             gap: 20px;
             padding: 20px;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 20px auto; /* Added top/bottom margin */
         }
         .game-item {
             text-align: left;
+            background-color: #fff; /* White background for each item */
+            border-radius: 5px; /* Slightly rounded corners */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
+            overflow: hidden; /* Ensure image corners are rounded if image itself isn't */
+        }
+        .game-item a {
+             display: block; /* Make link cover the image */
+             text-decoration: none;
         }
         .game-item img {
+            display: block; /* Remove extra space below image */
             width: 100%;
             height: auto;
             aspect-ratio: 1 / 1; /* Ensures square thumbnails */
-            object-fit: cover;
-            background-color: #add8e6; /* Light blue placeholder color from mockup */
+            object-fit: cover; /* Cover ensures the aspect ratio is maintained */
+            background-color: #e0e0e0; /* Slightly darker placeholder */
+            border-bottom: 1px solid #eee; /* Separator between image and info */
         }
         .game-info {
+            padding: 10px; /* Padding around text */
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
+            flex-direction: column; /* Stack title and select vertically */
+            gap: 8px; /* Space between title and select */
         }
         .game-title {
             margin: 0;
             font-size: 1em;
+            font-weight: bold; /* Make title slightly bolder */
             color: #333;
-            flex-grow: 1;
+            line-height: 1.2; /* Adjust line height */
         }
         .version-select {
-            margin-left: 10px;
-            padding: 4px;
+            padding: 5px; /* Slightly more padding */
             font-size: 0.9em;
             border-radius: 3px;
             border: 1px solid #ccc;
+            width: 100%; /* Make select take full width */
+            background-color: #fff; /* Ensure white background */
         }
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(1, 1fr); /* 1 column on mobile */
+        /* Responsive design (simplified) */
+        @media (max-width: 480px) {
+             .grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller columns on very small screens */
+                gap: 15px;
+                padding: 15px;
+            }
+             header h1 {
+                 font-size: 1.1em;
             }
         }
     </style>
@@ -73,81 +91,135 @@
     <header>
         <h1>What the Ai</h1>
     </header>
-    <div class="grid" id="game-grid"></div>
+
+    <div class="grid" id="game-grid">
+        <!-- Game items will be generated here by JavaScript -->
+    </div>
+
     <script>
         // Game data array with versions
         const games = [
-            { 
-                id: 1, 
-                title: "Cosmic Dodge", 
-                thumbnail: "/images/CosmicDodge.png",
+            {
+                id: 1,
+                title: "Cosmic Dodge",
+                thumbnail: "/images/CosmicDodge.png", // Ensure this image exists
                 versions: [
                     { name: "ChatGPT o3-mini-high", url: "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html" }
                 ]
             },
             {
                id: 2,
-               title: "Steve Jobs - Hammurabi", 
-               thumbnail: "https://via.placeholder.com/150",
+               title: "Steve Jobs - Hammurabi",
+               thumbnail: "/images/Hammurabi.jpeg", // CHANGED: Placeholder image path (Create this image)
                versions: [
-                   { name: "Grok 3 w/ Reasoning", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" }
-                   ,{ name: "Grok 3 Vanilla", url: "/games/game2.html" }
+                   // --- Corrected URL ---
+                   { name: "Grok 3 w/ Reasoning", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" },
+                   // --- Placeholder for Vanilla version - update when ready ---
+                   // TODO: Update this URL when the Grok 3 Vanilla version is ready
+                   { name: "Grok 3 Vanilla", url: "/games/steve_jobs_hammurabi/grok3_vanilla/game.html" }
                ]
             }
+            // Add more games here following the same structure
+            // {
+            //    id: 3,
+            //    title: "Another Game",
+            //    thumbnail: "/images/AnotherGame.png",
+            //    versions: [
+            //        { name: "Version A", url: "/games/another_game/version_a/game.html" },
+            //        { name: "Version B", url: "/games/another_game/version_b/game.html" }
+            //    ]
+            // }
         ];
 
         // Generate game grid dynamically
         const grid = document.getElementById("game-grid");
-        
-        games.forEach(game => {
-            const item = document.createElement("div");
-            item.className = "game-item";
-            
-            // Create the image with link to the first version
-            const imgLink = document.createElement("a");
-            imgLink.href = game.versions[0].url;
-            imgLink.id = `game-link-${game.id}`;
-            
-            const img = document.createElement("img");
-            img.src = game.thumbnail;
-            img.alt = game.title;
-            
-            imgLink.appendChild(img);
-            item.appendChild(imgLink);
-            
-            // Create the info container with title and version selector
-            const infoDiv = document.createElement("div");
-            infoDiv.className = "game-info";
-            
-            const title = document.createElement("p");
-            title.className = "game-title";
-            title.textContent = game.title;
-            
-            const versionSelect = document.createElement("select");
-            versionSelect.className = "version-select";
-            versionSelect.id = `version-select-${game.id}`;
-            
-            // Add options to the select
-            game.versions.forEach((version, index) => {
-                const option = document.createElement("option");
-                option.value = index;
-                option.textContent = version.name;
-                versionSelect.appendChild(option);
+
+        // Clear any existing content in the grid (optional, good practice)
+        grid.innerHTML = '';
+
+        if (games && games.length > 0) {
+            games.forEach(game => {
+                if (!game || !game.versions || game.versions.length === 0) {
+                    console.warn("Skipping invalid game data:", game);
+                    return; // Skip this game if data is malformed
+                }
+
+                const item = document.createElement("div");
+                item.className = "game-item";
+
+                // Create the image link - initially points to the first version's URL
+                const imgLink = document.createElement("a");
+                imgLink.href = game.versions[0].url; // Default link is the first version
+                imgLink.id = `game-link-${game.id}`; // Unique ID for the link
+
+                // Create the image element
+                const img = document.createElement("img");
+                img.src = game.thumbnail;
+                img.alt = game.title;
+                // Optional: Add error handling for images
+                img.onerror = () => {
+                    console.warn(`Image not found for ${game.title}: ${game.thumbnail}`);
+                    img.src = 'https://via.placeholder.com/200?text=No+Image'; // Fallback placeholder
+                };
+
+                imgLink.appendChild(img); // Add image to the link
+                item.appendChild(imgLink); // Add link (with image) to the game item
+
+                // Create the info container div
+                const infoDiv = document.createElement("div");
+                infoDiv.className = "game-info";
+
+                // Create the game title paragraph
+                const title = document.createElement("p");
+                title.className = "game-title";
+                title.textContent = game.title;
+
+                // Create the version selector dropdown
+                const versionSelect = document.createElement("select");
+                versionSelect.className = "version-select";
+                versionSelect.id = `version-select-${game.id}`; // Unique ID for the select
+
+                // Populate the select dropdown with options for each version
+                game.versions.forEach((version, index) => {
+                    const option = document.createElement("option");
+                    option.value = index; // Use index as value to easily get the version object
+                    option.textContent = version.name; // Display version name
+                    versionSelect.appendChild(option);
+                });
+
+                // Add an event listener to the select dropdown
+                versionSelect.addEventListener('change', function() {
+                    const selectedIndex = parseInt(this.value, 10); // Get selected index (as number)
+                    const gameLink = document.getElementById(`game-link-${game.id}`); // Find the corresponding link
+
+                    // Check if the selected index and version exist
+                    if (gameLink && game.versions[selectedIndex]) {
+                         // Update the href of the image link to the selected version's URL
+                        gameLink.href = game.versions[selectedIndex].url;
+                    } else {
+                        console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
+                    }
+                });
+
+                // Append title and select dropdown to the info container
+                infoDiv.appendChild(title);
+                infoDiv.appendChild(versionSelect);
+
+                // Append the info container to the game item
+                item.appendChild(infoDiv);
+
+                // Append the fully constructed game item to the grid
+                grid.appendChild(item);
             });
-            
-            // Add event listener to update the link when version changes
-            versionSelect.addEventListener('change', function() {
-                const selectedIndex = this.value;
-                const gameLink = document.getElementById(`game-link-${game.id}`);
-                gameLink.href = game.versions[selectedIndex].url;
-            });
-            
-            infoDiv.appendChild(title);
-            infoDiv.appendChild(versionSelect);
-            item.appendChild(infoDiv);
-            
-            grid.appendChild(item);
-        });
+        } else {
+            // Optional: Display a message if there are no games
+            grid.innerHTML = '<p>No games available at the moment.</p>';
+        }
     </script>
+
+    <!-- Cloudflare Web Analytics (Optional but recommended) -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+            
 </body>
 </html>
