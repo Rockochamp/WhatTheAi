@@ -220,15 +220,20 @@ body {
     border: 1px solid #666;
     border-radius: 3px;
 }
-/* Remove spinner buttons for number inputs in Firefox */
+
+/* Remove spinner buttons (up/down arrows) from number inputs */
 input[type='number'] {
+    /* Firefox */
     -moz-appearance: textfield;
+    /* Standard property - New browsers should recognize this */
+    appearance: none;
 }
-/* Remove spinner buttons for number inputs in Chrome, Safari, Edge, Opera */
+
+/* Remove spinner buttons specifically for WebKit/Blink browsers (Chrome, Safari, Edge, Opera) */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
-    margin: 0;
+    margin: 0; /* Also reset margin */
 }
 
 
