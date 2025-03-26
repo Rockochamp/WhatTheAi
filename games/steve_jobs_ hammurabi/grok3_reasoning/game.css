@@ -1,0 +1,293 @@
+/* Base styles from Cosmic Dodge */
+body {
+    background: #1a1a1a;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    /* text-align: center; */ /* Removed for better game layout */
+}
+
+/* Breadcrumb button */
+.breadcrumb {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+}
+
+.breadcrumb a {
+    text-decoration: none;
+    color: #333;
+    font-size: 1em;
+}
+
+/* Version indicator */
+.version-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    font-size: 0.9em;
+}
+
+/* Title Banner */
+#titleBanner {
+    background: #333;
+    padding: 20px;
+    font-size: 2em;
+    margin-bottom: 10px;
+    text-align: center; /* Center title */
+}
+
+/* --- Start Screen --- */
+#startScreen {
+    text-align: center;
+    padding: 20px;
+}
+
+#playerInfo {
+    margin-bottom: 20px;
+}
+
+#playerInfo label {
+    color: #fff; /* Ensure label is visible */
+}
+
+#playerInfo input {
+    padding: 5px;
+    font-size: 1em;
+    margin: 0 5px;
+}
+
+#playerInfo button {
+    padding: 5px 10px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #4CAF50; /* Match game button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+#playerInfo button:hover {
+    background-color: #45a049;
+}
+
+
+/* Leaderboard Box Styling (Used on Start and In-Game) */
+.leaderboard-box {
+    background: #222;
+    padding: 10px;
+    width: 260px; /* Consistent width */
+    border: 2px solid #fff;
+    margin: 0 auto 20px; /* Centered on start screen */
+    color: #fff; /* Ensure text is white */
+    text-align: left; /* Align list items left */
+}
+
+.leaderboard-box h2 {
+    margin-top: 0;
+    text-align: center; /* Center leaderboard title */
+    color: #fff;
+}
+
+.leaderboard-box ol {
+    padding-left: 20px; /* Indent list */
+    margin: 0;
+}
+
+.leaderboard-box li {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+
+/* --- Game Container --- */
+#gameContainer {
+    display: none; /* Hidden initially */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Left side: Game Interface + instructions */
+#gameArea {
+    margin-right: 20px;
+    flex: 1 1 auto;
+    max-width: 550px; /* Give game area space */
+}
+
+/* Right side: boardsContainer with global ranking */
+#boardsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 284px; /* Fixed width for leaderboard + padding/border */
+}
+
+#globalLeaderboardGame {
+     margin-bottom: 0; /* No bottom margin when in game */
+}
+
+/* Total games text style */
+.totalGamesText {
+    font-size: 0.8em;
+    margin: 0 0 10px 0; /* Space below text */
+    padding: 0;
+    color: #ccc;
+    text-align: center; /* Center total games text */
+}
+
+/* Instructions Text */
+.instructions {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #ccc;
+    text-align: center;
+}
+
+
+/* --- Original Hammurabi Game Styles (Adapted) --- */
+#game {
+    background-color: #333; /* Darker background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: 100%; /* Take available width in gameArea */
+    max-width: 500px; /* Max width from original */
+    margin: 0 auto; /* Center if gameArea is wider */
+    color: #fff; /* White text */
+}
+
+#game h1 { /* Style for the H1 inside the #game div */
+    text-align: center;
+    color: #eee;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+#resources, #decisions, #outcome {
+    margin: 20px 0;
+    border-top: 1px solid #555; /* Separators */
+    padding-top: 15px;
+}
+#resources {
+    border-top: none; /* No top border for the first section */
+    padding-top: 0;
+}
+
+
+#resources p {
+    margin: 8px 0;
+    font-weight: bold;
+}
+#resources span {
+    font-weight: normal;
+    color: #4CAF50; /* Highlight numbers */
+}
+
+
+#decisions h2, #outcome h2 {
+    color: #eee;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+#decisions label {
+    display: block;
+    margin: 10px 0;
+    color: #ccc;
+}
+
+#decisions input {
+    width: 70px; /* Slightly wider */
+    padding: 5px;
+    margin-left: 5px;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: 3px;
+}
+/* Remove spinner buttons for number inputs in Firefox */
+input[type='number'] {
+    -moz-appearance: textfield;
+}
+/* Remove spinner buttons for number inputs in Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+#nextTurn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 15px; /* Space above button */
+}
+
+#nextTurn:hover {
+    background-color: #45a049;
+}
+#nextTurn:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+#outcome {
+    color: #ddd;
+}
+#outcome p {
+    min-height: 1.2em; /* Prevent layout jump when message appears */
+    color: #ffcc00; /* Yellow outcome message */
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #gameContainer {
+        flex-direction: column; /* Stack game and leaderboard */
+        align-items: center;
+    }
+    #gameArea {
+        margin-right: 0;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 500px; /* Limit width on mobile too */
+    }
+    #boardsContainer {
+        flex: 1 1 auto; /* Allow leaderboard to take width */
+        width: 90%;
+        max-width: 300px; /* Max width for leaderboard */
+    }
+    .leaderboard-box {
+        width: 100%; /* Full width within container */
+    }
+     #playerInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+     #playerInfo input {
+        margin: 5px 0;
+    }
+}
