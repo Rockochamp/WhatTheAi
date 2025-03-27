@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What the Ai</title>
-    <!-- Add Favicon Link -->
+    <!-- Correct Favicon Link -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
     <style>
@@ -20,71 +20,75 @@
             padding: 10px 20px;
             background-color: #fff;
             text-align: left;
-            border-bottom: 1px solid #ccc; /* Added a subtle separator */
+            border-bottom: 1px solid #ccc;
         }
         header h1 {
-            font-size: 1.2em; /* Small font as requested */
+            font-size: 1.2em;
             margin: 0;
             color: #333;
         }
         /* Game grid styles */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive columns */
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
             padding: 20px;
             max-width: 1200px;
-            margin: 20px auto; /* Added top/bottom margin */
+            margin: 20px auto;
         }
         .game-item {
             text-align: left;
-            background-color: #fff; /* White background for each item */
-            border-radius: 5px; /* Slightly rounded corners */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
-            overflow: hidden; /* Ensure image corners are rounded if image itself isn't */
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         .game-item a {
-             display: block; /* Make link cover the image */
+             display: block;
              text-decoration: none;
         }
         .game-item img {
-            display: block; /* Remove extra space below image */
+            display: block;
             width: 100%;
             height: auto;
-            aspect-ratio: 1 / 1; /* Ensures square thumbnails */
-            object-fit: cover; /* Cover ensures the aspect ratio is maintained */
-            background-color: #e0e0e0; /* Slightly darker placeholder */
-            border-bottom: 1px solid #eee; /* Separator between image and info */
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            background-color: #e0e0e0;
+            border-bottom: 1px solid #eee;
         }
         .game-info {
-            padding: 10px; /* Padding around text */
+            padding: 10px;
             display: flex;
-            flex-direction: column; /* Stack title and select vertically */
-            gap: 8px; /* Space between title and select */
+            flex-direction: column;
+            gap: 8px;
         }
         .game-title {
             margin: 0;
             font-size: 1em;
-            font-weight: bold; /* Make title slightly bolder */
+            font-weight: bold;
             color: #333;
-            line-height: 1.2; /* Adjust line height */
+            line-height: 1.2;
         }
         .version-select {
-            padding: 5px; /* Slightly more padding */
+            padding: 5px;
             font-size: 0.9em;
             border-radius: 3px;
             border: 1px solid #ccc;
-            width: 100%; /* Make select take full width */
-            background-color: #fff; /* Ensure white background */
+            width: 100%;
+            background-color: #fff;
         }
-        /* Hide select if only one option */
-        .version-select:has(option:first-child:last-child) {
-             display: none;
+        /* Style for disabled select when only one version */
+        .version-select:disabled {
+             background-color: #eee; /* Grey background */
+             color: #555; /* Dimmer text */
+             cursor: default; /* Default cursor */
+             opacity: 0.7; /* Slight transparency */
         }
-        /* Responsive design (simplified) */
+
+        /* Responsive design */
         @media (max-width: 480px) {
              .grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller columns on very small screens */
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 15px;
                 padding: 15px;
             }
@@ -109,7 +113,7 @@
             {
                 id: 1,
                 title: "Cosmic Dodge",
-                thumbnail: "/images/CosmicDodge.png",
+                thumbnail: "/images/CosmicDodge.png", // Stays .png as per original code
                 versions: [
                     { name: "ChatGPT o3-mini-high", url: "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html" }
                 ]
@@ -117,11 +121,9 @@
             {
                id: 2,
                title: "Steve Jobs - Hammurabi",
-               thumbnail: "/images/Hammurabi.png",
+               thumbnail: "/images/Hammurabi.jpeg", // CORRECTED to .jpeg
                versions: [
-                   // --- Only remaining version ---
                    { name: "Grok 3 w/ Reasoning (Uncapped)", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" }
-                   // --- Grok 3 Vanilla REMOVED ---
                ]
             }
             // Add more games here following the same structure
@@ -163,20 +165,24 @@
                 title.className = "game-title";
                 title.textContent = game.title;
 
-                // Only create select if more than one version
-                let versionSelect = null;
-                if (game.versions.length > 1) {
-                    versionSelect = document.createElement("select");
-                    versionSelect.className = "version-select";
-                    versionSelect.id = `version-select-${game.id}`;
+                // Always create the select element
+                const versionSelect = document.createElement("select");
+                versionSelect.className = "version-select";
+                versionSelect.id = `version-select-${game.id}`;
 
-                    game.versions.forEach((version, index) => {
-                        const option = document.createElement("option");
-                        option.value = index;
-                        option.textContent = version.name;
-                        versionSelect.appendChild(option);
-                    });
+                // Populate the select dropdown
+                game.versions.forEach((version, index) => {
+                    const option = document.createElement("option");
+                    option.value = index;
+                    option.textContent = version.name;
+                    versionSelect.appendChild(option);
+                });
 
+                // Disable select and event listener if only one version
+                if (game.versions.length <= 1) {
+                    versionSelect.disabled = true;
+                } else {
+                    // Add event listener only if multiple versions exist
                     versionSelect.addEventListener('change', function() {
                         const selectedIndex = parseInt(this.value, 10);
                         const gameLink = document.getElementById(`game-link-${game.id}`);
@@ -186,19 +192,10 @@
                             console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
                         }
                     });
-                } else {
-                    // Optional: Add version name as text if only one version?
-                    // const versionText = document.createElement("span");
-                    // versionText.textContent = game.versions[0].name;
-                    // versionText.style.fontSize = "0.9em";
-                    // infoDiv.appendChild(versionText);
                 }
-
 
                 infoDiv.appendChild(title);
-                if (versionSelect) { // Append select only if it was created
-                    infoDiv.appendChild(versionSelect);
-                }
+                infoDiv.appendChild(versionSelect); // Always append the select
                 item.appendChild(infoDiv);
                 grid.appendChild(item);
             });
@@ -207,7 +204,7 @@
         }
     </script>
 
-    <!-- Cloudflare Web Analytics (Optional but recommended) -->
+    <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
 
