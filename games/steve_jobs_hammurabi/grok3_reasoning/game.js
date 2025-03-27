@@ -472,4 +472,5 @@ function processTurn() {
 // Event listener for next turn button
 if(nextTurnBtn) nextTurnBtn.addEventListener('click', processTurn);
 
+
 // Initial data load moved to DOMContentLoaded listener added earlier
