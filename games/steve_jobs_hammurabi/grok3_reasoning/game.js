@@ -132,7 +132,7 @@ function resetGameUIAndState(isRestart = false) {
     // Initial state
     gameState = {
         year: 0,
-        food: 1000,
+        food: 4000,
         land: 100,
         pawns: 100,
         landPrice: Math.floor(Math.random()*11)+18, // Price: 18-28
