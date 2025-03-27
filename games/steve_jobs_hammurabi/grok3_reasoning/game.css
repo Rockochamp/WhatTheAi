@@ -10,10 +10,9 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
 #playerInfo { margin-bottom: 20px; }
 #playerInfo label { color: #fff; }
 #playerInfo input { padding: 5px; font-size: 1em; margin: 0 5px; }
-#playerInfo button { padding: 8px 15px; font-size: 1em; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; transition: transform 0.1s ease, background-color 0.2s ease; /* Added transition */ }
+#playerInfo button { padding: 8px 15px; font-size: 1em; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; transition: transform 0.1s ease, background-color 0.2s ease; }
 #playerInfo button:hover { background-color: #45a049; }
 #playerInfo button:active { transform: scale(0.98); }
-
 
 /* Leaderboard Box Styling */
 .leaderboard-box { background: #222; padding: 10px 15px; width: 100%; max-width: 280px; border: 2px solid #fff; color: #fff; text-align: left; box-sizing: border-box; border-radius: 5px; }
@@ -35,49 +34,45 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
 #resources, #decisions, #outcome { margin: 20px 0; border-top: 1px solid #555; padding-top: 15px; }
 #resources { border-top: none; padding-top: 0; }
 #resources p { margin: 8px 0; font-weight: bold; }
-#resources span { font-weight: normal; color: #4CAF50; }
-#resources span[title] { /* Add hint for tooltips */
-    cursor: help;
-    border-bottom: 1px dotted #ccc;
+#resources span { font-weight: normal; /* Default span color handled by status classes */ }
+#resources span[title] { cursor: help; border-bottom: 1px dotted #ccc; }
+
+/* Added: Starvation Status Span Styles */
+#starvationStatus {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-left: 5px; /* Space from "Status:" label */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
 }
+.status-safe { background-color: #4CAF50; color: white; } /* Green */
+.status-ok { background-color: #b8d82c; color: #333; } /* YellowGreen */
+.status-warning { background-color: #ff9800; color: white; } /* Orange */
+.status-danger { background-color: #f44336; color: white; } /* Red */
+.status-critical { background-color: #b71c1c; color: white; font-weight: bold; } /* Dark Red, Bold */
+
+
 #decisions h2, #outcome h2 { color: #eee; margin-bottom: 10px; font-size: 1.2em; }
 #decisions label { display: block; margin: 12px 0; color: #ccc; }
-#decisions label[title] { /* Add hint for tooltips */
-    cursor: help;
-    border-bottom: 1px dotted #ccc;
-    display: inline-block; /* Allow border to work correctly */
-}
+#decisions label[title] { cursor: help; border-bottom: 1px dotted #ccc; display: inline-block; }
 #decisions input[type="number"] { width: 80px; padding: 6px; margin-left: 8px; background-color: #444; color: #fff; border: 1px solid #666; border-radius: 3px; font-size: 1em; }
 input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-/* Added: Info text styling */
-.info-text {
-    font-size: 0.85em;
-    color: #bbb;
-    margin-left: 10px;
-    display: inline; /* Keep on same line */
-}
-/* Ensure info text wraps reasonably */
-#decisions label span.info-text {
-    display: block; /* Put hints on new line below input */
-    margin-left: 0;
-    margin-top: 4px;
-}
-
+.info-text { font-size: 0.85em; color: #bbb; margin-left: 10px; display: inline; }
+#decisions label span.info-text { display: block; margin-left: 0; margin-top: 4px; }
 
 /* Main Game Button Styling */
 #nextTurn {
     display: block; width: 100%; padding: 12px; background-color: #4CAF50; color: white;
     border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em;
-    margin-top: 20px; transition: background-color 0.2s ease, transform 0.1s ease; /* Added transition */
+    margin-top: 20px; transition: background-color 0.2s ease, transform 0.1s ease;
 }
 #nextTurn:hover:not(:disabled) { background-color: #45a049; }
 #nextTurn:disabled { background-color: #555; cursor: not-allowed; opacity: 0.7; }
 #nextTurn:active:not(:disabled) { transform: scale(0.98); filter: brightness(90%); }
 #nextTurn.game-over-button { background-color: #f44336; }
 #nextTurn.game-over-button:hover:not(:disabled) { background-color: #d32f2f; }
-
 
 #outcome { color: #ddd; }
 #outcome p { min-height: 3em; padding: 8px; background-color: #2a2a2a; border-radius: 4px; border-left: 3px solid #ffcc00; color: #ffcc00; font-weight: normal; line-height: 1.4; }
@@ -89,72 +84,36 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 .volume-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #4CAF50; border-radius: 50%; cursor: pointer; }
 .volume-control input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #4CAF50; border-radius: 50%; cursor: pointer; border: none; }
 
-/* Added: Help Button Styling */
+/* Help Button Styling */
 .help-button {
-    padding: 8px 15px;
-    font-size: 0.9em;
-    cursor: pointer;
-    background-color: #007bff; /* Blue, distinct */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
-    margin-top: 0; /* Align with other boxes */
-    width: 100%; /* Match volume control width */
-    max-width: 280px; /* Match volume control width */
-    box-sizing: border-box;
+    padding: 8px 15px; font-size: 0.9em; cursor: pointer; background-color: #007bff;
+    color: white; border: none; border-radius: 5px; transition: background-color 0.2s ease;
+    margin-top: 0; width: 100%; max-width: 280px; box-sizing: border-box;
 }
-.help-button:hover {
-    background-color: #0056b3;
-}
+.help-button:hover { background-color: #0056b3; }
 
-/* Added: Modal Styles */
+/* Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 100; /* Sit on top */
-    left: 0; top: 0; width: 100%; height: 100%;
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.7); /* Dim background */
-    backdrop-filter: blur(3px); /* Optional: blur background */
-    -webkit-backdrop-filter: blur(3px);
+    display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+    overflow: auto; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
 }
 .modal-content {
-    background-color: #2a2a2a; /* Slightly lighter than game background */
-    color: #fff;
-    margin: 10% auto;
-    padding: 25px 35px;
-    border: 1px solid #555;
-    width: 85%;
-    max-width: 650px;
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    line-height: 1.6;
+    background-color: #2a2a2a; color: #fff; margin: 10% auto; padding: 25px 35px; border: 1px solid #555;
+    width: 85%; max-width: 650px; border-radius: 8px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); line-height: 1.6;
 }
 .modal-content h2 { margin-top: 0; color: #4CAF50; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px; }
 .modal-content h3 { color: #eee; margin-top: 20px; margin-bottom: 10px; }
 .modal-content hr { border: 0; border-top: 1px solid #444; margin: 20px 0; }
 .modal-content ul { padding-left: 20px; list-style: disc; }
 .modal-content li { margin-bottom: 10px; }
-.modal-content strong { color: #ffcc00; font-weight: bold; } /* Highlight key terms */
+.modal-content strong { color: #ffcc00; font-weight: bold; }
 .modal-content p:last-child { margin-bottom: 0; }
 
 .close-button {
-    color: #aaa;
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 32px;
-    font-weight: bold;
-    line-height: 1;
+    color: #aaa; position: absolute; top: 10px; right: 15px; font-size: 32px;
+    font-weight: bold; line-height: 1;
 }
-.close-button:hover, .close-button:focus {
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
-}
-
+.close-button:hover, .close-button:focus { color: #fff; text-decoration: none; cursor: pointer; }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -163,14 +122,9 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
     #boardsContainer { flex-basis: auto; width: 90%; max-width: 350px; }
     #playerInfo { display: flex; flex-direction: column; align-items: center; gap: 10px; }
     #playerInfo input { margin: 0; width: 80%; max-width: 250px; text-align: center; }
-
-    .modal-content {
-        width: 90%;
-        margin: 15% auto; /* Adjust margin for smaller screens */
-        padding: 20px;
-    }
-     /* Ensure info text fits */
+    .modal-content { width: 90%; margin: 15% auto; padding: 20px; }
     #decisions label span.info-text { font-size: 0.8em; }
+    #starvationStatus { font-size: 0.85em; } /* Adjust status size */
 }
 
 @media (max-width: 480px) {
@@ -180,4 +134,5 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
     .info-text, #decisions label span.info-text { font-size: 0.75em; }
     .modal-content { padding: 15px 20px; }
     .close-button { font-size: 28px; top: 5px; right: 10px; }
+    #starvationStatus { font-size: 0.8em; padding: 1px 4px; } /* Further adjust status size */
 }
