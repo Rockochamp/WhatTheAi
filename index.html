@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What the Ai</title>
+    <!-- Add Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
     <style>
         /* Reset and base styles */
         body {
@@ -74,6 +77,10 @@
             width: 100%; /* Make select take full width */
             background-color: #fff; /* Ensure white background */
         }
+        /* Hide select if only one option */
+        .version-select:has(option:first-child:last-child) {
+             display: none;
+        }
         /* Responsive design (simplified) */
         @media (max-width: 480px) {
              .grid {
@@ -102,7 +109,7 @@
             {
                 id: 1,
                 title: "Cosmic Dodge",
-                thumbnail: "/images/CosmicDodge.png", // Ensure this image exists
+                thumbnail: "/images/CosmicDodge.png",
                 versions: [
                     { name: "ChatGPT o3-mini-high", url: "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html" }
                 ]
@@ -110,33 +117,19 @@
             {
                id: 2,
                title: "Steve Jobs - Hammurabi",
-               thumbnail: "/images/Hammurabi.jpeg", // CHANGED: Placeholder image path (Create this image)
+               thumbnail: "/images/Hammurabi.png",
                versions: [
-                   // --- Corrected URL ---
-                   { name: "Grok 3 w/ Reasoning", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" },
-                   // --- Placeholder for Vanilla version - update when ready ---
-                   // TODO: Update this URL when the Grok 3 Vanilla version is ready
-                   { name: "Grok 3 Vanilla", url: "/games/steve_jobs_hammurabi/grok3_vanilla/game.html" }
+                   // --- Only remaining version ---
+                   { name: "Grok 3 w/ Reasoning (Uncapped)", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" }
+                   // --- Grok 3 Vanilla REMOVED ---
                ]
             }
-            
             // Add more games here following the same structure
-            // {
-            //    id: 3,
-            //    title: "Another Game",
-            //    thumbnail: "/images/AnotherGame.png",
-            //    versions: [
-            //        { name: "Version A", url: "/games/another_game/version_a/game.html" },
-            //        { name: "Version B", url: "/games/another_game/version_b/game.html" }
-            //    ]
-            // }
         ];
 
         // Generate game grid dynamically
         const grid = document.getElementById("game-grid");
-
-        // Clear any existing content in the grid (optional, good practice)
-        grid.innerHTML = '';
+        grid.innerHTML = ''; // Clear grid first
 
         if (games && games.length > 0) {
             games.forEach(game => {
@@ -148,72 +141,68 @@
                 const item = document.createElement("div");
                 item.className = "game-item";
 
-                // Create the image link - initially points to the first version's URL
                 const imgLink = document.createElement("a");
-                imgLink.href = game.versions[0].url; // Default link is the first version
-                imgLink.id = `game-link-${game.id}`; // Unique ID for the link
+                imgLink.href = game.versions[0].url;
+                imgLink.id = `game-link-${game.id}`;
 
-                // Create the image element
                 const img = document.createElement("img");
                 img.src = game.thumbnail;
                 img.alt = game.title;
-                // Optional: Add error handling for images
                 img.onerror = () => {
                     console.warn(`Image not found for ${game.title}: ${game.thumbnail}`);
                     img.src = 'https://via.placeholder.com/200?text=No+Image'; // Fallback placeholder
                 };
 
-                imgLink.appendChild(img); // Add image to the link
-                item.appendChild(imgLink); // Add link (with image) to the game item
+                imgLink.appendChild(img);
+                item.appendChild(imgLink);
 
-                // Create the info container div
                 const infoDiv = document.createElement("div");
                 infoDiv.className = "game-info";
 
-                // Create the game title paragraph
                 const title = document.createElement("p");
                 title.className = "game-title";
                 title.textContent = game.title;
 
-                // Create the version selector dropdown
-                const versionSelect = document.createElement("select");
-                versionSelect.className = "version-select";
-                versionSelect.id = `version-select-${game.id}`; // Unique ID for the select
+                // Only create select if more than one version
+                let versionSelect = null;
+                if (game.versions.length > 1) {
+                    versionSelect = document.createElement("select");
+                    versionSelect.className = "version-select";
+                    versionSelect.id = `version-select-${game.id}`;
 
-                // Populate the select dropdown with options for each version
-                game.versions.forEach((version, index) => {
-                    const option = document.createElement("option");
-                    option.value = index; // Use index as value to easily get the version object
-                    option.textContent = version.name; // Display version name
-                    versionSelect.appendChild(option);
-                });
+                    game.versions.forEach((version, index) => {
+                        const option = document.createElement("option");
+                        option.value = index;
+                        option.textContent = version.name;
+                        versionSelect.appendChild(option);
+                    });
 
-                // Add an event listener to the select dropdown
-                versionSelect.addEventListener('change', function() {
-                    const selectedIndex = parseInt(this.value, 10); // Get selected index (as number)
-                    const gameLink = document.getElementById(`game-link-${game.id}`); // Find the corresponding link
+                    versionSelect.addEventListener('change', function() {
+                        const selectedIndex = parseInt(this.value, 10);
+                        const gameLink = document.getElementById(`game-link-${game.id}`);
+                        if (gameLink && game.versions[selectedIndex]) {
+                            gameLink.href = game.versions[selectedIndex].url;
+                        } else {
+                            console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
+                        }
+                    });
+                } else {
+                    // Optional: Add version name as text if only one version?
+                    // const versionText = document.createElement("span");
+                    // versionText.textContent = game.versions[0].name;
+                    // versionText.style.fontSize = "0.9em";
+                    // infoDiv.appendChild(versionText);
+                }
 
-                    // Check if the selected index and version exist
-                    if (gameLink && game.versions[selectedIndex]) {
-                         // Update the href of the image link to the selected version's URL
-                        gameLink.href = game.versions[selectedIndex].url;
-                    } else {
-                        console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
-                    }
-                });
 
-                // Append title and select dropdown to the info container
                 infoDiv.appendChild(title);
-                infoDiv.appendChild(versionSelect);
-
-                // Append the info container to the game item
+                if (versionSelect) { // Append select only if it was created
+                    infoDiv.appendChild(versionSelect);
+                }
                 item.appendChild(infoDiv);
-
-                // Append the fully constructed game item to the grid
                 grid.appendChild(item);
             });
         } else {
-            // Optional: Display a message if there are no games
             grid.innerHTML = '<p>No games available at the moment.</p>';
         }
     </script>
@@ -221,6 +210,6 @@
     <!-- Cloudflare Web Analytics (Optional but recommended) -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
-            
+
 </body>
 </html>
