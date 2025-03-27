@@ -449,7 +449,7 @@ function processTurn() {
 
         if(messageEl) messageEl.innerHTML = turnMessages.join("<br>");
         if(nextTurnBtn) nextTurnBtn.disabled = true;
-        addGlobalRecord(playerName, 10, gameState.pawns); // Record final score at year 10
+        addGlobalRecord(playerName, 100, gameState.pawns); // Record final score at year 10
         updateUI(); // Final UI update
         return;
     }
