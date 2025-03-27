@@ -79,7 +79,6 @@
         <button id="startGame">Start Game</button>
     </div>
     <div id="globalLeaderboardStart">
-        <!-- CORRECTED Title -->
         <h2>Global Leaderboard</h2>
         <p id="globalGamesPlayedStart" class="totalGamesText">(Total games played worldwide: Loading...)</p>
         <div id="globalRankingContentStart">Loading...</div>
@@ -97,12 +96,10 @@
         <!-- Right side: Boards -->
         <div id="boardsContainer">
             <div id="rankingBoard">
-                <!-- CORRECTED Title -->
                 <h2>Local Ranking</h2>
                 <div id="rankingContent">No rounds played yet.</div>
             </div>
             <div id="globalLeaderboardGame">
-                <!-- CORRECTED Title -->
                 <h2>Global Leaderboard</h2>
                 <p id="globalGamesPlayedGame" class="totalGamesText">(Total games played worldwide: Loading...)</p>
                 <div id="globalRankingContentGame">Loading...</div>
@@ -125,9 +122,18 @@
         /***********************************************
          *          Firebase & Global Vars             *
          ***********************************************/
+
+        // IMPORTANT: REPLACE THIS WITH YOUR *PRODUCTION* FIREBASE CONFIG
         const firebaseConfig = {
-             apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE", authDomain: "cosmicdodge-5ae20.firebaseapp.com", projectId: "cosmicdodge-5ae20", storageBucket: "cosmicdodge-5ae20.appspot.com", messagingSenderId: "940230809594", appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643"
+             apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE", // REPLACE
+             authDomain: "cosmicdodge-5ae20.firebaseapp.com", // REPLACE
+             projectId: "cosmicdodge-5ae20", // REPLACE
+             storageBucket: "cosmicdodge-5ae20.appspot.com", // REPLACE
+             messagingSenderId: "940230809594", // REPLACE
+             appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643" // REPLACE
         };
+        // --- End of config to replace ---
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -141,18 +147,18 @@
 
         // --- Local/Session Storage Keys ---
         const volumeKey = `${gameTitle}_volume`;
-        const sessionRankingsKey = `${gameTitle}_rankings`;
-        const sessionRoundNumberKey = `${gameTitle}_roundNumber`;
-        const sessionHighScoreKey = `${gameTitle}_highScore`; // Still used locally for session high level logic
+        const sessionRankingsKey = `${gameTitle}_rankings_${version}`; // Added version isolation
+        const sessionRoundNumberKey = `${gameTitle}_roundNumber_${version}`; // Added version isolation
+        const sessionHighLevelKey = `${gameTitle}_highLevel_${version}`; // Renamed and versioned
 
         // --- Global State ---
         let playerName = "";
         let gameStarted = false;
         let gameOver = false;
         let roundRecorded = false; // Tracks if current round score is saved
-        let highLevel = parseInt(sessionStorage.getItem(sessionHighScoreKey) || '0'); // Local session high level (renamed for clarity)
+        let sessionHighLevel = parseInt(sessionStorage.getItem(sessionHighLevelKey) || '0'); // Local session high level
         let roundNumber = parseInt(sessionStorage.getItem(sessionRoundNumberKey) || '0'); // Session round counter
-        let rankings = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '[]'); // Session rankings array
+        // No global 'rankings' array needed, use sessionStorage object directly
 
         // --- Canvas/Game Specific State ---
         let frameCount = 0, titleOffsetX = 0, titleOffsetY = 0, gameOverOffsetX = 0, gameOverOffsetY = 0;
@@ -178,7 +184,6 @@
         const mobileLeft = document.getElementById('mobileLeft');
         const mobileRight = document.getElementById('mobileRight');
 
-
         /***********************************************
          *           Volume Control Logic              *
          ***********************************************/
@@ -202,12 +207,36 @@
          *       Firestore Leaderboard & Stats         *
          ***********************************************/
         function updateGlobalLeaderboard() {
-            db.collection(leaderboardCollection).orderBy("level", "desc").limit(20).get()
+            // Fetch more docs, order by level DESC, then timestamp DESC to get latest per level
+            db.collection(leaderboardCollection)
+                .orderBy("level", "desc")
+                .orderBy("timestamp", "desc") // Secondary sort: newest first within the same level
+                .limit(50) // Fetch more candidates to find unique levels
+                .get()
                 .then((querySnapshot) => {
                     let html = '<ol>';
-                    if (querySnapshot.empty) html = '<p>No scores yet. Be the first!</p>';
-                    else querySnapshot.forEach((doc) => html += `<li>${doc.data().playerName || 'Anon'} reached level ${doc.data().level}</li>`);
-                    if (!querySnapshot.empty) html += '</ol>';
+                    const uniqueEntries = [];
+                    const levelsSeen = new Set();
+                    const maxDisplay = 10; // How many unique entries to show
+
+                    if (!querySnapshot.empty) {
+                        querySnapshot.forEach((doc) => {
+                            const data = doc.data();
+                            // If we haven't seen this level yet and haven't reached max display count
+                            if (!levelsSeen.has(data.level) && uniqueEntries.length < maxDisplay) {
+                                uniqueEntries.push(`<li>${data.playerName || 'Anon'} reached level ${data.level}</li>`);
+                                levelsSeen.add(data.level);
+                            }
+                        });
+                    }
+
+                    if (uniqueEntries.length === 0) {
+                        html = '<p>No scores yet. Be the first!</p>';
+                    } else {
+                         html += uniqueEntries.join(''); // Add the unique entries
+                         html += '</ol>';
+                    }
+
                     if (globalRankingContentStart) globalRankingContentStart.innerHTML = html;
                     if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
                 }).catch((error) => {
@@ -217,19 +246,26 @@
                     if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
                 });
         }
-        // Changed function signature to take level directly
+
         function addGlobalRecord(finalLevel) {
             if (!playerName) { console.warn("Player name missing, cannot add global record."); return; }
-            // Ensure level is at least 1
             const levelToSave = Math.max(1, finalLevel);
             db.collection(leaderboardCollection).add({
-                playerName: playerName || "Anon", level: levelToSave, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => { console.log("Global record added for level:", levelToSave); updateGlobalLeaderboard(); })
+                playerName: playerName || "Anon",
+                level: levelToSave,
+                version: version,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Essential for sorting!
+            }).then(() => {
+                console.log("Global record added for level:", levelToSave);
+                updateGlobalLeaderboard(); // Refresh leaderboard
+            })
               .catch((error) => console.error("Error adding global record:", error));
         }
+
         function incrementGlobalGamesPlayed() {
             db.collection("globalStats").doc(statsDoc).set({
-                totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version
+                totalGamesPlayed: firebase.firestore.FieldValue.increment(1),
+                gameTitle: gameTitle, version: version
             }, { merge: true }).then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error);
         }
         function displayGlobalGamesPlayed() {
@@ -250,28 +286,38 @@
          *            Local Ranking (Session)          *
          ***********************************************/
         function updateRankingBoard() {
-            const currentRankings = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '[]');
-            const sortedRankings = currentRankings.slice().sort((a, b) => b.level - a.level); // Sorted by level descending
+            if (!rankingContentEl) return;
+            const rankingsObj = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '{}');
+            // Convert object values to an array
+            const rankingsList = Object.values(rankingsObj);
+            // Sort the array by level descending
+            const sortedRankings = rankingsList.sort((a, b) => b.level - a.level);
+
             let html = '';
-            if (sortedRankings.length === 0) html = '<p>No rounds completed yet this session.</p>';
-            else {
+            if (sortedRankings.length === 0) {
+                html = '<p>No rounds completed yet this session.</p>';
+            } else {
                 html = '<ol>';
-                sortedRankings.forEach((entry) => html += `<li>Round ${entry.round}: Level ${entry.level}</li>`);
+                // Display top 10 unique levels achieved this session
+                sortedRankings.slice(0, 10).forEach((entry) => {
+                    html += `<li>Round ${entry.round}: Level ${entry.level}</li>`;
+                });
                 html += '</ol>';
             }
-            if (rankingContentEl) rankingContentEl.innerHTML = html;
+            rankingContentEl.innerHTML = html;
         }
-        // Changed function signature to take level directly
+
         function saveLocalRecord(currentRound, finalLevel) {
-             let currentRankings = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '[]');
-             // Ensure level is at least 1
+             // Get current rankings object or create empty if none exists
+             let rankingsObj = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '{}');
              const levelToSave = Math.max(1, finalLevel);
-             currentRankings.push({ round: currentRound, level: levelToSave });
-             currentRankings.sort((a, b) => b.level - a.level); // Keep sorted by level
-             // Optional: Limit the number of entries stored
-             // currentRankings = currentRankings.slice(0, 10);
+
+             // Store or update the entry for this level, keyed by level number
+             // This automatically keeps only the latest round for each level
+             rankingsObj[levelToSave] = { round: currentRound, level: levelToSave };
+
              try {
-                sessionStorage.setItem(sessionRankingsKey, JSON.stringify(currentRankings));
+                sessionStorage.setItem(sessionRankingsKey, JSON.stringify(rankingsObj));
                 updateRankingBoard(); // Update display after saving
              } catch(e) {
                  console.error("Failed to save local ranking:", e);
@@ -284,12 +330,11 @@
          function isNameOffensive(name) {
              if (typeof offensiveWords === 'undefined') {
                  console.warn("Offensive words list not loaded!");
-                 return false; // Fail safe if blocklist.js didn't load
+                 return false;
              }
              if (!name) return false;
              const lowerCaseName = name.toLowerCase();
              for (const word of offensiveWords) {
-                 // Using word boundaries (\b) to avoid partial matches (e.g., 'ass' in 'class')
                  const regex = new RegExp(`\\b${word}\\b`, 'i');
                  if (regex.test(lowerCaseName)) {
                      console.log(`Offensive word found: ${word} in ${name}`);
@@ -304,19 +349,11 @@
          ***********************************************/
         function startGameNow() {
             const nameInput = playerNameInput.value.trim();
-            // Explicitly check for empty name
-            if (nameInput === "") {
-                alert("Please enter a player name.");
-                return;
-            }
-            if (isNameOffensive(nameInput)) {
-                alert("Please choose a more appropriate player name.");
-                return;
-            }
+            if (nameInput === "") { alert("Please enter a player name."); return; }
+            if (isNameOffensive(nameInput)) { alert("Please choose a more appropriate player name."); return; }
 
             playerName = nameInput.substring(0, 10);
 
-            // UI Changes
             document.getElementById("playerInfo").style.display = "none";
             document.getElementById("globalLeaderboardStart").style.display = "none";
             document.getElementById("gameContainer").style.display = "flex";
@@ -325,29 +362,26 @@
             gameOver = false;
             roundRecorded = false;
 
-            setupVolumeControl(); // Set volume based on preference
+            setupVolumeControl();
             if (backgroundMusic) {
                  backgroundMusic.play().catch(error => console.log("Music autoplay prevented:", error));
             }
 
-            // Session/Round Handling
-            if (roundNumber === 0) { // First time playing this session
+            if (roundNumber === 0) {
                 roundNumber = 1;
-                incrementGlobalGamesPlayed(); // Count initial start
+                incrementGlobalGamesPlayed();
             } else {
-                 roundNumber++; // Increment for subsequent plays in the session
-                 // Global count incremented on restart below
+                 roundNumber++;
             }
             sessionStorage.setItem(sessionRoundNumberKey, roundNumber.toString());
 
-            // Update displays
             updateGlobalLeaderboard();
             displayGlobalGamesPlayed();
-            updateRankingBoard(); // Show potentially existing session rankings
+            updateRankingBoard();
 
-            resetGameVisuals(); // Position ship, clear score etc.
+            resetGameVisuals();
             lastTime = null;
-            if (!ctx) { console.error("Canvas context not found!"); return; } // Safety check
+            if (!ctx) { console.error("Canvas context not found!"); return; }
             requestAnimationFrame(gameLoop);
         }
 
@@ -357,7 +391,7 @@
              ship.y = canvas.height - 50;
              ship.velocity = 0;
              asteroids = [];
-             score = 0; // Reset score used for level calculation
+             score = 0;
              level = 1; // Reset level display
              frameCount = 0;
              titleOffsetX = 0; titleOffsetY = 0; gameOverOffsetX = 0; gameOverOffsetY = 0;
@@ -366,191 +400,135 @@
         }
 
         function restartGame() {
-             if (!gameStarted || !canvas) return; // Cannot restart if not started or no canvas
+             if (!gameStarted || !canvas) return;
 
              gameOver = false;
              roundRecorded = false;
              resetGameVisuals();
 
-             roundNumber++; // Increment round number for the new attempt
+             roundNumber++;
              sessionStorage.setItem(sessionRoundNumberKey, roundNumber.toString());
-             incrementGlobalGamesPlayed(); // Count each restart as a distinct game played globally
+             incrementGlobalGamesPlayed(); // Count each restart
 
              if (backgroundMusic && backgroundMusic.paused) {
                  backgroundMusic.play().catch(error => console.log("Restart music play failed:", error));
              }
 
-             lastTime = null; // Reset delta time for new round
+             lastTime = null;
              requestAnimationFrame(gameLoop);
         }
 
         /***********************************************
          *        Canvas / Game Mechanics              *
          ***********************************************/
-        // --- Input Handling Setup ---
-         document.addEventListener('keydown', (e) => {
-             if (!gameStarted) return;
-             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = true;
-             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = true;
-             if (e.key === ' ' && gameOver) { e.preventDefault(); restartGame(); }
-         });
-         document.addEventListener('keyup', (e) => {
-             if (!gameStarted) return;
-             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = false;
-             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = false;
-         });
+         // --- Input Handling Setup (No changes needed here) ---
+         document.addEventListener('keydown', (e) => { if (!gameStarted) return; if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = true; if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = true; if (e.key === ' ' && gameOver) { e.preventDefault(); restartGame(); } });
+         document.addEventListener('keyup', (e) => { if (!gameStarted) return; if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = false; if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = false; });
          function handleTouchStart(e) { if (!gameStarted) return; e.preventDefault(); if (gameOver) touchRestartPending = true; else updateTouchControls(e.touches[0]); }
          function handleTouchMove(e) { if (!gameStarted || gameOver) return; e.preventDefault(); updateTouchControls(e.touches[0]); }
          function handleTouchEnd(e) { if (!gameStarted) return; e.preventDefault(); if (touchRestartPending) { restartGame(); touchRestartPending = false; } leftPressed = false; rightPressed = false; }
-         function updateTouchControls(touch) {
-            if (!touch || !canvas) return; const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const touchX = (touch.clientX - rect.left) * scaleX;
-            if (touchX < canvas.width / 2) { leftPressed = true; rightPressed = false; } else { rightPressed = true; leftPressed = false; }
-         }
-         if(canvas) { // Add listeners only if canvas exists
-             canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-             canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-             canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-             canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
-         }
-         function setupButtonTouch(button, action) {
-            if (!button) return; const setPressed = (p) => { if(gameStarted && !gameOver) action(p); };
-            button.addEventListener('touchstart', (e) => { e.preventDefault(); setPressed(true); }, { passive: false }); button.addEventListener('touchend', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('touchcancel', (e) => { e.preventDefault(); setPressed(false); }, { passive: false });
-            button.addEventListener('mousedown', () => setPressed(true)); button.addEventListener('mouseup', () => setPressed(false)); button.addEventListener('mouseleave', () => setPressed(false));
-         }
-         setupButtonTouch(mobileLeft, (p) => leftPressed = p);
-         setupButtonTouch(mobileRight, (p) => rightPressed = p);
+         function updateTouchControls(touch) { if (!touch || !canvas) return; const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const touchX = (touch.clientX - rect.left) * scaleX; if (touchX < canvas.width / 2) { leftPressed = true; rightPressed = false; } else { rightPressed = true; leftPressed = false; } }
+         if(canvas) { canvas.addEventListener('touchstart', handleTouchStart, { passive: false }); canvas.addEventListener('touchmove', handleTouchMove, { passive: false }); canvas.addEventListener('touchend', handleTouchEnd, { passive: false }); canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false }); }
+         function setupButtonTouch(button, action) { if (!button) return; const setPressed = (p) => { if(gameStarted && !gameOver) action(p); }; button.addEventListener('touchstart', (e) => { e.preventDefault(); setPressed(true); }, { passive: false }); button.addEventListener('touchend', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('touchcancel', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('mousedown', () => setPressed(true)); button.addEventListener('mouseup', () => setPressed(false)); button.addEventListener('mouseleave', () => setPressed(false)); }
+         setupButtonTouch(mobileLeft, (p) => leftPressed = p); setupButtonTouch(mobileRight, (p) => rightPressed = p);
 
-        // --- Spawn & Collision ---
-        function spawnAsteroid(currentLevel) { // Pass level explicitly
-             const asteroidColor = '#ff3300'; const speedModifier = 0.5;
-             if (!canvas) return; // Ensure canvas exists before using width
-             asteroids.push({ x: Math.random()*(canvas.width-30)+15, y: -30, radius: 10+Math.random()*15, speed: 2+(currentLevel-1)*speedModifier, color: asteroidColor });
-        }
-        function checkCollision(rect, circle) { // AABB vs Circle
-            const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
-            const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
-            const distanceX = circle.x - closestX; const distanceY = circle.y - closestY; const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-            return distanceSquared < (circle.radius * circle.radius);
-        }
+        // --- Spawn & Collision (No changes needed here) ---
+        function spawnAsteroid(currentLevel) { const asteroidColor = '#ff3300'; const speedModifier = 0.5; if (!canvas) return; asteroids.push({ x: Math.random()*(canvas.width-30)+15, y: -30, radius: 10+Math.random()*15, speed: 2+(currentLevel-1)*speedModifier, color: asteroidColor });}
+        function checkCollision(rect, circle) { const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width)); const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height)); const distanceX = circle.x - closestX; const distanceY = circle.y - closestY; const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY); return distanceSquared < (circle.radius * circle.radius); }
 
-        // --- Effects & Drawing ---
-        function updateTitleFlicker(currentLevel) { // Pass level explicitly
-            let intensity = 0; if (currentLevel >= 10) intensity = Math.min(1, (currentLevel - 10) / 30);
-            if (!titleElement) return;
-            if (intensity > 0 && frameCount % 5 === 0) { titleOffsetX = (Math.random() - 0.5) * 10 * intensity; titleOffsetY = (Math.random() - 0.5) * 10 * intensity; }
-            const flickerColor = (intensity > 0 && frameCount % 20 < 10) ? '#ff0066' : '#ff6699';
-            titleElement.style.color = intensity <= 0 ? '' : flickerColor; titleElement.style.transform = intensity <= 0 ? '' : `translate(${titleOffsetX}px, ${titleOffsetY}px)`;
-        }
+        // --- Effects & Drawing (No changes needed here) ---
+        function updateTitleFlicker(currentLevel) { let intensity = 0; if (currentLevel >= 10) intensity = Math.min(1, (currentLevel - 10) / 30); if (!titleElement) return; if (intensity > 0 && frameCount % 5 === 0) { titleOffsetX = (Math.random() - 0.5) * 10 * intensity; titleOffsetY = (Math.random() - 0.5) * 10 * intensity; } const flickerColor = (intensity > 0 && frameCount % 20 < 10) ? '#ff0066' : '#ff6699'; titleElement.style.color = intensity <= 0 ? '' : flickerColor; titleElement.style.transform = intensity <= 0 ? '' : `translate(${titleOffsetX}px, ${titleOffsetY}px)`; }
         function getShipColor() { return '#00ffcc'; }
 
         /***********************************************
          *              Main Game Loop                 *
          ***********************************************/
         function gameLoop(timestamp) {
-            if (!gameStarted || !ctx || !canvas) {
-                 return;
-            }
+            if (!gameStarted || !ctx || !canvas) { return; }
 
-            // --- Delta Time Calculation ---
             if (!lastTime) lastTime = timestamp;
-            let dt = Math.min(3, (timestamp - lastTime) / (1000 / 60)); // Clamp dt to prevent large jumps
+            let dt = Math.min(3, (timestamp - lastTime) / (1000 / 60));
             lastTime = timestamp;
             frameCount++;
 
-            // Update level based on score (can keep score logic internally)
             level = Math.floor(score / 10) + 1;
             updateTitleFlicker(level);
 
-            // --- Game Over State ---
             if (gameOver) {
                 if (!roundRecorded) {
-                    // Use the calculated level for recording
-                    const finalLevel = Math.max(1, level); // Ensure level is at least 1
-
-                    // Session High Level (using the sessionHighScoreKey)
-                    if (finalLevel > highLevel) {
-                        highLevel = finalLevel;
-                        sessionStorage.setItem(sessionHighScoreKey, highLevel.toString());
+                    const finalLevel = Math.max(1, level);
+                    // Session High Level
+                    if (finalLevel > sessionHighLevel) {
+                        sessionHighLevel = finalLevel;
+                        sessionStorage.setItem(sessionHighLevelKey, sessionHighLevel.toString());
                     }
-                    // Session Ranking
+                    // Session Ranking (Unique Level)
                     saveLocalRecord(roundNumber, finalLevel);
                     // Global Ranking
                     addGlobalRecord(finalLevel);
                     roundRecorded = true;
                 }
-                // Shake Effect
+                // Shake Effect & Draw Screen (No changes needed)
                 if (frameCount % 5 === 0) { gameOverOffsetX = (Math.random()-0.5)*10; gameOverOffsetY = (Math.random()-0.5)*10; }
-                // Draw Screen
                 ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.textAlign = 'center';
                 const gameOverColor = frameCount % 20 < 10 ? '#ff0066' : '#ff6699'; ctx.fillStyle = gameOverColor; ctx.font = '40px Arial';
                 ctx.fillText('GAME OVER', canvas.width/2 + gameOverOffsetX, canvas.height/2 - 40 + gameOverOffsetY);
                 ctx.fillStyle = '#fff'; ctx.font = '20px Arial';
-                // Display the final level reached
                 ctx.fillText(`You reached level ${Math.max(1, level)}`, canvas.width/2, canvas.height/2 + 10);
                 ctx.font = '16px Arial';
                 const restartText = window.matchMedia("(hover: none)").matches ? 'Tap screen to restart' : 'Press SPACE to restart';
                 ctx.fillText(restartText, canvas.width/2, canvas.height/2 + 50);
             }
-            // --- Gameplay State ---
-            else {
+            else { // Gameplay State
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // Update Ship
+                // Ship Movement (No changes needed)
                 if (leftPressed) ship.velocity = Math.max(ship.velocity - ship.acceleration * dt, -ship.maxVelocity);
                 else if (rightPressed) ship.velocity = Math.min(ship.velocity + ship.acceleration * dt, ship.maxVelocity);
                 else ship.velocity *= Math.pow(ship.friction, dt);
                 if (Math.abs(ship.velocity) < 0.1) ship.velocity = 0;
                 ship.x += ship.velocity * dt;
-                ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x)); // Clamp position
+                ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
 
-                // Draw Ship (Triangle)
-                ctx.fillStyle = getShipColor(); ctx.beginPath();
-                ctx.moveTo(ship.x + ship.width/2, ship.y - ship.height); // Top point
-                ctx.lineTo(ship.x, ship.y); // Bottom left
-                ctx.lineTo(ship.x + ship.width, ship.y); // Bottom right
-                ctx.closePath(); ctx.fill();
+                // Draw Ship (No changes needed)
+                ctx.fillStyle = getShipColor(); ctx.beginPath(); ctx.moveTo(ship.x + ship.width/2, ship.y - ship.height); ctx.lineTo(ship.x, ship.y); ctx.lineTo(ship.x + ship.width, ship.y); ctx.closePath(); ctx.fill();
 
-                // Asteroids
+                // Asteroids (No changes needed)
                 const spawnRate = 0.02 + (level - 1) * 0.005; if (Math.random() < spawnRate * dt) spawnAsteroid(level);
-                // Use ship's visual bounds for collision AABB
                 const shipCollisionRect = { x: ship.x, y: ship.y - ship.height, width: ship.width, height: ship.height };
-
                 for (let i = asteroids.length - 1; i >= 0; i--) {
                     let a = asteroids[i]; a.y += a.speed * dt;
-                    // Draw Asteroid
                     ctx.fillStyle = a.color || '#ff3300'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2); ctx.fill();
-                    // Collision Check
-                    if (checkCollision(shipCollisionRect, a)) { gameOver = true; break; } // End loop on hit
-                    // Remove & Increment Score (for level calc)
+                    if (checkCollision(shipCollisionRect, a)) { gameOver = true; break; }
                     if (a.y - a.radius > canvas.height) { asteroids.splice(i, 1); score++; }
                 }
-                // Draw UI (Only Level)
+                // Draw UI (Only Level - No changes needed)
                 ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.textAlign = 'left';
                 ctx.fillText(`Level: ${level}`, 10, 30);
-                // REMOVED Score display: ctx.fillText(`Score: ${score}`, 10, 55);
-            } // End Gameplay State
+            }
 
-            requestAnimationFrame(gameLoop); // Continue loop
+            requestAnimationFrame(gameLoop);
         }
 
         /***********************************************
          *          Initialization                     *
          ***********************************************/
         document.addEventListener('DOMContentLoaded', () => {
-             // Ensure canvas context is available before initializing things that use it
              if (!ctx) {
-                 console.error("Failed to get canvas context on DOMContentLoaded. Game cannot initialize properly.");
-                 // Maybe display an error message to the user on the page
+                 console.error("Failed to get canvas context on DOMContentLoaded.");
                  return;
              }
-            // Get initial high level from session storage
-            highLevel = parseInt(sessionStorage.getItem(sessionHighScoreKey) || '0');
-            resetGameVisuals(); // Set initial ship position etc.
+            // Load initial session state
+            sessionHighLevel = parseInt(sessionStorage.getItem(sessionHighLevelKey) || '0');
+            roundNumber = parseInt(sessionStorage.getItem(sessionRoundNumberKey) || '0');
+
+            resetGameVisuals();
             setupVolumeControl();
-            updateGlobalLeaderboard();
-            displayGlobalGamesPlayed();
-            updateRankingBoard();
-            // Event listeners for start button/input
-            document.getElementById("startGame")?.addEventListener("click", startGameNow); // Optional chaining
+            updateGlobalLeaderboard(); // Fetch and display leaderboard
+            displayGlobalGamesPlayed(); // Fetch and display play count
+            updateRankingBoard(); // Display session ranks
+
+            // Event listeners
+            document.getElementById("startGame")?.addEventListener("click", startGameNow);
             playerNameInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } });
         });
 

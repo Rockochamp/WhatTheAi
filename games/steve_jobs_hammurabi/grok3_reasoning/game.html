@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Corrected Title and Added Favicon -->
     <title>Steve Jobs - Hammurabi - What the Ai</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="stylesheet" href="game.css">
@@ -14,7 +13,7 @@
 <body>
     <!-- Breadcrumb navigation -->
     <div class="breadcrumb"> <a href="/index.html">Back to Games</a> </div>
-    <!-- CORRECTED Version indicator -->
+    <!-- Version indicator -->
     <div class="version-indicator" id="versionIndicator"> Grok 3 Reasoning </div>
 
     <h1 id="titleBanner">Steve Jobs - Hammurabi</h1>
@@ -27,7 +26,7 @@
             <button id="startGame">Start Game</button>
         </div>
         <div id="globalLeaderboardStart" class="leaderboard-box">
-            <!-- CORRECTED Title -->
+            <!-- Title updated to reflect pawn ranking -->
             <h2>Global Leaderboard</h2>
             <p id="globalGamesPlayedStart" class="totalGamesText">(Total games played worldwide: Loading...)</p>
             <div id="globalRankingContentStart">Loading...</div>
@@ -41,7 +40,7 @@
             <div id="game">
                 <h1>Pawn Master</h1>
                 <div id="resources">
-                    <p>Year: <span id="year">1</span></p>
+                    <p>Year: <span id="year">1</span> / 10</p> <!-- Indicate max year -->
                     <p>Food: <span id="food">1000</span> bushels</p>
                     <p>Land: <span id="land">100</span> acres</p>
                     <p>Pawns: <span id="pawns">100</span></p>
@@ -61,19 +60,19 @@
                 </div>
             </div>
              <p class="instructions">
-                Guide your pawns for as many years as possible. Manage food, land, and population. <br> The game ends when your population reaches zero. Good luck!
+                Guide your pawns for 10 years. Maximize your final pawn count. <br> The game ends after year 10, or if your population reaches zero. Good luck!
             </p>
         </div>
 
         <!-- Right side: Local, Global Leaderboard + Volume Control -->
         <div id="boardsContainer">
              <div id="rankingBoard" class="leaderboard-box">
-                <!-- CORRECTED Title -->
+                 <!-- Title updated -->
                 <h2>Local Ranking</h2>
                 <div id="rankingContent">No games played yet.</div>
             </div>
             <div id="globalLeaderboardGame" class="leaderboard-box">
-                 <!-- CORRECTED Title -->
+                 <!-- Title updated -->
                 <h2>Global Leaderboard</h2>
                 <p id="globalGamesPlayedGame" class="totalGamesText">(Total games played worldwide: Loading...)</p>
                 <div id="globalRankingContentGame">Loading...</div>
@@ -87,13 +86,14 @@
 
     <!-- Audio Element -->
     <audio id="backgroundMusic" loop>
-        <source src="/music/Elysium.mp3" type="audio/mpeg"> <!-- Verify path/type -->
+        <source src="/music/Elysium.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
     <!-- Load Shared Blocklist FIRST -->
     <script src="/js/common/blocklist.js"></script>
     <!-- Load Game Logic Second -->
+    <!-- IMPORTANT: Remember game.js needs the *production* firebaseConfig -->
     <script src="game.js"></script>
 
     <!-- Cloudflare Analytics -->
