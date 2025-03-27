@@ -36,7 +36,6 @@
                     <p>Land: <span id="land">100</span> acres</p>
                     <p>Pawns: <span id="pawns" title="Population. Grows with immigration (helped by good feeding), shrinks with starvation, emigration (from poor feeding), or plague.">100</span></p>
                     <p>Land Price: <span id="landPrice">?</span> bushels/acre</p>
-                    <!-- Added Starvation Status Indicator -->
                     <p>Status: <span id="starvationStatus" class="status-safe">Well Fed</span></p>
                 </div>
                 <div id="decisions">
@@ -75,8 +74,15 @@
                 <div id="globalRankingContentGame">Loading...</div>
             </div>
             <div class="volume-control">
-                <label for="volumeSlider">Music Volume:</label>
+                <!-- Volume Slider (shown on non-iOS) -->
+                <label for="volumeSlider" id="volumeSliderLabel">Music Volume:</label>
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+
+                <!-- Mute Toggle (shown on iOS) -->
+                <div id="muteControl" style="display: none;"> <!-- Hidden by default -->
+                   <input type="checkbox" id="muteToggle">
+                   <label for="muteToggle" id="muteToggleLabel">Mute Music</label>
+                </div>
             </div>
             <button id="helpButton" class="help-button">How to Play</button>
         </div>
@@ -96,6 +102,7 @@
             <li><strong>Land:</strong> Required for <strong>Planting</strong> crops. Can be bought or sold each year.</li>
             <li><strong>Land Price:</strong> Fluctuates randomly each year, affecting buying/selling costs.</li>
             <li><strong>Status:</strong> Shows the general well-being and starvation risk of your population based on feeding history. Keep it 'Well Fed' or 'Content' if possible!</li>
+            <li><strong>Volume/Mute:</strong> Use the slider (most devices) or Mute toggle (iOS) to control background music. On iOS, use device buttons for volume level.</li>
         </ul>
         <hr>
         <h3>Your Decisions Each Year:</h3>
@@ -115,7 +122,7 @@
     </audio>
 
     <script src="/js/common/blocklist.js"></script>
-    <script src="game.js"></script>
+    <script src="game.js"></script> <!-- This will contain the updated JS -->
 
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
 </body>
