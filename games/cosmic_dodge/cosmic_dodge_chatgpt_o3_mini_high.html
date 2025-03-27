@@ -57,9 +57,7 @@
              #playerInfo input { margin: 0; width: 80%; max-width: 250px; text-align: center; }
         }
     </style>
-    <!-- Firebase App -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <!-- Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
@@ -130,148 +128,87 @@
         const statsDoc = `stats_${gameTitle}_${version}`;
         const volumeKey = `${gameTitle}_volume`;
 
-        // --- Global State (Reset on Load) ---
-        let playerName = "";
-        let gameStarted = false;
-        let gameOver = false;
-        let roundRecorded = false;
-        let currentSessionRoundNumber = 0; // Tracks rounds *within this page load*
-        let localSessionRankings = {}; // Stores { level: { round: X, level: Y } } *within this page load*
-
-        // --- Canvas/Game Specific State ---
+        let playerName = ""; let gameStarted = false; let gameOver = false; let roundRecorded = false;
+        let currentSessionRoundNumber = 0; let localSessionRankings = {};
         let frameCount = 0, titleOffsetX = 0, titleOffsetY = 0, gameOverOffsetX = 0, gameOverOffsetY = 0;
-        let lastTime = null;
-        let ship = { x: 0, y: 0, width: 40, height: 20, velocity: 0, acceleration: 0.5, maxVelocity: 15, friction: 0.9 };
-        let asteroids = [];
-        let score = 0;
-        let level = 1;
-        let leftPressed = false, rightPressed = false, touchRestartPending = false;
+        let lastTime = null; let ship = { x: 0, y: 0, width: 40, height: 20, velocity: 0, acceleration: 0.5, maxVelocity: 15, friction: 0.9 };
+        let asteroids = []; let score = 0; let level = 1; let leftPressed = false, rightPressed = false, touchRestartPending = false;
 
-        // --- DOM Elements ---
-        const backgroundMusic = document.getElementById('backgroundMusic');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const playerNameInput = document.getElementById('playerName');
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas?.getContext('2d');
-        const rankingContentEl = document.getElementById('rankingContent');
-        const globalRankingContentStart = document.getElementById('globalRankingContentStart');
-        const globalRankingContentGame = document.getElementById('globalRankingContentGame');
-        const globalGamesPlayedStart = document.getElementById("globalGamesPlayedStart");
-        const globalGamesPlayedGame = document.getElementById("globalGamesPlayedGame");
-        const titleElement = document.getElementById("titleBanner");
-        const mobileLeft = document.getElementById('mobileLeft');
-        const mobileRight = document.getElementById('mobileRight');
+        const backgroundMusic = document.getElementById('backgroundMusic'); const volumeSlider = document.getElementById('volumeSlider');
+        const playerNameInput = document.getElementById('playerName'); const canvas = document.getElementById('gameCanvas'); const ctx = canvas?.getContext('2d');
+        const rankingContentEl = document.getElementById('rankingContent'); const globalRankingContentStart = document.getElementById('globalRankingContentStart');
+        const globalRankingContentGame = document.getElementById('globalRankingContentGame'); const globalGamesPlayedStart = document.getElementById("globalGamesPlayedStart");
+        const globalGamesPlayedGame = document.getElementById("globalGamesPlayedGame"); const titleElement = document.getElementById("titleBanner");
+        const mobileLeft = document.getElementById('mobileLeft'); const mobileRight = document.getElementById('mobileRight');
 
         /***********************************************
          *           Volume Control Logic              *
          ***********************************************/
          function setupVolumeControl() {
              if (!backgroundMusic || !volumeSlider) return;
-             const savedVolume = localStorage.getItem(volumeKey); // Volume uses localStorage to persist
-             let currentVolume = 0.5;
+             const savedVolume = localStorage.getItem(volumeKey); let currentVolume = 0.5;
              if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) { currentVolume = parseFloat(savedVolume); }
              volumeSlider.value = currentVolume; backgroundMusic.volume = currentVolume;
-             volumeSlider.addEventListener('input', () => {
-                 const newVolume = parseFloat(volumeSlider.value); backgroundMusic.volume = newVolume;
-                 try { localStorage.setItem(volumeKey, newVolume.toString()); } catch (e) { console.error("Failed to save volume:", e); }
-             });
+             volumeSlider.addEventListener('input', () => { const newVolume = parseFloat(volumeSlider.value); backgroundMusic.volume = newVolume; try { localStorage.setItem(volumeKey, newVolume.toString()); } catch (e) { console.error("Failed to save volume:", e); } });
          }
 
         /***********************************************
          *       Firestore Leaderboard & Stats         *
          ***********************************************/
         function updateGlobalLeaderboard() {
-            db.collection(leaderboardCollection)
-                .orderBy("level", "desc")
-                .orderBy("timestamp", "desc")
-                .limit(50)
-                .get()
-                .then((querySnapshot) => {
-                    let html = '<ol>'; const uniqueEntries = []; const levelsSeen = new Set(); const maxDisplay = 10;
-                    if (!querySnapshot.empty) {
-                        querySnapshot.forEach((doc) => {
-                            const data = doc.data();
-                            if (!levelsSeen.has(data.level) && uniqueEntries.length < maxDisplay) {
-                                uniqueEntries.push(`<li>${data.playerName || 'Anon'} reached level ${data.level}</li>`);
-                                levelsSeen.add(data.level);
-                            }
-                        });
-                    }
-                    if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; }
-                    else { html += uniqueEntries.join(''); html += '</ol>'; }
-                    if (globalRankingContentStart) globalRankingContentStart.innerHTML = html;
-                    if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
-                }).catch((error) => {
-                    console.error("Error getting global leaderboard:", error); const errorMsg = "<p>Error loading leaderboard.</p>";
-                    if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg; if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
-                });
+            db.collection(leaderboardCollection).orderBy("level", "desc").orderBy("timestamp", "desc").limit(50).get()
+            .then((querySnapshot) => {
+                let html = '<ol>'; const uniqueEntries = []; const levelsSeen = new Set(); const maxDisplay = 10;
+                if (!querySnapshot.empty) { querySnapshot.forEach((doc) => { const data = doc.data(); if (!levelsSeen.has(data.level) && uniqueEntries.length < maxDisplay) { uniqueEntries.push(`<li>${data.playerName || 'Anon'} reached level ${data.level}</li>`); levelsSeen.add(data.level); } }); }
+                if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; } else { html += uniqueEntries.join(''); html += '</ol>'; }
+                if (globalRankingContentStart) globalRankingContentStart.innerHTML = html; if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
+            }).catch((error) => { console.error("Error getting global leaderboard:", error); const errorMsg = "<p>Error loading leaderboard.</p>"; if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg; if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg; });
         }
 
         function addGlobalRecord(finalLevel) {
             if (!playerName) { console.warn("Player name missing, cannot add global record."); return; }
             const levelToSave = Math.max(1, finalLevel);
-            db.collection(leaderboardCollection).add({
-                playerName: playerName || "Anon", level: levelToSave, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => { console.log("Global record added for level:", levelToSave); updateGlobalLeaderboard(); })
-              .catch((error) => console.error("Error adding global record:", error));
+            db.collection(leaderboardCollection).add({ playerName: playerName || "Anon", level: levelToSave, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(() => { console.log("Global record added for level:", levelToSave); updateGlobalLeaderboard(); }).catch((error) => console.error("Error adding global record:", error));
         }
 
-        // MOVED: This is now called only on game over
         function incrementGlobalGamesPlayed() {
-            db.collection("globalStats").doc(statsDoc).set({
-                totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version
-            }, { merge: true }).then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error);
+            db.collection("globalStats").doc(statsDoc).set({ totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version }, { merge: true })
+            .then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error);
         }
         function displayGlobalGamesPlayed() {
-            db.collection("globalStats").doc(statsDoc).get().then((doc) => {
-                const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0; const text = `(Total games played worldwide: ${total})`;
-                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text;
-            }).catch((error) => {
-                console.error("Error reading total games:", error); const errorText = "(Total games played worldwide: Error)";
-                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText;
-            });
+            db.collection("globalStats").doc(statsDoc).get().then((doc) => { const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0; const text = `(Total games played worldwide: ${total})`; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text; })
+            .catch((error) => { console.error("Error reading total games:", error); const errorText = "(Total games played worldwide: Error)"; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText; });
         }
 
         /***********************************************
          *      Local Ranking (Page Load Only)         *
          ***********************************************/
         function updateRankingBoard() {
-            if (!rankingContentEl) return;
-            // Read directly from the global variable
-            const rankingsList = Object.values(localSessionRankings);
-            const sortedRankings = rankingsList.sort((a, b) => b.level - a.level);
-
-            let html = '';
-            if (sortedRankings.length === 0) { html = '<p>No rounds completed yet.</p>'; } // Changed message slightly
-            else {
-                html = '<ol>';
-                sortedRankings.slice(0, 10).forEach((entry) => {
-                    html += `<li>Round ${entry.round}: Level ${entry.level}</li>`;
-                });
-                html += '</ol>';
-            }
+            if (!rankingContentEl) return; const rankingsList = Object.values(localSessionRankings); const sortedRankings = rankingsList.sort((a, b) => b.level - a.level); let html = '';
+            if (sortedRankings.length === 0) { html = '<p>No rounds completed yet.</p>'; } else { html = '<ol>'; sortedRankings.slice(0, 10).forEach((entry) => { html += `<li>Round ${entry.round}: Level ${entry.level}</li>`; }); html += '</ol>'; }
             rankingContentEl.innerHTML = html;
         }
 
         function saveLocalRecord(roundNum, finalLevel) {
-             // Save directly to the global variable
-             const levelToSave = Math.max(1, finalLevel);
-             localSessionRankings[levelToSave] = { round: roundNum, level: levelToSave };
-             updateRankingBoard(); // Update display
+             const levelToSave = Math.max(1, finalLevel); localSessionRankings[levelToSave] = { round: roundNum, level: levelToSave }; updateRankingBoard();
         }
 
          /***********************************************
-         *          Name Validation (Improved)         *
+         *          Name Validation (FIXED)            *
          ***********************************************/
          function isNameOffensive(name) {
-             // Uses blocklist.js (loaded before this script)
-             if (typeof offensiveWords === 'undefined') { console.warn("Offensive words list not loaded!"); return false; }
+             // Uses blocklist.js
+             if (typeof offensiveWords === 'undefined') { console.warn("Offensive words list (blocklist.js) not loaded!"); return false; }
              if (!name) return false; const lowerCaseName = name.toLowerCase();
              for (const word of offensiveWords) {
-                 // Use word boundaries for blocklist check
-                 const regex = new RegExp(`\\b${word}\\b`, 'i');
-                 if (regex.test(lowerCaseName)) { console.log(`Offensive word found: ${word} in ${name}`); return true; }
-             } return false;
+                 // FIXED: Use includes for substring matching as requested
+                 if (lowerCaseName.includes(word)) {
+                     console.log(`Offensive substring found: ${word} in ${name}`);
+                     return true;
+                 }
+             }
+             return false;
          }
 
         /***********************************************
@@ -283,60 +220,33 @@
             if (isNameOffensive(nameInput)) { alert("Please choose a more appropriate player name."); return; }
             playerName = nameInput.substring(0, 10);
 
-            document.getElementById("playerInfo").style.display = "none";
-            document.getElementById("globalLeaderboardStart").style.display = "none";
-            document.getElementById("gameContainer").style.display = "flex";
-
+            document.getElementById("playerInfo").style.display = "none"; document.getElementById("globalLeaderboardStart").style.display = "none"; document.getElementById("gameContainer").style.display = "flex";
             gameStarted = true; gameOver = false; roundRecorded = false;
-
-            setupVolumeControl();
-            if (backgroundMusic) { backgroundMusic.play().catch(error => console.log("Music autoplay prevented:", error)); }
-
-            // Set round number for this page load session
-            currentSessionRoundNumber = 1;
-
-            // Update displays (global count NOT incremented here anymore)
-            updateGlobalLeaderboard();
-            displayGlobalGamesPlayed();
-            updateRankingBoard(); // Show empty board initially
-
-            resetGameVisuals();
-            lastTime = null;
-            if (!ctx) { console.error("Canvas context not found!"); return; }
-            requestAnimationFrame(gameLoop);
+            setupVolumeControl(); if (backgroundMusic) { backgroundMusic.play().catch(error => console.log("Music autoplay prevented:", error)); }
+            currentSessionRoundNumber = 1; // Start round count for this page session
+            localSessionRankings = {}; // Reset local rankings for this page session
+            updateGlobalLeaderboard(); displayGlobalGamesPlayed(); updateRankingBoard(); // Update displays
+            resetGameVisuals(); lastTime = null; if (!ctx) { console.error("Canvas context not found!"); return; } requestAnimationFrame(gameLoop);
         }
 
         function resetGameVisuals() {
-             if (!canvas) return;
-             ship.x = canvas.width / 2 - ship.width / 2; ship.y = canvas.height - 50; ship.velocity = 0;
-             asteroids = []; score = 0; level = 1; frameCount = 0;
-             titleOffsetX = 0; titleOffsetY = 0; gameOverOffsetX = 0; gameOverOffsetY = 0;
-             if (titleElement) { titleElement.style.color = ''; titleElement.style.transform = ''; }
-             leftPressed = false; rightPressed = false;
+             if (!canvas) return; ship.x = canvas.width / 2 - ship.width / 2; ship.y = canvas.height - 50; ship.velocity = 0;
+             asteroids = []; score = 0; level = 1; frameCount = 0; titleOffsetX = 0; titleOffsetY = 0; gameOverOffsetX = 0; gameOverOffsetY = 0;
+             if (titleElement) { titleElement.style.color = ''; titleElement.style.transform = ''; } leftPressed = false; rightPressed = false;
         }
 
         function restartGame() {
              if (!gameStarted || !canvas) return;
-
-             gameOver = false; roundRecorded = false;
-             resetGameVisuals();
-
-             // Increment round number for this page load session
-             currentSessionRoundNumber++;
-
-             if (backgroundMusic && backgroundMusic.paused) {
-                 backgroundMusic.play().catch(error => console.log("Restart music play failed:", error));
-             }
-
-             lastTime = null;
-             requestAnimationFrame(gameLoop);
-             // Global count NOT incremented on restart anymore
+             gameOver = false; roundRecorded = false; resetGameVisuals();
+             currentSessionRoundNumber++; // Increment round number for this page load session
+             if (backgroundMusic && backgroundMusic.paused) { backgroundMusic.play().catch(error => console.log("Restart music play failed:", error)); }
+             lastTime = null; requestAnimationFrame(gameLoop);
         }
 
         /***********************************************
          *        Canvas / Game Mechanics              *
          ***********************************************/
-         // Input Handling Setup (No changes)
+         // Input Handling, Spawn, Collision, Effects, Drawing (No changes needed in these sections)
          document.addEventListener('keydown', (e) => { if (!gameStarted) return; if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = true; if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = true; if (e.key === ' ' && gameOver) { e.preventDefault(); restartGame(); } });
          document.addEventListener('keyup', (e) => { if (!gameStarted) return; if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = false; if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = false; });
          function handleTouchStart(e) { if (!gameStarted) return; e.preventDefault(); if (gameOver) touchRestartPending = true; else updateTouchControls(e.touches[0]); }
@@ -346,48 +256,30 @@
          if(canvas) { canvas.addEventListener('touchstart', handleTouchStart, { passive: false }); canvas.addEventListener('touchmove', handleTouchMove, { passive: false }); canvas.addEventListener('touchend', handleTouchEnd, { passive: false }); canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false }); }
          function setupButtonTouch(button, action) { if (!button) return; const setPressed = (p) => { if(gameStarted && !gameOver) action(p); }; button.addEventListener('touchstart', (e) => { e.preventDefault(); setPressed(true); }, { passive: false }); button.addEventListener('touchend', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('touchcancel', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('mousedown', () => setPressed(true)); button.addEventListener('mouseup', () => setPressed(false)); button.addEventListener('mouseleave', () => setPressed(false)); }
          setupButtonTouch(mobileLeft, (p) => leftPressed = p); setupButtonTouch(mobileRight, (p) => rightPressed = p);
-
-        // Spawn & Collision (No changes)
-        function spawnAsteroid(currentLevel) { const asteroidColor = '#ff3300'; const speedModifier = 0.5; if (!canvas) return; asteroids.push({ x: Math.random()*(canvas.width-30)+15, y: -30, radius: 10+Math.random()*15, speed: 2+(currentLevel-1)*speedModifier, color: asteroidColor });}
-        function checkCollision(rect, circle) { const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width)); const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height)); const distanceX = circle.x - closestX; const distanceY = circle.y - closestY; const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY); return distanceSquared < (circle.radius * circle.radius); }
-
-        // Effects & Drawing (No changes)
-        function updateTitleFlicker(currentLevel) { let intensity = 0; if (currentLevel >= 10) intensity = Math.min(1, (currentLevel - 10) / 30); if (!titleElement) return; if (intensity > 0 && frameCount % 5 === 0) { titleOffsetX = (Math.random() - 0.5) * 10 * intensity; titleOffsetY = (Math.random() - 0.5) * 10 * intensity; } const flickerColor = (intensity > 0 && frameCount % 20 < 10) ? '#ff0066' : '#ff6699'; titleElement.style.color = intensity <= 0 ? '' : flickerColor; titleElement.style.transform = intensity <= 0 ? '' : `translate(${titleOffsetX}px, ${titleOffsetY}px)`; }
-        function getShipColor() { return '#00ffcc'; }
+         function spawnAsteroid(currentLevel) { const asteroidColor = '#ff3300'; const speedModifier = 0.5; if (!canvas) return; asteroids.push({ x: Math.random()*(canvas.width-30)+15, y: -30, radius: 10+Math.random()*15, speed: 2+(currentLevel-1)*speedModifier, color: asteroidColor });}
+         function checkCollision(rect, circle) { const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width)); const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height)); const distanceX = circle.x - closestX; const distanceY = circle.y - closestY; const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY); return distanceSquared < (circle.radius * circle.radius); }
+         function updateTitleFlicker(currentLevel) { let intensity = 0; if (currentLevel >= 10) intensity = Math.min(1, (currentLevel - 10) / 30); if (!titleElement) return; if (intensity > 0 && frameCount % 5 === 0) { titleOffsetX = (Math.random() - 0.5) * 10 * intensity; titleOffsetY = (Math.random() - 0.5) * 10 * intensity; } const flickerColor = (intensity > 0 && frameCount % 20 < 10) ? '#ff0066' : '#ff6699'; titleElement.style.color = intensity <= 0 ? '' : flickerColor; titleElement.style.transform = intensity <= 0 ? '' : `translate(${titleOffsetX}px, ${titleOffsetY}px)`; }
+         function getShipColor() { return '#00ffcc'; }
 
         /***********************************************
          *              Main Game Loop                 *
          ***********************************************/
         function gameLoop(timestamp) {
-            if (!gameStarted || !ctx || !canvas) { return; }
-            if (!lastTime) lastTime = timestamp;
-            let dt = Math.min(3, (timestamp - lastTime) / (1000 / 60)); lastTime = timestamp; frameCount++;
-            level = Math.floor(score / 10) + 1; updateTitleFlicker(level);
-
+            if (!gameStarted || !ctx || !canvas) { return; } if (!lastTime) lastTime = timestamp; let dt = Math.min(3, (timestamp - lastTime) / (1000 / 60)); lastTime = timestamp; frameCount++; level = Math.floor(score / 10) + 1; updateTitleFlicker(level);
             if (gameOver) {
                 if (!roundRecorded) {
                     const finalLevel = Math.max(1, level);
-                    // Local Ranking (Page Load Scope)
-                    saveLocalRecord(currentSessionRoundNumber, finalLevel);
-                    // Global Ranking
-                    addGlobalRecord(finalLevel);
-                    // Increment global games played count ONCE on game over
-                    incrementGlobalGamesPlayed();
-                    roundRecorded = true; // Mark that this game over has been processed
+                    saveLocalRecord(currentSessionRoundNumber, finalLevel); // Local ranking uses page-load scope variable
+                    addGlobalRecord(finalLevel); incrementGlobalGamesPlayed(); roundRecorded = true;
                 }
-                // Draw Screen (No changes)
-                if (frameCount % 5 === 0) { gameOverOffsetX = (Math.random()-0.5)*10; gameOverOffsetY = (Math.random()-0.5)*10; }
-                ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.textAlign = 'center'; const gameOverColor = frameCount % 20 < 10 ? '#ff0066' : '#ff6699'; ctx.fillStyle = gameOverColor; ctx.font = '40px Arial'; ctx.fillText('GAME OVER', canvas.width/2 + gameOverOffsetX, canvas.height/2 - 40 + gameOverOffsetY); ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.fillText(`You reached level ${Math.max(1, level)}`, canvas.width/2, canvas.height/2 + 10); ctx.font = '16px Arial'; const restartText = window.matchMedia("(hover: none)").matches ? 'Tap screen to restart' : 'Press SPACE to restart'; ctx.fillText(restartText, canvas.width/2, canvas.height/2 + 50);
-            }
-            else { // Gameplay State (No changes)
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (leftPressed) ship.velocity = Math.max(ship.velocity - ship.acceleration * dt, -ship.maxVelocity); else if (rightPressed) ship.velocity = Math.min(ship.velocity + ship.acceleration * dt, ship.maxVelocity); else ship.velocity *= Math.pow(ship.friction, dt); if (Math.abs(ship.velocity) < 0.1) ship.velocity = 0; ship.x += ship.velocity * dt; ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
+                if (frameCount % 5 === 0) { gameOverOffsetX = (Math.random()-0.5)*10; gameOverOffsetY = (Math.random()-0.5)*10; } ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.textAlign = 'center'; const gameOverColor = frameCount % 20 < 10 ? '#ff0066' : '#ff6699'; ctx.fillStyle = gameOverColor; ctx.font = '40px Arial'; ctx.fillText('GAME OVER', canvas.width/2 + gameOverOffsetX, canvas.height/2 - 40 + gameOverOffsetY); ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.fillText(`You reached level ${Math.max(1, level)}`, canvas.width/2, canvas.height/2 + 10); ctx.font = '16px Arial'; const restartText = window.matchMedia("(hover: none)").matches ? 'Tap screen to restart' : 'Press SPACE to restart'; ctx.fillText(restartText, canvas.width/2, canvas.height/2 + 50);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); if (leftPressed) ship.velocity = Math.max(ship.velocity - ship.acceleration * dt, -ship.maxVelocity); else if (rightPressed) ship.velocity = Math.min(ship.velocity + ship.acceleration * dt, ship.maxVelocity); else ship.velocity *= Math.pow(ship.friction, dt); if (Math.abs(ship.velocity) < 0.1) ship.velocity = 0; ship.x += ship.velocity * dt; ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
                 ctx.fillStyle = getShipColor(); ctx.beginPath(); ctx.moveTo(ship.x + ship.width/2, ship.y - ship.height); ctx.lineTo(ship.x, ship.y); ctx.lineTo(ship.x + ship.width, ship.y); ctx.closePath(); ctx.fill();
                 const spawnRate = 0.02 + (level - 1) * 0.005; if (Math.random() < spawnRate * dt) spawnAsteroid(level); const shipCollisionRect = { x: ship.x, y: ship.y - ship.height, width: ship.width, height: ship.height };
                 for (let i = asteroids.length - 1; i >= 0; i--) { let a = asteroids[i]; a.y += a.speed * dt; ctx.fillStyle = a.color || '#ff3300'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2); ctx.fill(); if (checkCollision(shipCollisionRect, a)) { gameOver = true; break; } if (a.y - a.radius > canvas.height) { asteroids.splice(i, 1); score++; } }
                 ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.textAlign = 'left'; ctx.fillText(`Level: ${level}`, 10, 30);
-            }
-            requestAnimationFrame(gameLoop);
+            } requestAnimationFrame(gameLoop);
         }
 
         /***********************************************
@@ -395,17 +287,11 @@
          ***********************************************/
         document.addEventListener('DOMContentLoaded', () => {
              if (!ctx) { console.error("Failed to get canvas context on DOMContentLoaded."); return; }
-             // Initialize things that don't depend on session storage for rankings
-             resetGameVisuals();
-             setupVolumeControl();
-             updateGlobalLeaderboard();
-             displayGlobalGamesPlayed();
-             updateRankingBoard(); // Update with initially empty local rankings
-
-             document.getElementById("startGame")?.addEventListener("click", startGameNow);
-             playerNameInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } });
+             // Initialize page-load scope variables
+             currentSessionRoundNumber = 0; localSessionRankings = {};
+             resetGameVisuals(); setupVolumeControl(); updateGlobalLeaderboard(); displayGlobalGamesPlayed(); updateRankingBoard();
+             document.getElementById("startGame")?.addEventListener("click", startGameNow); playerNameInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } });
         });
-
     </script>
 
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
