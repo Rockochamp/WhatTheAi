@@ -23,14 +23,10 @@ const leaderboardCollection = `leaderboard_${gameTitle}_${version}`;
 const statsDoc = `stats_${gameTitle}_${version}`;
 const volumeKey = `${gameTitle}_volume_v2`;
 
-// --- Global State (Reset on Load) ---
-let playerName = "";
-let gameStarted = false;
-let gameEnded = false;
-let currentSessionRoundNumber = 0; // Tracks rounds *within this page load*
-let localSessionRankings = {}; // Stores { pawns: { round: X, pawns: Y } } *within this page load* - Overwrites same pawn count
+let playerName = ""; let gameStarted = false; let gameEnded = false;
+let currentSessionRoundNumber = 0; let localSessionRankings = {};
+let gameState = {};
 
-// --- DOM Elements ---
 const startScreen = document.getElementById('startScreen');
 const playerInfoDiv = document.getElementById('playerInfo');
 const playerNameInput = document.getElementById('playerName');
@@ -56,16 +52,12 @@ const globalRankingContentGame = document.getElementById('globalRankingContentGa
 const globalGamesPlayedStart = document.getElementById("globalGamesPlayedStart");
 const globalGamesPlayedGame = document.getElementById("globalGamesPlayedGame");
 
-let gameState = {};
-
-
 /***********************************************
  *           Volume Control Logic              *
  ***********************************************/
  function setupVolumeControl() {
-    if (!backgroundMusic || !volumeSlider) { console.warn("Volume elements not found."); return; }
-    const savedVolume = localStorage.getItem(volumeKey); let currentVolume = 0.5; // Volume uses localStorage
-    if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) { currentVolume = parseFloat(savedVolume); }
+    if (!backgroundMusic || !volumeSlider) return; const savedVolume = localStorage.getItem(volumeKey); let currentVolume = 0.5;
+    if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) currentVolume = parseFloat(savedVolume);
     volumeSlider.value = currentVolume; backgroundMusic.volume = currentVolume;
     volumeSlider.addEventListener('input', () => { const newVolume = parseFloat(volumeSlider.value); backgroundMusic.volume = newVolume; try { localStorage.setItem(volumeKey, newVolume.toString()); } catch (e) { console.error("Failed to save volume:", e); } });
 }
@@ -74,17 +66,28 @@ let gameState = {};
  *       Firestore Leaderboard & Stats         *
  ***********************************************/
 function updateGlobalLeaderboard() {
+    console.log(`Fetching leaderboard from: ${leaderboardCollection}`); // DEBUG Log
     db.collection(leaderboardCollection).orderBy("finalPawns", "desc").orderBy("timestamp", "desc").limit(50).get()
     .then((querySnapshot) => {
         let html = '<ol>'; const uniqueEntries = []; const playersSeen = new Set(); const maxDisplay = 10;
+        console.log(`Leaderboard snapshot size: ${querySnapshot.size}`); // DEBUG Log
         if (!querySnapshot.empty) {
             querySnapshot.forEach((doc) => {
-                const data = doc.data(); const pName = data.playerName || 'Anon';
-                if (!playersSeen.has(pName.toLowerCase()) && uniqueEntries.length < maxDisplay) {
-                    uniqueEntries.push(`<li>${pName}: ${data.finalPawns} pawns</li>`); playersSeen.add(pName.toLowerCase());
+                const data = doc.data();
+                // DEBUG Log each doc's data
+                console.log("Leaderboard Doc:", doc.id, JSON.stringify(data));
+                // Ensure data exists and has the expected fields
+                if (data && typeof data.finalPawns !== 'undefined') {
+                    const pName = data.playerName || 'Anon';
+                    if (!playersSeen.has(pName.toLowerCase()) && uniqueEntries.length < maxDisplay) {
+                        uniqueEntries.push(`<li>${pName}: ${data.finalPawns} pawns</li>`); playersSeen.add(pName.toLowerCase());
+                    }
+                } else {
+                     console.warn("Skipping leaderboard doc with missing data:", doc.id); // DEBUG Log
                 }
             });
         }
+        console.log("Unique entries found:", uniqueEntries.length); // DEBUG Log
         if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; }
         else { html += uniqueEntries.join(''); html += '</ol>'; }
         if (globalRankingContentStart) globalRankingContentStart.innerHTML = html; if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
@@ -93,74 +96,54 @@ function updateGlobalLeaderboard() {
 }
 
 function addGlobalRecord(pName, finalPawns, finalYear) {
-    if (gameEnded) { console.log("Score already submitted for this game."); return; } // Should be protected by triggerGameOver's flag too
+    if (gameEnded) { /* Should be protected by handleGameOver's flag */ return; }
     const pawnsToSave = Math.max(0, finalPawns);
-    // gameEnded is set in triggerGameOver *before* calling this
+    console.log(`Attempting to add global record: P: ${pName}, Pawns: ${pawnsToSave}, Year: ${finalYear}, V: ${version}`); // DEBUG Log
 
     db.collection(leaderboardCollection).add({
         playerName: pName || "Anon", finalPawns: pawnsToSave, finalYear: finalYear, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
-    .then(() => { console.log(`Global record added: ${pName || 'Anon'}, Pawns ${pawnsToSave}, Year ${finalYear}`); updateGlobalLeaderboard(); })
-    .catch((error) => { console.error("Error adding global record:", error); /* Maybe allow retry? gameEnded is still true */ });
+    .then((docRef) => { // Log success with doc ID
+         console.log(`Global record added successfully with ID: ${docRef.id}`);
+         updateGlobalLeaderboard();
+    })
+    .catch((error) => { console.error("!!! Error adding global record:", error); }); // Make error more visible
 }
 
-// MOVED: Called only on game over
 function incrementGlobalGamesPlayed() {
-    db.collection("globalStats").doc(statsDoc).set({
-        totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version }, { merge: true })
-        .then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error);
+    db.collection("globalStats").doc(statsDoc).set({ totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version }, { merge: true })
+    .then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error);
 }
 function displayGlobalGamesPlayed() {
-    db.collection("globalStats").doc(statsDoc).get().then((doc) => {
-        const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0; const text = `(Total games played worldwide: ${total})`;
-        if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text; })
-        .catch((error) => { console.error("Error reading total games:", error); const errorText = "(Total games played worldwide: Error)"; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText; });
+    db.collection("globalStats").doc(statsDoc).get().then((doc) => { const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0; const text = `(Total games played worldwide: ${total})`; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text; })
+    .catch((error) => { console.error("Error reading total games:", error); const errorText = "(Total games played worldwide: Error)"; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText; });
 }
 
 /***********************************************
  *      Local Ranking (Page Load Only)         *
  ***********************************************/
  function updateRankingBoard() {
-    if (!rankingContentEl) return;
-    // Read directly from the global variable object
-    const rankingsList = Object.values(localSessionRankings);
-    // Sort by pawns descending
-    const sortedRankings = rankingsList.sort((a, b) => b.pawns - a.pawns);
-
-    let html = '';
+    if (!rankingContentEl) return; const rankingsList = Object.values(localSessionRankings);
+    const sortedRankings = rankingsList.sort((a, b) => b.pawns - a.pawns); let html = '';
     if (sortedRankings.length === 0) { html = '<p>No games completed yet.</p>'; }
-    else {
-        html = '<ol>';
-        sortedRankings.slice(0, 10).forEach((entry) => {
-            html += `<li>Game ${entry.round}: ${entry.pawns} pawns</li>`;
-        });
-        html += '</ol>';
-    }
+    else { html = '<ol>'; sortedRankings.slice(0, 10).forEach((entry) => { html += `<li>Game ${entry.round}: ${entry.pawns} pawns</li>`; }); html += '</ol>'; }
     rankingContentEl.innerHTML = html;
 }
 
 function saveLocalRecord(roundNum, finalPawns) {
-     // Save directly to the global variable object, using pawns as key
      const pawnsToSave = Math.max(0, finalPawns);
-     // This overwrites any previous game in this session with the same pawn count
+     // Overwrites previous entry for the same pawn count in this session
      localSessionRankings[pawnsToSave] = { round: roundNum, pawns: pawnsToSave };
-     updateRankingBoard(); // Update display
+     updateRankingBoard();
 }
 
  /***********************************************
- *          Name Validation (Improved)         *
+ *          Name Validation                 *
  ***********************************************/
  function isNameOffensive(name) {
-     // Uses blocklist.js
      if (typeof offensiveWords === 'undefined') { console.warn("Offensive words list (blocklist.js) not loaded!"); return false; }
      if (!name) return false; const lowerCaseName = name.toLowerCase();
-     for (const word of offensiveWords) {
-         // CHANGED: Use includes for substring matching as requested
-         if (lowerCaseName.includes(word)) {
-             console.log(`Offensive substring found: ${word} in ${name}`);
-             return true;
-         }
-     }
+     for (const word of offensiveWords) { if (lowerCaseName.includes(word)) { console.log(`Offensive substring found: ${word} in ${name}`); return true; } }
      return false;
  }
 
@@ -168,26 +151,25 @@ function saveLocalRecord(roundNum, finalPawns) {
  *         Game State & UI Updates             *
  ***********************************************/
 function resetGameUIAndState(isRestart = false) {
-    // Start at year 0
-    gameState = { year: 0, food: 1000, land: 100, pawns: 100, landPrice: Math.floor(Math.random()*11)+18 };
+    gameState = { year: 0, food: 1000, land: 100, pawns: 100, landPrice: Math.floor(Math.random()*11)+18 }; // Start year 0
     gameEnded = false;
     if(buyLandInput) buyLandInput.value=0; if(sellLandInput) sellLandInput.value=0; if(plantInput) plantInput.value=0; if(feedInput) feedInput.value=0;
     if(messageEl) messageEl.innerHTML= isRestart ? "Starting a new game." : "A new era begins. Rule wisely for 10 years!";
     if(nextTurnBtn) {
         nextTurnBtn.disabled=false;
-        nextTurnBtn.textContent = "Confirm Decisions & End Year"; // Reset button text
-        // Remove potential 'startNewGameHandler' and ensure 'processTurn' is the listener
-        nextTurnBtn.removeEventListener('click', startNewGameHandler);
-        nextTurnBtn.removeEventListener('click', processTurn); // Remove first to avoid duplicates
-        nextTurnBtn.addEventListener('click', processTurn);
+        nextTurnBtn.textContent = "Confirm Decisions & End Year";
+        nextTurnBtn.classList.remove('game-over-button'); // Remove red style
+        nextTurnBtn.removeEventListener('click', startNewGameHandler); // Remove potential leftover listener
+        nextTurnBtn.removeEventListener('click', processTurn); // Remove to prevent duplicates
+        nextTurnBtn.addEventListener('click', processTurn); // Ensure correct listener
     }
     updateUI();
 }
 function updateUI() {
     if(!gameStarted) return;
-    // Update year display correctly for 0-10 range
+    // Display year 0-10
     if(yearEl) yearEl.textContent=`${gameState.year} / ${maxYears}`;
-    if(decisionYearEl) decisionYearEl.textContent=gameState.year; // Show current year for decisions
+    if(decisionYearEl) decisionYearEl.textContent=gameState.year;
     if(foodEl) foodEl.textContent=Math.floor(gameState.food);
     if(landEl) landEl.textContent=gameState.land;
     if(pawnsEl) pawnsEl.textContent=gameState.pawns;
@@ -203,153 +185,118 @@ function startGameNow() {
     if (isNameOffensive(nameInput)) { alert("Please choose a more appropriate player name."); return; }
     playerName = nameInput.substring(0, 10);
 
-    if(startScreen) startScreen.style.display="none";
-    if(gameContainer) gameContainer.style.display="flex";
+    if(startScreen) startScreen.style.display="none"; if(gameContainer) gameContainer.style.display="flex";
+    gameStarted = true; currentSessionRoundNumber = 1; localSessionRankings = {};
 
-    gameStarted = true;
-    currentSessionRoundNumber = 1; // Start round count for this session
-    localSessionRankings = {}; // Clear local rankings for this session
+    resetGameUIAndState(false); // Initial setup for year 0
 
-    resetGameUIAndState(false); // Initial setup
-
-    // Update displays (global count NOT incremented here)
-    updateRankingBoard();
-    updateGlobalLeaderboard();
-    displayGlobalGamesPlayed();
-
-    setupVolumeControl();
-    if (backgroundMusic) { backgroundMusic.play().catch(error => { console.log("Music autoplay prevented:", error); if(messageEl) messageEl.innerHTML += "<br><small>(Music autoplay blocked. Adjust volume.)</small>"; });
-    } else { console.error("Background music element not found!"); }
+    updateRankingBoard(); updateGlobalLeaderboard(); displayGlobalGamesPlayed();
+    setupVolumeControl(); if (backgroundMusic) { backgroundMusic.play().catch(error => { console.log("Music autoplay prevented:", error); if(messageEl) messageEl.innerHTML += "<br><small>(Music autoplay blocked. Adjust volume.)</small>"; }); } else { console.error("Background music element not found!"); }
 }
 
-// Renamed from triggerGameOver for clarity
 function handleGameOver(messagePrefix = "GAME OVER") {
-    if (gameEnded) return; // Prevent double execution
-    gameEnded = true; // Set flag immediately
+    if (gameEnded) return; gameEnded = true; // Set flag FIRST
+    console.log("handleGameOver called"); // DEBUG Log
 
     const finalPawns = gameState.pawns;
-    // The game ends *after* year 10 is completed, so year would be 11. Let's record year 10.
-    const finalYearCompleted = Math.min(maxYears, gameState.year);
+    const finalYearCompleted = gameState.year; // Year is already incremented when this is called
 
+    if (messageEl) { /* Update message... (no changes needed here) */ }
     if (messageEl) {
         let endMessage = `${messagePrefix}<br>`;
-        if (finalPawns <= 0) {
-            endMessage += `Your civilization collapsed in year ${finalYearCompleted}! Final Pawn Count: 0.`;
-        } else {
-            endMessage += `You completed ${maxYears} years! Final Pawn Count: ${finalPawns}.`;
-        }
+        if (finalPawns <= 0) { endMessage += `Your civilization collapsed in year ${finalYearCompleted}! Final Pawn Count: 0.`; }
+        else { endMessage += `You completed ${maxYears} years! Final Pawn Count: ${finalPawns}.`; }
         messageEl.innerHTML = endMessage;
     }
 
-    saveLocalRecord(currentSessionRoundNumber, finalPawns);
-    addGlobalRecord(playerName, finalPawns, finalYearCompleted); // Save final state
-    incrementGlobalGamesPlayed(); // Count the completed game
 
-    // Change button to 'Start New Game'
+    // Save records and increment count
+    saveLocalRecord(currentSessionRoundNumber, finalPawns);
+    addGlobalRecord(playerName, finalPawns, finalYearCompleted);
+    incrementGlobalGamesPlayed();
+
     if(nextTurnBtn) {
         nextTurnBtn.textContent = "Start New Game";
-        nextTurnBtn.removeEventListener('click', processTurn); // Remove old listener
-        nextTurnBtn.addEventListener('click', startNewGameHandler); // Add new listener
-        nextTurnBtn.disabled = false; // Ensure it's clickable
+        nextTurnBtn.classList.add('game-over-button'); // Add red style
+        nextTurnBtn.removeEventListener('click', processTurn);
+        nextTurnBtn.removeEventListener('click', startNewGameHandler); // Remove first to be safe
+        nextTurnBtn.addEventListener('click', startNewGameHandler);
+        nextTurnBtn.disabled = false;
     }
 }
 
-// Handles click on the "Start New Game" button
 function startNewGameHandler() {
-    console.log("Starting new game from handler...");
-    currentSessionRoundNumber++; // Increment round for the new game
-    resetGameUIAndState(true); // Reset state and UI, including button listener
+    console.log("Starting new game...");
+    currentSessionRoundNumber++; resetGameUIAndState(true);
 }
-
 
 /***********************************************
  *          Hammurabi Game Turn Logic          *
  ***********************************************/
 function processTurn() {
-    // Check for game over conditions FIRST (pawns <= 0)
+    console.log(`Processing turn for year: ${gameState.year}`); // DEBUG Log
+    // Check if game should have already ended (handles edge cases)
+    if (gameEnded || gameState.year >= maxYears) {
+        console.log("ProcessTurn called but game should have ended. Triggering handleGameOver again just in case."); // DEBUG Log
+        handleGameOver(gameState.pawns <= 0 ? "Your civilization collapsed!" : `You completed ${maxYears} years!`);
+        return;
+    }
      if (gameState.pawns <= 0) {
         handleGameOver("Your civilization collapsed!");
-        return; // Stop processing if already over due to pawns
+        return;
     }
-    // Check if max years completed (game ends AFTER year 10 is done)
-    // gameState.year is the year *about to start* or just completed.
-    // If gameState.year is currently 10, this is the *last* turn to process.
-    // If it becomes 11 *after* this turn, the game ends.
 
-    if (!gameStarted || gameEnded || !nextTurnBtn) return;
+    // --- If game is active ---
+    if (!gameStarted || !nextTurnBtn) return; // Should not happen if logic is correct
 
     const buyLand=parseInt(buyLandInput?.value??0)||0, sellLand=parseInt(sellLandInput?.value??0)||0, plant=parseInt(plantInput?.value??0)||0, feed=parseInt(feedInput?.value??0)||0;
     if(messageEl) messageEl.textContent=""; let turnMessages=[]; let validationFailed=false;
     function failValidation(msg) { if(messageEl) messageEl.innerHTML = `<span style="color: #ff6666;">${msg}</span>`; validationFailed=true; }
 
     // --- Input Validation --- (No changes)
-    if(buyLand<0||sellLand<0||plant<0||feed<0){ failValidation("Please enter non-negative values."); }
-    else if(buyLand>0&&sellLand>0){ failValidation("Cannot buy AND sell land."); }
-    else if(buyLand*gameState.landPrice > gameState.food){ failValidation(`Not enough food to buy ${buyLand} acres! Need ${buyLand * gameState.landPrice}, have ${Math.floor(gameState.food)}.`); }
-    else if(sellLand > gameState.land){ failValidation(`Not enough land to sell! Own ${gameState.land} acres.`); }
-    else { const foodAfterLandDeals = gameState.food - (buyLand*gameState.landPrice) + (sellLand*gameState.landPrice); const landAfterLandDeals = gameState.land + buyLand - sellLand; if (plant > foodAfterLandDeals) { failValidation(`Not enough food to plant! Need ${plant} bushels, have ${Math.floor(foodAfterLandDeals)}.`); } else if (plant > landAfterLandDeals) { failValidation(`Not enough land to plant! Own ${landAfterLandDeals} acres.`); } else if (plant > gameState.pawns * 10) { failValidation(`Not enough pawns to tend ${plant} acres! Need ${Math.ceil(plant / 10)}, have ${gameState.pawns}.`); } else { const foodAfterPlanting = foodAfterLandDeals - plant; const foodFeedNeed = feed * gameState.pawns; if(foodFeedNeed > foodAfterPlanting){ failValidation(`Not enough food to feed! Need ${foodFeedNeed}, have ${Math.floor(foodAfterPlanting)}.`); }}}
+    if(buyLand<0||sellLand<0||plant<0||feed<0){ failValidation("Non-negative values only."); } else if(buyLand>0&&sellLand>0){ failValidation("Cannot buy AND sell land."); } else if(buyLand*gameState.landPrice > gameState.food){ failValidation(`Not enough food to buy ${buyLand} acres.`); } else if(sellLand > gameState.land){ failValidation(`Not enough land to sell.`); } else { const foodAfterLandDeals = gameState.food - (buyLand*gameState.landPrice) + (sellLand*gameState.landPrice); const landAfterLandDeals = gameState.land + buyLand - sellLand; if (plant > foodAfterLandDeals) { failValidation(`Not enough food to plant.`); } else if (plant > landAfterLandDeals) { failValidation(`Not enough land to plant.`); } else if (plant > gameState.pawns * 10) { failValidation(`Not enough pawns to tend ${plant} acres.`); } else { const foodAfterPlanting = foodAfterLandDeals - plant; const foodFeedNeed = feed * gameState.pawns; if(foodFeedNeed > foodAfterPlanting){ failValidation(`Not enough food to feed.`); }}}
     if(validationFailed) return;
 
     // --- Process Turn ---
-    nextTurnBtn.disabled=true;
+    nextTurnBtn.disabled=true; // Disable button temporarily
 
-    // Apply Costs/Changes
-    if(buyLand>0){ gameState.food-=buyLand*gameState.landPrice; gameState.land+=buyLand; turnMessages.push(`Bought ${buyLand} acres.`); }
-    else if(sellLand>0){ gameState.food+=sellLand*gameState.landPrice; gameState.land-=sellLand; turnMessages.push(`Sold ${sellLand} acres.`); }
-    if(plant>0){ gameState.food-=plant; turnMessages.push(`Used ${plant} bushels for planting.`); }
-    const totalFoodUsedForFeeding=feed*gameState.pawns; if(totalFoodUsedForFeeding>0) { gameState.food-=totalFoodUsedForFeeding; turnMessages.push(`Used ${totalFoodUsedForFeeding} bushels to feed ${gameState.pawns} pawns.`); }
-
-    // Harvest
+    // Apply Costs/Changes, Harvest, Starvation, Population, Events (No changes needed in core logic here)
+    if(buyLand>0){ gameState.food-=buyLand*gameState.landPrice; gameState.land+=buyLand; turnMessages.push(`Bought ${buyLand} acres.`); } else if(sellLand>0){ gameState.food+=sellLand*gameState.landPrice; gameState.land-=sellLand; turnMessages.push(`Sold ${sellLand} acres.`); }
+    if(plant>0){ gameState.food-=plant; turnMessages.push(`Used ${plant} bushels for planting.`); } const totalFoodUsedForFeeding=feed*gameState.pawns; if(totalFoodUsedForFeeding>0) { gameState.food-=totalFoodUsedForFeeding; turnMessages.push(`Used ${totalFoodUsedForFeeding} bushels to feed.`); }
     const yieldPerAcre=Math.floor(Math.random()*5)+2; const foodHarvested=plant*yieldPerAcre; if(plant > 0) { gameState.food+=foodHarvested; turnMessages.push(`Harvested ${foodHarvested} bushels (${yieldPerAcre}/acre).`); } else { turnMessages.push("No crops planted."); }
+    let pawnsStarved = 0; const requiredFoodPerPawn = 20; const foodDeficit = (requiredFoodPerPawn * gameState.pawns) - totalFoodUsedForFeeding; if (foodDeficit > 0 && gameState.pawns > 0) { const maxStarvationFraction = 0.45; const starvationFraction = Math.min(maxStarvationFraction, foodDeficit / (requiredFoodPerPawn * gameState.pawns)); pawnsStarved = Math.min(gameState.pawns, Math.floor(gameState.pawns * starvationFraction)); if (pawnsStarved > 0) { gameState.pawns -= pawnsStarved; turnMessages.push(`<span style="color: red;">STARVATION! ${pawnsStarved} died!</span>`); } } if (gameState.food < 0 && gameState.pawns > 0) { const extraShortage = Math.abs(gameState.food); const additionalStarved = Math.min(gameState.pawns, Math.ceil(extraShortage / requiredFoodPerPawn)); if (additionalStarved > 0) { gameState.pawns -= additionalStarved; turnMessages.push(`<span style="color: red;">SHORTAGE! ${additionalStarved} more died!</span>`); pawnsStarved += additionalStarved; } gameState.food = 0; }
+    if(gameState.pawns>0){ let pawnsGained=0, pawnsLeft=0; const immigrationChance = (feed / 30); if (Math.random() < immigrationChance) { pawnsGained = Math.min(50, Math.floor(Math.random() * (gameState.pawns * 0.1 + gameState.land * 0.01) + 1)); gameState.pawns += pawnsGained; if (pawnsGained > 0) turnMessages.push(`${pawnsGained} new pawns arrived.`); } if (feed < requiredFoodPerPawn / 2 && Math.random() < 0.1) { pawnsLeft = Math.min(gameState.pawns, Math.floor(Math.random() * (gameState.pawns * 0.05) + 1)); gameState.pawns -= pawnsLeft; if (pawnsLeft > 0) turnMessages.push(`${pawnsLeft} pawns left.`); } const eventChance=Math.random(); if(eventChance<0.15 && gameState.food>10){ const foodLost=Math.max(1,Math.floor(gameState.food*(Math.random()*0.2+0.1))); gameState.food-=foodLost; turnMessages.push(`<span style="color: orange;">Rats! Lost ${foodLost} bushels.</span>`); } else if(eventChance>=0.15&&eventChance<0.25 && foodHarvested>0){ const foodGained=Math.max(1,Math.floor(foodHarvested*(Math.random()*0.1+0.05))); gameState.food+=foodGained; turnMessages.push(`<span style="color: lightgreen;">Bonus harvest! +${foodGained} bushels.</span>`); } else if(eventChance>=0.30&&eventChance<0.40 && gameState.pawns>10){ let plagueVictims=Math.min(gameState.pawns,Math.max(1,Math.floor(gameState.pawns*(Math.random()*0.3+0.1)))); gameState.pawns-=plagueVictims; turnMessages.push(`<span style="color: red;">Plague! ${plagueVictims} died.</span>`); } }
 
-    // Starvation
-    let pawnsStarved = 0; const requiredFoodPerPawn = 20; const foodDeficit = (requiredFoodPerPawn * gameState.pawns) - totalFoodUsedForFeeding;
-    if (foodDeficit > 0 && gameState.pawns > 0) { const maxStarvationFraction = 0.45; const starvationFraction = Math.min(maxStarvationFraction, foodDeficit / (requiredFoodPerPawn * gameState.pawns)); pawnsStarved = Math.min(gameState.pawns, Math.floor(gameState.pawns * starvationFraction)); if (pawnsStarved > 0) { gameState.pawns -= pawnsStarved; turnMessages.push(`<span style="color: red;">STARVATION! ${pawnsStarved} pawns died!</span>`); } }
-    if (gameState.food < 0 && gameState.pawns > 0) { const extraShortage = Math.abs(gameState.food); const additionalStarved = Math.min(gameState.pawns, Math.ceil(extraShortage / requiredFoodPerPawn)); if (additionalStarved > 0) { gameState.pawns -= additionalStarved; turnMessages.push(`<span style="color: red;">SHORTAGE! ${additionalStarved} more died!</span>`); pawnsStarved += additionalStarved; } gameState.food = 0; }
+    // --- End of Year Processing ---
+    gameState.year++; // Increment the year AFTER processing the current year's events
 
-    // Population Changes & Random Events
-    if(gameState.pawns>0){ let pawnsGained=0, pawnsLeft=0; const immigrationChance = (feed / 30); if (Math.random() < immigrationChance) { pawnsGained = Math.min(50, Math.floor(Math.random() * (gameState.pawns * 0.1 + gameState.land * 0.01) + 1)); gameState.pawns += pawnsGained; if (pawnsGained > 0) turnMessages.push(`${pawnsGained} new pawns arrived.`); } if (feed < requiredFoodPerPawn / 2 && Math.random() < 0.1) { pawnsLeft = Math.min(gameState.pawns, Math.floor(Math.random() * (gameState.pawns * 0.05) + 1)); gameState.pawns -= pawnsLeft; if (pawnsLeft > 0) turnMessages.push(`${pawnsLeft} pawns left.`); }
-        const eventChance=Math.random(); if(eventChance<0.15 && gameState.food>10){ const foodLost=Math.max(1,Math.floor(gameState.food*(Math.random()*0.2+0.1))); gameState.food-=foodLost; turnMessages.push(`<span style="color: orange;">Rats! Lost ${foodLost} bushels.</span>`); } else if(eventChance>=0.15&&eventChance<0.25 && foodHarvested>0){ const foodGained=Math.max(1,Math.floor(foodHarvested*(Math.random()*0.1+0.05))); gameState.food+=foodGained; turnMessages.push(`<span style="color: lightgreen;">Bonus harvest! +${foodGained} bushels.</span>`); } else if(eventChance>=0.30&&eventChance<0.40 && gameState.pawns>10){ let plagueVictims=Math.min(gameState.pawns,Math.max(1,Math.floor(gameState.pawns*(Math.random()*0.3+0.1)))); gameState.pawns-=plagueVictims; turnMessages.push(`<span style="color: red;">Plague! ${plagueVictims} pawns died.</span>`); }
-    }
-
-    // --- Check for Game Over AFTER calculations for the year ---
-    if (gameState.pawns <= 0) {
-        updateUI(); // Update UI one last time
-        handleGameOver("Your civilization collapsed!");
-        return; // Stop, game is over
-    }
-
-    // --- If game continues: Advance year and prepare for Next Turn ---
-    gameState.year++;
-    gameState.landPrice = Math.floor(Math.random() * 11) + 18;
-    updateUI(); // Update UI for the upcoming year
+    // Update UI to show results of the turn and the NEW year number
+    updateUI();
     if(messageEl) messageEl.innerHTML = turnMessages.join("<br>");
 
-    // Check if the game ends BECAUSE we just finished the last year
-    if (gameState.year > maxYears) {
+    // --- Check Game Over Conditions for the *NEXT* turn ---
+    if (gameState.pawns <= 0) {
+        // Died during the year that just ended
+        handleGameOver("Your civilization collapsed!");
+    } else if (gameState.year > maxYears) {
+        // Completed the final year (Year 10)
         handleGameOver(`You completed ${maxYears} years!`);
-        // Button is handled within handleGameOver
     } else {
-        // Reset inputs for the *next* year
+        // Game continues, prepare inputs for the new year
+        gameState.landPrice = Math.floor(Math.random() * 11) + 18;
+        updateUI(); // Update land price display
         if(buyLandInput) buyLandInput.value=0; if(sellLandInput) sellLandInput.value=0; if(plantInput) plantInput.value=0; if(feedInput) feedInput.value=0;
-        nextTurnBtn.disabled = false; // Re-enable for next decision
+        nextTurnBtn.disabled = false; // Re-enable button for the next turn
     }
 }
-
 
 /***********************************************
  *          Initialization & Listeners         *
  ***********************************************/
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize state variables that reset on load
-    currentSessionRoundNumber = 0;
-    localSessionRankings = {};
-
-    setupVolumeControl();
-    updateGlobalLeaderboard();
-    displayGlobalGamesPlayed();
-    updateRankingBoard(); // Show empty local ranking initially
+    currentSessionRoundNumber = 0; localSessionRankings = {}; // Initialize session state
+    setupVolumeControl(); updateGlobalLeaderboard(); displayGlobalGamesPlayed(); updateRankingBoard();
 });
 if (startGameBtn) { startGameBtn.addEventListener("click", startGameNow); }
 if (playerNameInput) { playerNameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } }); }
-// Initial listener is added in resetGameUIAndState called by startGameNow
+// Initial 'processTurn' listener is added in 'resetGameUIAndState'
