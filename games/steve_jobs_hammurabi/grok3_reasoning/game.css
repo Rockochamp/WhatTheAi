@@ -34,28 +34,42 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
 #resources, #decisions, #outcome { margin: 20px 0; border-top: 1px solid #555; padding-top: 15px; }
 #resources { border-top: none; padding-top: 0; }
 #resources p { margin: 8px 0; font-weight: bold; }
-#resources span { font-weight: normal; /* Default span color handled by status classes */ }
+#resources span { font-weight: normal; }
 #resources span[title] { cursor: help; border-bottom: 1px dotted #ccc; }
 
-/* Added: Starvation Status Span Styles */
+/* Starvation Status Span Styles */
 #starvationStatus {
+    /* --- MOBILE FIX: Ensure display allows padding/sizing --- */
+    display: inline-block;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.9em;
-    margin-left: 5px; /* Space from "Status:" label */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+    margin-left: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    vertical-align: middle; /* Align better with the "Status:" text */
 }
-.status-safe { background-color: #4CAF50; color: white; } /* Green */
-.status-ok { background-color: #b8d82c; color: #333; } /* YellowGreen */
-.status-warning { background-color: #ff9800; color: white; } /* Orange */
-.status-danger { background-color: #f44336; color: white; } /* Red */
-.status-critical { background-color: #b71c1c; color: white; font-weight: bold; } /* Dark Red, Bold */
-
+.status-safe { background-color: #4CAF50; color: white; }
+.status-ok { background-color: #b8d82c; color: #333; }
+.status-warning { background-color: #ff9800; color: white; }
+.status-danger { background-color: #f44336; color: white; }
+.status-critical { background-color: #b71c1c; color: white; font-weight: bold; }
 
 #decisions h2, #outcome h2 { color: #eee; margin-bottom: 10px; font-size: 1.2em; }
 #decisions label { display: block; margin: 12px 0; color: #ccc; }
 #decisions label[title] { cursor: help; border-bottom: 1px dotted #ccc; display: inline-block; }
-#decisions input[type="number"] { width: 80px; padding: 6px; margin-left: 8px; background-color: #444; color: #fff; border: 1px solid #666; border-radius: 3px; font-size: 1em; }
+#decisions input[type="number"] {
+    width: 80px;
+    /* --- MOBILE IMPROVEMENT: Ensure minimum usability --- */
+    min-width: 60px;
+    padding: 6px 8px; /* Slightly more horizontal padding */
+    margin-left: 8px;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: 3px;
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding in width */
+}
 input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
@@ -64,7 +78,12 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 
 /* Main Game Button Styling */
 #nextTurn {
-    display: block; width: 100%; padding: 12px; background-color: #4CAF50; color: white;
+    display: block; width: 100%;
+    /* --- MOBILE IMPROVEMENT: Slightly larger tap target --- */
+    padding: 12px 10px;
+    min-height: 44px; /* Common practice for touch targets */
+    box-sizing: border-box;
+    background-color: #4CAF50; color: white;
     border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em;
     margin-top: 20px; transition: background-color 0.2s ease, transform 0.1s ease;
 }
@@ -82,13 +101,18 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 .volume-control label { display: block; margin-bottom: 10px; font-size: 0.9em; color: #ccc; }
 .volume-control input[type="range"] { width: 85%; cursor: pointer; -webkit-appearance: none; appearance: none; height: 8px; background: #555; border-radius: 5px; outline: none; }
 .volume-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #4CAF50; border-radius: 50%; cursor: pointer; }
+/* --- MOBILE IMPROVEMENT: Add Mozilla specific thumb styles --- */
 .volume-control input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #4CAF50; border-radius: 50%; cursor: pointer; border: none; }
 
 /* Help Button Styling */
 .help-button {
-    padding: 8px 15px; font-size: 0.9em; cursor: pointer; background-color: #007bff;
+    padding: 8px 15px;
+    /* --- MOBILE IMPROVEMENT: Ensure min height --- */
+    min-height: 40px; /* Slightly smaller than main button okay */
+    box-sizing: border-box;
+    font-size: 0.9em; cursor: pointer; background-color: #007bff;
     color: white; border: none; border-radius: 5px; transition: background-color 0.2s ease;
-    margin-top: 0; width: 100%; max-width: 280px; box-sizing: border-box;
+    margin-top: 0; width: 100%; max-width: 280px;
 }
 .help-button:hover { background-color: #0056b3; }
 
@@ -124,15 +148,33 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
     #playerInfo input { margin: 0; width: 80%; max-width: 250px; text-align: center; }
     .modal-content { width: 90%; margin: 15% auto; padding: 20px; }
     #decisions label span.info-text { font-size: 0.8em; }
-    #starvationStatus { font-size: 0.85em; } /* Adjust status size */
+    #starvationStatus {
+        /* --- MOBILE FIX: Make slightly more prominent --- */
+        font-size: 0.9em; /* Keep base size */
+        padding: 3px 7px; /* Slightly more padding */
+    }
 }
 
 @media (max-width: 480px) {
     #titleBanner { font-size: 1.6em; padding: 15px; }
     #decisions label { font-size: 0.9em; }
-    #decisions input[type="number"] { width: 60px; padding: 4px; font-size: 0.9em; }
+    #decisions input[type="number"] {
+        width: 70px; /* Allow slightly more width if possible */
+        min-width: 60px;
+        padding: 5px 6px;
+        font-size: 0.9em;
+    }
     .info-text, #decisions label span.info-text { font-size: 0.75em; }
-    .modal-content { padding: 15px 20px; }
+    .modal-content { padding: 15px 20px; font-size: 0.95em; /* Improve modal readability */}
     .close-button { font-size: 28px; top: 5px; right: 10px; }
-    #starvationStatus { font-size: 0.8em; padding: 1px 4px; } /* Further adjust status size */
+    #starvationStatus {
+        /* --- MOBILE FIX: Ensure visibility on smallest screens --- */
+        font-size: 0.85em; /* Slightly larger than before */
+        padding: 3px 6px; /* Maintain padding */
+    }
+    #nextTurn {
+        font-size: 1em; /* Slightly smaller font if needed */
+        padding: 10px 8px; /* Adjust padding if needed */
+        min-height: 42px;
+    }
 }

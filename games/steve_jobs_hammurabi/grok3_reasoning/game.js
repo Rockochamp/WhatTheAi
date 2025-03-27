@@ -77,8 +77,35 @@ const closeHelpButton = document.getElementById('closeHelp');
 /***********************************************
  *           Volume Control Logic              *
  ***********************************************/
- function setupVolumeControl() {
-    if (!backgroundMusic || !volumeSlider) return; const savedVolume = localStorage.getItem(volumeKey); let currentVolume = 0.5; if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) currentVolume = parseFloat(savedVolume); volumeSlider.value = currentVolume; backgroundMusic.volume = currentVolume; volumeSlider.addEventListener('input', () => { const newVolume = parseFloat(volumeSlider.value); backgroundMusic.volume = newVolume; try { localStorage.setItem(volumeKey, newVolume.toString()); } catch (e) { console.error("Failed to save volume:", e); } });
+function setupVolumeControl() {
+    if (!backgroundMusic || !volumeSlider) return;
+
+    const savedVolume = localStorage.getItem(volumeKey);
+    let currentVolume = 0.5;
+    if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) {
+        currentVolume = parseFloat(savedVolume);
+    }
+    volumeSlider.value = currentVolume;
+    backgroundMusic.volume = currentVolume;
+
+    // --- MODIFICATION START ---
+    // Combined function to handle volume change from either event
+    const handleVolumeChange = () => {
+        const newVolume = parseFloat(volumeSlider.value);
+        backgroundMusic.volume = newVolume;
+        try {
+            localStorage.setItem(volumeKey, newVolume.toString());
+        } catch (e) {
+            console.error("Failed to save volume:", e);
+        }
+    };
+
+    // Add both 'input' (fires continuously during drag) and 'change' (fires on release)
+    volumeSlider.removeEventListener('input', handleVolumeChange); // Remove previous if any
+    volumeSlider.removeEventListener('change', handleVolumeChange); // Remove previous if any
+    volumeSlider.addEventListener('input', handleVolumeChange);
+    volumeSlider.addEventListener('change', handleVolumeChange);
+    // --- MODIFICATION END ---
 }
 
 /***********************************************
