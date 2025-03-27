@@ -27,7 +27,7 @@ let playerName = ""; let gameStarted = false; let gameEnded = false;
 let currentSessionRoundNumber = 0; let localSessionRankings = {};
 let gameState = {};
 
-// DOM Elements
+// DOM Elements (assuming they are correctly defined as before)
 const startScreen = document.getElementById('startScreen');
 const playerInfoDiv = document.getElementById('playerInfo');
 const playerNameInput = document.getElementById('playerName');
@@ -63,12 +63,61 @@ const globalGamesPlayedGame = document.getElementById("globalGamesPlayedGame");
 /***********************************************
  *       Firestore Leaderboard & Stats         *
  ***********************************************/
-function updateGlobalLeaderboard() { /* ... no changes ... */
-    console.log(`Fetching leaderboard from: ${leaderboardCollection}`); db.collection(leaderboardCollection).orderBy("finalPawns", "desc").orderBy("timestamp", "desc").limit(50).get()
-    .then((querySnapshot) => { let html = '<ol>'; const uniqueEntries = []; const playersSeen = new Set(); const maxDisplay = 10; console.log(`Leaderboard snapshot size: ${querySnapshot.size}`); if (!querySnapshot.empty) { querySnapshot.forEach((doc) => { const data = doc.data(); console.log("Leaderboard Doc:", doc.id, JSON.stringify(data)); if (data && typeof data.finalPawns !== 'undefined') { const pName = data.playerName || 'Anon'; if (!playersSeen.has(pName.toLowerCase()) && uniqueEntries.length < maxDisplay) { uniqueEntries.push(`<li>${pName}: ${data.finalPawns} pawns</li>`); playersSeen.add(pName.toLowerCase()); } } else { console.warn("Skipping leaderboard doc with missing data:", doc.id); } }); } console.log("Unique entries found:", uniqueEntries.length); if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; } else { html += uniqueEntries.join(''); html += '</ol>'; } if (globalRankingContentStart) globalRankingContentStart.innerHTML = html; if (globalRankingContentGame) globalRankingContentGame.innerHTML = html; })
-    .catch((error) => { console.error("Error getting global leaderboard:", error); const errorMsg = "<p>Error loading leaderboard.</p>"; if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg; if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg; });
+function updateGlobalLeaderboard() {
+    console.log(`Fetching leaderboard from: ${leaderboardCollection}`);
+    db.collection(leaderboardCollection)
+        .orderBy("finalPawns", "desc") // Highest pawns first
+        .orderBy("timestamp", "desc") // Newest timestamp first for ties
+        .limit(50) // Fetch enough candidates
+        .get()
+    .then((querySnapshot) => {
+        let html = '<ol>';
+        const uniqueEntries = [];
+        // CHANGED: Track seen PAWN COUNTS, not players
+        const pawnsSeen = new Set();
+        const maxDisplay = 10; // Max entries to show
+
+        console.log(`Leaderboard snapshot size: ${querySnapshot.size}`);
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                console.log("Leaderboard Doc:", doc.id, JSON.stringify(data));
+
+                if (data && typeof data.finalPawns !== 'undefined') {
+                    const currentPawnCount = data.finalPawns;
+                    const pName = data.playerName || 'Anon';
+
+                    // If we haven't added an entry for this pawn count yet
+                    // AND we haven't reached the display limit
+                    if (!pawnsSeen.has(currentPawnCount) && uniqueEntries.length < maxDisplay) {
+                        uniqueEntries.push(`<li>${pName}: ${currentPawnCount} pawns</li>`);
+                        // Mark this pawn count as seen
+                        pawnsSeen.add(currentPawnCount);
+                    }
+                } else {
+                     console.warn("Skipping leaderboard doc with missing data:", doc.id);
+                }
+            });
+        }
+        console.log("Unique entries found (by pawn count):", uniqueEntries.length);
+        if (uniqueEntries.length === 0) {
+            html = '<p>No scores yet. Be the first!</p>';
+        } else {
+             html += uniqueEntries.join('');
+             html += '</ol>';
+        }
+        if (globalRankingContentStart) globalRankingContentStart.innerHTML = html;
+        if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
+    })
+    .catch((error) => {
+        console.error("Error getting global leaderboard:", error);
+        const errorMsg = "<p>Error loading leaderboard.</p>";
+        if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg;
+        if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
+    });
 }
-function addGlobalRecord(pName, finalPawns, finalYear) { /* ... no changes (fix was here before) ... */
+
+function addGlobalRecord(pName, finalPawns, finalYear) { /* ... no changes ... */
     const pawnsToSave = Math.max(0, finalPawns); console.log(`Attempting to add global record: P: ${pName}, Pawns: ${pawnsToSave}, Year: ${finalYear}, V: ${version}`);
     db.collection(leaderboardCollection).add({ playerName: pName || "Anon", finalPawns: pawnsToSave, finalYear: finalYear, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
     .then((docRef) => { console.log(`Global record added successfully with ID: ${docRef.id}`); updateGlobalLeaderboard(); })
@@ -130,7 +179,7 @@ function startNewGameHandler() { /* ... no changes ... */
 /***********************************************
  *          Hammurabi Game Turn Logic          *
  ***********************************************/
-function processTurn() { /* ... no changes to initial checks ... */
+function processTurn() { /* ... no changes to year/pawn checks, validation, core turn processing ... */
     if (gameState.year >= maxYears) { console.log(`ProcessTurn START: Year (${gameState.year}) is >= maxYears (${maxYears}). Ending game.`); updateUI(); handleGameOver(`You completed ${maxYears} years!`); return; }
     if (gameState.pawns <= 0) { console.log("ProcessTurn START: Pawns <= 0. Ending game."); updateUI(); handleGameOver("Your civilization collapsed!"); return; }
     if (gameEnded) { console.log("ProcessTurn START: Game ended flag is true. Stopping."); return; }
@@ -139,87 +188,13 @@ function processTurn() { /* ... no changes to initial checks ... */
     if(buyLand<0||sellLand<0||plant<0||feed<0){ failValidation("Non-negative values only."); } else if(buyLand>0&&sellLand>0){ failValidation("Cannot buy AND sell land."); } else if(buyLand*gameState.landPrice > gameState.food){ failValidation(`Not enough food to buy ${buyLand} acres.`); } else if(sellLand > gameState.land){ failValidation(`Not enough land to sell.`); } else { const foodAfterLandDeals = gameState.food - (buyLand*gameState.landPrice) + (sellLand*gameState.landPrice); const landAfterLandDeals = gameState.land + buyLand - sellLand; if (plant > foodAfterLandDeals) { failValidation(`Not enough food to plant.`); } else if (plant > landAfterLandDeals) { failValidation(`Not enough land to plant.`); } else if (plant > gameState.pawns * 10) { failValidation(`Not enough pawns to tend ${plant} acres.`); } else { const foodAfterPlanting = foodAfterLandDeals - plant; const foodFeedNeed = feed * gameState.pawns; if(foodFeedNeed > foodAfterPlanting){ failValidation(`Not enough food to feed.`); }}}
     if(validationFailed) return; nextTurnBtn.disabled=true;
     if(buyLand>0){ gameState.food-=buyLand*gameState.landPrice; gameState.land+=buyLand; turnMessages.push(`Bought ${buyLand} acres.`); } else if(sellLand>0){ gameState.food+=sellLand*gameState.landPrice; gameState.land-=sellLand; turnMessages.push(`Sold ${sellLand} acres.`); } if(plant>0){ gameState.food-=plant; turnMessages.push(`Used ${plant} bushels for planting.`); } const totalFoodUsedForFeeding=feed*gameState.pawns; if(totalFoodUsedForFeeding>0) { gameState.food-=totalFoodUsedForFeeding; turnMessages.push(`Used ${totalFoodUsedForFeeding} bushels to feed.`); } const yieldPerAcre=Math.floor(Math.random()*5)+2; const foodHarvested=plant*yieldPerAcre; if(plant > 0) { gameState.food+=foodHarvested; turnMessages.push(`Harvested ${foodHarvested} bushels (${yieldPerAcre}/acre).`); } else { turnMessages.push("No crops planted."); }
-
-    // --- Starvation Check (ADJUSTED Difficulty) ---
-    let pawnsStarved = 0;
-    const requiredFoodPerPawn = 20; // Base survival need remains the same
-
-    // Calculate the actual food deficit per pawn based on what was fed vs required
-    let foodDeficitPerPawn = 0;
-    if (gameState.pawns > 0) {
-        // Ensure feed value is not negative for calculation
-        const actualFeedPerPawn = Math.max(0, feed);
-        foodDeficitPerPawn = Math.max(0, requiredFoodPerPawn - actualFeedPerPawn);
-    }
-
-    if (foodDeficitPerPawn > 0 && gameState.pawns > 0) {
-        // Starvation fraction based on the *proportion* of the required food they are missing
-        // Example: Required=20, Fed=10 -> Deficit=10 -> Fraction = 10/20 = 0.5
-        // Example: Required=20, Fed=0  -> Deficit=20 -> Fraction = 20/20 = 1.0
-        const deficitFraction = foodDeficitPerPawn / requiredFoodPerPawn;
-
-        // Determine the max percentage that can starve based on the deficit severity
-        // Make it scale up, but maybe cap it below 100% unless feed is really low
-        let maxStarvationFractionThisTurn = 0;
-        if (deficitFraction >= 0.8) { // Very high deficit (e.g., fed < 4 if req=20)
-             maxStarvationFractionThisTurn = 0.75; // Cap at 75% starvation for this level
-        } else if (deficitFraction >= 0.5) { // Significant deficit (e.g., fed < 10 if req=20)
-             maxStarvationFractionThisTurn = 0.50; // Cap at 50%
-        } else { // Less severe deficit
-             maxStarvationFractionThisTurn = 0.40; // Cap at 40% (Reduced from 0.45)
-        }
-
-        // Calculate the number starved based on the deficit fraction and the cap
-        // Use the deficit fraction directly, but limited by the calculated cap
-        const starvationFraction = Math.min(maxStarvationFractionThisTurn, deficitFraction);
-        pawnsStarved = Math.min(gameState.pawns, Math.floor(gameState.pawns * starvationFraction));
-
-        if (pawnsStarved > 0) {
-            if (deficitFraction >= 0.8) {
-                turnMessages.push(`<span style="color: red;">CRITICAL STARVATION! ${pawnsStarved} pawns died!</span>`);
-            } else {
-                turnMessages.push(`<span style="color: red;">STARVATION! ${pawnsStarved} pawns died!</span>`);
-            }
-        }
-    }
-
-    // Apply starvation deaths
-    if (pawnsStarved > 0) {
-        gameState.pawns -= pawnsStarved;
-    }
-
-    // Check for negative food state (still important)
-    if (gameState.food < 0 && gameState.pawns > 0) {
-        const extraShortage = Math.abs(gameState.food);
-        // Reduce the divisor slightly to make this less punishing than before, but still bad
-        const additionalStarved = Math.min(gameState.pawns, Math.ceil(extraShortage / (requiredFoodPerPawn * 0.75)));
-        if (additionalStarved > 0) {
-            gameState.pawns -= additionalStarved;
-            turnMessages.push(`<span style="color: red;">FINANCIAL COLLAPSE! ${additionalStarved} more died!</span>`);
-        }
-        gameState.food = 0; // Food cannot be negative
-    }
-
-    // Population Changes & Random Events (No changes)
+    let pawnsStarved = 0; const requiredFoodPerPawn = 20; let foodDeficitPerPawn = 0; if (gameState.pawns > 0) { const actualFeedPerPawn = Math.max(0, feed); foodDeficitPerPawn = Math.max(0, requiredFoodPerPawn - actualFeedPerPawn); } if (foodDeficitPerPawn > 0 && gameState.pawns > 0) { const deficitFraction = foodDeficitPerPawn / requiredFoodPerPawn; let maxStarvationFractionThisTurn = 0; if (deficitFraction >= 0.8) { maxStarvationFractionThisTurn = 0.75; } else if (deficitFraction >= 0.5) { maxStarvationFractionThisTurn = 0.50; } else { maxStarvationFractionThisTurn = 0.40; } const starvationFraction = Math.min(maxStarvationFractionThisTurn, deficitFraction); pawnsStarved = Math.min(gameState.pawns, Math.floor(gameState.pawns * starvationFraction)); if (pawnsStarved > 0) { if (deficitFraction >= 0.8) { turnMessages.push(`<span style="color: red;">CRITICAL STARVATION! ${pawnsStarved} pawns died!</span>`); } else { turnMessages.push(`<span style="color: red;">STARVATION! ${pawnsStarved} pawns died!</span>`); } } } if (pawnsStarved > 0) { gameState.pawns -= pawnsStarved; } if (gameState.food < 0 && gameState.pawns > 0) { const extraShortage = Math.abs(gameState.food); const additionalStarved = Math.min(gameState.pawns, Math.ceil(extraShortage / (requiredFoodPerPawn * 0.75))); if (additionalStarved > 0) { gameState.pawns -= additionalStarved; turnMessages.push(`<span style="color: red;">FINANCIAL COLLAPSE! ${additionalStarved} more died!</span>`); } gameState.food = 0; }
     if(gameState.pawns > 0){ let pawnsGained=0, pawnsLeft=0; const immigrationChance = (feed / 30); if (Math.random() < immigrationChance) { pawnsGained = Math.min(50, Math.floor(Math.random() * (gameState.pawns * 0.1 + gameState.land * 0.01) + 1)); gameState.pawns += pawnsGained; if (pawnsGained > 0) turnMessages.push(`${pawnsGained} new pawns arrived.`); } if (feed < requiredFoodPerPawn / 2 && Math.random() < 0.05) { pawnsLeft = Math.min(gameState.pawns, Math.floor(Math.random() * (gameState.pawns * 0.05) + 1)); gameState.pawns -= pawnsLeft; if (pawnsLeft > 0) turnMessages.push(`${pawnsLeft} pawns left.`); } const eventChance=Math.random(); if(eventChance<0.15 && gameState.food>10){ const foodLost=Math.max(1,Math.floor(gameState.food*(Math.random()*0.2+0.1))); gameState.food-=foodLost; turnMessages.push(`<span style="color: orange;">Rats! Lost ${foodLost} bushels.</span>`); } else if(eventChance>=0.15&&eventChance<0.25 && foodHarvested>0){ const foodGained=Math.max(1,Math.floor(foodHarvested*(Math.random()*0.1+0.05))); gameState.food+=foodGained; turnMessages.push(`<span style="color: lightgreen;">Bonus harvest! +${foodGained} bushels.</span>`); } else if(eventChance>=0.30&&eventChance<0.40 && gameState.pawns>10){ let plagueVictims=Math.min(gameState.pawns,Math.max(1,Math.floor(gameState.pawns*(Math.random()*0.3+0.1)))); gameState.pawns-=plagueVictims; turnMessages.push(`<span style="color: red;">Plague! ${plagueVictims} died.</span>`); } }
 
-    // --- Check for pawn death AFTER all calculations ---
-    if (gameState.pawns <= 0) {
-        console.log(`ProcessTurn END: Pawns died in year ${gameState.year}. Ending game.`);
-        updateUI(); handleGameOver("Your civilization collapsed!"); return;
-    }
-
-    // --- If game continues: Advance year and prepare UI ---
-    gameState.year++; gameState.landPrice = Math.floor(Math.random() * 11) + 18;
-    updateUI(); if(messageEl) messageEl.innerHTML = turnMessages.join("<br>");
-
-    // --- Final Check: Game End Check for NEXT turn ---
-    if (gameState.year >= maxYears) {
-        console.log(`ProcessTurn END: Year incremented to ${gameState.year}. Max years reached. Ending game.`);
-        handleGameOver(`You completed ${maxYears} years!`);
-    } else {
-        if(buyLandInput) buyLandInput.value=0; if(sellLandInput) sellLandInput.value=0; if(plantInput) plantInput.value=0; if(feedInput) feedInput.value=0; nextTurnBtn.disabled = false;
-    }
+    if (gameState.pawns <= 0) { console.log(`ProcessTurn END: Pawns died in year ${gameState.year}. Ending game.`); updateUI(); handleGameOver("Your civilization collapsed!"); return; }
+    gameState.year++; gameState.landPrice = Math.floor(Math.random() * 11) + 18; updateUI(); if(messageEl) messageEl.innerHTML = turnMessages.join("<br>");
+    if (gameState.year >= maxYears) { console.log(`ProcessTurn END: Year incremented to ${gameState.year}. Max years reached. Ending game.`); handleGameOver(`You completed ${maxYears} years!`); }
+    else { if(buyLandInput) buyLandInput.value=0; if(sellLandInput) sellLandInput.value=0; if(plantInput) plantInput.value=0; if(feedInput) feedInput.value=0; nextTurnBtn.disabled = false; }
 }
 
 
