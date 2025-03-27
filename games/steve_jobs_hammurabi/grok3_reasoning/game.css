@@ -52,23 +52,49 @@
     border: none; /* Remove default border */
 }
 
-/* --- Responsive adjustments for volume control --- */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    /* In the existing media query, adjust boardsContainer if needed */
-    #boardsContainer {
-        /* Ensure it provides enough width */
-        /* max-width: 300px; /* Keep or adjust as needed */
-        /* width: 90%; /* Keep or adjust */
+    #gameContainer {
+        flex-direction: column; /* Stack game and leaderboard */
+        align-items: center;
+    }
+    #gameArea {
+        margin-right: 0;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 500px; /* Limit width on mobile too */
     }
 
+    /* This block correctly sets the mobile styles for boardsContainer */
+    #boardsContainer {
+        flex: 1 1 auto; /* Allow leaderboard/volume to take width */
+        width: 90%;
+        max-width: 300px; /* Max width for the container */
+    }
+
+     /* Styles for items *inside* boardsContainer on mobile */
+    .leaderboard-box,
     .volume-control {
-        width: 100%; /* Make volume take full width within its container */
+        width: 100%; /* Make them full width within the container */
+    }
+
+     #playerInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+     #playerInfo input {
+        margin: 5px 0;
+    }
+    .volume-control {
         margin-top: 15px;
     }
-
+    
      .volume-control input[type="range"] {
         width: 70%; /* Adjust slider width for mobile if needed */
     }
+
+    /* REMOVED THE DUPLICATE, COMMENTED-OUT #boardsContainer BLOCK HERE */
 }
 
 /* Base styles from Cosmic Dodge */
