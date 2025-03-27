@@ -30,23 +30,26 @@
     <div id="gameContainer">
         <div id="gameArea">
             <div id="game">
-                <!-- REMOVED Pawn Master Heading -->
                 <div id="resources">
-                    <!-- UPDATED Initial Year Display -->
                     <p>Year: <span id="year">0 / 10</span></p>
                     <p>Food: <span id="food">1000</span> bushels</p>
                     <p>Land: <span id="land">100</span> acres</p>
-                    <p>Pawns: <span id="pawns">100</span></p>
+                    <p>Pawns: <span id="pawns" title="Population. Grows with immigration (helped by good feeding), shrinks with starvation, emigration (from poor feeding), or plague.">100</span></p>
                     <p>Land Price: <span id="landPrice">?</span> bushels/acre</p>
                 </div>
                 <div id="decisions">
-                    <!-- Decision year will be updated by JS -->
                     <h2>Make Your Decisions for Year <span id="decisionYear">0</span></h2>
                     <label>Buy Land: <input type="number" id="buyLand" min="0" value="0"></label>
                     <label>Sell Land: <input type="number" id="sellLand" min="0" value="0"></label>
-                    <label>Plant Crops (Acres): <input type="number" id="plant" min="0" value="0"></label>
-                    <label>Feed Pawns (Bushels/Pawn): <input type="number" id="feed" min="0" value="0"></label>
-                    <!-- Button text/functionality handled by JS -->
+                    <label>
+                        Acres to Plant (uses 1 bushel/acre): <input type="number" id="plant" min="0" value="0">
+                        <span id="maxPlantableInfo" class="info-text">(Max plantable: ? acres)</span>
+                        <span class="info-text">(Yield: 3-7 bushels/acre)</span>
+                    </label>
+                    <label title="Bushels of food to give each pawn this year. Affects starvation risk and immigration/emigration.">
+                        Feed Pawns (Bushels/Pawn): <input type="number" id="feed" min="0" value="0">
+                        <span class="info-text">(Need ~20 for basic survival)</span>
+                    </label>
                     <button id="nextTurn">Confirm Decisions & End Year</button>
                 </div>
                 <div id="outcome">
@@ -73,7 +76,36 @@
                 <label for="volumeSlider">Music Volume:</label>
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
             </div>
+            <!-- Added Help Button -->
+            <button id="helpButton" class="help-button">How to Play</button>
         </div>
+    </div>
+
+    <!-- Added Help Modal Structure -->
+    <div id="helpModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" id="closeHelp">×</span>
+        <h2>How to Play Steve Jobs - Hammurabi</h2>
+        <p><strong>Goal:</strong> Survive for <strong>10 years</strong> and end with the highest possible <strong>Pawn</strong> population.</p>
+        <p><strong>Game Over:</strong> The game ends if your <strong>Pawns</strong> reach 0, or after completing Year 10.</p>
+        <hr>
+        <h3>Core Resources:</h3>
+        <ul>
+            <li><strong>Pawns:</strong> Your population. They need <strong>Food</strong> to survive (~20 bushels/year each) and provide labor to <strong>Plant</strong> crops (1 pawn tends 10 acres). Population changes based on feeding, starvation, plague, and migration.</li>
+            <li><strong>Food:</strong> Used to buy <strong>Land</strong>, used as seed for <strong>Planting</strong> (1 bushel/acre), and crucial for <strong>Feeding</strong> Pawns. Gained from harvest and selling <strong>Land</strong>. Lost to rats and mismanagement!</li>
+            <li><strong>Land:</strong> Required for <strong>Planting</strong> crops. Can be bought or sold each year.</li>
+            <li><strong>Land Price:</strong> Fluctuates randomly each year, affecting buying/selling costs.</li>
+        </ul>
+        <hr>
+        <h3>Your Decisions Each Year:</h3>
+        <ul>
+            <li><strong>Buy/Sell Land:</strong> Adjust your land holdings based on price and strategy. You cannot buy and sell in the same year.</li>
+            <li><strong>Plant Crops:</strong> Decide how many acres to plant. Costs 1 bushel of <strong>Food</strong> per acre. Limited by available <strong>Land</strong>, <strong>Food</strong> for seed, and <strong>Pawns</strong> for labor (max 10 acres/pawn). Yields 3-7 bushels/acre typically.</li>
+            <li><strong>Feed Pawns:</strong> Decide how many bushels of <strong>Food</strong> to allocate per pawn. Feeding below 20 increases starvation risk over time. Good feeding can attract immigrants.</li>
+        </ul>
+        <hr>
+        <p><strong>Tips:</strong> Balance feeding your people, investing in land, and planting enough for future growth. Watch out for random events like plagues and rats! Keep a food surplus as a buffer.</p>
+      </div>
     </div>
 
     <audio id="backgroundMusic" loop>

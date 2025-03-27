@@ -16,9 +16,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const version = 'grok3_reasoning_half_hard'; // Updated version identifier
+const version = 'grok3_reasoning_half_hard_v2'; // Updated version identifier (reflects UI changes)
 const gameTitle = 'steve_jobs_hammurabi';
 const maxYears = 10; // Game runs for 10 years (0-9)
+const requiredFoodPerPawn = 20; // Defined constant for clarity
+const pawnPlantingRatio = 10; // 1 pawn tends 10 acres
+const minYield = 3; // Min harvest bushels/acre
+const maxYield = 7; // Max harvest bushels/acre
 const leaderboardCollection = `leaderboard_${gameTitle}_${version}`;
 const statsDoc = `stats_${gameTitle}_${version}`;
 const volumeKey = `${gameTitle}_volume_v2`;
@@ -43,6 +47,7 @@ const buyLandInput = document.getElementById('buyLand');
 const sellLandInput = document.getElementById('sellLand');
 const plantInput = document.getElementById('plant');
 const feedInput = document.getElementById('feed');
+const maxPlantableInfoEl = document.getElementById('maxPlantableInfo'); // Added
 const nextTurnBtn = document.getElementById('nextTurn');
 const messageEl = document.getElementById('message');
 const backgroundMusic = document.getElementById('backgroundMusic');
@@ -52,6 +57,9 @@ const globalRankingContentStart = document.getElementById('globalRankingContentS
 const globalRankingContentGame = document.getElementById('globalRankingContentGame');
 const globalGamesPlayedStart = document.getElementById("globalGamesPlayedStart");
 const globalGamesPlayedGame = document.getElementById("globalGamesPlayedGame");
+const helpButton = document.getElementById('helpButton'); // Added
+const helpModal = document.getElementById('helpModal'); // Added
+const closeHelpButton = document.getElementById('closeHelp'); // Added
 
 // Assumes blocklist.js is loaded in HTML, e.g., <script src="blocklist.js"></script>
 // declare var offensiveWords: string[]; // For TypeScript, if used
@@ -150,7 +158,7 @@ function resetGameUIAndState(isRestart = false) {
         nextTurnBtn.addEventListener('click', processTurn); // Add the correct turn processor
     }
 
-    updateUI();
+    updateUI(); // Update UI *after* state is reset
 }
 function updateUI() {
     if(!gameStarted) return; // Don't update if game hasn't started
@@ -161,6 +169,10 @@ function updateUI() {
     if(landEl) landEl.textContent=gameState.land;
     if(pawnsEl) pawnsEl.textContent=gameState.pawns;
     if(landPriceEl) landPriceEl.textContent=gameState.landPrice;
+
+    // Update max plantable info
+    const maxPlantable = gameState.pawns * pawnPlantingRatio;
+    if(maxPlantableInfoEl) maxPlantableInfoEl.textContent = `(Max plantable: ${maxPlantable} acres)`;
 }
 
 /***********************************************
@@ -184,7 +196,7 @@ function startGameNow() {
     currentSessionRoundNumber = 1;
     localSessionRankings = {}; // Clear local rankings for new player
 
-    resetGameUIAndState(false); // Initialize game state and UI
+    resetGameUIAndState(false); // Initialize game state and UI (includes updateUI call)
     updateRankingBoard(); // Show empty local ranking
     updateGlobalLeaderboard(); // Fetch global leaderboard
     displayGlobalGamesPlayed(); // Fetch global play count
@@ -216,7 +228,7 @@ function handleGameOver(messagePrefix = "GAME OVER") {
         } else if (finalYearReached >= maxYears) {
             endMessage += `You completed ${maxYears} years! Final Pawn Count: ${finalPawns}.`;
         } else {
-            // This case might happen if called unexpectedly, though less likely now
+            // This case might happen if called unexpectedly
             endMessage += `Game ended unexpectedly in year ${finalYearReached}. Final Pawn Count: ${finalPawns}.`;
         }
         messageEl.innerHTML = endMessage;
@@ -306,13 +318,14 @@ function processTurn() {
         const foodAfterLandDeals = gameState.food - (buyLand * gameState.landPrice) + (sellLand * gameState.landPrice);
         const landAfterLandDeals = gameState.land + buyLand - sellLand;
         const pawnsAvailable = gameState.pawns;
+        const maxPlantableByPawns = pawnsAvailable * pawnPlantingRatio; // Use constant
 
         if (plant > foodAfterLandDeals) {
-            failValidation(`Not enough food to plant ${plant} bushels. You will only have ${Math.floor(foodAfterLandDeals)} after land deals.`);
+            failValidation(`Not enough food to plant ${plant} acres (costs ${plant} bushels). You will only have ${Math.floor(foodAfterLandDeals)} after land deals.`);
         } else if (plant > landAfterLandDeals) {
             failValidation(`Not enough land to plant on. You will only have ${landAfterLandDeals} acres after land deals.`);
-        } else if (plant > pawnsAvailable * 10) { // 1 pawn tends 10 acres
-            failValidation(`Not enough pawns to tend ${plant} acres. You need ${Math.ceil(plant / 10)} pawns but only have ${pawnsAvailable}.`);
+        } else if (plant > maxPlantableByPawns) { // Use calculated max
+            failValidation(`Not enough pawns to tend ${plant} acres. You need ${Math.ceil(plant / pawnPlantingRatio)} pawns (1 per ${pawnPlantingRatio} acres) but only have ${pawnsAvailable}. Max plantable is ${maxPlantableByPawns}.`);
         } else {
             const foodAfterPlanting = foodAfterLandDeals - plant;
             const totalFoodNeededForFeeding = feed * pawnsAvailable; // Check total needed
@@ -342,10 +355,10 @@ function processTurn() {
         turnMessages.push(`Sold ${sellLand} acres.`);
     }
 
-    // 2. Planting
+    // 2. Planting (Cost is 1 bushel per acre)
     if (plant > 0) {
         gameState.food -= plant; // Use food for seeds
-        turnMessages.push(`Used ${plant} bushels for planting.`);
+        turnMessages.push(`Used ${plant} bushels for planting on ${plant} acres.`);
     }
 
     // 3. Feeding
@@ -356,8 +369,7 @@ function processTurn() {
     }
 
     // 4. Harvest
-    // *** DIFFICULTY ADJUSTMENT: Increased minimum yield ***
-    const yieldPerAcre = Math.floor(Math.random() * 5) + 3; // Yield: 3-7 bushels/acre
+    const yieldPerAcre = Math.floor(Math.random() * (maxYield - minYield + 1)) + minYield; // Use constants
     const foodHarvested = plant * yieldPerAcre;
     if (plant > 0) {
         gameState.food += foodHarvested;
@@ -368,7 +380,7 @@ function processTurn() {
 
     // --- Starvation Check ---
     let pawnsStarved = 0;
-    const requiredFoodPerPawn = 20;
+    // requiredFoodPerPawn defined globally
 
     // --- ADJUSTED PARAMETERS (Half Difficulty) ---
     const riskRecoveryRate = 0.35; // Increased recovery when fed well
@@ -390,14 +402,11 @@ function processTurn() {
         // Risk increases proportionally to the deficit
         const deficitFraction = foodDeficitPerPawn / requiredFoodPerPawn;
         gameState.starvationRisk += deficitFraction * riskIncreaseFactor;
-        // Optional: Add message only if risk increases significantly?
-        // turnMessages.push(`Starvation risk increased due to food deficit.`);
     } else {
         // Risk decreases if feeding is sufficient
         gameState.starvationRisk = Math.max(0, gameState.starvationRisk - riskRecoveryRate);
     }
-    // Log risk for balancing/debugging if needed
-    // console.log(`End of year ${gameState.year}, Starvation Risk: ${gameState.starvationRisk.toFixed(2)}`);
+    // console.log(`End of year ${gameState.year}, Starvation Risk: ${gameState.starvationRisk.toFixed(2)}`); // Keep for debugging if needed
 
     // Calculate deaths based on accumulated risk
     if (gameState.starvationRisk > deathThreshold && gameState.pawns > 0) {
@@ -422,11 +431,10 @@ function processTurn() {
 
     // --- Financial Collapse Check ---
     // Check for negative food state AFTER harvest/feeding but BEFORE population change/events
-    // This represents running out of reserves entirely
     if (gameState.food < 0 && gameState.pawns > 0) {
         const foodShortage = Math.abs(gameState.food);
         // How many pawns would this shortage kill? (Less harsh than direct starvation)
-        const additionalStarved = Math.min(gameState.pawns, Math.ceil(foodShortage / (requiredFoodPerPawn * 0.75))); // Die from absolute lack of resources
+        const additionalStarved = Math.min(gameState.pawns, Math.ceil(foodShortage / (requiredFoodPerPawn * 0.75))); // Use constant
 
         if (additionalStarved > 0) {
             gameState.pawns -= additionalStarved;
@@ -439,7 +447,7 @@ function processTurn() {
     if (gameState.pawns > 0) {
         // Immigration (more likely with better feeding)
         let pawnsGained = 0;
-        const immigrationChance = (feed / 30); // Higher feed attracts more (cap feed effect if needed)
+        const immigrationChance = (feed / (requiredFoodPerPawn * 1.5)); // Chance linked to feeding quality relative to requirement
         if (Math.random() < immigrationChance) {
             // Gain based on current population and land availability
             pawnsGained = Math.min(50, Math.floor(Math.random() * (gameState.pawns * 0.1 + gameState.land * 0.01) + 1));
@@ -450,7 +458,7 @@ function processTurn() {
         // Emigration (small chance if feeding is very poor)
         let pawnsLeft = 0;
         // Only trigger if significantly underfed AND random chance
-        if (feed < requiredFoodPerPawn / 2 && Math.random() < 0.05) {
+        if (feed < requiredFoodPerPawn / 2 && Math.random() < 0.05) { // Use constant
             pawnsLeft = Math.min(gameState.pawns, Math.floor(Math.random() * (gameState.pawns * 0.05) + 1));
             gameState.pawns -= pawnsLeft;
             if (pawnsLeft > 0) turnMessages.push(`${pawnsLeft} pawns left due to harsh conditions.`);
@@ -459,7 +467,6 @@ function processTurn() {
         // Random Events
         const eventChance = Math.random();
         if (eventChance < 0.15 && gameState.food > 10) { // Rats (15% chance)
-            // *** DIFFICULTY ADJUSTMENT: Reduced max rat impact ***
             const foodLostPercent = Math.random() * 0.15 + 0.05; // 5% to 20% loss
             const foodLost = Math.max(1, Math.floor(gameState.food * foodLostPercent));
             gameState.food -= foodLost;
@@ -470,7 +477,6 @@ function processTurn() {
             gameState.food += foodGained;
             turnMessages.push(`<span style="color: lightgreen;">Bonus harvest! Favorable weather brought an extra ${foodGained} bushels.</span>`);
         } else if (eventChance >= 0.30 && eventChance < 0.40 && gameState.pawns > 10) { // Plague (10% chance)
-            // *** DIFFICULTY ADJUSTMENT: Reduced max plague impact ***
             const plaguePercent = Math.random() * 0.15 + 0.05; // 5% to 20% loss
             let plagueVictims = Math.min(gameState.pawns, Math.max(1, Math.floor(gameState.pawns * plaguePercent)));
             gameState.pawns -= plagueVictims;
@@ -530,21 +536,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show start screen, hide game initially
     if(startScreen) startScreen.style.display="block";
     if(gameContainer) gameContainer.style.display="none";
-});
 
-// Listener for the main start game button
-if (startGameBtn) {
-    startGameBtn.addEventListener("click", startGameNow);
-}
-// Listener for Enter key in player name input
-if (playerNameInput) {
-    playerNameInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault(); // Prevent potential form submission
-            startGameNow();
-        }
-    });
-}
+    // Listener for the main start game button
+    if (startGameBtn) {
+        startGameBtn.addEventListener("click", startGameNow);
+    }
+    // Listener for Enter key in player name input
+    if (playerNameInput) {
+        playerNameInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault(); // Prevent potential form submission
+                startGameNow();
+            }
+        });
+    }
+
+    // Help Modal Listeners
+    if (helpButton && helpModal && closeHelpButton) {
+        helpButton.addEventListener('click', () => {
+            helpModal.style.display = 'block';
+        });
+
+        closeHelpButton.addEventListener('click', () => {
+            helpModal.style.display = 'none';
+        });
+
+        // Close modal if clicked outside the content area
+        window.addEventListener('click', (event) => {
+            if (event.target == helpModal) {
+                helpModal.style.display = 'none';
+            }
+        });
+    } else {
+        console.error("Help modal elements not found!");
+    }
+
+    // The initial listener for 'Next Turn' is added in resetGameUIAndState
+    // The listener for 'Start New Game' is added in handleGameOver
+});
 
 // The initial listener for 'Next Turn' is added in resetGameUIAndState
 // The listener for 'Start New Game' is added in handleGameOver
+// Redundant comments removed from end of file.
