@@ -1,3 +1,76 @@
+/* === Add these styles to the END of your existing game.css === */
+
+/* --- Volume Control --- */
+.volume-control {
+    background: #222; /* Match leaderboard background */
+    padding: 10px 15px; /* Padding */
+    width: 260px; /* Match leaderboard width */
+    border: 2px solid #fff; /* Match leaderboard border */
+    border-radius: 5px; /* Rounded corners */
+    margin-top: 20px; /* Space above the control */
+    text-align: center; /* Center label and slider */
+    box-sizing: border-box; /* Include padding/border in width */
+}
+
+.volume-control label {
+    display: block; /* Label on its own line */
+    margin-bottom: 8px; /* Space below label */
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.volume-control input[type="range"] {
+    width: 80%; /* Slider width */
+    cursor: pointer;
+    /* Basic appearance reset */
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px; /* Track height */
+    background: #555; /* Track background */
+    border-radius: 5px; /* Rounded track */
+    outline: none; /* Remove outline */
+}
+
+/* Style the slider thumb (the draggable handle) for Webkit browsers */
+.volume-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px; /* Thumb width */
+    height: 18px; /* Thumb height */
+    background: #4CAF50; /* Thumb color (match button) */
+    border-radius: 50%; /* Circular thumb */
+    cursor: pointer;
+}
+
+/* Style the slider thumb for Firefox */
+.volume-control input[type="range"]::-moz-range-thumb {
+    width: 18px; /* Thumb width */
+    height: 18px; /* Thumb height */
+    background: #4CAF50; /* Thumb color */
+    border-radius: 50%; /* Circular thumb */
+    cursor: pointer;
+    border: none; /* Remove default border */
+}
+
+/* --- Responsive adjustments for volume control --- */
+@media (max-width: 768px) {
+    /* In the existing media query, adjust boardsContainer if needed */
+    #boardsContainer {
+        /* Ensure it provides enough width */
+        /* max-width: 300px; /* Keep or adjust as needed */
+        /* width: 90%; /* Keep or adjust */
+    }
+
+    .volume-control {
+        width: 100%; /* Make volume take full width within its container */
+        margin-top: 15px;
+    }
+
+     .volume-control input[type="range"] {
+        width: 70%; /* Adjust slider width for mobile if needed */
+    }
+}
+
 /* Base styles from Cosmic Dodge */
 body {
     background: #1a1a1a;
@@ -92,6 +165,7 @@ body {
     margin: 0 auto 20px; /* Centered on start screen */
     color: #fff; /* Ensure text is white */
     text-align: left; /* Align list items left */
+    box-sizing: border-box; /* Include padding/border in width */
 }
 
 .leaderboard-box h2 {
@@ -134,7 +208,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 0 284px; /* Fixed width for leaderboard + padding/border */
+    flex: 0 0 284px; /* Fixed width for leaderboard + padding/border + volume */
 }
 
 #globalLeaderboardGame {
@@ -295,4 +369,6 @@ input::-webkit-inner-spin-button {
      #playerInfo input {
         margin: 5px 0;
     }
+
+    /* Responsive adjustments for volume control (already defined above) */
 }

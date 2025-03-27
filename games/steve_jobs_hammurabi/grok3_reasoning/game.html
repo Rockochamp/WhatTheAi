@@ -46,7 +46,7 @@
         <!-- Original Game Interface on the left -->
         <div id="gameArea">
             <div id="game"> <!-- This is the original game div -->
-                <h1>Pawn Master</h1> <!-- Title might be redundant with banner, consider removing -->
+                <h1>Pawn Master</h1>
                 <div id="resources">
                     <p>Year: <span id="year">1</span></p>
                     <p>Food: <span id="food">1000</span> bushels</p>
@@ -72,15 +72,26 @@
             </p>
         </div>
 
-        <!-- Right side: Global Leaderboard -->
+        <!-- Right side: Global Leaderboard + Volume Control -->
         <div id="boardsContainer">
             <div id="globalLeaderboardGame" class="leaderboard-box">
                 <h2>Global Leaderboard</h2>
                 <p id="globalGamesPlayedGame" class="totalGamesText">(Total games played worldwide: Loading...)</p>
                 <div id="globalRankingContentGame">Loading...</div>
             </div>
+            <!-- Volume Control Added Here -->
+            <div class="volume-control">
+                <label for="volumeSlider">Music Volume:</label>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+            </div>
         </div>
     </div>
+
+    <!-- Audio Element for Background Music -->
+    <audio id="backgroundMusic" loop>
+        <source src="/music/Elysium.m4a" type="audio/mp4">
+        Your browser does not support the audio element.
+    </audio>
 
     <script src="game.js"></script> <!-- Link to the new JS -->
 
