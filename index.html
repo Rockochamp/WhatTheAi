@@ -113,7 +113,7 @@
             {
                 id: 1,
                 title: "Cosmic Dodge",
-                thumbnail: "/images/CosmicDodge.png", // Stays .png as per original code
+                thumbnail: "/images/CosmicDodge.png",
                 versions: [
                     { name: "ChatGPT o3-mini-high", url: "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html" }
                 ]
@@ -121,9 +121,10 @@
             {
                id: 2,
                title: "Steve Jobs - Hammurabi",
-               thumbnail: "/images/Hammurabi.jpeg", // CORRECTED to .jpeg
+               thumbnail: "/images/Hammurabi.jpeg",
                versions: [
-                   { name: "Grok 3 w/ Reasoning (Uncapped)", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" }
+                   // CORRECTED Version Name
+                   { name: "Grok 3 Reasoning", url: "/games/steve_jobs_hammurabi/grok3_reasoning/game.html" }
                ]
             }
             // Add more games here following the same structure
@@ -144,6 +145,7 @@
                 item.className = "game-item";
 
                 const imgLink = document.createElement("a");
+                // Set initial link to the first version
                 imgLink.href = game.versions[0].url;
                 imgLink.id = `game-link-${game.id}`;
 

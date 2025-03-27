@@ -6,7 +6,7 @@
 // NOTE: This is NOT foolproof and can be bypassed.
 // Consider more robust server-side validation for critical applications.
 // Add/Remove words as needed. Be mindful of potential false positives with common substrings.
-// Using word boundary checks in the validation function helps mitigate some false positives.
+// Using word boundary checks (\b) in the validation function helps mitigate some false positives.
 
 const offensiveWords = [
     // Common English Profanity & Slurs (Examples - expand significantly)
@@ -40,6 +40,6 @@ const offensiveWords = [
     // Consider terms related to violence, hate speech categories (race, religion, orientation, etc.)
     // This list is illustrative and needs significant expansion for thoroughness.
   ];
-  
+
   // Make it available globally (or could be exported as a module if using type="module")
   // Ensure this script is loaded BEFORE any game script that uses it.
