@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Cosmic Dodge - What the Ai</title>
-    <!-- Added Favicon Link -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <style>
         /* Base Styles */
@@ -16,14 +15,14 @@
 
         /* Start Page */
         #playerInfo { margin-bottom: 20px; }
-        #playerInfo label { color: #fff; } /* Ensure label is visible */
+        #playerInfo label { color: #fff; }
         #playerInfo input { padding: 5px; font-size: 1em; margin: 0 5px; }
-        #playerInfo button { padding: 8px 15px; font-size: 1em; cursor: pointer; } /* Made button slightly larger */
+        #playerInfo button { padding: 8px 15px; font-size: 1em; cursor: pointer; }
         #globalLeaderboardStart { background: #222; padding: 10px 15px; width: 100%; max-width: 280px; border: 2px solid #fff; margin: 0 auto 20px; box-sizing: border-box; text-align: left; border-radius: 5px;}
         #globalLeaderboardStart h2 { margin-top: 0; margin-bottom: 10px; text-align: center; font-size: 1.1em; }
         #globalLeaderboardStart ol, #globalLeaderboardGame ol, #rankingBoard ol { padding-left: 20px; margin: 0; }
         #globalLeaderboardStart li, #globalLeaderboardGame li, #rankingBoard li { margin-bottom: 5px; font-size: 0.9em; }
-        #globalLeaderboardStart p, #globalLeaderboardGame p, #rankingBoard p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; } /* Style for 'No scores' etc */
+        #globalLeaderboardStart p, #globalLeaderboardGame p, #rankingBoard p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
         .totalGamesText { font-size: 0.8em; margin: 0 0 10px 0; padding: 0; color: #ccc; text-align: center; }
 
         /* Game Container */
@@ -36,23 +35,22 @@
         #mobileControls button { background: #444; color: #fff; border: none; font-size: 2em; margin: 0 40px; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
 
         /* Right side boards */
-        #boardsContainer { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 0 0 320px; padding-top: 0; } /* Adjusted width slightly */
+        #boardsContainer { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 0 0 320px; padding-top: 0; }
         #rankingBoard, #globalLeaderboardGame { background: #222; padding: 10px 15px; width: 100%; max-width: 280px; border: 2px solid #fff; box-sizing: border-box; text-align: left; border-radius: 5px;}
         #rankingBoard h2, #globalLeaderboardGame h2 { margin-top: 0; margin-bottom: 10px; text-align: center; font-size: 1.1em; }
 
-        /* --- Volume Control --- */
+        /* Volume Control */
         .volume-control { background: #222; padding: 15px; width: 100%; max-width: 280px; border: 2px solid #fff; border-radius: 5px; text-align: center; box-sizing: border-box; }
         .volume-control label { display: block; margin-bottom: 10px; font-size: 0.9em; color: #ccc; }
         .volume-control input[type="range"] { width: 85%; cursor: pointer; -webkit-appearance: none; appearance: none; height: 8px; background: #555; border-radius: 5px; outline: none; }
-        .volume-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #00ffcc; /* Teal to match ship */ border-radius: 50%; cursor: pointer; }
-        .volume-control input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #00ffcc; /* Teal to match ship */ border-radius: 50%; cursor: pointer; border: none; }
+        .volume-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #00ffcc; border-radius: 50%; cursor: pointer; }
+        .volume-control input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #00ffcc; border-radius: 50%; cursor: pointer; border: none; }
 
         /* Responsive */
         @media (max-width: 768px) {
              #gameContainer { flex-direction: column; align-items: center; gap: 15px; }
              #gameArea { flex-basis: auto; width: 100%; max-width: 550px; margin-right: 0; }
              #boardsContainer { flex-basis: auto; width: 90%; max-width: 350px; padding-top: 0; }
-             /* board/volume widths are 100% */
              .desktop-instructions { display: none; } .mobile-instructions { display: block; }
              #mobileControls { display: flex; }
              #playerInfo { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -65,14 +63,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <!-- Breadcrumb navigation -->
     <div class="breadcrumb"> <a href="/index.html">Back to Games</a> </div>
-    <!-- Version indicator -->
     <div class="version-indicator" id="versionIndicator"> ChatGPT o3-mini-high </div>
-
     <h1 id="titleBanner">Cosmic Dodge</h1>
 
-    <!-- Start Page -->
     <div id="playerInfo">
         <label for="playerName">Player Name (max 10 chars): </label>
         <input type="text" id="playerName" maxlength="10" placeholder="Enter your name" />
@@ -84,16 +78,13 @@
         <div id="globalRankingContentStart">Loading...</div>
     </div>
 
-    <!-- Game Container -->
     <div id="gameContainer">
-        <!-- Canvas on the left -->
         <div id="gameArea">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <p class="desktop-instructions"> Use ← / → or A / D to dodge!<br> Press space to restart. </p>
             <p class="mobile-instructions"> Use the arrows below to dodge!<br> Tap screen to restart. </p>
             <div id="mobileControls"> <button id="mobileLeft">←</button> <button id="mobileRight">→</button> </div>
         </div>
-        <!-- Right side: Boards -->
         <div id="boardsContainer">
             <div id="rankingBoard">
                 <h2>Local Ranking</h2>
@@ -104,25 +95,21 @@
                 <p id="globalGamesPlayedGame" class="totalGamesText">(Total games played worldwide: Loading...)</p>
                 <div id="globalRankingContentGame">Loading...</div>
             </div>
-            <div class="volume-control"> <!-- Volume Slider -->
+            <div class="volume-control">
                 <label for="volumeSlider">Music Volume:</label>
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
             </div>
         </div>
     </div>
 
-    <!-- Audio Element -->
     <audio id="backgroundMusic" loop> <source src="/music/PixelRush.m4a" type="audio/mp4"> Your browser does not support the audio element. </audio>
 
-    <!-- Load Shared Blocklist FIRST -->
     <script src="/js/common/blocklist.js"></script>
 
-    <!-- Load Game Logic Second -->
     <script>
         /***********************************************
          *          Firebase & Global Vars             *
          ***********************************************/
-
         // IMPORTANT: REPLACE THIS WITH YOUR *PRODUCTION* FIREBASE CONFIG
         const firebaseConfig = {
              apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE", // REPLACE
@@ -137,44 +124,35 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- Game & Version Info ---
         const version = 'chatgpt_o3_mini_high';
         const gameTitle = 'cosmic_dodge';
-
-        // --- Firebase Collection/Doc Names ---
         const leaderboardCollection = `leaderboard_${gameTitle}_${version}`;
         const statsDoc = `stats_${gameTitle}_${version}`;
-
-        // --- Local/Session Storage Keys ---
         const volumeKey = `${gameTitle}_volume`;
-        const sessionRankingsKey = `${gameTitle}_rankings_${version}`; // Added version isolation
-        const sessionRoundNumberKey = `${gameTitle}_roundNumber_${version}`; // Added version isolation
-        const sessionHighLevelKey = `${gameTitle}_highLevel_${version}`; // Renamed and versioned
 
-        // --- Global State ---
+        // --- Global State (Reset on Load) ---
         let playerName = "";
         let gameStarted = false;
         let gameOver = false;
-        let roundRecorded = false; // Tracks if current round score is saved
-        let sessionHighLevel = parseInt(sessionStorage.getItem(sessionHighLevelKey) || '0'); // Local session high level
-        let roundNumber = parseInt(sessionStorage.getItem(sessionRoundNumberKey) || '0'); // Session round counter
-        // No global 'rankings' array needed, use sessionStorage object directly
+        let roundRecorded = false;
+        let currentSessionRoundNumber = 0; // Tracks rounds *within this page load*
+        let localSessionRankings = {}; // Stores { level: { round: X, level: Y } } *within this page load*
 
         // --- Canvas/Game Specific State ---
         let frameCount = 0, titleOffsetX = 0, titleOffsetY = 0, gameOverOffsetX = 0, gameOverOffsetY = 0;
         let lastTime = null;
         let ship = { x: 0, y: 0, width: 40, height: 20, velocity: 0, acceleration: 0.5, maxVelocity: 15, friction: 0.9 };
         let asteroids = [];
-        let score = 0; // Score still used internally to calculate level
-        let level = 1; // Track level explicitly
-        let leftPressed = false, rightPressed = false, touchRestartPending = false; // Input states
+        let score = 0;
+        let level = 1;
+        let leftPressed = false, rightPressed = false, touchRestartPending = false;
 
         // --- DOM Elements ---
         const backgroundMusic = document.getElementById('backgroundMusic');
         const volumeSlider = document.getElementById('volumeSlider');
         const playerNameInput = document.getElementById('playerName');
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas?.getContext('2d'); // Add check for canvas existence
+        const ctx = canvas?.getContext('2d');
         const rankingContentEl = document.getElementById('rankingContent');
         const globalRankingContentStart = document.getElementById('globalRankingContentStart');
         const globalRankingContentGame = document.getElementById('globalRankingContentGame');
@@ -189,16 +167,12 @@
          ***********************************************/
          function setupVolumeControl() {
              if (!backgroundMusic || !volumeSlider) return;
-             const savedVolume = localStorage.getItem(volumeKey);
-             let currentVolume = 0.5; // Default volume
-             if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) {
-                 currentVolume = parseFloat(savedVolume);
-             }
-             volumeSlider.value = currentVolume;
-             backgroundMusic.volume = currentVolume;
+             const savedVolume = localStorage.getItem(volumeKey); // Volume uses localStorage to persist
+             let currentVolume = 0.5;
+             if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) { currentVolume = parseFloat(savedVolume); }
+             volumeSlider.value = currentVolume; backgroundMusic.volume = currentVolume;
              volumeSlider.addEventListener('input', () => {
-                 const newVolume = parseFloat(volumeSlider.value);
-                 backgroundMusic.volume = newVolume;
+                 const newVolume = parseFloat(volumeSlider.value); backgroundMusic.volume = newVolume;
                  try { localStorage.setItem(volumeKey, newVolume.toString()); } catch (e) { console.error("Failed to save volume:", e); }
              });
          }
@@ -207,43 +181,29 @@
          *       Firestore Leaderboard & Stats         *
          ***********************************************/
         function updateGlobalLeaderboard() {
-            // Fetch more docs, order by level DESC, then timestamp DESC to get latest per level
             db.collection(leaderboardCollection)
                 .orderBy("level", "desc")
-                .orderBy("timestamp", "desc") // Secondary sort: newest first within the same level
-                .limit(50) // Fetch more candidates to find unique levels
+                .orderBy("timestamp", "desc")
+                .limit(50)
                 .get()
                 .then((querySnapshot) => {
-                    let html = '<ol>';
-                    const uniqueEntries = [];
-                    const levelsSeen = new Set();
-                    const maxDisplay = 10; // How many unique entries to show
-
+                    let html = '<ol>'; const uniqueEntries = []; const levelsSeen = new Set(); const maxDisplay = 10;
                     if (!querySnapshot.empty) {
                         querySnapshot.forEach((doc) => {
                             const data = doc.data();
-                            // If we haven't seen this level yet and haven't reached max display count
                             if (!levelsSeen.has(data.level) && uniqueEntries.length < maxDisplay) {
                                 uniqueEntries.push(`<li>${data.playerName || 'Anon'} reached level ${data.level}</li>`);
                                 levelsSeen.add(data.level);
                             }
                         });
                     }
-
-                    if (uniqueEntries.length === 0) {
-                        html = '<p>No scores yet. Be the first!</p>';
-                    } else {
-                         html += uniqueEntries.join(''); // Add the unique entries
-                         html += '</ol>';
-                    }
-
+                    if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; }
+                    else { html += uniqueEntries.join(''); html += '</ol>'; }
                     if (globalRankingContentStart) globalRankingContentStart.innerHTML = html;
                     if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
                 }).catch((error) => {
-                    console.error("Error getting global leaderboard:", error);
-                    const errorMsg = "<p>Error loading leaderboard.</p>";
-                    if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg;
-                    if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
+                    console.error("Error getting global leaderboard:", error); const errorMsg = "<p>Error loading leaderboard.</p>";
+                    if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg; if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
                 });
         }
 
@@ -251,54 +211,40 @@
             if (!playerName) { console.warn("Player name missing, cannot add global record."); return; }
             const levelToSave = Math.max(1, finalLevel);
             db.collection(leaderboardCollection).add({
-                playerName: playerName || "Anon",
-                level: levelToSave,
-                version: version,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Essential for sorting!
-            }).then(() => {
-                console.log("Global record added for level:", levelToSave);
-                updateGlobalLeaderboard(); // Refresh leaderboard
-            })
+                playerName: playerName || "Anon", level: levelToSave, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { console.log("Global record added for level:", levelToSave); updateGlobalLeaderboard(); })
               .catch((error) => console.error("Error adding global record:", error));
         }
 
+        // MOVED: This is now called only on game over
         function incrementGlobalGamesPlayed() {
             db.collection("globalStats").doc(statsDoc).set({
-                totalGamesPlayed: firebase.firestore.FieldValue.increment(1),
-                gameTitle: gameTitle, version: version
+                totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version
             }, { merge: true }).then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error);
         }
         function displayGlobalGamesPlayed() {
             db.collection("globalStats").doc(statsDoc).get().then((doc) => {
-                const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0;
-                const text = `(Total games played worldwide: ${total})`;
-                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text;
-                if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text;
+                const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0; const text = `(Total games played worldwide: ${total})`;
+                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text;
             }).catch((error) => {
-                console.error("Error reading total games:", error);
-                const errorText = "(Total games played worldwide: Error)";
-                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText;
-                if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText;
+                console.error("Error reading total games:", error); const errorText = "(Total games played worldwide: Error)";
+                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText;
             });
         }
 
         /***********************************************
-         *            Local Ranking (Session)          *
+         *      Local Ranking (Page Load Only)         *
          ***********************************************/
         function updateRankingBoard() {
             if (!rankingContentEl) return;
-            const rankingsObj = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '{}');
-            // Convert object values to an array
-            const rankingsList = Object.values(rankingsObj);
-            // Sort the array by level descending
+            // Read directly from the global variable
+            const rankingsList = Object.values(localSessionRankings);
             const sortedRankings = rankingsList.sort((a, b) => b.level - a.level);
 
             let html = '';
-            if (sortedRankings.length === 0) {
-                html = '<p>No rounds completed yet this session.</p>';
-            } else {
+            if (sortedRankings.length === 0) { html = '<p>No rounds completed yet.</p>'; } // Changed message slightly
+            else {
                 html = '<ol>';
-                // Display top 10 unique levels achieved this session
                 sortedRankings.slice(0, 10).forEach((entry) => {
                     html += `<li>Round ${entry.round}: Level ${entry.level}</li>`;
                 });
@@ -307,41 +253,25 @@
             rankingContentEl.innerHTML = html;
         }
 
-        function saveLocalRecord(currentRound, finalLevel) {
-             // Get current rankings object or create empty if none exists
-             let rankingsObj = JSON.parse(sessionStorage.getItem(sessionRankingsKey) || '{}');
+        function saveLocalRecord(roundNum, finalLevel) {
+             // Save directly to the global variable
              const levelToSave = Math.max(1, finalLevel);
-
-             // Store or update the entry for this level, keyed by level number
-             // This automatically keeps only the latest round for each level
-             rankingsObj[levelToSave] = { round: currentRound, level: levelToSave };
-
-             try {
-                sessionStorage.setItem(sessionRankingsKey, JSON.stringify(rankingsObj));
-                updateRankingBoard(); // Update display after saving
-             } catch(e) {
-                 console.error("Failed to save local ranking:", e);
-             }
+             localSessionRankings[levelToSave] = { round: roundNum, level: levelToSave };
+             updateRankingBoard(); // Update display
         }
 
          /***********************************************
          *          Name Validation (Improved)         *
          ***********************************************/
          function isNameOffensive(name) {
-             if (typeof offensiveWords === 'undefined') {
-                 console.warn("Offensive words list not loaded!");
-                 return false;
-             }
-             if (!name) return false;
-             const lowerCaseName = name.toLowerCase();
+             // Uses blocklist.js (loaded before this script)
+             if (typeof offensiveWords === 'undefined') { console.warn("Offensive words list not loaded!"); return false; }
+             if (!name) return false; const lowerCaseName = name.toLowerCase();
              for (const word of offensiveWords) {
+                 // Use word boundaries for blocklist check
                  const regex = new RegExp(`\\b${word}\\b`, 'i');
-                 if (regex.test(lowerCaseName)) {
-                     console.log(`Offensive word found: ${word} in ${name}`);
-                     return true;
-                 }
-             }
-             return false;
+                 if (regex.test(lowerCaseName)) { console.log(`Offensive word found: ${word} in ${name}`); return true; }
+             } return false;
          }
 
         /***********************************************
@@ -351,33 +281,24 @@
             const nameInput = playerNameInput.value.trim();
             if (nameInput === "") { alert("Please enter a player name."); return; }
             if (isNameOffensive(nameInput)) { alert("Please choose a more appropriate player name."); return; }
-
             playerName = nameInput.substring(0, 10);
 
             document.getElementById("playerInfo").style.display = "none";
             document.getElementById("globalLeaderboardStart").style.display = "none";
             document.getElementById("gameContainer").style.display = "flex";
 
-            gameStarted = true;
-            gameOver = false;
-            roundRecorded = false;
+            gameStarted = true; gameOver = false; roundRecorded = false;
 
             setupVolumeControl();
-            if (backgroundMusic) {
-                 backgroundMusic.play().catch(error => console.log("Music autoplay prevented:", error));
-            }
+            if (backgroundMusic) { backgroundMusic.play().catch(error => console.log("Music autoplay prevented:", error)); }
 
-            if (roundNumber === 0) {
-                roundNumber = 1;
-                incrementGlobalGamesPlayed();
-            } else {
-                 roundNumber++;
-            }
-            sessionStorage.setItem(sessionRoundNumberKey, roundNumber.toString());
+            // Set round number for this page load session
+            currentSessionRoundNumber = 1;
 
+            // Update displays (global count NOT incremented here anymore)
             updateGlobalLeaderboard();
             displayGlobalGamesPlayed();
-            updateRankingBoard();
+            updateRankingBoard(); // Show empty board initially
 
             resetGameVisuals();
             lastTime = null;
@@ -387,13 +308,8 @@
 
         function resetGameVisuals() {
              if (!canvas) return;
-             ship.x = canvas.width / 2 - ship.width / 2;
-             ship.y = canvas.height - 50;
-             ship.velocity = 0;
-             asteroids = [];
-             score = 0;
-             level = 1; // Reset level display
-             frameCount = 0;
+             ship.x = canvas.width / 2 - ship.width / 2; ship.y = canvas.height - 50; ship.velocity = 0;
+             asteroids = []; score = 0; level = 1; frameCount = 0;
              titleOffsetX = 0; titleOffsetY = 0; gameOverOffsetX = 0; gameOverOffsetY = 0;
              if (titleElement) { titleElement.style.color = ''; titleElement.style.transform = ''; }
              leftPressed = false; rightPressed = false;
@@ -402,13 +318,11 @@
         function restartGame() {
              if (!gameStarted || !canvas) return;
 
-             gameOver = false;
-             roundRecorded = false;
+             gameOver = false; roundRecorded = false;
              resetGameVisuals();
 
-             roundNumber++;
-             sessionStorage.setItem(sessionRoundNumberKey, roundNumber.toString());
-             incrementGlobalGamesPlayed(); // Count each restart
+             // Increment round number for this page load session
+             currentSessionRoundNumber++;
 
              if (backgroundMusic && backgroundMusic.paused) {
                  backgroundMusic.play().catch(error => console.log("Restart music play failed:", error));
@@ -416,12 +330,13 @@
 
              lastTime = null;
              requestAnimationFrame(gameLoop);
+             // Global count NOT incremented on restart anymore
         }
 
         /***********************************************
          *        Canvas / Game Mechanics              *
          ***********************************************/
-         // --- Input Handling Setup (No changes needed here) ---
+         // Input Handling Setup (No changes)
          document.addEventListener('keydown', (e) => { if (!gameStarted) return; if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = true; if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = true; if (e.key === ' ' && gameOver) { e.preventDefault(); restartGame(); } });
          document.addEventListener('keyup', (e) => { if (!gameStarted) return; if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftPressed = false; if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightPressed = false; });
          function handleTouchStart(e) { if (!gameStarted) return; e.preventDefault(); if (gameOver) touchRestartPending = true; else updateTouchControls(e.touches[0]); }
@@ -432,11 +347,11 @@
          function setupButtonTouch(button, action) { if (!button) return; const setPressed = (p) => { if(gameStarted && !gameOver) action(p); }; button.addEventListener('touchstart', (e) => { e.preventDefault(); setPressed(true); }, { passive: false }); button.addEventListener('touchend', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('touchcancel', (e) => { e.preventDefault(); setPressed(false); }, { passive: false }); button.addEventListener('mousedown', () => setPressed(true)); button.addEventListener('mouseup', () => setPressed(false)); button.addEventListener('mouseleave', () => setPressed(false)); }
          setupButtonTouch(mobileLeft, (p) => leftPressed = p); setupButtonTouch(mobileRight, (p) => rightPressed = p);
 
-        // --- Spawn & Collision (No changes needed here) ---
+        // Spawn & Collision (No changes)
         function spawnAsteroid(currentLevel) { const asteroidColor = '#ff3300'; const speedModifier = 0.5; if (!canvas) return; asteroids.push({ x: Math.random()*(canvas.width-30)+15, y: -30, radius: 10+Math.random()*15, speed: 2+(currentLevel-1)*speedModifier, color: asteroidColor });}
         function checkCollision(rect, circle) { const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width)); const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height)); const distanceX = circle.x - closestX; const distanceY = circle.y - closestY; const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY); return distanceSquared < (circle.radius * circle.radius); }
 
-        // --- Effects & Drawing (No changes needed here) ---
+        // Effects & Drawing (No changes)
         function updateTitleFlicker(currentLevel) { let intensity = 0; if (currentLevel >= 10) intensity = Math.min(1, (currentLevel - 10) / 30); if (!titleElement) return; if (intensity > 0 && frameCount % 5 === 0) { titleOffsetX = (Math.random() - 0.5) * 10 * intensity; titleOffsetY = (Math.random() - 0.5) * 10 * intensity; } const flickerColor = (intensity > 0 && frameCount % 20 < 10) ? '#ff0066' : '#ff6699'; titleElement.style.color = intensity <= 0 ? '' : flickerColor; titleElement.style.transform = intensity <= 0 ? '' : `translate(${titleOffsetX}px, ${titleOffsetY}px)`; }
         function getShipColor() { return '#00ffcc'; }
 
@@ -445,67 +360,33 @@
          ***********************************************/
         function gameLoop(timestamp) {
             if (!gameStarted || !ctx || !canvas) { return; }
-
             if (!lastTime) lastTime = timestamp;
-            let dt = Math.min(3, (timestamp - lastTime) / (1000 / 60));
-            lastTime = timestamp;
-            frameCount++;
-
-            level = Math.floor(score / 10) + 1;
-            updateTitleFlicker(level);
+            let dt = Math.min(3, (timestamp - lastTime) / (1000 / 60)); lastTime = timestamp; frameCount++;
+            level = Math.floor(score / 10) + 1; updateTitleFlicker(level);
 
             if (gameOver) {
                 if (!roundRecorded) {
                     const finalLevel = Math.max(1, level);
-                    // Session High Level
-                    if (finalLevel > sessionHighLevel) {
-                        sessionHighLevel = finalLevel;
-                        sessionStorage.setItem(sessionHighLevelKey, sessionHighLevel.toString());
-                    }
-                    // Session Ranking (Unique Level)
-                    saveLocalRecord(roundNumber, finalLevel);
+                    // Local Ranking (Page Load Scope)
+                    saveLocalRecord(currentSessionRoundNumber, finalLevel);
                     // Global Ranking
                     addGlobalRecord(finalLevel);
-                    roundRecorded = true;
+                    // Increment global games played count ONCE on game over
+                    incrementGlobalGamesPlayed();
+                    roundRecorded = true; // Mark that this game over has been processed
                 }
-                // Shake Effect & Draw Screen (No changes needed)
+                // Draw Screen (No changes)
                 if (frameCount % 5 === 0) { gameOverOffsetX = (Math.random()-0.5)*10; gameOverOffsetY = (Math.random()-0.5)*10; }
-                ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.textAlign = 'center';
-                const gameOverColor = frameCount % 20 < 10 ? '#ff0066' : '#ff6699'; ctx.fillStyle = gameOverColor; ctx.font = '40px Arial';
-                ctx.fillText('GAME OVER', canvas.width/2 + gameOverOffsetX, canvas.height/2 - 40 + gameOverOffsetY);
-                ctx.fillStyle = '#fff'; ctx.font = '20px Arial';
-                ctx.fillText(`You reached level ${Math.max(1, level)}`, canvas.width/2, canvas.height/2 + 10);
-                ctx.font = '16px Arial';
-                const restartText = window.matchMedia("(hover: none)").matches ? 'Tap screen to restart' : 'Press SPACE to restart';
-                ctx.fillText(restartText, canvas.width/2, canvas.height/2 + 50);
+                ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.textAlign = 'center'; const gameOverColor = frameCount % 20 < 10 ? '#ff0066' : '#ff6699'; ctx.fillStyle = gameOverColor; ctx.font = '40px Arial'; ctx.fillText('GAME OVER', canvas.width/2 + gameOverOffsetX, canvas.height/2 - 40 + gameOverOffsetY); ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.fillText(`You reached level ${Math.max(1, level)}`, canvas.width/2, canvas.height/2 + 10); ctx.font = '16px Arial'; const restartText = window.matchMedia("(hover: none)").matches ? 'Tap screen to restart' : 'Press SPACE to restart'; ctx.fillText(restartText, canvas.width/2, canvas.height/2 + 50);
             }
-            else { // Gameplay State
+            else { // Gameplay State (No changes)
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // Ship Movement (No changes needed)
-                if (leftPressed) ship.velocity = Math.max(ship.velocity - ship.acceleration * dt, -ship.maxVelocity);
-                else if (rightPressed) ship.velocity = Math.min(ship.velocity + ship.acceleration * dt, ship.maxVelocity);
-                else ship.velocity *= Math.pow(ship.friction, dt);
-                if (Math.abs(ship.velocity) < 0.1) ship.velocity = 0;
-                ship.x += ship.velocity * dt;
-                ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
-
-                // Draw Ship (No changes needed)
+                if (leftPressed) ship.velocity = Math.max(ship.velocity - ship.acceleration * dt, -ship.maxVelocity); else if (rightPressed) ship.velocity = Math.min(ship.velocity + ship.acceleration * dt, ship.maxVelocity); else ship.velocity *= Math.pow(ship.friction, dt); if (Math.abs(ship.velocity) < 0.1) ship.velocity = 0; ship.x += ship.velocity * dt; ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
                 ctx.fillStyle = getShipColor(); ctx.beginPath(); ctx.moveTo(ship.x + ship.width/2, ship.y - ship.height); ctx.lineTo(ship.x, ship.y); ctx.lineTo(ship.x + ship.width, ship.y); ctx.closePath(); ctx.fill();
-
-                // Asteroids (No changes needed)
-                const spawnRate = 0.02 + (level - 1) * 0.005; if (Math.random() < spawnRate * dt) spawnAsteroid(level);
-                const shipCollisionRect = { x: ship.x, y: ship.y - ship.height, width: ship.width, height: ship.height };
-                for (let i = asteroids.length - 1; i >= 0; i--) {
-                    let a = asteroids[i]; a.y += a.speed * dt;
-                    ctx.fillStyle = a.color || '#ff3300'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2); ctx.fill();
-                    if (checkCollision(shipCollisionRect, a)) { gameOver = true; break; }
-                    if (a.y - a.radius > canvas.height) { asteroids.splice(i, 1); score++; }
-                }
-                // Draw UI (Only Level - No changes needed)
-                ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.textAlign = 'left';
-                ctx.fillText(`Level: ${level}`, 10, 30);
+                const spawnRate = 0.02 + (level - 1) * 0.005; if (Math.random() < spawnRate * dt) spawnAsteroid(level); const shipCollisionRect = { x: ship.x, y: ship.y - ship.height, width: ship.width, height: ship.height };
+                for (let i = asteroids.length - 1; i >= 0; i--) { let a = asteroids[i]; a.y += a.speed * dt; ctx.fillStyle = a.color || '#ff3300'; ctx.beginPath(); ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2); ctx.fill(); if (checkCollision(shipCollisionRect, a)) { gameOver = true; break; } if (a.y - a.radius > canvas.height) { asteroids.splice(i, 1); score++; } }
+                ctx.fillStyle = '#fff'; ctx.font = '20px Arial'; ctx.textAlign = 'left'; ctx.fillText(`Level: ${level}`, 10, 30);
             }
-
             requestAnimationFrame(gameLoop);
         }
 
@@ -513,28 +394,20 @@
          *          Initialization                     *
          ***********************************************/
         document.addEventListener('DOMContentLoaded', () => {
-             if (!ctx) {
-                 console.error("Failed to get canvas context on DOMContentLoaded.");
-                 return;
-             }
-            // Load initial session state
-            sessionHighLevel = parseInt(sessionStorage.getItem(sessionHighLevelKey) || '0');
-            roundNumber = parseInt(sessionStorage.getItem(sessionRoundNumberKey) || '0');
+             if (!ctx) { console.error("Failed to get canvas context on DOMContentLoaded."); return; }
+             // Initialize things that don't depend on session storage for rankings
+             resetGameVisuals();
+             setupVolumeControl();
+             updateGlobalLeaderboard();
+             displayGlobalGamesPlayed();
+             updateRankingBoard(); // Update with initially empty local rankings
 
-            resetGameVisuals();
-            setupVolumeControl();
-            updateGlobalLeaderboard(); // Fetch and display leaderboard
-            displayGlobalGamesPlayed(); // Fetch and display play count
-            updateRankingBoard(); // Display session ranks
-
-            // Event listeners
-            document.getElementById("startGame")?.addEventListener("click", startGameNow);
-            playerNameInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } });
+             document.getElementById("startGame")?.addEventListener("click", startGameNow);
+             playerNameInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } });
         });
 
     </script>
 
-    <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
 </body>
 </html>

@@ -23,7 +23,7 @@ const offensiveWords = [
     'kike', 'knob', 'knobend', 'kunt', 'kyke',
     'labia', 'lust',
     'masochist', 'masturbate', 'milf', 'muff', 'motherfucker',
-    'nazi', 'negro', 'nigga', 'nigger', 'n i g g e r',
+    'nazi', 'negro', 'nigga', 'nigger', 'n i g g e r', 'niger', 'hitler', 'adolf', 'cum',
     'orgasm',
     'paedo', 'paedophile', 'paki', 'pecker', 'penis', 'piss', 'poof', 'poon', 'porn', 'prick', 'prostitute', 'pube', 'pussy',
     'queaf', 'queef', 'queer',
