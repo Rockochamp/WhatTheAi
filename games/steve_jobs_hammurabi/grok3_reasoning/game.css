@@ -1,110 +1,10 @@
-/* === Add these styles to the END of your existing game.css === */
-
-/* --- Volume Control --- */
-.volume-control {
-    background: #222; /* Match leaderboard background */
-    padding: 10px 15px; /* Padding */
-    width: 260px; /* Match leaderboard width */
-    border: 2px solid #fff; /* Match leaderboard border */
-    border-radius: 5px; /* Rounded corners */
-    margin-top: 20px; /* Space above the control */
-    text-align: center; /* Center label and slider */
-    box-sizing: border-box; /* Include padding/border in width */
-}
-
-.volume-control label {
-    display: block; /* Label on its own line */
-    margin-bottom: 8px; /* Space below label */
-    font-size: 0.9em;
-    color: #ccc;
-}
-
-.volume-control input[type="range"] {
-    width: 80%; /* Slider width */
-    cursor: pointer;
-    /* Basic appearance reset */
-    -webkit-appearance: none;
-    appearance: none;
-    height: 8px; /* Track height */
-    background: #555; /* Track background */
-    border-radius: 5px; /* Rounded track */
-    outline: none; /* Remove outline */
-}
-
-/* Style the slider thumb (the draggable handle) for Webkit browsers */
-.volume-control input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px; /* Thumb width */
-    height: 18px; /* Thumb height */
-    background: #4CAF50; /* Thumb color (match button) */
-    border-radius: 50%; /* Circular thumb */
-    cursor: pointer;
-}
-
-/* Style the slider thumb for Firefox */
-.volume-control input[type="range"]::-moz-range-thumb {
-    width: 18px; /* Thumb width */
-    height: 18px; /* Thumb height */
-    background: #4CAF50; /* Thumb color */
-    border-radius: 50%; /* Circular thumb */
-    cursor: pointer;
-    border: none; /* Remove default border */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #gameContainer {
-        flex-direction: column; /* Stack game and leaderboard */
-        align-items: center;
-    }
-    #gameArea {
-        margin-right: 0;
-        margin-bottom: 20px;
-        width: 100%;
-        max-width: 500px; /* Limit width on mobile too */
-    }
-
-    /* This block correctly sets the mobile styles for boardsContainer */
-    #boardsContainer {
-        flex: 1 1 auto; /* Allow leaderboard/volume to take width */
-        width: 90%;
-        max-width: 300px; /* Max width for the container */
-    }
-
-     /* Styles for items *inside* boardsContainer on mobile */
-    .leaderboard-box,
-    .volume-control {
-        width: 100%; /* Make them full width within the container */
-    }
-
-     #playerInfo {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-     #playerInfo input {
-        margin: 5px 0;
-    }
-    .volume-control {
-        margin-top: 15px;
-    }
-    
-     .volume-control input[type="range"] {
-        width: 70%; /* Adjust slider width for mobile if needed */
-    }
-
-    /* REMOVED THE DUPLICATE, COMMENTED-OUT #boardsContainer BLOCK HERE */
-}
-
-/* Base styles from Cosmic Dodge */
+/* Base styles */
 body {
     background: #1a1a1a;
     color: #fff;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    /* text-align: center; */ /* Removed for better game layout */
 }
 
 /* Breadcrumb button */
@@ -118,7 +18,6 @@ body {
     border-radius: 5px;
     font-family: Arial, sans-serif;
 }
-
 .breadcrumb a {
     text-decoration: none;
     color: #333;
@@ -145,7 +44,7 @@ body {
     padding: 20px;
     font-size: 2em;
     margin-bottom: 10px;
-    text-align: center; /* Center title */
+    text-align: center;
 }
 
 /* --- Start Screen --- */
@@ -153,26 +52,22 @@ body {
     text-align: center;
     padding: 20px;
 }
-
 #playerInfo {
     margin-bottom: 20px;
 }
-
 #playerInfo label {
-    color: #fff; /* Ensure label is visible */
+    color: #fff;
 }
-
 #playerInfo input {
     padding: 5px;
     font-size: 1em;
     margin: 0 5px;
 }
-
 #playerInfo button {
-    padding: 5px 10px;
+    padding: 8px 15px; /* Slightly larger button */
     font-size: 1em;
     cursor: pointer;
-    background-color: #4CAF50; /* Match game button */
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
@@ -181,35 +76,37 @@ body {
     background-color: #45a049;
 }
 
-
-/* Leaderboard Box Styling (Used on Start and In-Game) */
+/* Leaderboard Box Styling (Shared) */
 .leaderboard-box {
     background: #222;
-    padding: 10px;
-    width: 260px; /* Consistent width */
+    padding: 10px 15px; /* More horizontal padding */
+    width: 280px; /* Slightly wider */
     border: 2px solid #fff;
-    margin: 0 auto 20px; /* Centered on start screen */
-    color: #fff; /* Ensure text is white */
-    text-align: left; /* Align list items left */
-    box-sizing: border-box; /* Include padding/border in width */
+    margin: 0 auto 20px;
+    color: #fff;
+    text-align: left;
+    box-sizing: border-box;
 }
-
 .leaderboard-box h2 {
     margin-top: 0;
-    text-align: center; /* Center leaderboard title */
+    margin-bottom: 10px;
+    text-align: center;
     color: #fff;
+    font-size: 1.1em; /* Slightly smaller H2 */
 }
-
 .leaderboard-box ol {
-    padding-left: 20px; /* Indent list */
+    padding-left: 20px;
     margin: 0;
 }
-
 .leaderboard-box li {
     margin-bottom: 5px;
     font-size: 0.9em;
 }
-
+.leaderboard-box p { /* Style for 'No scores' or 'Error' messages */
+    text-align: center;
+    font-style: italic;
+    color: #aaa;
+}
 
 /* --- Game Container --- */
 #gameContainer {
@@ -217,6 +114,7 @@ body {
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
+    gap: 20px; /* Gap between game area and boards */
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -224,35 +122,42 @@ body {
 
 /* Left side: Game Interface + instructions */
 #gameArea {
-    margin-right: 20px;
-    flex: 1 1 auto;
-    max-width: 550px; /* Give game area space */
+    flex: 1 1 500px; /* Flexible width, base 500px */
+    max-width: 550px;
 }
 
-/* Right side: boardsContainer with global ranking */
+/* Right side: boardsContainer */
 #boardsContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 0 284px; /* Fixed width for leaderboard + padding/border + volume */
+    gap: 20px; /* Gap between leaderboard and volume */
+    flex: 0 0 300px; /* Fixed width for boards container */
+    padding-top: 10px; /* Align top with game box roughly */
 }
 
+/* Ensure boxes inside boardsContainer take appropriate width */
 #globalLeaderboardGame {
-     margin-bottom: 0; /* No bottom margin when in game */
+    width: 100%; /* Take full width of boardsContainer */
+    max-width: 280px; /* Match start screen style width */
+    margin-bottom: 0; /* Gap handled by parent */
 }
 
 /* Total games text style */
 .totalGamesText {
     font-size: 0.8em;
-    margin: 0 0 10px 0; /* Space below text */
+    margin: 0 0 10px 0;
     padding: 0;
     color: #ccc;
-    text-align: center; /* Center total games text */
+    text-align: center;
 }
 
 /* Instructions Text */
 .instructions {
     margin-top: 15px;
+    padding: 10px;
+    background-color: #2a2a2a; /* Slightly different background */
+    border-radius: 5px;
     font-size: 0.9em;
     color: #ccc;
     text-align: center;
@@ -261,140 +166,180 @@ body {
 
 /* --- Original Hammurabi Game Styles (Adapted) --- */
 #game {
-    background-color: #333; /* Darker background */
+    background-color: #333;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    width: 100%; /* Take available width in gameArea */
-    max-width: 500px; /* Max width from original */
-    margin: 0 auto; /* Center if gameArea is wider */
-    color: #fff; /* White text */
+    color: #fff;
 }
-
-#game h1 { /* Style for the H1 inside the #game div */
+#game h1 {
     text-align: center;
     color: #eee;
     font-size: 1.5em;
+    margin-top: 0;
     margin-bottom: 15px;
 }
 
 #resources, #decisions, #outcome {
     margin: 20px 0;
-    border-top: 1px solid #555; /* Separators */
+    border-top: 1px solid #555;
     padding-top: 15px;
 }
 #resources {
-    border-top: none; /* No top border for the first section */
+    border-top: none;
     padding-top: 0;
 }
-
-
 #resources p {
     margin: 8px 0;
     font-weight: bold;
 }
 #resources span {
     font-weight: normal;
-    color: #4CAF50; /* Highlight numbers */
+    color: #4CAF50;
 }
-
 
 #decisions h2, #outcome h2 {
     color: #eee;
     margin-bottom: 10px;
     font-size: 1.2em;
 }
-
 #decisions label {
     display: block;
-    margin: 10px 0;
+    margin: 12px 0; /* Increased spacing */
     color: #ccc;
 }
-
-#decisions input {
-    width: 70px; /* Slightly wider */
-    padding: 5px;
-    margin-left: 5px;
+#decisions input[type="number"] {
+    width: 80px; /* Wider input */
+    padding: 6px;
+    margin-left: 8px;
     background-color: #444;
     color: #fff;
     border: 1px solid #666;
     border-radius: 3px;
+    font-size: 1em;
 }
-
-/* Remove spinner buttons (up/down arrows) from number inputs */
+/* Remove spinner buttons from number inputs */
 input[type='number'] {
-    /* Firefox */
     -moz-appearance: textfield;
-    /* Standard property - New browsers should recognize this */
-    appearance: none;
+    appearance: textfield; /* Standard way first */
 }
-
-/* Remove spinner buttons specifically for WebKit/Blink browsers (Chrome, Safari, Edge, Opera) */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
-    margin: 0; /* Also reset margin */
+    margin: 0;
 }
-
 
 #nextTurn {
     display: block;
     width: 100%;
-    padding: 10px;
+    padding: 12px; /* Larger button */
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1em;
-    margin-top: 15px; /* Space above button */
+    font-size: 1.1em; /* Larger font */
+    margin-top: 20px;
 }
-
 #nextTurn:hover {
     background-color: #45a049;
 }
 #nextTurn:disabled {
     background-color: #555;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
 #outcome {
     color: #ddd;
 }
 #outcome p {
-    min-height: 1.2em; /* Prevent layout jump when message appears */
-    color: #ffcc00; /* Yellow outcome message */
-    font-weight: bold;
+    min-height: 3em; /* More space for multi-line messages */
+    padding: 8px;
+    background-color: #2a2a2a;
+    border-radius: 4px;
+    border-left: 3px solid #ffcc00;
+    color: #ffcc00;
+    font-weight: normal; /* Less harsh than bold */
+    line-height: 1.4;
+}
+
+
+/* --- Volume Control --- */
+.volume-control {
+    background: #222;
+    padding: 15px;
+    width: 100%; /* Take full width of boardsContainer */
+    max-width: 280px; /* Match leaderboard width */
+    border: 2px solid #fff;
+    border-radius: 5px;
+    text-align: center;
+    box-sizing: border-box;
+}
+.volume-control label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #ccc;
+}
+.volume-control input[type="range"] {
+    width: 85%; /* Wider slider */
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: #555;
+    border-radius: 5px;
+    outline: none;
+}
+.volume-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; /* Slightly larger thumb */
+    height: 20px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.volume-control input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #gameContainer {
-        flex-direction: column; /* Stack game and leaderboard */
+        flex-direction: column;
         align-items: center;
+        gap: 15px; /* Reduced gap when stacked */
     }
     #gameArea {
-        margin-right: 0;
-        margin-bottom: 20px;
-        width: 100%;
-        max-width: 500px; /* Limit width on mobile too */
+        flex-basis: auto; /* Reset flex basis */
+        width: 100%; /* Full width */
+        max-width: 550px; /* Still limit game width */
     }
     #boardsContainer {
-        flex: 1 1 auto; /* Allow leaderboard to take width */
-        width: 90%;
-        max-width: 300px; /* Max width for leaderboard */
+        flex-basis: auto; /* Reset flex basis */
+        width: 90%; /* Relative width */
+        max-width: 350px; /* Allow slightly wider on mobile */
+        padding-top: 0; /* Remove padding when stacked */
     }
-    .leaderboard-box {
-        width: 100%; /* Full width within container */
-    }
-     #playerInfo {
+    /* Boxes inside boards container already set to 100% width */
+
+     #playerInfo { /* Stack start button elements */
         display: flex;
         flex-direction: column;
         align-items: center;
+        gap: 10px;
     }
      #playerInfo input {
-        margin: 5px 0;
+        margin: 0; /* Remove horizontal margins */
+        width: 80%;
+        max-width: 250px;
+        text-align: center;
     }
-
-    /* Responsive adjustments for volume control (already defined above) */
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steve Jobs - Hammurabi (Grok3 Reasoning) - What the Ai</title>
-    <link rel="stylesheet" href="game.css"> <!-- Link to the new CSS -->
+    <link rel="stylesheet" href="game.css">
 
     <!-- Firebase App -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -35,7 +35,7 @@
 
         <!-- Global Leaderboard on Start Page -->
         <div id="globalLeaderboardStart" class="leaderboard-box">
-            <h2>Global Leaderboard</h2>
+            <h2>Global Leaderboard (Years Survived)</h2>
             <p id="globalGamesPlayedStart" class="totalGamesText">(Total games played worldwide: Loading...)</p>
             <div id="globalRankingContentStart">Loading...</div>
         </div>
@@ -52,30 +52,30 @@
                     <p>Food: <span id="food">1000</span> bushels</p>
                     <p>Land: <span id="land">100</span> acres</p>
                     <p>Pawns: <span id="pawns">100</span></p>
-                    <p>Land Price: <span id="landPrice">24</span> bushels/acre</p>
+                    <p>Land Price: <span id="landPrice">?</span> bushels/acre</p>
                 </div>
                 <div id="decisions">
-                    <h2>Make Your Decisions</h2>
+                    <h2>Make Your Decisions for Year <span id="decisionYear">1</span></h2>
                     <label>Buy Land: <input type="number" id="buyLand" min="0" value="0"></label>
                     <label>Sell Land: <input type="number" id="sellLand" min="0" value="0"></label>
-                    <label>Plant Crops: <input type="number" id="plant" min="0" value="0"></label>
-                    <label>Feed Pawns: <input type="number" id="feed" min="0" value="0"></label>
-                    <button id="nextTurn">Next Turn</button>
+                    <label>Plant Crops (Acres): <input type="number" id="plant" min="0" value="0"></label>
+                    <label>Feed Pawns (Bushels/Pawn): <input type="number" id="feed" min="0" value="0"></label>
+                    <button id="nextTurn">Confirm Decisions & End Year</button>
                 </div>
                 <div id="outcome">
-                    <h2>Outcome</h2>
+                    <h2>Last Year's Outcome</h2>
                     <p id="message"></p>
                 </div>
             </div>
              <p class="instructions">
-                Guide your pawns for 100 years. Manage food, land, and population to survive and thrive. <br> Enter your decisions each year and press "Next Turn".
+                Guide your pawns for as many years as possible. Manage food, land, and population. <br> The game ends when your population reaches zero. Good luck!
             </p>
         </div>
 
         <!-- Right side: Global Leaderboard + Volume Control -->
         <div id="boardsContainer">
             <div id="globalLeaderboardGame" class="leaderboard-box">
-                <h2>Global Leaderboard</h2>
+                <h2>Global Leaderboard (Years Survived)</h2>
                 <p id="globalGamesPlayedGame" class="totalGamesText">(Total games played worldwide: Loading...)</p>
                 <div id="globalRankingContentGame">Loading...</div>
             </div>
@@ -89,15 +89,15 @@
 
     <!-- Audio Element for Background Music -->
     <audio id="backgroundMusic" loop>
+        <!-- IMPORTANT: Verify this path and filename are correct on your server! -->
         <source src="/music/Elysium.mp3" type="audio/mpeg">
+        <!-- If the file is M4A, use: <source src="/music/Elysium.m4a" type="audio/mp4"> -->
         Your browser does not support the audio element.
     </audio>
 
-    <script src="game.js"></script> <!-- Link to the new JS -->
+    <script src="game.js"></script>
 
     <!-- Cloudflare Web Analytics -->
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
-            data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
-
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
 </body>
 </html>
