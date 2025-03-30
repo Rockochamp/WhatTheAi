@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What the Ai</title>
+    <title>What the Ai</title> <!-- This title is for the browser tab, we'll change the H1 -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
     <style>
@@ -20,12 +20,35 @@
             background-color: #fff;
             text-align: left;
             border-bottom: 1px solid #ccc;
+            /* ADDED: Ensure enough height for potentially longer titles */
+            min-height: 1.5em; /* Adjust as needed based on font size */
+            line-height: 1.2; /* Match h1 line-height */
         }
         header h1 {
             font-size: 1.2em;
             margin: 0;
             color: #333;
+            display: inline-block; /* Keep it from taking full width */
+            vertical-align: bottom; /* Align better with potential cursor */
         }
+
+        /* --- START: Added CSS for Typewriter --- */
+        #dynamic-title::after {
+            content: '|';
+            display: inline-block;
+            animation: blink 1s step-end infinite;
+            margin-left: 3px;
+            font-weight: normal; /* Keep cursor normal weight */
+            opacity: 1;
+            color: #555; /* Cursor color */
+        }
+
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        /* --- END: Added CSS for Typewriter --- */
+
         /* Game grid styles */
         .grid {
             display: grid;
@@ -41,12 +64,11 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Added transition */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-        /* ADDED: Hover effect */
         .game-item:hover {
-            transform: translateY(-5px); /* Slight lift */
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15); /* Enhanced shadow */
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
         .game-item a {
              display: block;
@@ -99,7 +121,6 @@
              header h1 {
                  font-size: 1.1em;
             }
-             /* Reduce hover effect on mobile? Optional */
              .game-item:hover {
                  transform: none;
                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -109,7 +130,8 @@
 </head>
 <body>
     <header>
-        <h1>What the Ai</h1>
+        <!-- MODIFIED: Added ID -->
+        <h1 id="dynamic-title"></h1>
     </header>
 
     <div class="grid" id="game-grid">
@@ -117,9 +139,9 @@
     </div>
 
     <script>
-        // Game data array with versions
+        // Game data array (existing script)
         const games = [
-            {
+             {
                 id: 1,
                 title: "Cosmic Dodge",
                 thumbnail: "/images/CosmicDodge.png",
@@ -138,7 +160,7 @@
             // Add more games here following the same structure
         ];
 
-        // Generate game grid dynamically
+        // Generate game grid dynamically (existing script)
         const grid = document.getElementById("game-grid");
         grid.innerHTML = ''; // Clear grid first
 
@@ -153,6 +175,7 @@
                 item.className = "game-item";
 
                 const imgLink = document.createElement("a");
+                // Default to first version, updated by select change
                 imgLink.href = game.versions[0].url;
                 imgLink.id = `game-link-${game.id}`;
 
@@ -180,24 +203,27 @@
 
                 game.versions.forEach((version, index) => {
                     const option = document.createElement("option");
-                    option.value = index;
+                    option.value = index; // Store index to easily get version data
                     option.textContent = version.name;
                     versionSelect.appendChild(option);
                 });
 
+                 // If only one version, disable the select
                 if (game.versions.length <= 1) {
                     versionSelect.disabled = true;
                 } else {
+                    // Add event listener only if there are multiple versions
                     versionSelect.addEventListener('change', function() {
                         const selectedIndex = parseInt(this.value, 10);
                         const gameLink = document.getElementById(`game-link-${game.id}`);
                         if (gameLink && game.versions[selectedIndex]) {
                             gameLink.href = game.versions[selectedIndex].url;
                         } else {
-                            console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
+                             console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
                         }
                     });
                 }
+
 
                 infoDiv.appendChild(title);
                 infoDiv.appendChild(versionSelect);
@@ -207,12 +233,95 @@
         } else {
             grid.innerHTML = '<p>No games available at the moment.</p>';
         }
+
+        // --- START: New Typewriter Title Script ---
+        const titleElement = document.getElementById('dynamic-title');
+        const titles = [
+            "What the Ai",       // English
+            "¿Qué la IA?",       // Spanish
+            "Quoi l'IA ?",      // French
+            "Was die KI?",       // German
+            "Cosa l'IA?",       // Italian
+            "O que a IA?",       // Portuguese
+            "Что за ИИ?",        // Russian (Chto za II?)
+            "何だAI？",        // Japanese (Nanda AI?)
+            "什么AI？",       // Chinese (Simplified - Shénme AI?)
+            "뭐야 AI?",        // Korean (Mwoya AI?)
+            "ما ال IA؟",         // Arabic (Ma al IA?) - Might be approximate
+            "क्या एआई?",         // Hindi (Kya AI?)
+            "Wat de AI?",       // Dutch
+            "Vad AI?",          // Swedish
+            "Hva AI?",          // Norwegian
+            "Hvad AI?",         // Danish
+            "Mitä tekoäly?",    // Finnish
+            "Co AI?",           // Polish
+            "Ne AI?",           // Turkish
+            "Τι το AI;",        // Greek (Ti to AI?)
+            "מה ה-AI?"          // Hebrew (Ma ha-AI?)
+        ];
+
+        let titleIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typeTimeout;
+        const typingSpeed = 100; // Speed of typing/deleting chars (ms)
+        const pauseAfterTyping = 2000; // Pause after typing a title (ms)
+        const pauseAfterDeleting = 300; // Pause before typing next title (ms)
+
+        function typeWriterEffect() {
+            clearTimeout(typeTimeout); // Clear previous timeout
+
+            const currentTitle = titles[titleIndex];
+            let displayText = '';
+            let delay = typingSpeed;
+
+            if (isDeleting) {
+                // Deleting characters
+                displayText = currentTitle.substring(0, charIndex - 1);
+                charIndex--;
+                delay = typingSpeed / 2; // Delete faster
+            } else {
+                // Typing characters
+                displayText = currentTitle.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            titleElement.textContent = displayText;
+
+            // Check conditions to change state or move to next title
+            if (!isDeleting && charIndex === currentTitle.length) {
+                // Finished typing current title
+                isDeleting = true;
+                delay = pauseAfterTyping; // Pause before deleting
+            } else if (isDeleting && charIndex === 0) {
+                // Finished deleting current title
+                isDeleting = false;
+                titleIndex = (titleIndex + 1) % titles.length; // Move to next title
+                delay = pauseAfterDeleting; // Pause before typing next one
+            }
+
+            // Set timeout for the next character action
+            typeTimeout = setTimeout(typeWriterEffect, delay);
+        }
+
+        // Start the effect if the element exists
+        if (titleElement) {
+             // Ensure initial state is clean for first run
+             titleElement.textContent = '';
+             charIndex = 0;
+             isDeleting = false;
+             titleIndex = 0; // Start with the first title
+             typeTimeout = setTimeout(typeWriterEffect, 500); // Initial delay
+        } else {
+            console.error("Dynamic title element not found!");
+        }
+        // --- END: New Typewriter Title Script ---
+
     </script>
 
     <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
-
 
     <!-- ===== START: ADDED SNIPPET ===== -->
     <a target="_blank" href="https://jam.pieter.com" style="font-family: 'system-ui', sans-serif; position: fixed; bottom: -1px; right: -1px; padding: 7px; font-size: 14px; font-weight: bold; background: #fff; color: #000; text-decoration: none; z-index: 10; border-top-left-radius: 12px; z-index: 10000; border: 1px solid #fff;">🕹️ Vibe Jam 2025</a>
