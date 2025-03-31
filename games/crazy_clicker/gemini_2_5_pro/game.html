@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <title>Crazy Clicker - What the Ai</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <style>
+        /* Base Styles */
+        body {
+            background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center;
+            overflow: hidden; /* Prevent scrolling */
+            height: 100vh; /* Full viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+        }
+        .breadcrumb { position: absolute; top: 10px; left: 10px; z-index: 30; /* Increased z-index */ background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; }
+        .breadcrumb a { text-decoration: none; color: #333; font-size: 1em; }
+        .version-indicator { position: absolute; top: 10px; right: 10px; z-index: 10; background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; color: #333; font-size: 0.9em; }
+
+        /* Start Page */
+        #startScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #playerInfo label { color: #fff; margin-bottom: 5px; }
+        #playerInfo input { padding: 8px; font-size: 1em; margin-bottom: 10px; width: 80%; max-width: 250px; text-align: center; border-radius: 4px; border: 1px solid #ccc; }
+        #playerInfo button { padding: 10px 20px; font-size: 1.1em; cursor: pointer; border-radius: 4px; background-color: #4CAF50; color: white; border: none; }
+        #globalLeaderboardStart { background: #222; padding: 10px 15px; width: 90%; max-width: 300px; border: 2px solid #fff; margin: 20px auto 0; box-sizing: border-box; text-align: left; border-radius: 5px;}
+        #globalLeaderboardStart h2 { margin-top: 0; margin-bottom: 10px; text-align: center; font-size: 1.1em; }
+        #globalLeaderboardStart ol { padding-left: 20px; margin: 0; }
+        #globalLeaderboardStart li { margin-bottom: 5px; font-size: 0.9em; }
+        #globalLeaderboardStart p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
+        .totalGamesText { font-size: 0.8em; margin: 0 0 10px 0; padding: 0; color: #ccc; text-align: center; }
+
+        /* Game Area */
+        #gameScreen {
+            display: none; /* Hidden initially */
+            flex-grow: 1; /* Take remaining space */
+            width: 100%;
+            position: relative; /* For positioning score */
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+            user-select: none; /* Prevent text selection */
+            -webkit-user-select: none;
+        }
+        #scoreDisplay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: #fff;
+            z-index: 5;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        #instructionText {
+            position: absolute;
+            top: 80px; /* Below score */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2em;
+            color: #ccc;
+            z-index: 5;
+        }
+
+        /* Game Over Screen */
+        #gameOverScreen {
+            display: none; /* Hidden initially */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent overlay */
+            position: absolute; /* Cover game area */
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 20;
+        }
+        #gameOverScreen h2 { font-size: 2em; margin-bottom: 15px; color: #ff4d4d; }
+        #finalScore { font-size: 1.5em; margin-bottom: 15px; } /* Reduced margin */
+        /* Styles for both leaderboard boxes */
+        .leaderboard-box { background: #222; padding: 10px 15px; width: 90%; max-width: 300px; border: 2px solid #fff; margin-bottom: 15px; box-sizing: border-box; text-align: left; border-radius: 5px;}
+        .leaderboard-box h3 { margin-top: 0; margin-bottom: 10px; text-align: center; font-size: 1.1em; }
+        .leaderboard-box ol { padding-left: 20px; margin: 0; }
+        .leaderboard-box li { margin-bottom: 5px; font-size: 0.9em; }
+        .leaderboard-box p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
+        #nextRoundButton { padding: 12px 25px; font-size: 1.2em; cursor: pointer; border-radius: 4px; background-color: #4CAF50; color: white; border: none; margin-top: 5px; /* Added margin */ }
+
+        /* Flicker Effects */
+        #globalLeaderboardGameOver p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
+        #nextRoundButton { padding: 12px 25px; font-size: 1.2em; cursor: pointer; border-radius: 4px; background-color: #4CAF50; color: white; border: none; }
+
+        /* Flicker Effects */
+        .flicker-green {
+            animation: flicker-green-anim 0.1s ease-out;
+        }
+        @keyframes flicker-green-anim {
+            0% { background-color: rgba(0, 255, 0, 0.3); }
+            100% { background-color: transparent; }
+        }
+        .flicker-red {
+            animation: flicker-red-anim 1s ease-out;
+        }
+        @keyframes flicker-red-anim {
+            0% { background-color: rgba(255, 0, 0, 0.7); }
+            100% { background-color: transparent; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            #scoreDisplay { font-size: 2.5em; top: 15px; }
+            #instructionText { font-size: 1em; top: 60px; }
+            #playerInfo input { font-size: 0.9em; }
+            #playerInfo button { font-size: 1em; }
+            #globalLeaderboardStart, .leaderboard-box { max-width: 95%; } /* Applied to new class */
+            #gameOverScreen h2 { font-size: 1.8em; }
+            #finalScore { font-size: 1.3em; }
+            #nextRoundButton { font-size: 1.1em; }
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="breadcrumb"> <a href="/index.html">Back to Games</a> </div>
+    <div class="version-indicator" id="versionIndicator"> Gemini 2.5 Pro </div>
+
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <h1>Crazy Clicker</h1>
+        <div id="playerInfo">
+            <label for="playerName">Player Name (max 10 chars): </label>
+            <input type="text" id="playerName" maxlength="10" placeholder="Enter your name" />
+            <button id="startGame">Start Game</button>
+        </div>
+        <div id="globalLeaderboardStart">
+            <h2>Global Leaderboard</h2>
+            <p id="globalGamesPlayedStart" class="totalGamesText">(Total games played worldwide: Loading...)</p>
+            <div id="globalRankingContentStart">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen">
+        <div id="scoreDisplay">0</div>
+        <div id="instructionText">Click anywhere to start...</div>
+        <!-- This div covers the screen for clicks -->
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen">
+        <h2>Game Over!</h2>
+        <div id="finalScore">Final Score: 0</div>
+        <!-- Added Local Ranking Box -->
+        <div id="localRankingBoard" class="leaderboard-box">
+            <h3>Local Ranking</h3>
+            <div id="localRankingContent">No rounds played yet.</div>
+        </div>
+        <!-- Updated Global Leaderboard Box ID and Class -->
+        <div id="globalLeaderboardGameOver" class="leaderboard-box">
+            <h3>Global Leaderboard</h3>
+            <p id="globalGamesPlayedGameOver" class="totalGamesText">(Total games played worldwide: Loading...)</p>
+            <div id="globalRankingContentGameOver">Loading...</div>
+        </div>
+        <button id="nextRoundButton">Next Round</button>
+    </div>
+
+    <!-- Placeholder for Audio -->
+    <!-- <audio id="backgroundMusic" loop> <source src="/path/to/your/music.mp3" type="audio/mpeg"> </audio> -->
+
+    <script src="/js/common/blocklist.js"></script>
+
+    <script>
+        /***********************************************
+         *          Firebase & Global Vars             *
+         ***********************************************/
+        // Using placeholder config from Cosmic Dodge
+        const firebaseConfig = {
+             apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE", // PLACEHOLDER
+             authDomain: "cosmicdodge-5ae20.firebaseapp.com", // PLACEHOLDER
+             projectId: "cosmicdodge-5ae20", // PLACEHOLDER
+             storageBucket: "cosmicdodge-5ae20.appspot.com", // PLACEHOLDER
+             messagingSenderId: "940230809594", // PLACEHOLDER
+             appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643" // PLACEHOLDER
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const version = 'gemini_2_5_pro';
+        const gameTitle = 'crazy_clicker';
+        const leaderboardCollection = `leaderboard_${gameTitle}_${version}`;
+        const statsDoc = `stats_${gameTitle}_${version}`;
+        const RHYTHM_TOLERANCE_MS = 50; // +/- 50ms tolerance
+
+        // Game States
+        const GameState = {
+            WAITING_FOR_NAME: 'WAITING_FOR_NAME',
+            WAITING_FOR_FIRST_CLICK: 'WAITING_FOR_FIRST_CLICK',
+            WAITING_FOR_SECOND_CLICK: 'WAITING_FOR_SECOND_CLICK',
+            PLAYING: 'PLAYING',
+            GAME_OVER: 'GAME_OVER'
+        };
+
+        let currentState = GameState.WAITING_FOR_NAME;
+        let playerName = "";
+        let score = 0;
+        let firstClickTime = null;
+        let secondClickTime = null;
+        let taktTime = null; // Time interval between clicks in ms
+        let lastValidClickTime = null;
+        let missTimeout = null; // Timeout handle for detecting missed takt
+        let currentSessionRoundNumber = 0; // Added for local ranking
+        let localSessionRankings = {}; // Added for local ranking
+
+        // DOM Elements
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const instructionText = document.getElementById('instructionText');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const playerNameInput = document.getElementById('playerName');
+        const startGameButton = document.getElementById('startGame');
+        const nextRoundButton = document.getElementById('nextRoundButton');
+        const globalRankingContentStart = document.getElementById('globalRankingContentStart');
+        const globalRankingContentGameOver = document.getElementById('globalRankingContentGameOver');
+        const globalGamesPlayedStart = document.getElementById("globalGamesPlayedStart");
+        const globalGamesPlayedGameOver = document.getElementById("globalGamesPlayedGameOver");
+        const localRankingContentEl = document.getElementById('localRankingContent'); // Added for local ranking
+
+        /***********************************************
+         *       Firestore Leaderboard & Stats         *
+         ***********************************************/
+        // Adapted from Cosmic Dodge - Updated logic to show only latest entry per score
+        function updateGlobalLeaderboard() {
+            // Fetch more initially to allow filtering (e.g., 50)
+            db.collection(leaderboardCollection).orderBy("score", "desc").orderBy("timestamp", "desc").limit(50).get()
+            .then((querySnapshot) => {
+                let html = '<ol>';
+                const uniqueEntries = [];
+                const scoresSeen = new Set();
+                const maxDisplay = 10; // Max entries to show
+
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        // Check data validity and if score already displayed and limit not reached
+                        if (data && data.score !== undefined && !scoresSeen.has(data.score) && uniqueEntries.length < maxDisplay) {
+                            uniqueEntries.push(`<li>${data.playerName || 'Anon'} - Score: ${data.score}</li>`);
+                            scoresSeen.add(data.score); // Mark score as seen
+                        }
+                    });
+                }
+
+                if (uniqueEntries.length === 0) {
+                    html = '<p>No scores yet. Be the first!</p>';
+                } else {
+                    html += uniqueEntries.join('');
+                    html += '</ol>';
+                }
+
+                if (globalRankingContentStart) globalRankingContentStart.innerHTML = html;
+                if (globalRankingContentGameOver) globalRankingContentGameOver.innerHTML = html;
+            }).catch((error) => {
+                console.error("Error getting global leaderboard:", error);
+                const errorMsg = "<p>Error loading leaderboard.</p>";
+                if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg;
+                if (globalRankingContentGameOver) globalRankingContentGameOver.innerHTML = errorMsg;
+            });
+        }
+
+        function addGlobalRecord(finalScore) {
+            if (!playerName) { console.warn("Player name missing, cannot add global record."); return; }
+            const scoreToSave = Math.max(0, finalScore); // Ensure score is not negative
+            db.collection(leaderboardCollection).add({
+                playerName: playerName || "Anon",
+                score: scoreToSave,
+                version: version,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                console.log("Global record added for score:", scoreToSave);
+                updateGlobalLeaderboard(); // Refresh leaderboard after adding
+            }).catch((error) => console.error("Error adding global record:", error));
+        }
+
+        function incrementGlobalGamesPlayed() {
+            // Incremented only on game over
+            db.collection("globalStats").doc(statsDoc).set({
+                totalGamesPlayed: firebase.firestore.FieldValue.increment(1),
+                gameTitle: gameTitle,
+                version: version
+            }, { merge: true })
+            .then(() => {
+                console.log("Total games incremented.");
+                displayGlobalGamesPlayed(); // Refresh display
+            }).catch(console.error);
+        }
+
+        function displayGlobalGamesPlayed() {
+            db.collection("globalStats").doc(statsDoc).get().then((doc) => {
+                const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0;
+                const text = `(Total games played worldwide: ${total})`;
+                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text;
+                if (globalGamesPlayedGameOver) globalGamesPlayedGameOver.innerText = text;
+            }).catch((error) => {
+                console.error("Error reading total games:", error);
+                const errorText = "(Total games played worldwide: Error)";
+                if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText;
+                if (globalGamesPlayedGameOver) globalGamesPlayedGameOver.innerText = errorText;
+            });
+        }
+
+         /***********************************************
+         *          Name Validation                    *
+         ***********************************************/
+         function isNameOffensive(name) {
+             // Assumes blocklist.js is loaded globally
+             if (typeof offensiveWords === 'undefined') {
+                 console.warn("Offensive words list (blocklist.js) not loaded!");
+                 return false;
+             }
+             if (!name) return false;
+             const lowerCaseName = name.toLowerCase();
+             for (const word of offensiveWords) {
+                 // Basic substring check
+                 if (lowerCaseName.includes(word)) {
+                     console.log(`Offensive substring found: ${word} in ${name}`);
+                     return true;
+                 }
+             }
+             return false;
+         }
+
+        /***********************************************
+         *      Local Ranking (Session Only)           *
+         ***********************************************/
+         // Added functions similar to Cosmic Dodge
+         function updateLocalRankingBoard() {
+             if (!localRankingContentEl) return;
+             const rankingsList = Object.values(localSessionRankings);
+             // Sort by score descending
+             const sortedRankings = rankingsList.sort((a, b) => b.score - a.score);
+             let html = '';
+             if (sortedRankings.length === 0) {
+                 html = '<p>No rounds completed yet.</p>';
+             } else {
+                 html = '<ol>';
+                 // Display top 10 local scores for the session
+                 sortedRankings.slice(0, 10).forEach((entry) => {
+                     html += `<li>Round ${entry.round}: Score ${entry.score}</li>`;
+                 });
+                 html += '</ol>';
+             }
+             localRankingContentEl.innerHTML = html;
+         }
+
+         function saveLocalRecord(roundNum, finalScore) {
+              const scoreToSave = Math.max(0, finalScore);
+              // Store using score as key to overwrite previous same scores
+              localSessionRankings[scoreToSave] = { round: roundNum, score: scoreToSave };
+              updateLocalRankingBoard(); // Update display immediately
+         }
+
+
+        /***********************************************
+         *         Game State Management               *
+         ***********************************************/
+        function transitionToState(newState) {
+            console.log(`Transitioning from ${currentState} to ${newState}`);
+            currentState = newState;
+
+            // Reset UI elements based on state
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            clearTimeout(missTimeout); // Clear any pending game over timeout
+
+            switch (newState) {
+                case GameState.WAITING_FOR_NAME:
+                    startScreen.style.display = 'flex';
+                    updateGlobalLeaderboard(); // Refresh leaderboard on start screen
+                    displayGlobalGamesPlayed();
+                    // Reset local session if returning to name screen (implies new player/session)
+                    currentSessionRoundNumber = 0;
+                    localSessionRankings = {};
+                    break;
+                case GameState.WAITING_FOR_FIRST_CLICK:
+                    gameScreen.style.display = 'block';
+                    score = 0;
+                    firstClickTime = null;
+                    secondClickTime = null;
+                    taktTime = null;
+                    lastValidClickTime = null;
+                    scoreDisplay.textContent = score;
+                    instructionText.textContent = "Click anywhere for your first beat...";
+                    break;
+                case GameState.WAITING_FOR_SECOND_CLICK:
+                    gameScreen.style.display = 'block';
+                    instructionText.textContent = "Click again for your second beat...";
+                    break;
+                case GameState.PLAYING:
+                    gameScreen.style.display = 'block';
+                    instructionText.textContent = `Keep the rhythm! (${taktTime}ms)`;
+                    // Start the first miss timeout
+                    setMissTimeout();
+                    break;
+                case GameState.GAME_OVER:
+                    gameOverScreen.style.display = 'flex';
+                    finalScoreDisplay.textContent = `Final Score: ${score}`;
+                    triggerRedFlicker();
+                    saveLocalRecord(currentSessionRoundNumber, score); // Save local score first
+                    addGlobalRecord(score); // Save global score to Firebase
+                    incrementGlobalGamesPlayed(); // Increment count *only* on game over
+                    updateGlobalLeaderboard(); // Refresh global leaderboard on game over screen
+                    updateLocalRankingBoard(); // Refresh local leaderboard display
+                    displayGlobalGamesPlayed();
+                    break;
+            }
+        }
+
+        /***********************************************
+         *         Game Logic & Event Handlers         *
+         ***********************************************/
+
+        function handleScreenClick(event) {
+            // Prevent default actions like text selection on double click
+            event.preventDefault();
+
+            const now = performance.now();
+
+            switch (currentState) {
+                case GameState.WAITING_FOR_FIRST_CLICK:
+                    score = 1; // First click counts
+                    scoreDisplay.textContent = score;
+                    firstClickTime = now;
+                    lastValidClickTime = now;
+                    triggerGreenFlicker();
+                    transitionToState(GameState.WAITING_FOR_SECOND_CLICK);
+                    break;
+
+                case GameState.WAITING_FOR_SECOND_CLICK:
+                    score++;
+                    scoreDisplay.textContent = score;
+                    secondClickTime = now;
+                    taktTime = Math.round(secondClickTime - firstClickTime);
+                    lastValidClickTime = now;
+
+                    if (taktTime <= 0) { // Prevent zero or negative takt time
+                        console.warn("Takt time too short, resetting.");
+                        transitionToState(GameState.WAITING_FOR_FIRST_CLICK); // Reset
+                        return;
+                    }
+                    triggerGreenFlicker();
+                    transitionToState(GameState.PLAYING);
+                    break;
+
+                case GameState.PLAYING:
+                    clearTimeout(missTimeout); // Clear previous timeout
+                    const timeSinceLastClick = now - lastValidClickTime;
+                    const lowerBound = taktTime - RHYTHM_TOLERANCE_MS;
+                    const upperBound = taktTime + RHYTHM_TOLERANCE_MS;
+
+                    if (timeSinceLastClick >= lowerBound && timeSinceLastClick <= upperBound) {
+                        // Click is within rhythm
+                        score++;
+                        scoreDisplay.textContent = score;
+                        lastValidClickTime = now;
+                        triggerGreenFlicker();
+                        setMissTimeout(); // Set timeout for the next expected click
+                    } else {
+                        // Click is off rhythm
+                        console.log(`Off rhythm: ${timeSinceLastClick}ms vs ${taktTime}ms`);
+                        transitionToState(GameState.GAME_OVER);
+                    }
+                    break;
+            }
+        }
+
+        function setMissTimeout() {
+            // Set timeout slightly after the tolerance window ends
+            missTimeout = setTimeout(() => {
+                if (currentState === GameState.PLAYING) {
+                    console.log("Stopped clicking in rhythm.");
+                    transitionToState(GameState.GAME_OVER);
+                }
+            }, taktTime + RHYTHM_TOLERANCE_MS + 10); // +10ms buffer
+        }
+
+        function triggerGreenFlicker() {
+            gameScreen.classList.remove('flicker-green'); // Remove first to reset animation
+            void gameScreen.offsetWidth; // Trigger reflow
+            gameScreen.classList.add('flicker-green');
+        }
+
+        function triggerRedFlicker() {
+            gameOverScreen.classList.remove('flicker-red');
+            void gameOverScreen.offsetWidth;
+            gameOverScreen.classList.add('flicker-red');
+            // Remove class after animation finishes to allow re-triggering if needed
+            setTimeout(() => {
+                 gameOverScreen.classList.remove('flicker-red');
+            }, 1000); // Match animation duration
+        }
+
+        function handleStartGameClick() {
+            const nameInput = playerNameInput.value.trim();
+            if (nameInput === "") {
+                alert("Please enter a player name.");
+                return;
+            }
+            if (isNameOffensive(nameInput)) {
+                alert("Please choose a more appropriate player name.");
+                return;
+            }
+             playerName = nameInput.substring(0, 10);
+             // Reset session stats when starting with a name
+             currentSessionRoundNumber = 1; // Start at round 1
+             localSessionRankings = {};
+             updateLocalRankingBoard(); // Clear the board display
+             transitionToState(GameState.WAITING_FOR_FIRST_CLICK);
+         }
+
+         function handleNextRoundClick() {
+             currentSessionRoundNumber++; // Increment round number
+             transitionToState(GameState.WAITING_FOR_FIRST_CLICK);
+         }
+
+         /***********************************************
+         *          Initialization                     *
+         ***********************************************/
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial setup
+            transitionToState(GameState.WAITING_FOR_NAME); // Start at name entry
+
+            // Event Listeners
+            startGameButton.addEventListener('click', handleStartGameClick);
+            playerNameInput.addEventListener('keydown', (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleStartGameClick();
+                }
+            });
+            gameScreen.addEventListener('click', handleScreenClick);
+            gameScreen.addEventListener('touchstart', handleScreenClick, { passive: false }); // Also handle touch
+            nextRoundButton.addEventListener('click', handleNextRoundClick);
+
+             // Initial data load
+             updateGlobalLeaderboard();
+             displayGlobalGamesPlayed();
+             updateLocalRankingBoard(); // Initial display for local board
+         });
+
+     </script>
+
+    <!-- Cloudflare Web Analytics -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+</body>
+</html>
