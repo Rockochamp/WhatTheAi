@@ -9,11 +9,15 @@
         /* Base Styles */
         body {
             background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center;
-            overflow: hidden; /* Prevent scrolling */
-            height: 100vh; /* Full viewport height */
+            /* Removed height, overflow, and flex properties */
+        }
+        /* Added Main Wrapper */
+        .main-wrapper {
+            position: relative; /* Context for absolute children */
+            min-height: 100vh; /* Ensure it tries to fill viewport */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content vertically */
+            /* justify-content: center; /* Removed, let content flow */
         }
         .breadcrumb { position: absolute; top: 10px; left: 10px; z-index: 30; /* Increased z-index */ background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; }
         .breadcrumb a { text-decoration: none; color: #333; font-size: 1em; }
@@ -34,7 +38,7 @@
         /* Game Area */
         #gameScreen {
             display: none; /* Hidden initially */
-            flex-grow: 1; /* Take remaining space */
+            flex-grow: 1; /* Take remaining space within the wrapper */
             width: 100%;
             position: relative; /* Needed for absolute positioning of children */
             display: flex; /* Use flexbox for centering */
@@ -74,6 +78,7 @@
             position: absolute; /* Cover game area */
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 20;
+            overflow-y: auto; /* Allow scrolling if content overflows */
         }
         #gameOverScreen h2 { font-size: 2em; margin-bottom: 15px; color: #ff4d4d; }
         #finalScore { font-size: 1.5em; margin-bottom: 15px; } /* Reduced margin */
@@ -188,6 +193,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
+<div class="main-wrapper"> <!-- Added Wrapper -->
     <div class="breadcrumb"> <a href="/index.html">Back to Games</a> </div>
     <!-- Volume Control Added Here -->
     <div class="volume-control-container" id="volumeControlContainer">
@@ -745,5 +751,6 @@
     <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+</div> <!-- Closed Wrapper -->
 </body>
 </html>
