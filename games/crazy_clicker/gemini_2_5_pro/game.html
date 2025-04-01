@@ -17,7 +17,7 @@
         }
         .breadcrumb { position: absolute; top: 10px; left: 10px; z-index: 30; /* Increased z-index */ background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; }
         .breadcrumb a { text-decoration: none; color: #333; font-size: 1em; }
-        .version-indicator { position: absolute; top: 10px; right: 10px; z-index: 10; background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; color: #333; font-size: 0.9em; }
+        .version-indicator { position: absolute; top: 10px; right: 10px; z-index: 30; /* Increased z-index */ background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; color: #333; font-size: 0.9em; }
 
         /* Start Page */
         #startScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
@@ -36,32 +36,32 @@
             display: none; /* Hidden initially */
             flex-grow: 1; /* Take remaining space */
             width: 100%;
-            position: relative; /* For positioning score */
+            position: relative; /* Needed for absolute positioning of children */
+            display: flex; /* Use flexbox for centering */
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
             cursor: pointer;
             -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
             user-select: none; /* Prevent text selection */
             -webkit-user-select: none;
         }
         #scoreDisplay {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            /* Removed absolute positioning, rely on flexbox */
             font-size: 3em;
             font-weight: bold;
             color: #fff;
             z-index: 5;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px; /* Add some space below score */
         }
         #instructionText {
-            position: absolute;
-            top: 80px; /* Below score */
-            left: 50%;
-            transform: translateX(-50%);
+             /* Removed absolute positioning, rely on flexbox */
             font-size: 1.2em;
-            color: #ccc;
+            color: #ccc; /* Reverted color */
             z-index: 5;
         }
+
 
         /* Game Over Screen */
         #gameOverScreen {
@@ -85,9 +85,62 @@
         .leaderboard-box p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
         #nextRoundButton { padding: 12px 25px; font-size: 1.2em; cursor: pointer; border-radius: 4px; background-color: #4CAF50; color: white; border: none; margin-top: 5px; /* Added margin */ }
 
-        /* Flicker Effects */
-        #globalLeaderboardGameOver p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
-        #nextRoundButton { padding: 12px 25px; font-size: 1.2em; cursor: pointer; border-radius: 4px; background-color: #4CAF50; color: white; border: none; }
+        /* Volume Control Styles (Copied & Adjusted from Cosmic Dodge) */
+        .volume-control-container {
+            position: absolute;
+            top: 10px;
+            right: 150px; /* Position left of version indicator (adjust as needed) */
+            z-index: 30; /* Ensure visibility */
+            background-color: rgba(34, 34, 34, 0.8); /* #222 with opacity */
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            display: none; /* Hidden by default, shown by JS */
+            align-items: center; /* Align items vertically */
+            gap: 8px; /* Space between elements */
+        }
+        .volume-control-container label {
+            font-size: 0.8em;
+            color: #ccc;
+            margin: 0; /* Reset margin */
+            display: inline-block; /* Keep label inline */
+            vertical-align: middle;
+        }
+        .volume-control-container input[type="range"] {
+            width: 80px; /* Adjust width */
+            cursor: pointer;
+            -webkit-appearance: none; appearance: none;
+            height: 6px; background: #555; border-radius: 3px; outline: none;
+            vertical-align: middle;
+        }
+        .volume-control-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 14px; height: 14px; background: #00ffcc; border-radius: 50%; cursor: pointer;
+        }
+        .volume-control-container input[type="range"]::-moz-range-thumb {
+            width: 14px; height: 14px; background: #00ffcc; border-radius: 50%; cursor: pointer; border: none;
+        }
+        /* Mute Toggle Styles */
+        #muteControl {
+            display: none; /* Hidden by default, shown via JS on iOS */
+            padding: 0; /* Reset padding */
+            margin: 0; /* Reset margin */
+            line-height: 1; /* Adjust line height */
+        }
+        #muteControl input[type="checkbox"] {
+            margin-right: 5px;
+            vertical-align: middle;
+            width: 14px; height: 14px;
+            cursor: pointer;
+        }
+        #muteControl label#muteToggleLabel {
+            display: inline-block;
+            vertical-align: middle;
+            margin-bottom: 0;
+            cursor: pointer;
+            color: #ccc;
+            font-size: 0.8em;
+        }
 
         /* Flicker Effects */
         .flicker-green {
@@ -106,9 +159,23 @@
         }
 
         /* Responsive */
+        @media (max-width: 768px) { /* Adjust breakpoint for volume control */
+             .volume-control-container {
+                 right: 10px; /* Move closer to edge */
+                 top: 70px; /* Increased top margin to move below version indicator */
+                 width: auto; /* Allow shrinking */
+                 padding: 4px 8px;
+                 gap: 5px;
+             }
+             .volume-control-container input[type="range"] { width: 60px; }
+             .version-indicator { top: 40px; right: 10px; } /* Move version down too */
+             .breadcrumb { top: 40px; } /* Move breadcrumb down too */
+        }
+
         @media (max-width: 600px) {
-            #scoreDisplay { font-size: 2.5em; top: 15px; }
-            #instructionText { font-size: 1em; top: 60px; }
+            /* Score/Instruction centering handled by flexbox */
+            #scoreDisplay { font-size: 2.5em; }
+            #instructionText { font-size: 1em; }
             #playerInfo input { font-size: 0.9em; }
             #playerInfo button { font-size: 1em; }
             #globalLeaderboardStart, .leaderboard-box { max-width: 95%; } /* Applied to new class */
@@ -122,6 +189,17 @@
 </head>
 <body>
     <div class="breadcrumb"> <a href="/index.html">Back to Games</a> </div>
+    <!-- Volume Control Added Here -->
+    <div class="volume-control-container" id="volumeControlContainer">
+        <!-- Volume Slider (shown on non-iOS) -->
+        <label for="volumeSlider" id="volumeSliderLabel">Vol:</label>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+        <!-- Mute Toggle (shown on iOS) -->
+        <div id="muteControl">
+           <input type="checkbox" id="muteToggle">
+           <label for="muteToggle" id="muteToggleLabel">Mute</label>
+        </div>
+    </div>
     <div class="version-indicator" id="versionIndicator"> Gemini 2.5 Pro </div>
 
     <!-- Start Screen -->
@@ -164,8 +242,8 @@
         <button id="nextRoundButton">Next Round</button>
     </div>
 
-    <!-- Placeholder for Audio -->
-    <!-- <audio id="backgroundMusic" loop> <source src="/path/to/your/music.mp3" type="audio/mpeg"> </audio> -->
+    <!-- Added Audio Element -->
+    <audio id="backgroundMusic" loop> <source src="/music/Pulse.m4a" type="audio/mp4"> Your browser does not support the audio element. </audio>
 
     <script src="/js/common/blocklist.js"></script>
 
@@ -191,6 +269,10 @@
         const leaderboardCollection = `leaderboard_${gameTitle}_${version}`;
         const statsDoc = `stats_${gameTitle}_${version}`;
         const RHYTHM_TOLERANCE_MS = 50; // +/- 50ms tolerance
+        // Added Volume/Mute Keys
+        const volumeKey = `${gameTitle}_volume`;
+        const muteKey = `${gameTitle}_muted_v1`;
+
 
         // Game States
         const GameState = {
@@ -227,6 +309,15 @@
         const globalGamesPlayedStart = document.getElementById("globalGamesPlayedStart");
         const globalGamesPlayedGameOver = document.getElementById("globalGamesPlayedGameOver");
         const localRankingContentEl = document.getElementById('localRankingContent'); // Added for local ranking
+        // Added Volume/Mute DOM Elements
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeSliderLabel = document.getElementById('volumeSliderLabel'); // Although hidden, might be needed
+        const muteControlDiv = document.getElementById('muteControl');
+        const muteToggle = document.getElementById('muteToggle');
+        const muteToggleLabel = document.getElementById('muteToggleLabel'); // Although hidden, might be needed
+        const volumeControlContainer = document.getElementById('volumeControlContainer'); // Container for visibility
+
 
         /***********************************************
          *       Firestore Leaderboard & Stats         *
@@ -333,6 +424,65 @@
          }
 
         /***********************************************
+         *           Volume/Mute Control Logic         *
+         ***********************************************/
+         // --- Copied & Adapted from Cosmic Dodge ---
+         function isIOS() {
+             return [
+                 'iPad Simulator', 'iPhone Simulator', 'iPod Simulator',
+                 'iPad', 'iPhone', 'iPod'
+             ].includes(navigator.platform)
+             || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+         }
+         const runningOnIOS = isIOS(); // Check once on load
+
+         function setupVolumeSliderControl() {
+             if (runningOnIOS || !backgroundMusic || !volumeSlider) return;
+
+             const savedVolume = localStorage.getItem(volumeKey);
+             let currentVolume = 0.5;
+             if (savedVolume !== null && !isNaN(parseFloat(savedVolume))) {
+                 currentVolume = parseFloat(savedVolume);
+             }
+             currentVolume = Math.max(0, Math.min(1, currentVolume));
+             volumeSlider.value = currentVolume;
+             // Initial volume applied before play()
+
+             const handleVolumeChange = () => {
+                 const newVolumeRaw = parseFloat(volumeSlider.value);
+                 const newVolume = isNaN(newVolumeRaw) ? 0.5 : Math.max(0, Math.min(1, newVolumeRaw));
+                 if (backgroundMusic) { backgroundMusic.volume = newVolume; }
+                 try { localStorage.setItem(volumeKey, newVolume.toString()); }
+                 catch (e) { console.error("Crazy Clicker: Failed to save volume:", e); }
+             };
+             volumeSlider.removeEventListener('input', handleVolumeChange);
+             volumeSlider.removeEventListener('change', handleVolumeChange);
+             volumeSlider.addEventListener('input', handleVolumeChange);
+             volumeSlider.addEventListener('change', handleVolumeChange);
+             console.log("Crazy Clicker: Volume slider control listeners attached.");
+         }
+
+         function setupMuteToggleControl() {
+             if (!runningOnIOS || !backgroundMusic || !muteToggle) return;
+
+             let isMuted = localStorage.getItem(muteKey) === 'true';
+             muteToggle.checked = isMuted;
+             // Initial mute applied before play()
+
+             const handleMuteChange = () => {
+                 const shouldMute = muteToggle.checked;
+                 if (backgroundMusic) { backgroundMusic.muted = shouldMute; }
+                 try { localStorage.setItem(muteKey, shouldMute.toString()); }
+                 catch (e) { console.error("Crazy Clicker: Failed to save mute state:", e); }
+             };
+             muteToggle.removeEventListener('change', handleMuteChange);
+             muteToggle.addEventListener('change', handleMuteChange);
+             console.log("Crazy Clicker: Mute toggle control listener attached.");
+         }
+         // --- End Volume/Mute Logic ---
+
+
+        /***********************************************
          *      Local Ranking (Session Only)           *
          ***********************************************/
          // Added functions similar to Cosmic Dodge
@@ -381,12 +531,14 @@
                     startScreen.style.display = 'flex';
                     updateGlobalLeaderboard(); // Refresh leaderboard on start screen
                     displayGlobalGamesPlayed();
+                    volumeControlContainer.style.display = 'none'; // Hide volume on start screen
                     // Reset local session if returning to name screen (implies new player/session)
                     currentSessionRoundNumber = 0;
                     localSessionRankings = {};
                     break;
                 case GameState.WAITING_FOR_FIRST_CLICK:
-                    gameScreen.style.display = 'block';
+                    gameScreen.style.display = 'flex'; // Use flex for centering
+                    volumeControlContainer.style.display = 'flex'; // Show volume in game
                     score = 0;
                     firstClickTime = null;
                     secondClickTime = null;
@@ -394,19 +546,40 @@
                     lastValidClickTime = null;
                     scoreDisplay.textContent = score;
                     instructionText.textContent = "Click anywhere for your first beat...";
+                    // Attempt to play music when game starts
+                    if (backgroundMusic && backgroundMusic.paused) {
+                        try {
+                            // Apply saved volume/mute state BEFORE playing
+                            if (runningOnIOS) {
+                                if (muteToggle) backgroundMusic.muted = muteToggle.checked;
+                            } else {
+                                if (volumeSlider) {
+                                     let initialVolume = parseFloat(volumeSlider.value);
+                                     if (isNaN(initialVolume)) initialVolume = 0.5;
+                                     backgroundMusic.volume = Math.max(0, Math.min(1, initialVolume));
+                                }
+                            }
+                            backgroundMusic.play().catch(error => console.log("Crazy Clicker: Music autoplay prevented:", error));
+                        } catch (err) {
+                            console.error("Crazy Clicker: Error during music setup/play:", err);
+                        }
+                    }
                     break;
                 case GameState.WAITING_FOR_SECOND_CLICK:
-                    gameScreen.style.display = 'block';
+                    gameScreen.style.display = 'flex'; // Use flex for centering
+                    volumeControlContainer.style.display = 'flex'; // Show volume in game
                     instructionText.textContent = "Click again for your second beat...";
                     break;
                 case GameState.PLAYING:
-                    gameScreen.style.display = 'block';
+                    gameScreen.style.display = 'flex'; // Use flex for centering
+                    volumeControlContainer.style.display = 'flex'; // Show volume in game
                     instructionText.textContent = `Keep the rhythm! (${taktTime}ms)`;
                     // Start the first miss timeout
                     setMissTimeout();
                     break;
                 case GameState.GAME_OVER:
                     gameOverScreen.style.display = 'flex';
+                    volumeControlContainer.style.display = 'flex'; // Show volume on game over
                     finalScoreDisplay.textContent = `Final Score: ${score}`;
                     triggerRedFlicker();
                     saveLocalRecord(currentSessionRoundNumber, score); // Save local score first
@@ -532,6 +705,22 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Initial setup
             transitionToState(GameState.WAITING_FOR_NAME); // Start at name entry
+
+            // --- ADDED: Conditional UI Setup for Volume/Mute ---
+             console.log(`Crazy Clicker: iOS detected: ${runningOnIOS}`);
+             if (runningOnIOS) {
+                 if(volumeSlider) volumeSlider.style.display = 'none';
+                 if(volumeSliderLabel) volumeSliderLabel.style.display = 'none';
+                 if(muteControlDiv) muteControlDiv.style.display = 'inline-block'; // Use inline-block
+                 setupMuteToggleControl(); // Setup mute checkbox listener for iOS
+             } else {
+                 if(muteControlDiv) muteControlDiv.style.display = 'none';
+                 if(volumeSlider) volumeSlider.style.display = 'inline-block'; // Use inline-block
+                 if(volumeSliderLabel) volumeSliderLabel.style.display = 'inline-block'; // Use inline-block
+                 setupVolumeSliderControl(); // Setup volume slider listener for non-iOS
+             }
+             // --- END: Conditional UI Setup ---
+
 
             // Event Listeners
             startGameButton.addEventListener('click', handleStartGameClick);
