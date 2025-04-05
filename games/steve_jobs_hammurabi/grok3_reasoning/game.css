@@ -23,6 +23,78 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
 .leaderboard-box p { text-align: center; font-style: italic; color: #aaa; margin: 5px 0; }
 .totalGamesText { font-size: 0.8em; margin: 0 0 10px 0; padding: 0; color: #ccc; text-align: center; }
 
+/* Make leaderboard boxes clickable */
+#globalLeaderboardStart, #globalLeaderboardGame, #rankingBoard {
+     cursor: pointer;
+}
+#globalLeaderboardStart:hover, #globalLeaderboardGame:hover, #rankingBoard:hover {
+     border-color: #4CAF50; /* Highlight on hover (using game's green) */
+}
+
+/* Modal Styles (Copied & Adjusted) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    padding-top: 60px; /* Location of the box */
+}
+.modal-content {
+    background-color: #2a2a2a;
+    margin: 5% auto; /* 5% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Could be more or less, depending on screen size */
+    max-width: 500px; /* Maximum width */
+    border-radius: 8px;
+    position: relative;
+    color: #fff;
+    max-height: 80vh; /* Limit height */
+    display: flex;
+    flex-direction: column;
+}
+.modal-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #555;
+    text-align: center;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+}
+.modal-body {
+    flex-grow: 1; /* Take available space */
+    overflow-y: auto; /* Enable scrolling for the list */
+    padding-right: 10px; /* Space for scrollbar */
+}
+.modal-body ol {
+    padding-left: 0; /* Remove default padding */
+    margin: 0 auto; /* Center the block */
+    list-style-position: inside; /* Keep numbers inside the flow */
+    text-align: left; /* Align text left within the centered block */
+    max-width: fit-content; /* Shrink block to content width */
+}
+.modal-body li { margin-bottom: 6px; font-size: 0.95em; }
+.modal-body p { text-align: center; font-style: italic; color: #aaa; margin: 10px 0; }
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1;
+}
+.close-button:hover,
+.close-button:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 /* Game Container */
 #gameContainer { display: none; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 30px; padding: 20px; max-width: 1200px; margin: 0 auto; }
 #gameArea { flex: 1 1 500px; max-width: 550px; }

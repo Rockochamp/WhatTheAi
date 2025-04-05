@@ -94,6 +94,12 @@ const globalGamesPlayedGame = document.getElementById("globalGamesPlayedGame");
 const helpButton = document.getElementById('helpButton');
 const helpModal = document.getElementById('helpModal');
 const closeHelpButton = document.getElementById('closeHelp');
+// Leaderboard Trigger Elements (Get these early, they exist before modals)
+const globalLeaderboardStartBox = document.getElementById('globalLeaderboardStart');
+const globalLeaderboardGameBox = document.getElementById('globalLeaderboardGame');
+const rankingBoardBox = document.getElementById('rankingBoard');
+// NOTE: Modal elements will be assigned inside DOMContentLoaded
+
 
 // Assumes blocklist.js is loaded
 
@@ -176,8 +182,64 @@ function setupMuteToggleControl() {
 /***********************************************
  *       Firestore Leaderboard & Stats         *
  ***********************************************/
-// ... (No changes needed in these functions) ...
-function updateGlobalLeaderboard() { console.log(`Fetching leaderboard from: ${leaderboardCollection}`); db.collection(leaderboardCollection).orderBy("finalPawns", "desc").orderBy("timestamp", "desc").limit(50).get().then((querySnapshot) => { let html = '<ol>'; const uniqueEntries = []; const pawnsSeen = new Set(); const maxDisplay = 10; if (!querySnapshot.empty) { querySnapshot.forEach((doc) => { const data = doc.data(); if (data && typeof data.finalPawns !== 'undefined') { const currentPawnCount = data.finalPawns; const pName = data.playerName || 'Anon'; if (!pawnsSeen.has(currentPawnCount) && uniqueEntries.length < maxDisplay) { uniqueEntries.push(`<li>${pName}: ${currentPawnCount} pawns</li>`); pawnsSeen.add(currentPawnCount); } } else { console.warn("Skipping leaderboard doc with missing data:", doc.id); } }); } if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; } else { html += uniqueEntries.join(''); html += '</ol>'; } if (globalRankingContentStart) globalRankingContentStart.innerHTML = html; if (globalRankingContentGame) globalRankingContentGame.innerHTML = html; }).catch((error) => { console.error("Error getting global leaderboard:", error); const errorMsg = "<p>Error loading leaderboard.</p>"; if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg; if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg; }); }
+function updateGlobalLeaderboard() {
+    console.log(`Fetching leaderboard from: ${leaderboardCollection}`);
+    const fetchLimit = 200;
+    const maxDisplayInline = 10;
+    const maxDisplayModal = 100;
+
+    db.collection(leaderboardCollection).orderBy("finalPawns", "desc").orderBy("timestamp", "desc").limit(fetchLimit).get()
+    .then((querySnapshot) => {
+        const uniqueEntries = [];
+        const pawnsSeen = new Set();
+
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data && typeof data.finalPawns !== 'undefined') {
+                    const currentPawnCount = data.finalPawns;
+                    const pName = data.playerName || 'Anon';
+                    if (!pawnsSeen.has(currentPawnCount) && uniqueEntries.length < maxDisplayModal) {
+                        uniqueEntries.push({ name: pName, pawns: currentPawnCount });
+                        pawnsSeen.add(currentPawnCount);
+                    }
+                } else {
+                    console.warn("Skipping leaderboard doc with missing data:", doc.id);
+                }
+            });
+        }
+
+        let inlineHtml = '<p>No scores yet. Be the first!</p>';
+        let modalHtml = '<p>No scores yet. Be the first!</p>';
+
+        if (uniqueEntries.length > 0) {
+            // Generate HTML for inline display (Top 10)
+            inlineHtml = '<ol>';
+            inlineHtml += uniqueEntries.slice(0, maxDisplayInline).map(entry => `<li>${entry.name}: ${entry.pawns} pawns</li>`).join('');
+            inlineHtml += '</ol>';
+
+            // Generate HTML for modal display (Top 100)
+            modalHtml = '<ol>';
+            modalHtml += uniqueEntries.slice(0, maxDisplayModal).map(entry => `<li>${entry.name}: ${entry.pawns} pawns</li>`).join('');
+            modalHtml += '</ol>';
+        }
+
+        // Update inline displays
+        if (globalRankingContentStart) globalRankingContentStart.innerHTML = inlineHtml;
+        if (globalRankingContentGame) globalRankingContentGame.innerHTML = inlineHtml;
+        // Update modal display
+        if (globalLeaderboardModalContent) globalLeaderboardModalContent.innerHTML = modalHtml;
+
+    }).catch((error) => {
+        console.error("Error getting global leaderboard:", error);
+        const errorMsg = "<p>Error loading leaderboard.</p>";
+        // Update inline displays with error
+        if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg;
+        if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
+        // Update modal display with error
+        if (globalLeaderboardModalContent) globalLeaderboardModalContent.innerHTML = errorMsg;
+    });
+}
 function addGlobalRecord(pName, finalPawns, finalYear) { const pawnsToSave = Math.max(0, finalPawns); console.log(`Attempting to add global record: P: ${pName}, Pawns: ${pawnsToSave}, Year: ${finalYear}, V: ${version}`); db.collection(leaderboardCollection).add({ playerName: pName || "Anon", finalPawns: pawnsToSave, finalYear: finalYear, version: version, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then((docRef) => { console.log(`Global record added successfully with ID: ${docRef.id}`); updateGlobalLeaderboard(); }).catch((error) => { console.error("!!! Error adding global record:", error); }); }
 function incrementGlobalGamesPlayed() { db.collection("globalStats").doc(statsDoc).set({ totalGamesPlayed: firebase.firestore.FieldValue.increment(1), gameTitle: gameTitle, version: version }, { merge: true }).then(() => { console.log("Total games incremented."); displayGlobalGamesPlayed(); }).catch(console.error); }
 function displayGlobalGamesPlayed() { db.collection("globalStats").doc(statsDoc).get().then((doc) => { const total = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0; const text = `(Total games played worldwide: ${total})`; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = text; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = text; }).catch((error) => { console.error("Error reading total games:", error); const errorText = "(Total games played worldwide: Error)"; if (globalGamesPlayedStart) globalGamesPlayedStart.innerText = errorText; if (globalGamesPlayedGame) globalGamesPlayedGame.innerText = errorText; }); }
@@ -185,8 +247,36 @@ function displayGlobalGamesPlayed() { db.collection("globalStats").doc(statsDoc)
 /***********************************************
  *      Local Ranking (Page Load Only)         *
  ***********************************************/
-// ... (No changes needed in these functions) ...
-function updateRankingBoard() { if (!rankingContentEl) return; const rankingsList = Object.values(localSessionRankings); const sortedRankings = rankingsList.sort((a, b) => b.pawns - a.pawns); let html = ''; if (sortedRankings.length === 0) { html = '<p>No games completed yet.</p>'; } else { html = '<ol>'; sortedRankings.slice(0, 10).forEach((entry) => { html += `<li>Game ${entry.round}: ${entry.pawns} pawns</li>`; }); html += '</ol>'; } rankingContentEl.innerHTML = html; }
+function updateRankingBoard() {
+    const maxDisplayInline = 10;
+    const maxDisplayModal = 100;
+
+    if (!rankingContentEl || !localLeaderboardModalContent) return;
+
+    const rankingsList = Object.values(localSessionRankings);
+    // Sort by pawns descending
+    const sortedRankings = rankingsList.sort((a, b) => b.pawns - a.pawns);
+
+    let inlineHtml = '<p>No games completed yet.</p>';
+    let modalHtml = '<p>No games completed yet.</p>';
+
+    if (sortedRankings.length > 0) {
+        // Generate HTML for inline display (Top 10)
+        inlineHtml = '<ol>';
+        inlineHtml += sortedRankings.slice(0, maxDisplayInline).map(entry => `<li>Game ${entry.round}: ${entry.pawns} pawns</li>`).join('');
+        inlineHtml += '</ol>';
+
+        // Generate HTML for modal display (Top 100)
+        modalHtml = '<ol>';
+        modalHtml += sortedRankings.slice(0, maxDisplayModal).map(entry => `<li>Game ${entry.round}: ${entry.pawns} pawns</li>`).join('');
+        modalHtml += '</ol>';
+    }
+
+    // Update inline display
+    rankingContentEl.innerHTML = inlineHtml;
+    // Update modal display
+    localLeaderboardModalContent.innerHTML = modalHtml;
+}
 function saveLocalRecord(roundNum, finalPawns) { const pawnsToSave = Math.max(0, finalPawns); localSessionRankings[pawnsToSave] = { round: roundNum, pawns: pawnsToSave }; updateRankingBoard(); }
 
 /***********************************************
@@ -283,6 +373,15 @@ function processTurn() { if (gameState.year >= maxYears) { updateUI(); handleGam
  *          Initialization & Listeners         *
  ***********************************************/
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Assign Modal Elements *after* DOM is ready ---
+    const globalLeaderboardModal = document.getElementById('globalLeaderboardModal');
+    const localLeaderboardModal = document.getElementById('localLeaderboardModal');
+    const globalLeaderboardModalContent = document.getElementById('globalLeaderboardModalContent');
+    const localLeaderboardModalContent = document.getElementById('localLeaderboardModalContent');
+    const closeGlobalModalButton = document.getElementById('closeGlobalModal');
+    const closeLocalModalButton = document.getElementById('closeLocalModal');
+    // --- End Assign Modal Elements ---
+
     console.log(`iOS detected: ${runningOnIOS}`); // Log detection result
 
     // --- Conditional UI Setup for Volume/Mute ---
@@ -317,7 +416,90 @@ document.addEventListener('DOMContentLoaded', () => {
     if (helpButton && helpModal && closeHelpButton) {
         helpButton.addEventListener('click', () => { helpModal.style.display = 'block'; });
         closeHelpButton.addEventListener('click', () => { helpModal.style.display = 'none'; });
-        window.addEventListener('click', (event) => { if (event.target == helpModal) { helpModal.style.display = 'none'; } });
+        window.addEventListener('click', (event) => {
+             if (event.target == helpModal) { helpModal.style.display = 'none'; }
+             // Close Leaderboard Modals via Background Click
+             if (event.target === globalLeaderboardModal) {
+                 globalLeaderboardModal.style.display = 'none';
+             }
+             if (event.target === localLeaderboardModal) {
+                 localLeaderboardModal.style.display = 'none';
+             }
+        });
     } else { console.error("Help modal elements not found!"); }
+
+    // --- Modal Event Listeners ---
+    console.log("Setting up modal listeners...");
+    console.log("Global Start Box:", globalLeaderboardStartBox);
+    console.log("Global Game Box:", globalLeaderboardGameBox);
+    console.log("Ranking Box:", rankingBoardBox);
+    console.log("Global Modal:", globalLeaderboardModal);
+    console.log("Local Modal:", localLeaderboardModal);
+    console.log("Close Global Btn:", closeGlobalModalButton);
+    console.log("Close Local Btn:", closeLocalModalButton);
+
+    // Open Global Modal
+    if (globalLeaderboardStartBox) {
+        globalLeaderboardStartBox.addEventListener('click', () => {
+            console.log("Global Leaderboard Start Box clicked!"); // DEBUG
+            updateGlobalLeaderboard(); // Refresh data just in case
+            if (globalLeaderboardModal) {
+                 console.log("Showing global modal."); // DEBUG
+                 globalLeaderboardModal.style.display = 'block';
+            } else {
+                 console.error("Global modal element not found!"); // DEBUG
+            }
+        });
+        console.log("Listener added to Global Start Box."); // DEBUG
+    } else { console.error("Global Leaderboard Start Box not found!"); }
+
+    if (globalLeaderboardGameBox) {
+        globalLeaderboardGameBox.addEventListener('click', () => {
+            console.log("Global Leaderboard Game Box clicked!"); // DEBUG
+            updateGlobalLeaderboard(); // Refresh data just in case
+            if (globalLeaderboardModal) {
+                 console.log("Showing global modal."); // DEBUG
+                 globalLeaderboardModal.style.display = 'block';
+            } else {
+                 console.error("Global modal element not found!"); // DEBUG
+            }
+        });
+        console.log("Listener added to Global Game Box."); // DEBUG
+    } else { console.error("Global Leaderboard Game Box not found!"); }
+
+    // Open Local Modal
+    if (rankingBoardBox) {
+        rankingBoardBox.addEventListener('click', () => {
+            console.log("Ranking Board Box clicked!"); // DEBUG
+            updateRankingBoard(); // Refresh data
+            if (localLeaderboardModal) {
+                 console.log("Showing local modal."); // DEBUG
+                 localLeaderboardModal.style.display = 'block';
+            } else {
+                 console.error("Local modal element not found!"); // DEBUG
+            }
+        });
+        console.log("Listener added to Ranking Board Box."); // DEBUG
+    } else { console.error("Ranking Board Box not found!"); }
+
+
+    // Close Modals via Button
+    if (closeGlobalModalButton) {
+        closeGlobalModalButton.addEventListener('click', () => {
+            console.log("Close global modal button clicked."); // DEBUG
+            if (globalLeaderboardModal) globalLeaderboardModal.style.display = 'none';
+        });
+        console.log("Listener added to Close Global Button."); // DEBUG
+    } else { console.error("Close Global Modal Button not found!"); }
+
+    if (closeLocalModalButton) {
+        closeLocalModalButton.addEventListener('click', () => {
+            console.log("Close local modal button clicked."); // DEBUG
+            if (localLeaderboardModal) localLeaderboardModal.style.display = 'none';
+        });
+        console.log("Listener added to Close Local Button."); // DEBUG
+    } else { console.error("Close Local Modal Button not found!"); }
+    // --- End Modal Event Listeners ---
+
 });
 // ----- End of game.js -----

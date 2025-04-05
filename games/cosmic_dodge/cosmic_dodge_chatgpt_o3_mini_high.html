@@ -83,6 +83,78 @@
              #playerInfo { display: flex; flex-direction: column; align-items: center; gap: 10px; }
              #playerInfo input { margin: 0; width: 80%; max-width: 250px; text-align: center; }
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            padding-top: 60px; /* Location of the box */
+        }
+        .modal-content {
+            background-color: #2a2a2a;
+            margin: 5% auto; /* 5% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%; /* Could be more or less, depending on screen size */
+            max-width: 500px; /* Maximum width */
+            border-radius: 8px;
+            position: relative;
+            color: #fff;
+            max-height: 80vh; /* Limit height */
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #555;
+            text-align: center;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        .modal-body {
+            flex-grow: 1; /* Take available space */
+            overflow-y: auto; /* Enable scrolling for the list */
+    padding-right: 10px; /* Space for scrollbar */
+}
+.modal-body ol {
+    padding-left: 0; /* Remove default padding */
+    margin: 0 auto; /* Center the block */
+    list-style-position: inside; /* Keep numbers inside the flow */
+    text-align: left; /* Align text left within the centered block */
+    max-width: fit-content; /* Shrink block to content width */
+}
+.modal-body li { margin-bottom: 6px; font-size: 0.95em; }
+.modal-body p { text-align: center; font-style: italic; color: #aaa; margin: 10px 0; }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Make leaderboard boxes clickable */
+        #globalLeaderboardStart, #globalLeaderboardGame, #rankingBoard {
+             cursor: pointer;
+        }
+        #globalLeaderboardStart:hover, #globalLeaderboardGame:hover, #rankingBoard:hover {
+             border-color: #00ffcc; /* Highlight on hover */
+        }
+
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -203,6 +275,12 @@
         const muteToggle = document.getElementById('muteToggle');
         const muteToggleLabel = document.getElementById('muteToggleLabel');
         // --- END: Volume/Mute DOM Elements ---
+        // Leaderboard Trigger Elements (Get these early)
+        const globalLeaderboardStartBox = document.getElementById('globalLeaderboardStart');
+        const globalLeaderboardGameBox = document.getElementById('globalLeaderboardGame');
+        const rankingBoardBox = document.getElementById('rankingBoard');
+        // NOTE: Modal elements will be assigned inside DOMContentLoaded
+
 
         /***********************************************
          *           Volume/Mute Control Logic         *
@@ -267,15 +345,58 @@
         /***********************************************
          *       Firestore Leaderboard & Stats         *
          ***********************************************/
-        // ... (Firestore functions remain unchanged) ...
         function updateGlobalLeaderboard() {
-            db.collection(leaderboardCollection).orderBy("level", "desc").orderBy("timestamp", "desc").limit(50).get()
+            // Fetch more to allow filtering for top 100 unique
+            const fetchLimit = 200;
+            const maxDisplayInline = 10; // Max entries for the inline display
+            const maxDisplayModal = 100; // Max entries for the modal display
+
+            db.collection(leaderboardCollection).orderBy("level", "desc").orderBy("timestamp", "desc").limit(fetchLimit).get()
             .then((querySnapshot) => {
-                let html = '<ol>'; const uniqueEntries = []; const levelsSeen = new Set(); const maxDisplay = 10;
-                if (!querySnapshot.empty) { querySnapshot.forEach((doc) => { const data = doc.data(); if (data && data.level && !levelsSeen.has(data.level) && uniqueEntries.length < maxDisplay) { uniqueEntries.push(`<li>${data.playerName || 'Anon'} reached level ${data.level}</li>`); levelsSeen.add(data.level); } }); } // Added data check
-                if (uniqueEntries.length === 0) { html = '<p>No scores yet. Be the first!</p>'; } else { html += uniqueEntries.join(''); html += '</ol>'; }
-                if (globalRankingContentStart) globalRankingContentStart.innerHTML = html; if (globalRankingContentGame) globalRankingContentGame.innerHTML = html;
-            }).catch((error) => { console.error("Error getting global leaderboard:", error); const errorMsg = "<p>Error loading leaderboard.</p>"; if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg; if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg; });
+                const uniqueEntries = [];
+                const levelsSeen = new Set();
+
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        // Check data validity and if level already displayed and limit not reached
+                        if (data && data.level !== undefined && !levelsSeen.has(data.level) && uniqueEntries.length < maxDisplayModal) {
+                            uniqueEntries.push({ name: data.playerName || 'Anon', level: data.level });
+                            levelsSeen.add(data.level); // Mark level as seen
+                        }
+                    });
+                }
+
+                let inlineHtml = '<p>No scores yet. Be the first!</p>';
+                let modalHtml = '<p>No scores yet. Be the first!</p>';
+
+                if (uniqueEntries.length > 0) {
+                    // Generate HTML for inline display (Top 10)
+                    inlineHtml = '<ol>';
+                    inlineHtml += uniqueEntries.slice(0, maxDisplayInline).map(entry => `<li>${entry.name} reached level ${entry.level}</li>`).join('');
+                    inlineHtml += '</ol>';
+
+                    // Generate HTML for modal display (Top 100)
+                    modalHtml = '<ol>';
+                    modalHtml += uniqueEntries.slice(0, maxDisplayModal).map(entry => `<li>${entry.name} reached level ${entry.level}</li>`).join('');
+                    modalHtml += '</ol>';
+                }
+
+                // Update inline displays
+                if (globalRankingContentStart) globalRankingContentStart.innerHTML = inlineHtml;
+                if (globalRankingContentGame) globalRankingContentGame.innerHTML = inlineHtml;
+                // Update modal display
+                if (globalLeaderboardModalContent) globalLeaderboardModalContent.innerHTML = modalHtml;
+
+            }).catch((error) => {
+                console.error("Error getting global leaderboard:", error);
+                const errorMsg = "<p>Error loading leaderboard.</p>";
+                // Update inline displays with error
+                if (globalRankingContentStart) globalRankingContentStart.innerHTML = errorMsg;
+                if (globalRankingContentGame) globalRankingContentGame.innerHTML = errorMsg;
+                // Update modal display with error
+                if (globalLeaderboardModalContent) globalLeaderboardModalContent.innerHTML = errorMsg;
+            });
         }
         function addGlobalRecord(finalLevel) {
             if (!playerName) { console.warn("Player name missing, cannot add global record."); return; }
@@ -295,11 +416,36 @@
         /***********************************************
          *      Local Ranking (Page Load Only)         *
          ***********************************************/
-        // ... (Local ranking functions remain unchanged) ...
+        // Updated to populate both inline and modal displays
         function updateRankingBoard() {
-            if (!rankingContentEl) return; const rankingsList = Object.values(localSessionRankings); const sortedRankings = rankingsList.sort((a, b) => b.level - a.level); let html = '';
-            if (sortedRankings.length === 0) { html = '<p>No rounds completed yet.</p>'; } else { html = '<ol>'; sortedRankings.slice(0, 10).forEach((entry) => { html += `<li>Round ${entry.round}: Level ${entry.level}</li>`; }); html += '</ol>'; }
-            rankingContentEl.innerHTML = html;
+            const maxDisplayInline = 10;
+            const maxDisplayModal = 100;
+
+            if (!rankingContentEl || !localLeaderboardModalContent) return;
+
+            const rankingsList = Object.values(localSessionRankings);
+            // Sort by level descending
+            const sortedRankings = rankingsList.sort((a, b) => b.level - a.level);
+
+            let inlineHtml = '<p>No rounds completed yet.</p>';
+            let modalHtml = '<p>No rounds completed yet.</p>';
+
+            if (sortedRankings.length > 0) {
+                // Generate HTML for inline display (Top 10)
+                inlineHtml = '<ol>';
+                inlineHtml += sortedRankings.slice(0, maxDisplayInline).map(entry => `<li>Round ${entry.round}: Level ${entry.level}</li>`).join('');
+                inlineHtml += '</ol>';
+
+                // Generate HTML for modal display (Top 100)
+                modalHtml = '<ol>';
+                modalHtml += sortedRankings.slice(0, maxDisplayModal).map(entry => `<li>Round ${entry.round}: Level ${entry.level}</li>`).join('');
+                modalHtml += '</ol>';
+            }
+
+            // Update inline display
+            rankingContentEl.innerHTML = inlineHtml;
+            // Update modal display
+            localLeaderboardModalContent.innerHTML = modalHtml;
         }
         function saveLocalRecord(roundNum, finalLevel) {
              const levelToSave = Math.max(1, finalLevel); localSessionRankings[levelToSave] = { round: roundNum, level: levelToSave }; updateRankingBoard();
@@ -422,6 +568,15 @@
          *          Initialization                     *
          ***********************************************/
         document.addEventListener('DOMContentLoaded', () => {
+             // --- Assign Modal Elements *after* DOM is ready ---
+             const globalLeaderboardModal = document.getElementById('globalLeaderboardModal');
+             const localLeaderboardModal = document.getElementById('localLeaderboardModal');
+             const globalLeaderboardModalContent = document.getElementById('globalLeaderboardModalContent');
+             const localLeaderboardModalContent = document.getElementById('localLeaderboardModalContent');
+             const closeGlobalModalButton = document.getElementById('closeGlobalModal');
+             const closeLocalModalButton = document.getElementById('closeLocalModal');
+             // --- End Assign Modal Elements ---
+
              if (!ctx) { console.error("Cosmic Dodge: Failed to get canvas context on DOMContentLoaded."); return; }
 
              console.log(`Cosmic Dodge: iOS detected: ${runningOnIOS}`);
@@ -447,9 +602,78 @@
              updateGlobalLeaderboard(); displayGlobalGamesPlayed(); updateRankingBoard();
              document.getElementById("startGame")?.addEventListener("click", startGameNow);
              playerNameInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); startGameNow(); } });
+
+             // --- Modal Event Listeners ---
+             // Open Global Modal
+             if (globalLeaderboardStartBox) {
+                 globalLeaderboardStartBox.addEventListener('click', () => {
+                     updateGlobalLeaderboard(); // Refresh data just in case
+                     if (globalLeaderboardModal) globalLeaderboardModal.style.display = 'block';
+                 });
+             }
+             if (globalLeaderboardGameBox) {
+                 globalLeaderboardGameBox.addEventListener('click', () => {
+                     updateGlobalLeaderboard(); // Refresh data just in case
+                     if (globalLeaderboardModal) globalLeaderboardModal.style.display = 'block';
+                 });
+             }
+             // Open Local Modal
+             if (rankingBoardBox) {
+                 rankingBoardBox.addEventListener('click', () => {
+                     updateRankingBoard(); // Refresh data
+                     if (localLeaderboardModal) localLeaderboardModal.style.display = 'block';
+                 });
+             }
+
+             // Close Modals via Button
+             if (closeGlobalModalButton) {
+                 closeGlobalModalButton.addEventListener('click', () => {
+                     if (globalLeaderboardModal) globalLeaderboardModal.style.display = 'none';
+                 });
+             }
+             if (closeLocalModalButton) {
+                 closeLocalModalButton.addEventListener('click', () => {
+                     if (localLeaderboardModal) localLeaderboardModal.style.display = 'none';
+                 });
+             }
+
+             // Close Modals via Background Click
+             window.addEventListener('click', (event) => {
+                 if (event.target === globalLeaderboardModal) {
+                     globalLeaderboardModal.style.display = 'none';
+                 }
+                 if (event.target === localLeaderboardModal) {
+                     localLeaderboardModal.style.display = 'none';
+                 }
+             });
+             // --- End Modal Event Listeners ---
+
         });
     </script>
 
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+
+    <!-- Global Leaderboard Modal -->
+    <div id="globalLeaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeGlobalModal">&times;</span>
+            <div class="modal-header">Global Leaderboard</div>
+            <div class="modal-body" id="globalLeaderboardModalContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local Leaderboard Modal -->
+    <div id="localLeaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeLocalModal">&times;</span>
+            <div class="modal-header">Local Session Ranking</div>
+            <div class="modal-body" id="localLeaderboardModalContent">
+                <p>No rounds completed yet.</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

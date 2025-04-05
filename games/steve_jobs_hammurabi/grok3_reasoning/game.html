@@ -127,5 +127,28 @@
     <script src="game.js?v=1.1"></script>
 
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+
+    <!-- Global Leaderboard Modal -->
+    <div id="globalLeaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeGlobalModal">&times;</span>
+            <div class="modal-header">Global Leaderboard</div>
+            <div class="modal-body" id="globalLeaderboardModalContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local Leaderboard Modal -->
+    <div id="localLeaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeLocalModal">&times;</span>
+            <div class="modal-header">Local Session Ranking</div>
+            <div class="modal-body" id="localLeaderboardModalContent">
+                <p>No games completed yet.</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
