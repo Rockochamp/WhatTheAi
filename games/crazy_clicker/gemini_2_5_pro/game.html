@@ -908,6 +908,75 @@
 
      </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const globalLeaderboardModal = document.getElementById('globalLeaderboardModal');
+            const localLeaderboardModal = document.getElementById('localLeaderboardModal');
+            const closeGlobalModalButton = document.getElementById('closeGlobalModal');
+            const closeLocalModalButton = document.getElementById('closeLocalModal');
+            const globalLeaderboardStartBox = document.getElementById('globalLeaderboardStart');
+            const localRankingBoardBox = document.getElementById('localRankingBoard');
+
+            // Open Global Leaderboard Modal
+            globalLeaderboardStartBox.addEventListener('click', () => {
+                globalLeaderboardModal.style.display = 'block';
+                globalLeaderboardModal.setAttribute('aria-hidden', 'false');
+                closeGlobalModalButton.focus(); // Set focus to close button
+            });
+
+            // Open Local Leaderboard Modal
+            localRankingBoardBox.addEventListener('click', () => {
+                localLeaderboardModal.style.display = 'block';
+                localLeaderboardModal.setAttribute('aria-hidden', 'false');
+                closeLocalModalButton.focus(); // Set focus to close button
+            });
+
+            // Close Global Leaderboard Modal
+            closeGlobalModalButton.addEventListener('click', () => {
+                globalLeaderboardModal.style.display = 'none';
+                globalLeaderboardModal.setAttribute('aria-hidden', 'true');
+                globalLeaderboardStartBox.focus(); // Return focus to the trigger
+            });
+
+            // Close Local Leaderboard Modal
+            closeLocalModalButton.addEventListener('click', () => {
+                localLeaderboardModal.style.display = 'none';
+                localLeaderboardModal.setAttribute('aria-hidden', 'true');
+                localRankingBoardBox.focus(); // Return focus to the trigger
+            });
+
+            // Close modals when clicking outside the modal content
+            window.addEventListener('click', (event) => {
+                if (event.target === globalLeaderboardModal) {
+                    globalLeaderboardModal.style.display = 'none';
+                    globalLeaderboardModal.setAttribute('aria-hidden', 'true');
+                    globalLeaderboardStartBox.focus(); // Return focus to the trigger
+                }
+                if (event.target === localLeaderboardModal) {
+                    localLeaderboardModal.style.display = 'none';
+                    localLeaderboardModal.setAttribute('aria-hidden', 'true');
+                    localRankingBoardBox.focus(); // Return focus to the trigger
+                }
+            });
+
+            // Close modals when pressing the Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    if (globalLeaderboardModal.style.display === 'block') {
+                        globalLeaderboardModal.style.display = 'none';
+                        globalLeaderboardModal.setAttribute('aria-hidden', 'true');
+                        globalLeaderboardStartBox.focus(); // Return focus to the trigger
+                    }
+                    if (localLeaderboardModal.style.display === 'block') {
+                        localLeaderboardModal.style.display = 'none';
+                        localLeaderboardModal.setAttribute('aria-hidden', 'true');
+                        localRankingBoardBox.focus(); // Return focus to the trigger
+                    }
+                }
+            });
+        });
+    </script>
+
     <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
