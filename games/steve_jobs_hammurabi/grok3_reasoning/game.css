@@ -41,22 +41,21 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
-    padding-top: 60px; /* Location of the box */
+    background-color: rgba(0, 0, 0, 0.7); /* Black w/ opacity */
+    backdrop-filter: blur(3px); /* Optional blur effect */
 }
 .modal-content {
     background-color: #2a2a2a;
-    margin: 5% auto; /* 5% from the top and centered */
+    margin: 5% auto; /* Centered vertically and horizontally */
     padding: 20px;
     border: 1px solid #888;
-    width: 90%; /* Could be more or less, depending on screen size */
-    max-width: 500px; /* Maximum width */
+    width: 90%; /* Adjust width */
+    max-width: 600px; /* Limit maximum width */
+    max-height: 80vh; /* Limit height to 80% of the viewport */
+    overflow-y: auto; /* Enable vertical scrolling for long content */
     border-radius: 8px;
-    position: relative;
     color: #fff;
-    max-height: 80vh; /* Limit height */
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
 }
 .modal-header {
     padding-bottom: 10px;
@@ -69,6 +68,7 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
     flex-grow: 1; /* Take available space */
     overflow-y: auto; /* Enable scrolling for the list */
     padding-right: 10px; /* Space for scrollbar */
+    max-height: 60vh; /* Limit height to 60% of the viewport */
 }
 .modal-body ol {
     padding-left: 30px; /* Add space for list numbers */

@@ -6,7 +6,7 @@
     <title>Steve Jobs - Hammurabi - What the Ai</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <!-- Updated cache-busting query string -->
-    <link rel="stylesheet" href="game.css?v=1.3">
+    <link rel="stylesheet" href="game.css?v=1.4">
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
@@ -124,7 +124,7 @@
 
     <script src="/js/common/blocklist.js"></script>
     <!-- Updated cache-busting query string -->
-    <script src="game.js?v=1.3"></script>
+    <script src="game.js?v=1.4"></script>
 
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
 
@@ -150,5 +150,36 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const helpModal = document.getElementById('helpModal');
+            const helpButton = document.getElementById('helpButton');
+            const closeHelpButton = document.getElementById('closeHelp');
+
+            // Open the modal when the "How to Play" button is clicked
+            helpButton.addEventListener('click', () => {
+                helpModal.style.display = 'block';
+            });
+
+            // Close the modal when the close button is clicked
+            closeHelpButton.addEventListener('click', () => {
+                helpModal.style.display = 'none';
+            });
+
+            // Close the modal when clicking outside the modal content
+            window.addEventListener('click', (event) => {
+                if (event.target === helpModal) {
+                    helpModal.style.display = 'none';
+                }
+            });
+
+            // Close the modal when pressing the Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && helpModal.style.display === 'block') {
+                    helpModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
