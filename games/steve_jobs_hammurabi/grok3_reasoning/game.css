@@ -3,7 +3,7 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
 .breadcrumb { position: absolute; top: 10px; left: 10px; z-index: 10; background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; }
 .breadcrumb a { text-decoration: none; color: #333; font-size: 1em; }
 .version-indicator { position: absolute; top: 10px; right: 10px; z-index: 10; background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; font-family: Arial, sans-serif; color: #333; font-size: 0.9em; }
-#titleBanner { background: #333; padding: 20px; font-size: 2em; margin-bottom: 10px; text-align: center; }
+#titleBanner { background: #333; padding: 20px; font-size: 2em; margin-bottom: 10px; text-align: center; margin-top: 30px; /* Add margin to push the title further down */ }
 
 /* Start Screen */
 #startScreen { text-align: center; padding: 20px; }
