@@ -71,11 +71,10 @@ body { background: #1a1a1a; color: #fff; font-family: Arial, sans-serif; margin:
     padding-right: 10px; /* Space for scrollbar */
 }
 .modal-body ol {
-    padding-left: 0; /* Remove default padding */
-    margin: 0 auto; /* Center the block */
-    list-style-position: inside; /* Keep numbers inside the flow */
-    text-align: left; /* Align text left within the centered block */
-    max-width: fit-content; /* Shrink block to content width */
+    padding-left: 30px; /* Add space for list numbers */
+    margin: 0; /* Reset margin */
+    list-style-position: outside; /* Default, numbers outside */
+    text-align: left; /* Align text left */
 }
 .modal-body li { margin-bottom: 6px; font-size: 0.95em; }
 .modal-body p { text-align: center; font-style: italic; color: #aaa; margin: 10px 0; }
