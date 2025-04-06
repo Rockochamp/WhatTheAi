@@ -655,13 +655,14 @@
                     score = 0;
                     firstClickTime = null;
                     secondClickTime = null;
-                    taktTime = null;
-                    lastValidClickTime = null;
-                    scoreDisplay.textContent = score;
-                    instructionText.textContent = "Click anywhere for your first beat...";
-                    // Attempt to play music when game starts
-                    if (backgroundMusic && backgroundMusic.paused) {
-                        try {
+                        taktTime = null;
+                        lastValidClickTime = null;
+                        scoreDisplay.textContent = score;
+                        instructionText.textContent = "Click anywhere for your first beat...";
+                        displayGlobalGamesPlayed(); // Refresh count when starting a round
+                        // Attempt to play music when game starts
+                        if (backgroundMusic && backgroundMusic.paused) {
+                            try {
                             // Apply saved volume/mute state BEFORE playing
                             if (runningOnIOS) {
                                 if (muteToggle) backgroundMusic.muted = muteToggle.checked;
