@@ -403,23 +403,26 @@
         // --- END: New Typewriter Title Script ---
 
         // Dark Mode Toggle Script
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
 
-        // Apply saved preference on load
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-        }
+            if (darkModeEnabled) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.querySelector('i').className = 'fas fa-sun'; // Set icon to sun
+            } else {
+                darkModeToggle.querySelector('i').className = 'fas fa-moon'; // Set icon to moon
+            }
 
-        // Toggle dark mode on button click
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const darkModeEnabled = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', darkModeEnabled);
+            darkModeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const darkModeEnabled = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', darkModeEnabled);
 
-            // Update icon based on mode
-            const icon = darkModeToggle.querySelector('i');
-            icon.className = darkModeEnabled ? 'fas fa-sun' : 'fas fa-moon';
+                // Update icon based on mode
+                const icon = darkModeToggle.querySelector('i');
+                icon.className = darkModeEnabled ? 'fas fa-sun' : 'fas fa-moon';
+            });
         });
     </script>
 
