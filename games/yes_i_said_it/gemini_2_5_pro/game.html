@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yes! I Said It.</title>
+    <!-- Pico.css Minimalist Framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <!-- Your Custom Styles (Load After Pico for Overrides) -->
+    <link rel="stylesheet" href="game.css">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Cloudflare Analytics -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+</head>
+<body>
+    <!-- Control Buttons -->
+    <div class="top-controls">
+        <button class="control-btn dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button class="control-btn mute-toggle" id="muteToggle" aria-label="Toggle music">
+            <i class="fas fa-volume-up"></i> <!-- Initial state: unmuted -->
+        </button>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="background-music" src="/music/YesISaidIt.m4a" loop></audio>
+
+    <div class="container">
+        <h1>Yes! I Said It.</h1>
+        <p>Say anything. Vote on anything. See what rises to the top... or sinks to the bottom.</p>
+
+        <!-- Main Screen View -->
+        <div id="main-screen">
+
+             <div class="global-comment-input">
+                <h3>Start a New Discussion</h3>
+                <textarea id="global-comment-textarea" placeholder="Say something new..."></textarea>
+                <button id="submit-global-comment-btn">Submit</button>
+            </div>
+
+            <h2>Global Ranking</h2>
+            <div class="rank-toggle">
+                <button id="rank-recent-btn" class="active">Most Recent</button>
+                <button id="rank-love-btn">Most Loved</button>
+                <button id="rank-hate-btn">Most Hated</button>
+            </div>
+            <div id="ranked-list-container">
+                <p>Loading comments...</p>
+                <!-- Ranked comments will be loaded here -->
+            </div>
+
+        </div>
+
+        <!-- Chain View -->
+        <div id="chain-view" style="display: none;">
+            <button id="back-to-main-btn">&larr; Back to Rankings</button>
+            <h2>Comment Chain</h2>
+
+            <div id="comment-thread-container" class="scrollable-thread">
+                <!-- Ancestors, focused comment, and children will be loaded here -->
+                <p>Loading thread...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <script>
+        // IMPORTANT: REPLACE THIS WITH YOUR *PRODUCTION* FIREBASE CONFIG
+        const firebaseConfig = {
+             apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE", // REPLACE
+             authDomain: "cosmicdodge-5ae20.firebaseapp.com", // REPLACE
+             projectId: "cosmicdodge-5ae20", // REPLACE
+             storageBucket: "cosmicdodge-5ae20.appspot.com", // REPLACE
+             messagingSenderId: "940230809594", // REPLACE
+             appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643" // REPLACE
+        };
+        // --- End of config to replace ---
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <script src="game.js"></script>
+</body>
+</html>
