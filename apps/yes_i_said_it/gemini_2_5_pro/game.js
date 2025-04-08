@@ -894,8 +894,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 audioElement.pause(); // Explicitly pause when muting via button
             } else {
                 muteToggle.querySelector('i').className = 'fas fa-volume-up';
-                // Don't just play, use the attempt function which handles autoplay issues
-                attemptAudioPlay();
+                // Explicitly play when unmuting if the element exists
+                if (audioElement) {
+                    audioElement.play().catch(error => console.error("Error resuming playback:", error));
+                }
             }
         });
 
