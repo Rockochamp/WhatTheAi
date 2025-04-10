@@ -204,20 +204,57 @@
             /* border-top: 1px solid #333; */ /* Removed border */
         }
 
-        /* Modified: Footer paragraph styling for fixed positioning */
+        /* Added: About Section Styles */
+        .about-section {
+            max-width: 1200px; /* Match grid max-width */
+            margin: 30px auto 20px auto; /* Top margin, auto horizontal, bottom margin */
+            padding: 20px; /* Reverted padding */
+            background-color: #fff; /* Light mode background */
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; /* Light mode text */
+            /* box-sizing: border-box; */ /* Reverted box-sizing */
+        }
+        .about-section h2 {
+            margin-top: 0;
+            font-size: 1.4em;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .about-section p {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #555;
+        }
+        body.dark-mode .about-section {
+            background-color: #1e1e1e; /* Dark mode background */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            color: #ffffff; /* Dark mode text */
+        }
+        body.dark-mode .about-section h2 {
+            color: #ffffff;
+            border-bottom-color: #333;
+        }
+        body.dark-mode .about-section p {
+            color: #ccc;
+        }
+
+        /* Modified: Footer paragraph styling - REMOVED fixed positioning */
         footer p {
-            position: fixed;
-            bottom: 0;
-            left: 0;
+            /* position: fixed; */ /* REMOVED */
+            /* bottom: 0; */ /* REMOVED */
+            /* left: 0; */ /* REMOVED */
             margin: 0;
-            padding: 7px 15px; /* Match Vibe Jam vertical padding */
+            padding: 7px 15px;
             font-size: 0.9em;
             color: #555; /* Explicit light mode color */
             /* background-color: #f0f0f0; */ /* Removed background */
-            z-index: 9999; /* Below Vibe Jam link */
+            /* z-index: 9999; */ /* REMOVED */
             text-align: left !important; /* Ensure left alignment */
         }
-        /* Added: Dark mode specific color for fixed footer p */
+        /* Added: Dark mode specific color for footer p */
         body.dark-mode footer p {
              color: #aaa; /* Explicit dark mode color */
              /* background-color: #1e1e1e; */ /* Removed background */
@@ -238,6 +275,18 @@
     <div class="grid" id="game-grid">
         <!-- Game items will be generated here by JavaScript -->
     </div>
+
+    <!-- NEW ABOUT SECTION -->
+    <section class="about-section">
+        <h2>About What the AI</h2>
+        <p>
+            What the AI is a showcase of games and apps created using modern, vibe-rich coding techniques and a mix of different AI base models. Each experience highlights how today’s AI systems can generate everything from mechanics to visuals with minimal human input — blending creativity, code, and cutting-edge automation.
+        </p>
+        <p>
+            Even the assets — like images and music — are crafted using state-of-the-art AI models, pushing the boundaries of what’s possible with AI-driven creation.
+        </p>
+    </section>
+    <!-- END ABOUT SECTION -->
 
     <script>
         // Game data array (existing script)
