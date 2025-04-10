@@ -257,10 +257,35 @@
         /* Added: Dark mode specific color for footer p */
         body.dark-mode footer p {
              color: #aaa; /* Explicit dark mode color */
-             /* background-color: #1e1e1e; */ /* Removed background */
+              /* background-color: #1e1e1e; */ /* Removed background */
+         }
+
+        /* NEW: Fixed positioning for footer p ONLY on desktop */
+        @media (min-width: 768px) { /* Apply styles for screens 768px and wider */
+            footer p {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                z-index: 10000; /* Match Vibe Jam z-index */
+                /* Optional: Add background if needed, matching Vibe Jam button style */
+                /* background: #fff; */
+                /* border-top-right-radius: 12px; */ /* Optional: Mirror Vibe Jam style */
+            }
+
+            /* Optional: Adjust dark mode background if needed for fixed element */
+            /* body.dark-mode footer p {
+                background: #333;
+            } */
         }
-    </style>
-</head>
+
+        /* Added: Dark mode styles for Vibe Jam button */
+        body.dark-mode footer a[target="_blank"] {
+           background: #333; /* Example dark mode background */
+           color: #fff; /* Example dark mode text */
+           border-color: #333; /* Example dark mode border */
+        }
+     </style>
+ </head>
 <body>
     <header>
         <!-- MODIFIED: Added ID -->
