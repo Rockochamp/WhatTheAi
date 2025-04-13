@@ -112,6 +112,20 @@
              opacity: 0.7;
          }
 
+        /* NEW: Styles for coming soon items */
+        .coming-soon a { /* Target the link inside */
+            cursor: default; /* Change cursor to show it's not clickable */
+        }
+        .coming-soon img {
+            opacity: 0.6; /* Make the image slightly faded */
+        }
+        .coming-soon .game-title {
+             color: #888; /* Optional: Dim the title text */
+        }
+        body.dark-mode .coming-soon .game-title {
+             color: #aaa; /* Dark mode dimmed title */
+        }
+
         /* Added for accessibility: Hide labels visually but keep for screen readers */
         .visually-hidden {
             position: absolute;
@@ -347,6 +361,14 @@
                versions: [
                    { name: "Gemini 2.5 Pro", url: "/apps/yes_i_said_it/gemini_2_5_pro/game.html" }
                ]
+            },
+            {
+               id: 5,
+               title: "Little Exponentials (coming soon!)", // Corrected typo
+                thumbnail: "/images/LittleExponentials.webp", // Placeholder path
+                versions: [
+                     { name: "Gemini 2.5 Pro", url: "/games/little_exponentials/gemini_2_5_pro/game.html" } // Note: This URL likely doesn't exist yet
+               ]
             }
             // Add more games here following the same structure
         ];
@@ -366,9 +388,16 @@
                 item.className = "game-item";
 
                 const imgLink = document.createElement("a");
-                // Default to first version, updated by select change
-                imgLink.href = game.versions[0].url;
-                imgLink.id = `game-link-${game.id}`;
+                imgLink.id = `game-link-${game.id}`; // Set ID regardless
+
+                // Check if the game is marked as coming soon (using corrected title)
+                if (game.title.includes("(coming soon!)")) {
+                    item.classList.add("coming-soon");
+                    // Do not set href for coming soon games
+                } else {
+                    // Default to first version for active games, updated by select change
+                    imgLink.href = game.versions[0].url;
+                }
 
                 const img = document.createElement("img");
                 img.src = game.thumbnail;
@@ -403,16 +432,21 @@
                 if (game.versions.length <= 1) {
                     versionSelect.disabled = true;
                 } else {
-                    // Add event listener only if there are multiple versions
-                    versionSelect.addEventListener('change', function() {
-                        const selectedIndex = parseInt(this.value, 10);
-                        const gameLink = document.getElementById(`game-link-${game.id}`);
-                        if (gameLink && game.versions[selectedIndex]) {
-                            gameLink.href = game.versions[selectedIndex].url;
-                        } else {
-                             console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
-                        }
-                    });
+                    // Add event listener only if there are multiple versions AND it's not coming soon (using corrected title)
+                    if (!game.title.includes("(coming soon!)")) {
+                        versionSelect.addEventListener('change', function() {
+                            const selectedIndex = parseInt(this.value, 10);
+                            const gameLink = document.getElementById(`game-link-${game.id}`);
+                            if (gameLink && game.versions[selectedIndex]) {
+                                gameLink.href = game.versions[selectedIndex].url;
+                            } else {
+                                 console.error(`Could not find link or version for game ID ${game.id} and index ${selectedIndex}`);
+                            }
+                        });
+                    } else {
+                        // Disable select for coming soon games as well
+                        versionSelect.disabled = true;
+                    }
                 }
 
 
