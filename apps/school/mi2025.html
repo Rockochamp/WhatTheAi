@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KI Bild-Werkstatt – Gemini</title>
+<style>
+  :root{--bg:#0b1220;--fg:#e5e7eb;--muted:#94a3b8;--card:#0f172a;--accent:#22c55e;--border:#1f2937}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial}
+  header,main{max-width:980px;margin:0 auto;padding:16px}
+  h1{margin:0 0 6px;font-size:1.4rem}
+  .sub{margin:0 0 16px;color:var(--muted);font-size:.95rem}
+  .wrap{display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:900px){.wrap{grid-template-columns:1fr 1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .card h2{margin:.2rem 0 8px;font-size:1.05rem}
+  label{display:block;font-size:.9rem;margin:.5rem 0 .25rem;color:var(--muted)}
+  textarea,input[type="text"]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0c1528;color:var(--fg);font:inherit}
+  textarea{min-height:120px;resize:vertical}
+  input[type="file"]{display:block;margin:.25rem 0 0}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .btn{appearance:none;border:1px solid var(--border);background:var(--accent);color:#0b1220;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}
+  .btn.secondary{background:transparent;color:var(--fg)}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
+  .hint{color:var(--muted);font-size:.85rem;margin-top:8px}
+  pre{white-space:pre-wrap;background:#0c1528;border:1px solid var(--border);padding:10px;border-radius:10px;max-height:200px;overflow:auto}
+  .gallery{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .tile{background:#0c1528;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:220px}
+  .tile img{width:100%;display:block}
+  .tile .actions{display:flex;gap:6px;padding:8px;border-top:1px solid var(--border)}
+  .tile .actions button{flex:1}
+  .footer{color:var(--muted);font-size:.8rem;margin-top:12px;text-align:center}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#15223a;border:1px solid var(--border);font-size:.74rem;color:var(--muted)}
+  /* Spinner + Skeleton */
+  .loading{display:grid;place-items:center;gap:8px;flex:1;padding:24px}
+  .spinner{width:36px;height:36px;border-radius:50%;border:3px solid #1f2937;border-top-color:var(--accent);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .skeleton{width:92%;height:140px;border-radius:10px;background:linear-gradient(90deg,#101a2f,#14213a,#101a2f);background-size:200% 100%;animation:shimmer 1.2s ease-in-out infinite}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  /* Passwort-Gate */
+  #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,7,18,.92);backdrop-filter:blur(6px);z-index:9999}
+  #gate .box{width:min(96vw,420px);background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+  #gate h3{margin:0 0 4px}
+  #gate p{margin:0 0 12px;color:var(--muted);font-size:.95rem}
+  #pw{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0c1528;color:var(--fg);font:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1>KI Bild-Werkstatt <span class="badge">Gemini</span></h1>
+  <p class="sub">Text-to-Image & Image-to-Image mit Google GenAI • Galerie & Download</p>
+</header>
+
+<main>
+  <div class="wrap">
+    <!-- TEXT TO IMAGE -->
+    <section class="card">
+      <h2>Text-to-Image</h2>
+      <label for="t2i">Prompt (Beschreibung)</label>
+      <textarea id="t2i" placeholder="z.B. Realistisches Porträt von Banana-Man in Banatham, dramatisches Gegenlicht, keine Comic-Optik."></textarea>
+      <div class="row">
+        <button class="btn" id="btnT2I" type="button">Bild erzeugen</button>
+        <button class="btn secondary" id="btnClearPrompt" type="button">Prompt leeren</button>
+      </div>
+      <p class="hint">Tipp: Motiv + Stil + Licht + Umgebung; schulgeeignet.</p>
+      <p>Ausgabe (Text, wenn vorhanden)</p>
+      <pre id="txtOut"></pre>
+    </section>
+
+    <!-- IMAGE TO IMAGE -->
+    <section class="card">
+      <h2>Image-to-Image</h2>
+      <label for="i2iFile">Ausgangsbild (Upload)</label>
+      <input type="file" id="i2iFile" accept="image/*">
+      <label for="i2iPrompt">Stil / Änderungen (optional)</label>
+      <input type="text" id="i2iPrompt" placeholder="z.B. filmische Farben, wärmeres Licht, realistisch.">
+      <div class="row">
+        <button class="btn" id="btnI2I" type="button">Bild umwandeln</button>
+        <button class="btn secondary" id="btnClearI2I" type="button">Zurücksetzen</button>
+      </div>
+      <p>Ausgabe (Text, wenn vorhanden)</p>
+      <pre id="txtOut2"></pre>
+    </section>
+  </div>
+
+  <!-- GALLERY -->
+  <section class="card">
+    <h2>Galerie</h2>
+    <div id="gallery" class="gallery"></div>
+    <p class="footer">Alle generierten Bilder erscheinen hier.</p>
+  </section>
+</main>
+
+<!-- PASSWORT-GATE -->
+<div id="gate" hidden>
+  <div class="box">
+    <h3>Passwort erforderlich</h3>
+    <p>Bitte das Passwort eingeben, das du im Unterricht erhalten hast.</p>
+    <input id="pw" type="password" placeholder="Passwort" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <div class="row" style="margin-top:10px;">
+      <button class="btn" id="enter" type="button">Öffnen</button>
+      <button class="btn secondary" id="cancel" type="button">Schliessen</button>
+    </div>
+    <p id="msg" class="hint" style="margin-top:8px;"></p>
+  </div>
+</div>
+
+<script>
+/* ========= Passwort-Gate ========= */
+(function(){
+  const PASSWORD = "123";
+  const GATE_KEY = "ki_gate_ok";
+  const gate = document.getElementById('gate');
+  const pw   = document.getElementById('pw');
+  const msg  = document.getElementById('msg');
+  function hideGate(){ gate.hidden=true; gate.style.display="none"; }
+  function showGate(){ gate.hidden=false; gate.style.display="flex"; setTimeout(()=>pw.focus(),0); }
+  const passParam=new URLSearchParams(location.search).get('pass');
+  if(passParam===PASSWORD){ try{localStorage.setItem(GATE_KEY,"1");}catch{} hideGate(); }
+  else { try{ if(localStorage.getItem(GATE_KEY)!=="1") showGate(); } catch{ showGate(); } }
+  function tryOpen(){ if((pw.value||"").trim()===PASSWORD){ try{localStorage.setItem(GATE_KEY,"1");}catch{} hideGate(); msg.textContent=""; } else msg.textContent="Falsches Passwort."; }
+  document.getElementById('enter').onclick=tryOpen;
+  document.getElementById('cancel').onclick=()=>msg.textContent="Seite bleibt gesperrt.";
+  pw.addEventListener('keydown',e=>{ if(e.key==='Enter') tryOpen(); });
+})();
+
+/* ========= Google Gemini ========= */
+const GEMINI_API_KEY = "AIzaSyCjcEs_50Ca7kCgoZ0Mw_MgDouX0BSA90M";
+const MODEL = "gemini-2.5-flash-image-preview";
+
+async function geminiGenerate(parts){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const body={ contents:[{role:"user",parts}] };
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+/* ========= Download-Helper ========= */
+function mimeToExt(mime){
+  switch((mime||"").toLowerCase()){
+    case "image/jpeg": case "image/jpg": return ".jpg";
+    case "image/png": return ".png";
+    case "image/webp": return ".webp";
+    default: return ".img";
+  }
+}
+async function downloadImageFromDataUrl(dataUrl, baseName="gemini"){
+  const resp=await fetch(dataUrl); const blob=await resp.blob();
+  const mime=blob.type||"application/octet-stream"; const ext=mimeToExt(mime);
+  const url=URL.createObjectURL(new Blob([blob],{type:mime}));
+  const a=document.createElement("a"); a.href=url; a.download=baseName+ext;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+/* ========= Galerie ========= */
+const gallery=document.getElementById('gallery');
+function makeLoadingTile(label="Wird generiert…"){
+  const tile=document.createElement('div'); tile.className='tile';
+  const box=document.createElement('div'); box.className='loading';
+  const spinner=document.createElement('div'); spinner.className='spinner';
+  const sk=document.createElement('div'); sk.className='skeleton';
+  const p=document.createElement('div'); p.style.color='var(--muted)'; p.style.fontSize='.9rem'; p.textContent=label;
+  box.appendChild(spinner); box.appendChild(sk); box.appendChild(p);
+  tile.appendChild(box); gallery.prepend(tile);
+  return {
+    replaceWithImage(b64,mime){
+      tile.innerHTML=''; const url=`data:${mime||"image/jpeg"};base64,${b64}`;
+      const img=document.createElement('img'); img.src=url; img.alt="AI Bild";
+      const actions=document.createElement('div'); actions.className='actions';
+      const dl=document.createElement('button'); dl.className='btn secondary'; dl.textContent='Download';
+      dl.onclick=()=>downloadImageFromDataUrl(url,'gemini');
+      const rm=document.createElement('button'); rm.className='btn secondary'; rm.textContent='Entfernen';
+      rm.onclick=()=>tile.remove();
+      actions.appendChild(dl); actions.appendChild(rm);
+      tile.appendChild(img); tile.appendChild(actions);
+    },
+    remove(){ tile.remove(); }
+  };
+}
+
+/* ========= T2I ========= */
+const t2iField=document.getElementById('t2i'),txtOut=document.getElementById('txtOut');
+btnT2I.onclick=async()=>{
+  const prompt=t2iField.value.trim(); if(!prompt){alert("Bitte Prompt eingeben.");return;}
+  const holder=makeLoadingTile("Wird aus Text erzeugt…"); btnT2I.disabled=true; btnT2I.textContent="Erzeuge…";
+  try{
+    const res=await geminiGenerate([{text:prompt}]); txtOut.textContent=""; let imgSet=false;
+    const parts=res?.candidates?.[0]?.content?.parts||[];
+    for(const p of parts){
+      if(p.inlineData&&p.inlineData.data&&!imgSet){ holder.replaceWithImage(p.inlineData.data,p.inlineData.mimeType); imgSet=true; }
+      if(p.text) txtOut.textContent+=p.text+"\n";
+    }
+    if(!imgSet){ holder.remove(); alert("Keine Bilddaten erhalten."); }
+  }catch(e){ holder.remove(); alert("Fehler: "+e.message);}
+  finally{ btnT2I.disabled=false; btnT2I.textContent="Bild erzeugen"; }
+};
+btnClearPrompt.onclick=()=>{t2iField.value="";txtOut.textContent="";};
+
+/* ========= PNG→JPEG ========= */
+function pngToJpegBase64(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(); const r=new FileReader();
+    r.onload=e=>{img.src=e.target.result;}; r.onerror=reject;
+    img.onload=()=>{ const c=document.createElement("canvas"); c.width=img.width; c.height=img.height;
+      const ctx=c.getContext("2d"); ctx.drawImage(img,0,0);
+      resolve(c.toDataURL("image/jpeg",0.9).split(",")[1]); };
+    r.readAsDataURL(file);
+  });
+}
+function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});}
+
+/* ========= I2I ========= */
+btnI2I.onclick=async()=>{
+  const file=i2iFile.files?.[0]; if(!file){alert("Bitte ein Bild hochladen.");return;}
+  const prompt=i2iPrompt.value.trim(); const holder=makeLoadingTile("Wird aus Bild umgewandelt…");
+  btnI2I.disabled=true; btnI2I.textContent="Wandle um…";
+  try{
+    const isPNG=(file.type||"").toLowerCase().includes("png");
+    let b64,mime; if(isPNG){ b64=await pngToJpegBase64(file); mime="image/jpeg"; } else { b64=await fileToB64(file); mime=file.type||"image/jpeg"; }
+    const parts=[{inlineData:{mimeType:mime,data:b64}}]; if(prompt) parts.push({text:prompt});
+    const res=await geminiGenerate(parts); txtOut2.textContent=""; let imgSet=false;
+    const out=res?.candidates?.[0]?.content?.parts||[];
+    for(const p of out){
+      if(p.inlineData&&p.inlineData.data&&!imgSet){ holder.replaceWithImage(p.inlineData.data,p.inlineData.mimeType); imgSet=true; }
+      if(p.text) txtOut2.textContent+=p.text+"\n";
+    }
+    if(!imgSet){ holder.remove(); alert("Keine Bilddaten erhalten."); }
+  }catch(e){ holder.remove(); alert("Fehler: "+e.message);}
+  finally{ btnI2I.disabled=false; btnI2I.textContent="Bild umwandeln"; }
+};
+btnClearI2I.onclick=()=>{i2iFile.value="";i2iPrompt.value="";txtOut2.textContent="";};
+</script>
+</body>
+</html>
