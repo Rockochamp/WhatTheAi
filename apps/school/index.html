@@ -28,8 +28,25 @@
   .gallery{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
   .tile{background:#0c1528;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:220px}
   .tile img{width:100%;display:block}
-  .tile .actions{display:flex;gap:6px;padding:8px;border-top:1px solid var(--border)}
-  .tile .actions button{flex:1}
+  .tile .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 8px 12px 8px;
+    border-top: 1px solid var(--border);
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: stretch;
+  }
+  .tile .actions button {
+    width: 100%;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+  .tile .actions button:last-child {
+    margin-bottom: 0;
+  }
   .footer{color:var(--muted);font-size:.8rem;margin-top:12px;text-align:center}
   .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#15223a;border:1px solid var(--border);font-size:.74rem;color:var(--muted)}
   /* Spinner + Skeleton */
@@ -63,9 +80,8 @@
         <button class="btn" id="btnT2I" type="button">Bild erzeugen</button>
         <button class="btn secondary" id="btnClearPrompt" type="button">Prompt leeren</button>
       </div>
-      <p class="hint">Tipp: Motiv + Stil + Licht + Umgebung; schulgeeignet.</p>
-      <p>Ausgabe (Text, wenn vorhanden)</p>
-      <pre id="txtOut"></pre>
+  <p class="hint">Tipp: Motiv + Stil</p>
+      
     </section>
 
     <!-- IMAGE TO IMAGE -->
@@ -74,13 +90,17 @@
       <label for="i2iFile">Ausgangsbild (Upload)</label>
       <input type="file" id="i2iFile" accept="image/*">
       <label for="i2iPrompt">Stil / Änderungen (optional)</label>
-      <input type="text" id="i2iPrompt" placeholder="z.B. filmische Farben, wärmeres Licht, realistisch.">
+      <input type="text" id="i2iPrompt" placeholder="z.B. beschreibe wer oder was geändert werden soll.">
+      <div id="i2iSelectedPreview" style="margin-top:10px;display:none;align-items:center;gap:8px;">
+        <strong style="font-size:.9rem;margin-right:8px;color:var(--muted);">Ausgewähltes Bild:</strong>
+        <img id="i2iSelectedImg" src="" alt="Ausgewähltes Bild" style="height:64px;border-radius:8px;border:1px solid var(--border);object-fit:cover">
+        <button class="btn secondary" id="btnClearSelection" type="button">Auswahl zurücksetzen</button>
+      </div>
       <div class="row">
         <button class="btn" id="btnI2I" type="button">Bild umwandeln</button>
         <button class="btn secondary" id="btnClearI2I" type="button">Zurücksetzen</button>
       </div>
-      <p>Ausgabe (Text, wenn vorhanden)</p>
-      <pre id="txtOut2"></pre>
+      
     </section>
   </div>
 
@@ -88,7 +108,7 @@
   <section class="card">
     <h2>Galerie</h2>
     <div id="gallery" class="gallery"></div>
-    <p class="footer">Alle generierten Bilder erscheinen hier.</p>
+  <p class="footer">Galerie</p>
   </section>
 </main>
 
@@ -126,14 +146,33 @@
 })();
 
 /* ========= Google Gemini ========= */
-const GEMINI_API_KEY = "BIzaSyCjcEs_50Ca7kCgoZ0Mw_MgDouX0BSA90M";
+const GEMINI_API_KEY = "AIzaSyCjcEs_50Ca7kCgoZ0Mw_MgDouX0BSA90M";
 const MODEL = "gemini-2.5-flash-image-preview";
 
-async function geminiGenerate(parts){
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-  const body={ contents:[{role:"user",parts}] };
-  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-  if(!r.ok) throw new Error(await r.text());
+async function geminiGenerate(contents){
+  // Accept either a simple string prompt or an array of parts (for image editing).
+  // Build parts array for the request body.
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  let partsArray;
+  if(typeof contents === 'string'){
+    partsArray = [{ text: contents }];
+  } else if(Array.isArray(contents)){
+    partsArray = contents;
+  } else {
+    throw new Error('Invalid contents for geminiGenerate: expected string or array');
+  }
+
+  // The REST API expects a top-level `contents` array with role/parts.
+  // Sende ausschließlich das Feld `contents` laut API-Spezifikation.
+  const body = { contents: [{ role: 'user', parts: partsArray }] };
+  try{ console.debug('gemini request body:', body); }catch(e){}
+
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if(!r.ok){
+    // include body text for easier debugging
+    const txt = await r.text();
+    throw new Error(`API error: ${r.status} ${r.statusText} - ${txt}`);
+  }
   return r.json();
 }
 
@@ -166,37 +205,96 @@ function makeLoadingTile(label="Wird generiert…"){
   tile.appendChild(box); gallery.prepend(tile);
   return {
     replaceWithImage(b64,mime){
-      tile.innerHTML=''; const url=`data:${mime||"image/jpeg"};base64,${b64}`;
-      const img=document.createElement('img'); img.src=url; img.alt="AI Bild";
-      const actions=document.createElement('div'); actions.className='actions';
-      const dl=document.createElement('button'); dl.className='btn secondary'; dl.textContent='Download';
-      dl.onclick=()=>downloadImageFromDataUrl(url,'gemini');
-      const rm=document.createElement('button'); rm.className='btn secondary'; rm.textContent='Entfernen';
-      rm.onclick=()=>tile.remove();
-      actions.appendChild(dl); actions.appendChild(rm);
-      tile.appendChild(img); tile.appendChild(actions);
+  tile.innerHTML='';
+  let url;
+  // If b64 already looks like a data URL, use as-is.
+  if(typeof b64==='string' && b64.startsWith('data:')){
+    url = b64;
+    // try to extract mime and base64
+    const m = b64.match(/^data:([^;]+);base64,(.*)$/);
+    if(m){ mime = m[1]; b64 = m[2]; }
+  } else {
+    url = `data:${mime||"image/jpeg"};base64,${b64}`;
+  }
+  // store base64/mime on tile for later editing
+  tile.dataset.b64 = b64;
+  tile.dataset.mime = mime||"image/jpeg";
+  const img=document.createElement('img'); img.src=url; img.alt="AI Bild";
+  const actions=document.createElement('div'); actions.className='actions';
+  const edit=document.createElement('button'); edit.className='btn'; edit.textContent='Bearbeiten';
+  edit.onclick=()=>selectGalleryImage(tile.dataset.b64,tile.dataset.mime);
+  const dl=document.createElement('button'); dl.className='btn secondary'; dl.textContent='Download';
+  dl.onclick=()=>downloadImageFromDataUrl(url,'gemini');
+  const rm=document.createElement('button'); rm.className='btn secondary'; rm.textContent='Entfernen';
+  rm.onclick=()=>tile.remove();
+  actions.appendChild(edit); actions.appendChild(dl); actions.appendChild(rm);
+  tile.appendChild(img); tile.appendChild(actions);
     },
     remove(){ tile.remove(); }
   };
 }
 
+// Selected image (from gallery) for I2I
+let selectedGalleryImage = null;
+function selectGalleryImage(b64,mime){
+  selectedGalleryImage = { b64, mime };
+  const preview = document.getElementById('i2iSelectedPreview');
+  const img = document.getElementById('i2iSelectedImg');
+  if(img) img.src = `data:${mime||'image/jpeg'};base64,${b64}`;
+  if(preview) preview.style.display = 'flex';
+  try{ const f=document.getElementById('i2iFile'); if(f) f.value=''; }catch(e){}
+}
+
+// clear selection button handler (element may be present in DOM)
+document.addEventListener('click', (e)=>{
+  if(e.target && e.target.id==='btnClearSelection'){
+    selectedGalleryImage = null;
+    const preview = document.getElementById('i2iSelectedPreview');
+    if(preview) preview.style.display='none';
+    const img = document.getElementById('i2iSelectedImg'); if(img) img.src='';
+  }
+});
+
 /* ========= T2I ========= */
-const t2iField=document.getElementById('t2i'),txtOut=document.getElementById('txtOut');
+const t2iField=document.getElementById('t2i');
 btnT2I.onclick=async()=>{
   const prompt=t2iField.value.trim(); if(!prompt){alert("Bitte Prompt eingeben.");return;}
   const holder=makeLoadingTile("Wird aus Text erzeugt…"); btnT2I.disabled=true; btnT2I.textContent="Erzeuge…";
   try{
-    const res=await geminiGenerate([{text:prompt}]); txtOut.textContent=""; let imgSet=false;
-    const parts=res?.candidates?.[0]?.content?.parts||[];
-    for(const p of parts){
-      if(p.inlineData&&p.inlineData.data&&!imgSet){ holder.replaceWithImage(p.inlineData.data,p.inlineData.mimeType); imgSet=true; }
-      if(p.text) txtOut.textContent+=p.text+"\n";
+    const res=await geminiGenerate(prompt);
+    let imgSet=false;
+    console.debug('T2I response', res);
+    const found = extractImageFromResponse(res);
+    if(found){
+      if(found.b64){ holder.replaceWithImage(found.b64, found.mime); imgSet=true; }
+      else if(found.imageUri){
+        try{
+          const r = await fetch(found.imageUri); const blob = await r.blob();
+          const dataUrl = await new Promise((resolve,rej)=>{ const fr=new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=rej; fr.readAsDataURL(blob); });
+          holder.replaceWithImage(dataUrl);
+          imgSet=true;
+        }catch(e){ console.debug('fetch imageUri failed',e); }
+      }
     }
-    if(!imgSet){ holder.remove(); alert("Keine Bilddaten erhalten."); }
-  }catch(e){ holder.remove(); alert("Fehler: "+e.message);}
+    if(!imgSet){ 
+      holder.remove();
+      let msg = "Bild konnte nicht generiert werden.";
+      if(res && res.error && res.error.message) msg += "\n"+res.error.message;
+      else if(res && res.candidates && res.candidates[0] && res.candidates[0].finishReason) msg += "\nGrund: " + res.candidates[0].finishReason;
+      alert(msg);
+    }
+  }catch(e){
+    holder.remove();
+    let msg = "Fehler: "+e.message;
+    try {
+      const errObj = JSON.parse(e.message.split(' - ')[1]||'{}');
+      if(errObj && errObj.error && errObj.error.message) msg = errObj.error.message;
+    } catch{}
+    alert(msg);
+  }
   finally{ btnT2I.disabled=false; btnT2I.textContent="Bild erzeugen"; }
 };
-btnClearPrompt.onclick=()=>{t2iField.value="";txtOut.textContent="";};
+btnClearPrompt.onclick=()=>{t2iField.value="";};
 
 /* ========= PNG→JPEG ========= */
 function pngToJpegBase64(file){
@@ -211,26 +309,106 @@ function pngToJpegBase64(file){
 }
 function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});}
 
+// Try to extract image data from various API response shapes.
+function extractImageFromResponse(res){
+  try{
+    // helper to inspect parts array
+    const inspectParts = (parts)=>{
+      if(!Array.isArray(parts)) return null;
+      for(const p of parts){
+        // inlineData.data: base64 string
+        if(p.inlineData && p.inlineData.data){ return { b64: p.inlineData.data, mime: p.inlineData.mimeType || 'image/jpeg' }; }
+        // inlineData.imageUri: sometimes a data URL or http URL
+        if(p.inlineData && p.inlineData.imageUri){ const uri=p.inlineData.imageUri; if(uri.startsWith('data:')){ const m=uri.match(/^data:([^;]+);base64,(.*)$/); if(m) return { b64: m[2], mime: m[1] }; }
+          // remote URL — not base64; return imageUri so caller can fetch it
+          return { imageUri: uri };
+        }
+        // direct data field
+        if(p.data){ // sometimes APIs return {data: {image: 'base64...'}} — try common spots
+          if(typeof p.data === 'string') return { b64: p.data, mime: p.mimeType||'image/jpeg' };
+          if(p.data.image) return { b64: p.data.image, mime: p.data.mimeType||'image/jpeg' };
+        }
+      }
+      return null;
+    };
+
+    const candidates = res?.candidates || [];
+    for(const c of candidates){
+      // new shape: c.output is an array of outputs with .content
+      if(c.output && Array.isArray(c.output)){
+        for(const out of c.output){
+          const parts = out?.content?.parts || out?.content || out?.parts;
+          const found = inspectParts(parts);
+          if(found) return found;
+        }
+      }
+      // older shape: c.content.parts
+      const parts = c?.content?.parts || c?.content;
+      const found = inspectParts(parts);
+      if(found) return found;
+    }
+
+    // fallback: top-level outputs
+    const outputs = res?.output || res?.outputs || res?.visualOutputs;
+    if(Array.isArray(outputs)){
+      for(const o of outputs){
+        const found = inspectParts(o?.content?.parts || o?.content || o?.parts);
+        if(found) return found;
+      }
+    }
+  }catch(e){ console.debug('extractImageFromResponse error',e); }
+  return null;
+}
+
 /* ========= I2I ========= */
 btnI2I.onclick=async()=>{
-  const file=i2iFile.files?.[0]; if(!file){alert("Bitte ein Bild hochladen.");return;}
+  const file=i2iFile.files?.[0];
   const prompt=i2iPrompt.value.trim(); const holder=makeLoadingTile("Wird aus Bild umgewandelt…");
   btnI2I.disabled=true; btnI2I.textContent="Wandle um…";
   try{
-    const isPNG=(file.type||"").toLowerCase().includes("png");
-    let b64,mime; if(isPNG){ b64=await pngToJpegBase64(file); mime="image/jpeg"; } else { b64=await fileToB64(file); mime=file.type||"image/jpeg"; }
-    const parts=[{inlineData:{mimeType:mime,data:b64}}]; if(prompt) parts.push({text:prompt});
-    const res=await geminiGenerate(parts); txtOut2.textContent=""; let imgSet=false;
-    const out=res?.candidates?.[0]?.content?.parts||[];
-    for(const p of out){
-      if(p.inlineData&&p.inlineData.data&&!imgSet){ holder.replaceWithImage(p.inlineData.data,p.inlineData.mimeType); imgSet=true; }
-      if(p.text) txtOut2.textContent+=p.text+"\n";
+    let b64,mime;
+    if(selectedGalleryImage){
+      b64 = selectedGalleryImage.b64; mime = selectedGalleryImage.mime || 'image/jpeg';
+    } else {
+      if(!file){ holder.remove(); alert("Bitte ein Bild hochladen oder ein Bild aus der Galerie auswählen."); btnI2I.disabled=false; btnI2I.textContent="Bild umwandeln"; return; }
+      const isPNG=(file.type||"").toLowerCase().includes("png");
+      if(isPNG){ b64=await pngToJpegBase64(file); mime="image/jpeg"; } else { b64=await fileToB64(file); mime=file.type||"image/jpeg"; }
     }
-    if(!imgSet){ holder.remove(); alert("Keine Bilddaten erhalten."); }
-  }catch(e){ holder.remove(); alert("Fehler: "+e.message);}
+    const parts=[{inlineData:{mimeType:mime,data:b64}}]; if(prompt) parts.push({text:prompt});
+    const res=await geminiGenerate(parts);
+    let imgSet=false;
+    console.debug('I2I response', res);
+    const found = extractImageFromResponse(res);
+    if(found){
+      if(found.b64){ holder.replaceWithImage(found.b64, found.mime); imgSet=true; }
+      else if(found.imageUri){
+        try{
+          const r = await fetch(found.imageUri); const blob = await r.blob();
+          const dataUrl = await new Promise((resolve,rej)=>{ const fr=new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=rej; fr.readAsDataURL(blob); });
+          holder.replaceWithImage(dataUrl);
+          imgSet=true;
+        }catch(e){ console.debug('fetch imageUri failed',e); }
+      }
+    }
+    if(!imgSet){
+      holder.remove();
+      let msg = "Bild konnte nicht editiert werden.";
+      if(res && res.error && res.error.message) msg += "\n"+res.error.message;
+      else if(res && res.candidates && res.candidates[0] && res.candidates[0].finishReason) msg += "\nGrund: " + res.candidates[0].finishReason;
+      alert(msg);
+    }
+  }catch(e){
+    holder.remove();
+    let msg = "Fehler: "+e.message;
+    try {
+      const errObj = JSON.parse(e.message.split(' - ')[1]||'{}');
+      if(errObj && errObj.error && errObj.error.message) msg = errObj.error.message;
+    } catch{}
+    alert(msg);
+  }
   finally{ btnI2I.disabled=false; btnI2I.textContent="Bild umwandeln"; }
 };
-btnClearI2I.onclick=()=>{i2iFile.value="";i2iPrompt.value="";txtOut2.textContent="";};
+btnClearI2I.onclick=()=>{i2iFile.value="";i2iPrompt.value=""; selectedGalleryImage=null; const pv=document.getElementById('i2iSelectedPreview'); if(pv) pv.style.display='none';};
 </script>
 </body>
 </html>
