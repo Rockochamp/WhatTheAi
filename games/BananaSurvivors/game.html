@@ -2,9 +2,8 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <!-- WICHTIG: Viewport Settings für Mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Banana Survivors: MOBILE AUDIO FIX</title>
+  <title>Banana Survivors: CONTROL UPDATE</title>
   <style>
     :root {
       --gold: #ffdd00;
@@ -19,8 +18,8 @@
       color: #fff;
       user-select: none;
       -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent; /* Kein Highlight bei Touch */
-      touch-action: none; /* Verhindert Scrollen/Zoomen */
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
     }
     #game { display: block; width: 100vw; height: 100vh; }
     
@@ -32,30 +31,20 @@
       z-index: 10;
     }
 
-    /* HUD TOP - RESPONSIVE */
     .hud-top {
       padding: 15px;
-      display: flex; 
-      gap: 15px; 
-      align-items: flex-start;
+      display: flex; gap: 15px; align-items: flex-start;
       background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-      flex-wrap: wrap; /* Erlaubt Umbruch auf Mobile */
-      justify-content: center;
+      flex-wrap: wrap; justify-content: center;
     }
     
-    .stat-group {
-      display: flex; gap: 15px;
-    }
-
     .stat-box {
       background: var(--ui-bg);
       border: 1px solid rgba(255, 50, 50, 0.3);
-      border-radius: 6px;
-      padding: 8px 12px;
+      border-radius: 6px; padding: 8px 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       backdrop-filter: blur(4px);
-      min-width: 70px;
-      flex-grow: 1; /* Füllt Platz auf Mobile */
+      min-width: 70px; flex-grow: 1;
       display: flex; flex-direction: column; justify-content: center;
     }
     
@@ -71,8 +60,13 @@
     .label { font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
     .val { font-size: 18px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,1); font-variant-numeric: tabular-nums; }
 
-    /* Pause Button (Visible on Mobile & Desktop) */
-    #pause-btn-ui {
+    /* Button Container (Right Side) */
+    .btn-container {
+      display: flex; flex-direction: column; gap: 10px; margin-left: auto;
+    }
+
+    /* Generic HUD Button */
+    .hud-btn {
       pointer-events: auto;
       background: var(--ui-bg);
       border: 1px solid #555; color: #fff;
@@ -80,18 +74,18 @@
       display: flex; align-items: center; justify-content: center;
       border-radius: 8px; cursor: pointer;
       font-weight: bold; font-size: 18px;
-      margin-left: auto; /* Schiebt Button nach rechts */
+      transition: background 0.1s;
     }
-    #pause-btn-ui:active { transform: scale(0.95); background: #444; }
+    .hud-btn:active { transform: scale(0.95); background: #444; }
+    .hud-btn.active { border-color: var(--gold); color: var(--gold); }
 
     .hud-bottom {
       padding: 20px; text-align: center; font-size: 13px; color: #aaa; 
       text-shadow: 0 1px 2px #000; opacity: 0.9;
       background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      padding-bottom: 30px; /* Platz für Home-Bar auf iPhones */
+      padding-bottom: 30px;
     }
 
-    /* Floating Text */
     #damage-container {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; overflow: hidden; z-index: 5;
@@ -107,7 +101,6 @@
       100% { transform: translate(-50%, -250%) scale(1); opacity: 0; }
     }
 
-    /* Wave Announcement */
     #wave-overlay {
       position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
       text-align: center; pointer-events: none; z-index: 20;
@@ -116,28 +109,21 @@
     #wave-title {
       font-size: 40px; font-weight: 900; color: var(--gold);
       text-shadow: 0 0 30px var(--gold-glow), 0 0 10px #000;
-      margin-bottom: 10px;
-      animation: pulseText 0.5s infinite alternate;
+      margin-bottom: 10px; animation: pulseText 0.5s infinite alternate;
     }
-    #wave-countdown {
-      font-size: 80px; font-weight: 900; color: #fff;
-      text-shadow: 0 0 20px #ff0000;
-    }
+    #wave-countdown { font-size: 80px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #ff0000; }
     @keyframes pulseText { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-    /* Damage Vignette */
     #damage-overlay {
       position: fixed; inset: 0; pointer-events: none; z-index: 2;
       background: radial-gradient(circle at center, transparent 50%, rgba(255,0,0,0) 100%);
       transition: background 0.1s;
     }
 
-    /* Overlays (Card System) */
     .overlay {
       position: fixed; inset: 0; background: rgba(5,0,0,0.92);
       z-index: 50; display: none; align-items: center; justify-content: center;
-      flex-direction: column; backdrop-filter: blur(12px);
-      padding: 20px;
+      flex-direction: column; backdrop-filter: blur(12px); padding: 20px;
     }
     .card {
       background: linear-gradient(135deg, #1a0505, #0a0000);
@@ -147,18 +133,10 @@
       width: 100%; max-width: 500px; 
       text-align: center; color: #eee;
       animation: menuFloat 4s ease-in-out infinite;
-      transition: transform 0.3s ease;
-      box-sizing: border-box;
+      transition: transform 0.3s ease; box-sizing: border-box;
     }
-    .card:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 100px rgba(255, 220, 0, 0.3);
-      border-color: #ffaa00;
-    }
-    @keyframes menuFloat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
+    .card:hover { transform: scale(1.02); box-shadow: 0 0 100px rgba(255, 220, 0, 0.3); border-color: #ffaa00; }
+    @keyframes menuFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
 
     h1 { margin: 0 0 10px; color: var(--gold); text-shadow: 0 0 20px var(--gold-glow); font-size: 32px; text-transform: uppercase; letter-spacing: 2px; }
     
@@ -198,10 +176,9 @@
     }
     #dash-bar { width: 100%; height: 100%; background: #00ffff; box-shadow: 0 0 15px #00ffff; transition: width 0.1s linear; }
 
-    /* MOBILE SPECIFIC CSS */
     @media (max-width: 768px) {
       .hud-top { gap: 8px; padding: 10px; }
-      .bar-wrap { width: 100px; } /* Smaller bars on phone */
+      .bar-wrap { width: 100px; }
       .stat-box { padding: 5px 8px; }
       .label { font-size: 9px; }
       .val { font-size: 16px; }
@@ -210,15 +187,9 @@
       .card { padding: 20px; width: 95%; }
       h1 { font-size: 26px; }
     }
-
   </style>
   <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
+    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
   </script>
 </head>
 <body>
@@ -229,68 +200,27 @@
   
   <div id="ui">
     <div class="hud-top">
-      <div class="stat-box">
-        <div class="label">GESUNDHEIT</div>
-        <div class="bar-wrap"><div id="hp-bar" class="bar-fill hp-fill" style="width: 100%;"></div></div>
-      </div>
-      <div class="stat-box">
-        <div class="label">LEVEL <span id="lvl-num" style="color:var(--gold)">1</span></div>
-        <div class="bar-wrap"><div id="xp-bar" class="bar-fill xp-fill" style="width: 0%;"></div></div>
-      </div>
-      
-      <div class="stat-box">
-        <div class="label">WELLE <span id="wave-display" style="color:var(--gold)">1</span></div>
-        <div class="val" id="time-display">00:00</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">KILLS</div>
-        <div class="val" id="kills-display">0</div>
-      </div>
+      <div class="stat-box"><div class="label">GESUNDHEIT</div><div class="bar-wrap"><div id="hp-bar" class="bar-fill hp-fill" style="width: 100%;"></div></div></div>
+      <div class="stat-box"><div class="label">LEVEL <span id="lvl-num" style="color:var(--gold)">1</span></div><div class="bar-wrap"><div id="xp-bar" class="bar-fill xp-fill" style="width: 0%;"></div></div></div>
+      <div class="stat-box"><div class="label">WELLE <span id="wave-display" style="color:var(--gold)">1</span></div><div class="val" id="time-display">00:00</div></div>
+      <div class="stat-box"><div class="label">KILLS</div><div class="val" id="kills-display">0</div></div>
 
-      <div id="pause-btn-ui" onclick="togglePause()">||</div>
+      <div class="btn-container">
+        <!-- AUDIO TOGGLE -->
+        <div id="audio-btn-ui" class="hud-btn" onclick="toggleAudio()">🔊</div>
+        <!-- PAUSE -->
+        <div id="pause-btn-ui" class="hud-btn" onclick="togglePause()">||</div>
+      </div>
     </div>
 
     <div id="dash-ui"><div id="dash-bar"></div></div>
     <div class="hud-bottom" id="legend-text">Laden...</div>
   </div>
 
-  <div id="start-screen" class="overlay" style="display:flex;">
-    <div class="card">
-      <h1>Banana Survivors</h1>
-      <h2 style="color:var(--gold); font-weight:900; letter-spacing:2px; font-size:16px; margin-bottom:15px;">GOLD EDITION</h2>
-      <p style="margin-bottom:25px; font-size:14px; color:#ccc; line-height:1.5;">
-        Die Fleisch-Horden greifen an! <br>
-        Sammle XP, wähle Upgrades und überlebe die endlosen Boss-Wellen.
-      </p>
-      <button class="btn-primary" onclick="startGame()">JETZT SPIELEN</button>
-    </div>
-  </div>
-
-  <div id="levelup-screen" class="overlay">
-    <div class="card">
-      <h1>UPGRADE</h1>
-      <div class="upgrade-grid" id="upgrade-list"></div>
-    </div>
-  </div>
-
-  <div id="pause-screen" class="overlay">
-    <div class="card">
-      <h1>PAUSE</h1>
-      <p style="color:#aaa; margin-bottom:30px;">Spiel pausiert</p>
-      <button class="btn-primary" onclick="togglePause()">WEITERSPIELEN</button>
-      <br>
-      <button class="btn-secondary" onclick="location.reload()">NEUSTART</button>
-    </div>
-  </div>
-
-  <div id="gameover-screen" class="overlay">
-    <div class="card">
-      <h1 style="color:#ff0000;">GAME OVER</h1>
-      <p style="font-size:18px;">Welle: <span id="final-wave" style="color:var(--gold);">1</span></p>
-      <p style="font-size:18px;">Kills: <span id="final-kills" style="color:var(--gold); font-weight:bold;">0</span></p>
-      <button class="btn-primary" onclick="location.reload()">NEUSTART</button>
-    </div>
-  </div>
+  <div id="start-screen" class="overlay" style="display:flex;"><div class="card"><h1>Banana Survivors</h1><h2 style="color:var(--gold); font-weight:900; letter-spacing:2px; font-size:16px; margin-bottom:15px;">GOLD EDITION</h2><p style="margin-bottom:25px; font-size:14px; color:#ccc; line-height:1.5;">Die Fleisch-Horden greifen an! <br>Verteidige dich als mutige Voxel-Banane. Sammle XP, wähle mächtige Upgrades und überlebe die endlosen Boss-Wellen.</p><button class="btn-primary" onclick="startGame()">JETZT SPIELEN</button></div></div>
+  <div id="levelup-screen" class="overlay"><div class="card"><h1>UPGRADE</h1><div class="upgrade-grid" id="upgrade-list"></div></div></div>
+  <div id="pause-screen" class="overlay"><div class="card"><h1>PAUSE</h1><p style="color:#aaa; margin-bottom:30px;">Spiel pausiert</p><button class="btn-primary" onclick="togglePause()">WEITERSPIELEN</button><br><button class="btn-secondary" onclick="location.reload()">NEUSTART</button></div></div>
+  <div id="gameover-screen" class="overlay"><div class="card"><h1 style="color:#ff0000;">GAME OVER</h1><p style="font-size:18px;">Welle: <span id="final-wave" style="color:var(--gold);">1</span></p><p style="font-size:18px;">Kills: <span id="final-kills" style="color:var(--gold); font-weight:bold;">0</span></p><button class="btn-primary" onclick="location.reload()">NEUSTART</button></div></div>
 
   <script type="module">
     import * as THREE from 'three';
@@ -311,23 +241,23 @@
     // --- Audio System ---
     const AudioSys = {
       ctx: null,
+      enabled: true,
       init: function() {
         if(!this.ctx) {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
           this.ctx = new AudioContext();
         }
-        if(this.ctx.state === 'suspended') {
-            this.ctx.resume();
+        this.checkState();
+      },
+      checkState: function() {
+        if(this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().then(() => {
+                console.log("Audio Context Resumed");
+            });
         }
-        // MOBILE UNLOCK: Play silent buffer to unlock audio engine on touch/click
-        const buffer = this.ctx.createBuffer(1, 1, 22050);
-        const source = this.ctx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(this.ctx.destination);
-        source.start(0);
       },
       playTone: function(freq, type, duration, vol=0.1) {
-        if(!this.ctx) return;
+        if(!this.ctx || !this.enabled) return;
         const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
         osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
         g.gain.setValueAtTime(vol, this.ctx.currentTime);
@@ -336,7 +266,7 @@
         osc.start(); osc.stop(this.ctx.currentTime + duration);
       },
       playNoise: function(duration, vol=0.2) {
-        if(!this.ctx) return;
+        if(!this.ctx || !this.enabled) return;
         const bufSz = this.ctx.sampleRate * duration;
         const buf = this.ctx.createBuffer(1, bufSz, this.ctx.sampleRate);
         const data = buf.getChannelData(0);
@@ -351,6 +281,7 @@
       dash: function() { this.playNoise(0.3, 0.15); },
       explosion: function() { this.playNoise(0.8, 0.5); this.playTone(50, 'square', 0.8, 0.3); },
       powerup: function() {
+        if(!this.enabled) return;
         const now = this.ctx.currentTime;
         [440, 554, 659, 880].forEach((f, i) => {
            const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
@@ -364,6 +295,7 @@
       },
       bossSpawn: function() { this.playTone(150, 'sawtooth', 1.0, 0.5); this.playNoise(1.0, 0.5); },
       victory: function() {
+        if(!this.enabled) return;
         const now = this.ctx.currentTime;
         [523, 659, 783, 1046].forEach((f, i) => {
            const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
@@ -397,11 +329,9 @@
 
     // --- Device Detection ---
     const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    
-    // Set Legend Text based on Device
     const legendEl = document.getElementById('legend-text');
     if(isMobile) {
-        legendEl.innerHTML = "TOUCH & ZIEHEN = BEWEGEN &bull; DOPPEL-TOUCH = DASH &bull; KNOPF OBEN = PAUSE";
+        legendEl.innerHTML = "TOUCH & ZIEHEN = BEWEGEN &bull; DOPPEL-TOUCH = DASH &bull; KNÖPFE OBEN = MENU";
     } else {
         legendEl.innerHTML = "MAUS / WASD = BEWEGEN &bull; LEERTASTE = DASH &bull; P = PAUSE";
     }
@@ -551,23 +481,41 @@
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     let targetPos = new THREE.Vector3();
     let isMouseDown = false;
-    let keys = { Space: false, DashSignal: false };
     
-    // --- INPUT ---
+    // INPUT STATE
+    let keys = { w:false, a:false, s:false, d:false, Space: false, DashSignal: false };
+
+    // MOUSE
     window.addEventListener('mousemove', e => updateTarget(e.clientX, e.clientY));
     window.addEventListener('mousedown', () => isMouseDown = true);
     window.addEventListener('mouseup', () => isMouseDown = false);
-    window.addEventListener('keydown', e => { 
+    
+    // KEYBOARD (WASD + ARROWS)
+    window.addEventListener('keydown', e => {
+        if(e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = true;
+        if(e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = true;
+        if(e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = true;
+        if(e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
         if(e.code === 'Space') keys.Space = true; 
         if(e.code === 'KeyP') togglePause();
     });
-    window.addEventListener('keyup', e => { if(e.code === 'Space') keys.Space = false; });
+    
+    window.addEventListener('keyup', e => {
+        if(e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = false;
+        if(e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = false;
+        if(e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = false;
+        if(e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = false;
+        if(e.code === 'Space') keys.Space = false;
+    });
     
     // TOUCH LOGIC
     let lastTouchTime = 0;
     
     canvas.addEventListener('touchstart', e => {
         e.preventDefault();
+        // Audio Unlock Mobile on first touch
+        if(AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.checkState();
+        
         const now = Date.now();
         if (now - lastTouchTime < 300) {
             keys.DashSignal = true; 
@@ -580,6 +528,15 @@
         e.preventDefault();
         updateTarget(e.touches[0].clientX, e.touches[0].clientY);
     }, {passive: false});
+
+    // FUNCTIONS
+    window.toggleAudio = function() {
+        AudioSys.enabled = !AudioSys.enabled;
+        const btn = document.getElementById('audio-btn-ui');
+        btn.innerText = AudioSys.enabled ? "🔊" : "🔇";
+        // Try resume on toggle
+        AudioSys.checkState();
+    }
 
     window.togglePause = function() {
         if(!gameState.running) return; 
@@ -606,9 +563,7 @@
     function spawnPowerup() {
         const r = Math.random();
         let type = 'RAPID';
-        if (r < 0.15) type = 'NUKE'; 
-        else if (r < 0.55) type = 'HEAL';
-        
+        if (r < 0.15) type = 'NUKE'; else if (r < 0.55) type = 'HEAL';
         const mesh = createPowerupMesh(type);
         const angle = Math.random() * Math.PI * 2;
         const dist = 20 + Math.random() * 30;
@@ -624,22 +579,15 @@
         if(p.type === 'NUKE') {
             spawnFloatingText(playerGroup.position, "NUKE!", '#00aaff', 2);
             enemies.forEach(e => {
-                if(e.type !== 'boss') {
-                    e.hp = -9999;
-                    spawnParticles(e.mesh.position, 0xffaa00, 20, 2);
-                } else {
-                    e.hp -= 500;
-                    spawnFloatingText(e.mesh.position, "500", '#00aaff', 2);
-                }
+                if(e.type !== 'boss') { e.hp = -9999; spawnParticles(e.mesh.position, 0xffaa00, 20, 2); } 
+                else { e.hp -= 500; spawnFloatingText(e.mesh.position, "500", '#00aaff', 2); }
             });
-            AudioSys.explosion();
-            gameState.screenShake = 1.5; 
+            AudioSys.explosion(); gameState.screenShake = 1.5; 
         } else if (p.type === 'HEAL') {
             gameState.hp = Math.min(gameState.maxHp, gameState.hp + 30);
             spawnFloatingText(playerGroup.position, "HEAL", '#00ff00', 1.5);
         } else if (p.type === 'RAPID') {
-            gameState.overdriveTimer = 5.0;
-            spawnFloatingText(playerGroup.position, "OVERDRIVE!", '#ff00ff', 1.5);
+            gameState.overdriveTimer = 5.0; spawnFloatingText(playerGroup.position, "OVERDRIVE!", '#ff00ff', 1.5);
         }
     }
 
@@ -650,91 +598,58 @@
             const mesh = new THREE.Mesh(ASSETS.boxGeo, ASSETS.matNormal); 
             mesh.scale.set(s,s,s);
             mesh.position.copy(pos);
-            const velocity = new THREE.Vector3(
-                Math.random()-0.5, 
-                Math.random() * 2, 
-                Math.random()-0.5
-            ).normalize().multiplyScalar(8 + Math.random() * 5);
-            
+            const velocity = new THREE.Vector3(Math.random()-0.5, Math.random()*2, Math.random()-0.5).normalize().multiplyScalar(8+Math.random()*5);
             scene.add(mesh);
             debris.push({ mesh, velocity, life: 4.0 + Math.random() * 2 });
         }
     }
 
     function spawnLoot(pos, type, sizeScale) {
-        let isLevelUp = false;
-        let val = 1;
-        
-        if (type === 'boss') {
-             isLevelUp = true;
-        } else if (type === 'growing' || type === 'splitter') {
-             val = 3;
-        }
-
+        let isLevelUp = false; let val = 1;
+        if (type === 'boss') isLevelUp = true; else if (type === 'growing' || type === 'splitter') val = 3;
         const xpMesh = new THREE.Mesh(new THREE.OctahedronGeometry(isLevelUp?0.8:0.5, 0), isLevelUp ? ASSETS.matXpLvl : ASSETS.matXp);
-        xpMesh.position.copy(pos); 
-        xpMesh.position.y = 1;
+        xpMesh.position.copy(pos); xpMesh.position.y = 1;
         scene.add(xpMesh);
-        
         xpGems.push({ mesh: xpMesh, val: val, isLevelUp: isLevelUp });
     }
 
-    // --- NEW SPLITTER LOGIC ---
     function spawnSplitter() {
         const scale = 4.5 + (gameState.level * 0.1); 
         const hp = 800 * Math.pow(1.2, gameState.level/3); 
         const speed = 5 + (gameState.level * 0.05);
-
         const mesh = createMeatChunk(scale, 'splitter');
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 70;
+        const angle = Math.random() * Math.PI * 2; const dist = 70;
         mesh.position.set(playerGroup.position.x + Math.cos(angle)*dist, scale, playerGroup.position.z + Math.sin(angle)*dist);
         scene.add(mesh);
-
         enemies.push({ mesh, hp, maxHp: hp, speed, type: 'splitter', radius: scale*0.9, scale: scale });
         AudioSys.spawnAlert();
     }
 
     function spawnSplitterChildren(pos) {
-        // 2 Growing
         for(let i=0; i<2; i++) {
-            const scale = 1.5;
-            const mesh = createMeatChunk(scale, 'normal');
-            mesh.position.copy(pos);
-            mesh.position.x += (Math.random()-0.5)*3;
-            mesh.position.z += (Math.random()-0.5)*3;
+            const scale = 1.5; const mesh = createMeatChunk(scale, 'normal');
+            mesh.position.copy(pos); mesh.position.x += (Math.random()-0.5)*3; mesh.position.z += (Math.random()-0.5)*3;
             scene.add(mesh);
             enemies.push({ mesh, hp: 60 * gameState.level, maxHp: 60, speed: 7, type: 'growing', radius: scale*0.8, scale });
         }
-        // 4 Normal
         for(let i=0; i<4; i++) {
-            const scale = 1.0;
-            const mesh = createMeatChunk(scale, 'normal');
-            mesh.position.copy(pos);
-            mesh.position.x += (Math.random()-0.5)*4;
-            mesh.position.z += (Math.random()-0.5)*4;
+            const scale = 1.0; const mesh = createMeatChunk(scale, 'normal');
+            mesh.position.copy(pos); mesh.position.x += (Math.random()-0.5)*4; mesh.position.z += (Math.random()-0.5)*4;
             scene.add(mesh);
             enemies.push({ mesh, hp: 30 * gameState.level, maxHp: 30, speed: 9, type: 'normal', radius: scale*0.8, scale });
         }
-        
-        spawnParticles(pos, 0x330000, 30, 2.0);
-        AudioSys.explosion();
+        spawnParticles(pos, 0x330000, 30, 2.0); AudioSys.explosion();
     }
 
     function spawnBoss() {
         gameState.bossActive = true;
         const scale = 3.0 + (gameState.wave * 0.5); 
         const hp = 500 * Math.pow(1.5, gameState.wave); 
-        
-        // BOSS SPEED INCREASE 6% PER WAVE
-        const speed = (8 + (gameState.wave * 0.5)) * (1 + gameState.wave * 0.06);
-
+        const speed = (8 + (gameState.wave * 0.5)) * (1 + gameState.wave * 0.06); 
         const mesh = createMeatChunk(scale, 'boss');
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 80;
+        const angle = Math.random() * Math.PI * 2; const dist = 80;
         mesh.position.set(playerGroup.position.x + Math.cos(angle)*dist, scale, playerGroup.position.z + Math.sin(angle)*dist);
         scene.add(mesh);
-
         enemies.push({ mesh, hp, maxHp: hp, speed, type: 'boss', radius: scale, scale: scale });
         spawnFloatingText(playerGroup.position, "BOSS SPAWNED!", '#ff0000', 2.0);
         AudioSys.bossSpawn();
@@ -742,28 +657,13 @@
 
     function spawnEnemy() {
       if(gameState.bossActive) return; 
-
-      let type = 'normal';
-      let hp = 30 + (gameState.level * 5);
-      let speed = 4 + (gameState.level * 0.1); 
-      let scale = 1.0;
-
+      let type = 'normal'; let hp = 30 + (gameState.level * 5); let speed = 4 + (gameState.level * 0.1); let scale = 1.0;
       const r = Math.random();
-      
-      if(gameState.level >= 2 && r > 0.85) { 
-          type = 'growing'; 
-          scale = 1.2 + (gameState.level * 0.08) + (gameState.wave * 0.2);
-          hp *= 3.0; 
-          speed *= 0.8; 
-      } 
-
+      if(gameState.level >= 2 && r > 0.85) { type = 'growing'; scale = 1.2 + (gameState.level * 0.08) + (gameState.wave * 0.2); hp *= 3.0; speed *= 0.8; } 
       const mesh = createMeatChunk(scale, 'normal');
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 50 + scale * 5 + Math.random() * 20;
-      
+      const angle = Math.random() * Math.PI * 2; const dist = 50 + scale * 5 + Math.random() * 20;
       mesh.position.set(playerGroup.position.x + Math.cos(angle)*dist, scale, playerGroup.position.z + Math.sin(angle)*dist);
       scene.add(mesh);
-      
       enemies.push({ mesh, hp, maxHp: hp, speed, type, radius: 0.8 * scale, scale });
     }
 
@@ -771,16 +671,12 @@
         const overlay = document.getElementById('wave-overlay');
         const title = document.getElementById('wave-title');
         const cd = document.getElementById('wave-countdown');
-        
         overlay.style.display = 'block';
-        title.innerText = "WELLE " + gameState.wave + " ABGESCHLOSSEN";
-        cd.innerText = "";
-        
+        title.innerText = "WELLE " + gameState.wave + " ABGESCHLOSSEN"; cd.innerText = "";
         setTimeout(() => {
             gameState.wave++;
             document.getElementById('wave-display').innerText = gameState.wave;
             title.innerText = "WELLE " + gameState.wave + " STARTET IN";
-            
             cd.innerText = "3"; AudioSys.countdown();
             setTimeout(() => {
                 cd.innerText = "2"; AudioSys.countdown();
@@ -788,19 +684,13 @@
                     cd.innerText = "1"; AudioSys.countdown();
                     setTimeout(() => {
                         overlay.style.display = 'none';
-                        gameState.bossActive = false; 
-                        gameState.waveTimer = 0;
+                        gameState.bossActive = false; gameState.waveTimer = 0;
                         AudioSys.playTone(600, 'square', 0.5, 0.2); 
-
-                        // SPAWN BEHEMOTHS BASED ON WAVE
                         const behemothCount = gameState.wave - 1;
                         if (behemothCount > 0) {
                              spawnFloatingText(playerGroup.position, "GIGANTEN ALARM!", '#ff00ff', 2.5);
-                             for(let i=0; i<behemothCount; i++) {
-                                 setTimeout(() => spawnSplitter(), i * 500);
-                             }
+                             for(let i=0; i<behemothCount; i++) setTimeout(() => spawnSplitter(), i * 500);
                         }
-
                     }, 1000);
                 }, 1000);
             }, 1000);
@@ -816,11 +706,8 @@
       let dir = new THREE.Vector3(1,0,0);
       if(target) dir.subVectors(target, playerGroup.position).normalize();
       else dir.subVectors(targetPos, playerGroup.position).normalize();
-
       AudioSys.shoot();
-
-      const count = gameState.projCount;
-      const spread = 0.15;
+      const count = gameState.projCount; const spread = 0.15;
       for(let i=0; i<count; i++) {
         const angle = (i - (count-1)/2) * spread;
         const v = dir.clone().applyAxisAngle(new THREE.Vector3(0,1,0), angle);
@@ -895,19 +782,49 @@
       document.getElementById('dash-bar').style.background = gameState.dashCooldownTimer<=0 ? '#00ffff' : '#444';
 
       const speed = (gameState.isDashing ? CONFIG.dashSpeed : CONFIG.baseSpeed) * gameState.speedMulti;
-      const dist = playerGroup.position.distanceTo(targetPos);
-      if(dist > 0.5) {
-        const dir = targetPos.clone().sub(playerGroup.position).normalize(); dir.y = 0;
-        const nextX = playerGroup.position.x + dir.x * speed * delta;
-        const nextZ = playerGroup.position.z + dir.z * speed * delta;
-        if(Math.abs(nextX) < CONFIG.worldSize) playerGroup.position.x = nextX;
-        if(Math.abs(nextZ) < CONFIG.worldSize) playerGroup.position.z = nextZ;
-        playerGroup.lookAt(targetPos.x, playerGroup.position.y, targetPos.z);
-        bananaVisualGroup.rotation.z = gameState.isDashing ? 0.4 : Math.sin(gameState.time * 15) * 0.15;
+      
+      // MOVEMENT LOGIC (WASD Priority)
+      let dx = 0, dz = 0;
+      if (keys.w) dz = -1;
+      if (keys.s) dz = 1;
+      if (keys.a) dx = -1;
+      if (keys.d) dx = 1;
+
+      if (dx !== 0 || dz !== 0) {
+          // Keyboard move
+          const moveDir = new THREE.Vector3(dx, 0, dz).normalize();
+          const nextX = playerGroup.position.x + moveDir.x * speed * delta;
+          const nextZ = playerGroup.position.z + moveDir.z * speed * delta;
+          
+          if(Math.abs(nextX) < CONFIG.worldSize) playerGroup.position.x = nextX;
+          if(Math.abs(nextZ) < CONFIG.worldSize) playerGroup.position.z = nextZ;
+          
+          // Smooth rotation to direction
+          const targetRot = Math.atan2(moveDir.x, moveDir.z);
+          playerGroup.rotation.y = targetRot;
+          
+          bananaVisualGroup.rotation.z = gameState.isDashing ? 0.4 : Math.sin(gameState.time * 15) * 0.15;
+          
+      } else {
+          // Mouse/Touch move (Target Pos)
+          const dist = playerGroup.position.distanceTo(targetPos);
+          if(dist > 0.5) {
+            const dir = targetPos.clone().sub(playerGroup.position).normalize(); dir.y = 0;
+            const nextX = playerGroup.position.x + dir.x * speed * delta;
+            const nextZ = playerGroup.position.z + dir.z * speed * delta;
+            if(Math.abs(nextX) < CONFIG.worldSize) playerGroup.position.x = nextX;
+            if(Math.abs(nextZ) < CONFIG.worldSize) playerGroup.position.z = nextZ;
+            
+            playerGroup.lookAt(targetPos.x, playerGroup.position.y, targetPos.z);
+            bananaVisualGroup.rotation.z = gameState.isDashing ? 0.4 : Math.sin(gameState.time * 15) * 0.15;
+          }
       }
+      
       playerGroup.position.y = Math.abs(Math.sin(gameState.time * 15) * 0.5);
 
       const camTarget = playerGroup.position.clone();
+      // Only offset camera if using mouse/touch aiming logic, otherwise center on player for WASD?
+      // Actually keeping aim offset feels dynamic even with WASD if mouse is somewhere else.
       const aimOffset = targetPos.clone().sub(playerGroup.position);
       aimOffset.y = 0; aimOffset.clampLength(0, 15);
       camTarget.add(aimOffset);
@@ -918,7 +835,12 @@
           gameState.screenShake -= delta * 2;
       }
       camera.position.lerp(camTarget, 0.08);
-      camera.lookAt(playerGroup.position);
+      
+      // Update TargetPos if using WASD to keep shooting straight? 
+      // Current Logic: Shooting direction is handled by `bullets` targeting `targetPos` or nearest enemy.
+      // We need to ensure that if using WASD, `targetPos` is updated to where player is facing if no mouse input? 
+      // Actually `spawnBullet` calculates direction. If NO enemy is near, it shoots at `targetPos`.
+      // If `targetPos` is old (last mouse click), it shoots there. This is fine for hybrid control.
 
       const currentFireRate = gameState.overdriveTimer > 0 ? gameState.fireRate * 3 : gameState.fireRate;
       if(gameState.time - gameState.lastShot > (1/currentFireRate)) {
