@@ -439,6 +439,30 @@
     window.addEventListener('mousemove', e => updateTarget(e.clientX, e.clientY));
     window.addEventListener('mousedown', () => isMouseDown = true);
     window.addEventListener('mouseup', () => isMouseDown = false);
+    // Touch support for mobile: map touch to pointer and finger-press to dash
+    window.addEventListener('touchstart', function(e) {
+      if(e.touches && e.touches.length > 0) {
+        const t = e.touches[0];
+        updateTarget(t.clientX, t.clientY);
+        isMouseDown = true;
+        e.preventDefault();
+      }
+    }, { passive: false });
+    window.addEventListener('touchmove', function(e) {
+      if(e.touches && e.touches.length > 0) {
+        const t = e.touches[0];
+        updateTarget(t.clientX, t.clientY);
+        e.preventDefault();
+      }
+    }, { passive: false });
+    window.addEventListener('touchend', function(e) {
+      isMouseDown = false;
+      e.preventDefault();
+    }, { passive: false });
+    window.addEventListener('touchcancel', function(e) {
+      isMouseDown = false;
+      e.preventDefault();
+    }, { passive: false });
     window.addEventListener('keydown', e => { 
         if(e.code === 'Space') keys.Space = true; 
         if(e.code === 'KeyP') togglePause();
