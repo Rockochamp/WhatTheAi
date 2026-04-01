@@ -48,6 +48,17 @@
             from, to { opacity: 1; }
             50% { opacity: 0; }
         }
+
+        /* --- START: Emoji Spin --- */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spin-animation {
+            animation: spin 0.5s ease-in-out;
+            display: inline-block; /* Needs to be a block or inline-block to rotate */
+        }
+        /* --- END: Emoji Spin --- */
         /* --- END: Added CSS for Typewriter --- */
 
         /* Game grid styles */
@@ -304,7 +315,7 @@
     <header>
         <!-- MODIFIED: Added ID -->
         <a href="/" style="text-decoration: none; color: inherit;"> <!-- Added anchor tag -->
-            <h1><img src="/images/favicon.ico?v=1.2" alt="" style="height: 1em; margin-right: 0.25em; position: relative; top: 2px;"><span id="dynamic-title"></span></h1>
+            <h1><img id="spin-emoji" src="/images/favicon.ico?v=1.2" alt="" style="height: 1em; margin-right: 0.25em; position: relative; top: 2px; cursor: pointer; display: inline-block;"><span id="dynamic-title"></span></h1>
         </a>
         <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
             <i class="fas fa-moon"></i>
@@ -580,6 +591,17 @@
                 const icon = darkModeToggle.querySelector('i');
                 icon.className = darkModeEnabled ? 'fas fa-sun' : 'fas fa-moon';
             });
+
+            // Emoji spin logic
+            const spinEmoji = document.getElementById('spin-emoji');
+            if (spinEmoji) {
+                spinEmoji.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent navigating to "/" so we can see the spin!
+                    spinEmoji.classList.remove('spin-animation');
+                    void spinEmoji.offsetWidth; // Trigger reflow to restart animation
+                    spinEmoji.classList.add('spin-animation');
+                });
+            }
         });
     </script>
 
