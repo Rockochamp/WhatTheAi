@@ -19,7 +19,7 @@
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,41 +27,135 @@
         }
 
         .dashboard {
-            max-width: 1100px;
+            max-width: 1400px;
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 24px;
         }
 
-        .svg-wrapper {
-            width: 100%;
-            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 0;
+        .main-header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .main-header h1 {
+            font-family: monospace;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: #f8fafc;
+            text-shadow: 0px 0px 15px rgba(56, 189, 248, 0.4);
+            margin-top: 0;
         }
 
-        .svg-wrapper svg {
-            max-width: 100%;
-            height: auto;
+        .main-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            width: 100%;
+        }
+
+        @media (max-width: 1100px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: radial-gradient(circle at top, #1e293b 0%, #020617 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            border-color: #475569;
+        }
+
+        .card h2 {
+            color: var(--text-main);
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.25rem;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .svg-container {
+            width: 100%;
+            max-width: 240px;
+            margin-bottom: 12px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .stat-row.header {
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .stat-row .val {
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .stat-row.trend {
+            margin-top: 4px;
+            border-top: 1px solid #1e293b;
+            padding-top: 10px;
+            font-size: 1.1rem;
         }
 
         .explanation-card {
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 30px;
+            padding: 24px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             border-left: 4px solid var(--accent);
             opacity: 0;
-            transform: translateY(20px);
-            animation: slideUp 1s ease-out 7.5s forwards; 
+            transform: translateY(15px);
+            animation: slideUp 1s ease-out 4.5s forwards; 
         }
 
         @keyframes slideUp {
@@ -70,230 +164,116 @@
 
         .explanation-card h2 {
             margin-top: 0;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .explanation-card p {
             margin: 0;
-            line-height: 1.6;
+            line-height: 1.5;
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .highlight {
-            color: #ef4444;
+            color: #38bdf8;
             font-weight: 600;
-        }
-
-        .flash-danger {
-            animation: pulseRed 1.5s infinite alternate;
-        }
-
-        @keyframes pulseRed {
-            from { filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.4)); }
-            to { filter: drop-shadow(0 0 15px rgba(239, 68, 68, 1)); }
         }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
-        
-        <!-- SVG Graphic Container -->
-        <div class="svg-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600">
-                <defs>
-                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#ef4444" />
-                    <stop offset="50%" stop-color="#eab308" />
-                    <stop offset="100%" stop-color="#22c55e" />
-                  </linearGradient>
-              
-                  <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-              
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" stroke-width="0.5" stroke-opacity="0.3"/>
-                </pattern>
-                <rect width="1000" height="600" fill="url(#grid)" />
-              
-                <!-- HEADER -->
-                <text x="50" y="50" font-family="monospace" font-size="24" font-weight="bold" fill="#f8fafc" letter-spacing="2">
-                  AGI PROBABILITY BAROMETER
-                </text>
-                <path d="M 50 65 L 950 65" stroke="#334155" stroke-width="2" />
-              
-                <!-- LEFT PANEL: THE GAUGE -->
-                <g transform="translate(40, 50)">
-                  <path d="M 60 300 A 180 180 0 0 1 420 300" fill="none" stroke="#1e293b" stroke-width="30" />
-                  <path d="M 60 300 A 180 180 0 0 1 420 300" fill="none" stroke="url(#gaugeGrad)" stroke-width="30" />
-                  
-                  <text x="40" y="330" font-family="monospace" font-size="16" fill="#ef4444" font-weight="bold">0% (HUMAN DEP.)</text>
-                  <text x="220" y="100" font-family="monospace" font-size="16" fill="#eab308" font-weight="bold">50%</text>
-                  <text x="390" y="330" font-family="monospace" font-size="16" fill="#22c55e" font-weight="bold">100% (AGI)</text>
-              
-                  <!-- The Needle -->
-                  <path id="needle" d="M 240 300 L 70 300 L 240 295 Z" fill="#22c55e" filter="url(#neonGlow)" transform="rotate(180, 240, 300)" />
-                  <circle cx="240" cy="300" r="12" fill="#f8fafc" />
-                  <circle cx="240" cy="300" r="6" fill="#0f172a" />
-              
-                  <text id="agi-big-text" x="240" y="370" font-family="monospace" font-size="48" font-weight="bold" fill="#22c55e" text-anchor="middle" filter="url(#neonGlow)">
-                    100.00%
-                  </text>
-                  <text x="240" y="400" font-family="monospace" font-size="14" fill="#94a3b8" text-anchor="middle" letter-spacing="1">
-                    AGI PROBABILITY
-                  </text>
-                </g>
-              
-                <!-- RIGHT PANEL: QUARTERLY DATA TABLE -->
-                <g transform="translate(480, 100)">
-                  <rect width="490" height="260" fill="#0f172a" stroke="#334155" stroke-width="2" rx="8" />
-                  
-                  <text x="20" y="35" font-family="monospace" font-size="16" fill="#64748b" font-weight="bold">
-                    FRONTIER LABS: HUMAN JOB INDEX (QUARTERLY)
-                  </text>
-                  <path d="M 20 50 L 470 50" stroke="#334155" stroke-width="1" />
-              
-                  <!-- Table Headers -->
-                  <text x="20" y="80" font-family="monospace" font-size="13" fill="#94a3b8">LAB</text>
-                  <text x="110" y="80" font-family="monospace" font-size="13" fill="#94a3b8">Q1'25</text>
-                  <text x="170" y="80" font-family="monospace" font-size="13" fill="#94a3b8">Q2'25</text>
-                  <text x="230" y="80" font-family="monospace" font-size="13" fill="#94a3b8">Q3'25</text>
-                  <text x="290" y="80" font-family="monospace" font-size="13" fill="#94a3b8">Q4'25</text>
-                  <text x="350" y="80" font-family="monospace" font-size="13" fill="#38bdf8" font-weight="bold">Q1'26</text>
-                  <text x="420" y="80" font-family="monospace" font-size="13" fill="#94a3b8">TREND</text>
-              
-                  <!-- Row 1: OpenAI -->
-                  <text x="20" y="115" font-family="monospace" font-size="14" fill="#f8fafc" font-weight="bold">OpenAI</text>
-                  <text id="o-q1" x="110" y="115" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="o-q2" x="170" y="115" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="o-q3" x="230" y="115" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="o-q4" x="290" y="115" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="o-q5" x="350" y="115" font-family="monospace" font-size="14" fill="#f8fafc" font-weight="bold">0</text>
-                  <text id="trend-openai" x="420" y="115" font-family="monospace" font-size="14" fill="#94a3b8" font-weight="bold">-</text>
-              
-                  <!-- Row 2: Anthropic -->
-                  <text x="20" y="150" font-family="monospace" font-size="14" fill="#f8fafc">Anthropic</text>
-                  <text id="a-q1" x="110" y="150" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="a-q2" x="170" y="150" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="a-q3" x="230" y="150" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="a-q4" x="290" y="150" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="a-q5" x="350" y="150" font-family="monospace" font-size="14" fill="#f8fafc">0</text>
-                  <text id="trend-anthropic" x="420" y="150" font-family="monospace" font-size="14" fill="#94a3b8">-</text>
-              
-                  <!-- Row 3: DeepMind -->
-                  <text x="20" y="185" font-family="monospace" font-size="14" fill="#f8fafc">DeepMind</text>
-                  <text id="d-q1" x="110" y="185" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="d-q2" x="170" y="185" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="d-q3" x="230" y="185" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="d-q4" x="290" y="185" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="d-q5" x="350" y="185" font-family="monospace" font-size="14" fill="#f8fafc">0</text>
-                  <text id="trend-deepmind" x="420" y="185" font-family="monospace" font-size="14" fill="#94a3b8">-</text>
-              
-                  <!-- Row 4: xAI -->
-                  <text x="20" y="220" font-family="monospace" font-size="14" fill="#f8fafc">xAI</text>
-                  <text id="x-q1" x="110" y="220" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="x-q2" x="170" y="220" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="x-q3" x="230" y="220" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="x-q4" x="290" y="220" font-family="monospace" font-size="14" fill="#94a3b8">0</text>
-                  <text id="x-q5" x="350" y="220" font-family="monospace" font-size="14" fill="#f8fafc">0</text>
-                  <text id="trend-xai" x="420" y="220" font-family="monospace" font-size="14" fill="#94a3b8">-</text>
-              
-                  <path d="M 20 235 L 470 235" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" />
-              
-                  <!-- Total -->
-                  <text x="20" y="260" font-family="monospace" font-size="15" fill="#f8fafc" font-weight="bold">TOTAL</text>
-                  <text id="t-q1" x="110" y="260" font-family="monospace" font-size="15" fill="#94a3b8" font-weight="bold">0</text>
-                  <text id="t-q2" x="170" y="260" font-family="monospace" font-size="15" fill="#94a3b8" font-weight="bold">0</text>
-                  <text id="t-q3" x="230" y="260" font-family="monospace" font-size="15" fill="#94a3b8" font-weight="bold">0</text>
-                  <text id="t-q4" x="290" y="260" font-family="monospace" font-size="15" fill="#94a3b8" font-weight="bold">0</text>
-                  <text id="t-q5" x="350" y="260" font-family="monospace" font-size="15" fill="#38bdf8" font-weight="bold">0</text>
-                  <text id="trend-total" x="420" y="260" font-family="monospace" font-size="15" fill="#94a3b8" font-weight="bold">-</text>
-                </g>
-              
-                <!-- BOTTOM PANEL: THE LOGIC FORMULA -->
-                <g transform="translate(50, 470)">
-                  <rect width="900" height="100" fill="#0f172a" stroke="#334155" stroke-width="2" rx="4" />
-                  <rect width="10" height="100" fill="#38bdf8" rx="2" />
-                  
-                  <text x="30" y="25" font-family="monospace" font-size="14" fill="#38bdf8" font-weight="bold">[ EXECUTING LOGIC: HUMAN DEPENDENCY RATIO ]
-                  </text>
-                  
-                  <text x="30" y="55" font-family="monospace" font-size="15" fill="#f8fafc">
-                    FORMULA: P(AGI) = MAX( 0%, 100 * ( 1 - ( JOBS_Q1_2026 / JOBS_Q4_2025 ) ) )
-                  </text>
-              
-                  <!-- OVERARCHING FORMULA STAYS TRUE TO Q1'26 vs Q4'25 -->
-                  <text x="30" y="85" font-family="monospace" font-size="15" fill="#f8fafc">
-                    RESULT : P(AGI) = MAX( 0%, 100 * ( 1 - ( <tspan id="formula-jobs">0</tspan> / <tspan id="formula-base">0</tspan> ) ) ) = <tspan id="formula-pct" fill="#22c55e" font-weight="bold">100.00%</tspan>
-                  </text>
-              
-                  <!-- Alert Box (Starts in "Analyzing" mode) -->
-                  <rect id="alert-bg" x="670" y="15" width="210" height="70" fill="#1e293b" stroke="#334155" stroke-width="1" rx="4" />
-                  <text id="alert-text-1" x="775" y="45" font-family="monospace" font-size="16" fill="#94a3b8" font-weight="bold" text-anchor="middle">
-                    SYSTEM STATUS:
-                  </text>
-                  <text id="alert-text-2" x="775" y="65" font-family="monospace" font-size="16" fill="#94a3b8" font-weight="bold" text-anchor="middle">
-                    ANALYZING...
-                  </text>
-                </g>
-              </svg>
+        <header class="main-header">
+            <h1>AGI PROBABILITY BAROMETER</h1>
+            <p>Tracking frontier lab hiring velocity (Q1 2026 vs Q2 2026).</p>
+        </header>
+
+        <div id="grid-container" class="grid-container">
+            <!-- Rendered via JS -->
         </div>
 
-        <!-- Explanation Text -->
         <div class="explanation-card">
-            <h2>What This Metric Means</h2>
+            <h2>Tracking Independent P(AGI)</h2>
             <p>
-                The AGI Probability Barometer tracks the hiring velocity of the top AI frontier labs to estimate our proximity to Artificial General Intelligence (AGI). The core logic is simple: if AGI were truly imminent and capable of performing most economically valuable work as advertised, these labs would be automating their own operations, causing human job listings to decline. Instead, as the data shows, human hiring is accelerating by over <span class="highlight">15% quarter-over-quarter</span> across every major lab. This rapid, steady expansion of software engineers, marketers, and operations staff strongly suggests that achieving and scaling these AI models still requires a massive, sustained human workforce—pushing the actual arrival of autonomous AGI much further into the future than current marketing hype suggests.
+                The updated Barometer tracks the quarter-over-quarter human job hiring trends across the top AI labs. The logic operates strictly on the principle of obsolescence: if a lab were truly closing in on functional Artificial General Intelligence, their internal demand for human labor would drop. We are noticing exactly this trend begin to materialize at <span class="highlight">Google DeepMind and xAI</span>, translating to a non-zero probability of AGI imminence. Conversely, OpenAI and Anthropic continue to linearly ramp up human dependency.
             </p>
         </div>
-
     </div>
 
     <!-- Animation Logic -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Full dataset
-            const data = {
-                openai:[400, 450, 520, 590, 666],
-                anthropic:[150, 180, 220, 260, 320],
-                deepmind:[200, 210, 230, 250, 280],
-                xai:[50, 65, 80, 100, 120]
-            };
-            const targetTotals =[800, 905, 1050, 1200, 1386]; 
-
-            const prefixes = { openai: 'o', anthropic: 'a', deepmind: 'd', xai: 'x', total: 't' };
-            const labs =['openai', 'anthropic', 'deepmind', 'xai'];
-
-            // Timelines
-            const timelines =[
-                { start: 0.00, end: 0.15 }, // Q1'25 loads fast (Base)
-                { start: 0.10, end: 0.25 }, // Q2'25
-                { start: 0.20, end: 0.35 }, // Q3'25
-                { start: 0.30, end: 0.45 }, // Q4'25
-                { start: 0.45, end: 1.00 }  // Q1'26
+            const rawLabs = [
+                { id: 'openai', name: 'OpenAI', q1: 452, q2: 660 },
+                { id: 'anthropic', name: 'Anthropic', q1: 309, q2: 431 },
+                { id: 'deepmind', name: 'DeepMind', q1: 102, q2: 92 },
+                { id: 'xai', name: 'xAI', q1: 285, q2: 247 }
             ];
 
-            // DOM Elements
-            const els = {
-                needle: document.getElementById('needle'),
-                agiBigText: document.getElementById('agi-big-text'),
-                formulaBase: document.getElementById('formula-base'),
-                formulaJobs: document.getElementById('formula-jobs'),
-                formulaPct: document.getElementById('formula-pct'),
-                alertBg: document.getElementById('alert-bg'),
-                alertText1: document.getElementById('alert-text-1'),
-                alertText2: document.getElementById('alert-text-2')
-            };
+            // Pre-calculate final probability to sort them
+            rawLabs.forEach(lab => {
+                let finalP = Math.max(0, 100 * (1 - (lab.q2 / lab.q1)));
+                if (lab.q1 === 0) finalP = 100;
+                lab.finalP = finalP;
+            });
 
-            // Color Interpolation (Green -> Yellow -> Red)
+            // Sort descending by finalP. If tied, the one with fewer jobs is ranked higher.
+            const labs = rawLabs.sort((a, b) => {
+                if (b.finalP !== a.finalP) {
+                    return b.finalP - a.finalP;
+                }
+                return a.q2 - b.q2;
+            });
+
+            const grid = document.getElementById('grid-container');
+
+            let html = '';
+            labs.forEach(lab => {
+                html += `
+                    <div class="card" id="card-${lab.id}">
+                        <h2>${lab.name}</h2>
+                        <div class="svg-container">
+                            <svg viewBox="0 0 300 170" width="100%">
+                                <defs>
+                                    <linearGradient id="gaugeGrad-${lab.id}" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#ef4444" />
+                                        <stop offset="50%" stop-color="#eab308" />
+                                        <stop offset="100%" stop-color="#22c55e" />
+                                    </linearGradient>
+                                    <filter id="neonGlow-${lab.id}" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+                                <path d="M 30 140 A 120 120 0 0 1 270 140" fill="none" stroke="#1e293b" stroke-width="20" stroke-linecap="round"/>
+                                <path d="M 30 140 A 120 120 0 0 1 270 140" fill="none" stroke="url(#gaugeGrad-${lab.id})" stroke-width="20" stroke-linecap="round" opacity="0.3"/>
+                                
+                                <text x="30" y="165" font-family="monospace" font-size="12" fill="#ef4444" font-weight="bold" text-anchor="middle">0%</text>
+                                <text x="270" y="165" font-family="monospace" font-size="12" fill="#22c55e" font-weight="bold" text-anchor="middle">100%</text>
+                                
+                                <path id="needle-${lab.id}" d="M 150 140 L 50 140 L 150 136 Z" fill="#ef4444" filter="url(#neonGlow-${lab.id})"/>
+                                <circle cx="150" cy="140" r="8" fill="#f8fafc"/>
+                                <circle cx="150" cy="140" r="4" fill="#0f172a"/>
+
+                                <text id="agi-big-${lab.id}" x="150" y="85" font-family="monospace" font-size="34" font-weight="bold" fill="#ef4444" text-anchor="middle" filter="url(#neonGlow-${lab.id})">0.00%</text>
+                                <text x="150" y="105" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="middle" letter-spacing="1">PROBABILITY</text>
+                            </svg>
+                        </div>
+                        <div class="stats-table">
+                            <div class="stat-row header"><span>Quarter</span><span>Job Listings</span></div>
+                            <div class="stat-row"><span>Q1 2026</span><span class="val" id="q1-${lab.id}">0</span></div>
+                            <div class="stat-row"><span>Q2 2026</span><span class="val" id="q2-${lab.id}">0</span></div>
+                            <div class="stat-row trend"><span>Trend</span><span class="val" id="trend-${lab.id}">-</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+
             function getColor(p_agi) {
                 let r, g, b;
                 if (p_agi > 50) {
@@ -310,21 +290,20 @@
                 return `rgb(${r}, ${g}, ${b})`;
             }
 
-            // Trend Formatting
             function formatTrend(current, base) {
                 if (current === 0 || base === 0) return { text: "-", color: "#94a3b8" };
-                const pct = ((current - base) / base * 100).toFixed(0);
+                const pct = (((current - base) / base) * 100).toFixed(1);
                 if (pct > 0) return { text: `▲ +${pct}%`, color: "#ef4444" }; // Red
                 if (pct < 0) return { text: `▼ ${pct}%`, color: "#22c55e" };  // Green
-                return { text: "0%", color: "#eab308" };
+                return { text: "0.0%", color: "#eab308" };
             }
 
             function easeOutCubic(x) {
                 return 1 - Math.pow(1 - x, 3);
             }
 
-            const duration = 7000; // 7 seconds total
-            const startTime = performance.now() + 500; 
+            const duration = 3500;
+            const startTime = performance.now() + 500;
 
             function animate(currentTime) {
                 let timeElapsed = currentTime - startTime;
@@ -333,108 +312,38 @@
                     return;
                 }
 
-                let globalProgress = timeElapsed / duration;
-                if (globalProgress > 1) globalProgress = 1;
+                let progress = Math.min(timeElapsed / duration, 1);
+                let ease = easeOutCubic(progress);
 
-                let currentTotals =[0, 0, 0, 0, 0];
+                labs.forEach(lab => {
+                    let curQ1 = Math.floor(lab.q1 * ease);
+                    let curQ2 = Math.floor(lab.q2 * ease);
 
-                // --- 1. POPULATE THE TABLE MATRIX ---
-                for (let col = 0; col < 5; col++) {
-                    let localProgress = 0;
-                    if (globalProgress >= timelines[col].end) {
-                        localProgress = 1;
-                    } else if (globalProgress > timelines[col].start) {
-                        localProgress = (globalProgress - timelines[col].start) / (timelines[col].end - timelines[col].start);
-                    }
-                    
-                    let ease = easeOutCubic(localProgress);
+                    document.getElementById(`q1-${lab.id}`).textContent = curQ1;
+                    document.getElementById(`q2-${lab.id}`).textContent = curQ2;
 
-                    labs.forEach(lab => {
-                        let targetVal = data[lab][col];
-                        let curVal = Math.floor(targetVal * ease);
-                        currentTotals[col] += curVal;
-                        
-                        document.getElementById(`${prefixes[lab]}-q${col+1}`).textContent = curVal;
+                    let tr = formatTrend(curQ2, curQ1);
+                    let trendDom = document.getElementById(`trend-${lab.id}`);
+                    trendDom.textContent = tr.text;
+                    trendDom.style.color = tr.color;
 
-                        // Calculate Trend for Q1 2026 vs Q4 2025
-                        if (col === 4) {
-                            let baseVal = data[lab][3]; // Use Q4 2025 as the base
-                            let trendDom = document.getElementById(`trend-${lab}`);
-                            if (localProgress > 0) {
-                                let tr = formatTrend(curVal, baseVal);
-                                trendDom.textContent = tr.text;
-                                trendDom.setAttribute("fill", tr.color);
-                            }
-                        }
-                    });
+                    let p_agi = lab.finalP * ease;
+                    let pColor = getColor(p_agi);
 
-                    document.getElementById(`t-q${col+1}`).textContent = currentTotals[col];
-                }
+                    let bigText = document.getElementById(`agi-big-${lab.id}`);
+                    bigText.textContent = p_agi.toFixed(2) + "%";
+                    bigText.setAttribute("fill", pColor);
 
-                // Update Overall Total Trend (Q1 2026 vs Q4 2025)
-                if (globalProgress > timelines[4].start) {
-                    let trTotal = formatTrend(currentTotals[4], currentTotals[3]); // currentTotals[3] = Q4 2025
-                    let trendTotalDom = document.getElementById('trend-total');
-                    trendTotalDom.textContent = trTotal.text;
-                    trendTotalDom.setAttribute("fill", trTotal.color);
-                    if (globalProgress === 1) trendTotalDom.setAttribute("filter", "url(#neonGlow)");
-                }
+                    let angle = p_agi * 1.8;
+                    let needle = document.getElementById(`needle-${lab.id}`);
+                    needle.setAttribute("transform", `rotate(${angle}, 150, 140)`);
+                    needle.setAttribute("fill", pColor);
+                });
 
-                // --- 2. THE VISUAL GAUGE LOGIC (25% Drop per Quarter) ---
-                // The needle steps down gracefully up to 25% for each loading quarter
-                let drop_q2 = 25 * (currentTotals[1] / targetTotals[1]);
-                let drop_q3 = 25 * (currentTotals[2] / targetTotals[2]);
-                let drop_q4 = 25 * (currentTotals[3] / targetTotals[3]);
-                let drop_q5 = 25 * (currentTotals[4] / targetTotals[4]);
-
-                let needle_p_agi = 100 - (drop_q2 + drop_q3 + drop_q4 + drop_q5);
-                needle_p_agi = Math.max(0, needle_p_agi); // Floor at 0%
-                let needleColor = getColor(needle_p_agi);
-
-                // Apply to Needle & Big Text
-                els.agiBigText.textContent = needle_p_agi.toFixed(2) + "%";
-                els.agiBigText.setAttribute("fill", needleColor);
-                
-                let angle = needle_p_agi * 1.8;
-                els.needle.setAttribute("transform", `rotate(${angle}, 240, 300)`);
-                els.needle.setAttribute("fill", needleColor);
-
-
-                // --- 3. THE TRUE MATH FORMULA (Bottom Box) ---
-                // This strictly computes Q1 2026 / Q4 2025 as requested
-                let safeBase = currentTotals[3] === 0 ? 1 : currentTotals[3]; // Protect against div by zero before Q4 loads
-                els.formulaBase.textContent = currentTotals[3];
-                els.formulaJobs.textContent = currentTotals[4];
-
-                let true_p_agi = Math.max(0, 100 * (1 - (currentTotals[4] / safeBase)));
-                
-                // Keep visually at 100% until base numbers (Q4 2025) are established
-                if (currentTotals[3] === 0) true_p_agi = 100;
-
-                let trueColor = getColor(true_p_agi);
-                els.formulaPct.textContent = true_p_agi.toFixed(2) + "%";
-                els.formulaPct.setAttribute("fill", trueColor);
-
-
-                // --- 4. END STATE ---
-                if (globalProgress < 1) {
+                if (progress < 1) {
                     requestAnimationFrame(animate);
-                } else {
-                    // Flash the alert box when animation concludes
-                    els.alertBg.setAttribute("fill", "#450a0a");
-                    els.alertBg.setAttribute("stroke", "#ef4444");
-                    els.alertBg.classList.add("flash-danger");
-                    
-                    els.alertText1.textContent = "AGI STATUS:";
-                    els.alertText1.setAttribute("fill", "#ef4444");
-                    els.alertText1.setAttribute("filter", "url(#neonGlow)");
-                    
-                    els.alertText2.textContent = "NOT IMMINENT";
-                    els.alertText2.setAttribute("fill", "#ef4444");
-                    els.alertText2.setAttribute("filter", "url(#neonGlow)");
                 }
             }
-
             requestAnimationFrame(animate);
         });
     </script>
