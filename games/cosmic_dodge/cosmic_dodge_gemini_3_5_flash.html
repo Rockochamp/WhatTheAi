@@ -1,0 +1,2384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cosmic Dodge: Overdrive - What the Ai</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico?v=1.2">
+    <!-- Sci-Fi Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Modern Space Theme Reset & Core Style */
+        :root {
+            --bg-color: #05030a;
+            --panel-bg: rgba(15, 10, 30, 0.75);
+            --border-glow: rgba(0, 242, 254, 0.25);
+            --neon-cyan: #00f2fe;
+            --neon-pink: #ff007f;
+            --neon-purple: #9d4edd;
+            --gold: #ffb703;
+            --text-light: #f3f0fc;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(0, 242, 254, 0.15) 0%, transparent 40%);
+            color: var(--text-light);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Top Navigation/Indicator bar */
+        .header-bar {
+            width: 100%;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .breadcrumb {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 8px 18px;
+            border-radius: 30px;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .breadcrumb a {
+            text-decoration: none;
+            color: var(--neon-cyan);
+            font-family: var(--font-display);
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0, 242, 254, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .breadcrumb:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.3);
+            transform: scale(1.03);
+        }
+
+        .version-indicator {
+            background: rgba(255, 0, 127, 0.1);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: var(--neon-pink);
+            font-family: var(--font-display);
+            font-size: 0.8em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
+        }
+
+        /* Title Banner with Cyberpunk Aesthetics */
+        #titleBanner {
+            margin-top: 10px;
+            margin-bottom: 25px;
+            font-family: var(--font-display);
+            font-size: 3em;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.3));
+            text-transform: uppercase;
+            position: relative;
+            user-select: none;
+        }
+
+        /* Main Content Container */
+        .main-wrapper {
+            width: 100%;
+            max-width: 1300px;
+            padding: 0 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        /* Glassmorphic Start Screen Panel */
+        #startScreen {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-family: var(--font-display);
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #b0a8cf;
+            text-transform: uppercase;
+        }
+
+        .input-group input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-family: var(--font-body);
+            font-size: 1.1em;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-group input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.25);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .cyber-btn {
+            background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-pink) 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            padding: 16px 32px;
+            font-family: var(--font-display);
+            font-size: 1.1em;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
+        }
+
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4), 0 0 10px rgba(255, 0, 127, 0.4);
+        }
+
+        .cyber-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Leaderboard Overview Panel on Start Screen */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .glass-panel:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 8px 32px rgba(0, 242, 254, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .glass-panel h2 {
+            font-family: var(--font-display);
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leaderboard-list li {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .leaderboard-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .leaderboard-list li span.rank {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--neon-pink);
+        }
+
+        .leaderboard-list li span.name {
+            font-weight: 600;
+            flex: 1;
+            margin-left: 15px;
+            color: #e2dff0;
+        }
+
+        .leaderboard-list li span.score {
+            font-family: var(--font-display);
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .panel-loader {
+            text-align: center;
+            font-style: italic;
+            color: #8e88a5;
+            padding: 10px;
+        }
+
+        /* Game Container UI */
+        #gameContainer {
+            display: none;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* Canvas Wrap */
+        #canvasWrapper {
+            flex: 1 1 600px;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        canvas {
+            border: 2px solid var(--border-glow);
+            border-radius: 12px;
+            background: #000;
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 800 / 600;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 242, 254, 0.1);
+            image-rendering: auto;
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 0.9em;
+            color: #b0a8cf;
+            line-height: 1.5;
+            max-width: 600px;
+        }
+
+        .instructions span {
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        /* Sidebar Boards Stack */
+        #sidebar {
+            flex: 0 0 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-board {
+            width: 100%;
+        }
+
+        .sidebar-board h2 {
+            font-size: 1.1em;
+        }
+
+        /* Mobile Controls */
+        #mobileControls {
+            display: none;
+            width: 100%;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .mobile-btn {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 12px;
+            color: var(--neon-cyan);
+            width: 65px;
+            height: 65px;
+            font-size: 1.8em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-btn:active {
+            background: var(--neon-cyan);
+            color: #000;
+            transform: scale(0.92);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+        }
+
+        .mobile-btn.fire {
+            border-color: rgba(255, 0, 127, 0.3);
+            color: var(--neon-pink);
+            width: 80px;
+        }
+
+        .mobile-btn.fire:active {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.6);
+        }
+
+        /* Vol Controls Panel */
+        .controls-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .vol-slider-wrap {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .vol-slider-wrap label {
+            font-family: var(--font-display);
+            font-size: 0.8em;
+            color: #b0a8cf;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .vol-slider-wrap input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .vol-slider-wrap input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 8px var(--neon-cyan);
+            transition: all 0.15s ease;
+        }
+
+        .vol-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .vol-slider-wrap input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            border: none;
+            box-shadow: 0 0 8px var(--neon-cyan);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .vol-slider-wrap input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .mute-toggle-wrap {
+            display: none; /* Auto-toggled for iOS */
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mute-toggle-wrap input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--neon-pink);
+        }
+
+        .mute-toggle-wrap label {
+            font-size: 0.9em;
+            color: #c9c3e2;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Modal Overlay System */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-panel {
+            background: #0d0a1b;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.3);
+            animation: modalSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            font-family: var(--font-display);
+            font-size: 1.3em;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: #8e88a5;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-pink);
+        }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Modal custom scrollbar */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--border-glow);
+            border-radius: 4px;
+            border: 2px solid #0d0a1b;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-cyan);
+        }
+
+        /* Floating total text */
+        .total-counter {
+            font-size: 0.85em;
+            color: #8e88a5;
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            #gameContainer {
+                flex-direction: column;
+                align-items: center;
+            }
+            #canvasWrapper {
+                width: 100%;
+            }
+            #sidebar {
+                width: 100%;
+                max-width: 600px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .sidebar-board {
+                flex: 1 1 280px;
+            }
+            .controls-card {
+                flex: 1 1 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            #titleBanner {
+                font-size: 2em;
+            }
+            #startScreen {
+                padding: 25px 20px;
+            }
+            #sidebar {
+                flex-direction: column;
+                align-items: center;
+            }
+            .sidebar-board {
+                width: 100%;
+            }
+            #mobileControls {
+                display: flex;
+            }
+            .instructions {
+                display: none; /* Hide on mobile to conserve vertical space */
+            }
+        }
+    </style>
+    <!-- Firebase Legacy compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    
+    <div class="header-bar">
+        <div class="breadcrumb">
+            <a href="/index.html">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Games List
+            </a>
+        </div>
+        <div class="version-indicator">Gemini 3.5 Flash</div>
+    </div>
+
+    <h1 id="titleBanner">Cosmic Dodge</h1>
+
+    <div class="main-wrapper">
+        <!-- START SCREEN UI -->
+        <div id="startScreen">
+            <div class="input-group">
+                <label for="playerName">Pilot Signature</label>
+                <input type="text" id="playerName" maxlength="10" placeholder="ENTER INITIALS..." />
+            </div>
+            
+            <button id="startGameBtn" class="cyber-btn">Initialize Warp Drive</button>
+            
+            <div id="startLeaderboard" class="glass-panel">
+                <h2>Global Rankings</h2>
+                <div class="total-counter" id="globalGamesPlayedStart">Loading total records...</div>
+                <div id="globalListStart" class="panel-loader">Connecting to neural net...</div>
+            </div>
+        </div>
+
+        <!-- GAMEPLAY SCREEN UI -->
+        <div id="gameContainer">
+            <div id="canvasWrapper">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div class="instructions">
+                    Use <span>← / →</span> or <span>A / D</span> to steer your fighter. Press <span>SPACEBAR</span> to fire Wing Blasters.<br>
+                    Avoid Asteroids, Comets, and Giant Meteors. Grab power-ups to survive! Press <span>SPACEBAR</span> on Game Over to warp back.
+                </div>
+                <!-- On screen mobile controls -->
+                <div id="mobileControls">
+                    <button class="mobile-btn" id="mobileLeftBtn">←</button>
+                    <button class="mobile-btn fire" id="mobileFireBtn">⚡</button>
+                    <button class="mobile-btn" id="mobileRightBtn">→</button>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <!-- Session Local Board -->
+                <div id="localBoard" class="glass-panel sidebar-board">
+                    <h2>Session Log</h2>
+                    <div id="localRankingsContent">No flights logged.</div>
+                </div>
+
+                <!-- Game Global Board -->
+                <div id="gameLeaderboardBoard" class="glass-panel sidebar-board">
+                    <h2>Galaxy Rank</h2>
+                    <div class="total-counter" id="globalGamesPlayedGame">Games played: Loading...</div>
+                    <div id="globalListGame" class="panel-loader">Retrieving stats...</div>
+                </div>
+
+                <!-- Volume and settings -->
+                <div class="controls-card">
+                    <div class="vol-slider-wrap" id="volWrap">
+                        <label for="volumeSlider">Hyperdrive Audio</label>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.02" value="0.5" />
+                    </div>
+                    <div class="mute-toggle-wrap" id="muteWrap">
+                        <input type="checkbox" id="muteToggle" />
+                        <label for="muteToggle">Mute System Warnings</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUPS FOR SCROLLABLE HIGH SCORES (TOP 100) -->
+    <div id="globalModal" class="modal-overlay">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3>Global Top 100 Pilots</h3>
+                <button class="modal-close" id="closeGlobalModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="globalModalBody">
+                <!-- Will be loaded dynamic -->
+            </div>
+        </div>
+    </div>
+
+    <div id="localModal" class="modal-overlay">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3>Flight Session Top 100</h3>
+                <button class="modal-close" id="closeLocalModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="localModalBody">
+                <!-- Will be loaded dynamic -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Element for background loop -->
+    <audio id="backgroundMusic" loop>
+        <source src="/music/PixelRush.m4a" type="audio/mp4">
+    </audio>
+
+    <!-- Word Filter Blocklist -->
+    <script src="/js/common/blocklist.js"></script>
+
+    <script>
+        /***************************************************
+         *          FIREBASE CONFIG & STORAGE KEYS          *
+         ***************************************************/
+        const firebaseConfig = {
+             apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE",
+             authDomain: "cosmicdodge-5ae20.firebaseapp.com",
+             projectId: "cosmicdodge-5ae20",
+             storageBucket: "cosmicdodge-5ae20.appspot.com",
+             messagingSenderId: "940230809594",
+             appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Separate Version Collection from ChatGPT's to avoid database pollution
+        const version = 'gemini_3_5_flash';
+        const gameTitle = 'cosmic_dodge';
+        const leaderboardCollection = `leaderboard_${gameTitle}_${version}`;
+        const statsDoc = `stats_${gameTitle}_${version}`;
+        
+        // Persistent audio storage keys
+        const volumeKey = `${gameTitle}_volume`;
+        const muteKey = `${gameTitle}_muted_v1`;
+
+        // iOS audio check
+        function isIOS() {
+            return [
+                'iPad Simulator', 'iPhone Simulator', 'iPod Simulator',
+                'iPad', 'iPhone', 'iPod'
+            ].includes(navigator.platform)
+            || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+        }
+        const runningOnIOS = isIOS();
+
+        /***************************************************
+         *         AUDIO ENGINE SYNTHESIZER (WEB AUDIO)    *
+         ***************************************************/
+        let audioCtx = null;
+        let mainGainNode = null;
+        const backgroundMusic = document.getElementById('backgroundMusic');
+
+        function initAudio() {
+            if (audioCtx) return;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+                mainGainNode = audioCtx.createGain();
+                mainGainNode.connect(audioCtx.destination);
+                updateAudioVolumes();
+            } catch(e) {
+                console.error("Audio Synthesis error: ", e);
+            }
+        }
+
+        // Real-time SFX pitch oscillators
+        function playLaserSFX() {
+            if (!audioCtx) initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'triangle'; // Smooth retro laser sweep
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(150, now + 0.14);
+
+            gainNode.gain.setValueAtTime(0.12, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+
+            osc.connect(gainNode);
+            gainNode.connect(mainGainNode);
+
+            osc.start(now);
+            osc.stop(now + 0.14);
+        }
+
+        function playExplosionSFX() {
+            if (!audioCtx) initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') return;
+
+            const now = audioCtx.currentTime;
+            
+            // Procedural white noise buffer generator
+            const bufferSize = audioCtx.sampleRate * 0.35; // 0.35s sound
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseNode = audioCtx.createBufferSource();
+            noiseNode.buffer = buffer;
+
+            // Lowpass sweep filter to give a bass-heavy impact
+            const filterNode = audioCtx.createBiquadFilter();
+            filterNode.type = 'lowpass';
+            filterNode.frequency.setValueAtTime(1200, now);
+            filterNode.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.28, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.005, now + 0.35);
+
+            noiseNode.connect(filterNode);
+            filterNode.connect(gainNode);
+            gainNode.connect(mainGainNode);
+
+            noiseNode.start(now);
+            noiseNode.stop(now + 0.35);
+        }
+
+        function playPowerupSFX() {
+            if (!audioCtx) initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'sine';
+            // Upward digital synthesized arpeggio
+            osc.frequency.setValueAtTime(261.63, now); // C4
+            osc.frequency.setValueAtTime(329.63, now + 0.05); // E4
+            osc.frequency.setValueAtTime(392.00, now + 0.1); // G4
+            osc.frequency.setValueAtTime(523.25, now + 0.15); // C5
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.35);
+
+            gainNode.gain.setValueAtTime(0.12, now);
+            gainNode.gain.setValueAtTime(0.12, now + 0.15);
+            gainNode.gain.exponentialRampToValueAtTime(0.005, now + 0.35);
+
+            osc.connect(gainNode);
+            gainNode.connect(mainGainNode);
+
+            osc.start(now);
+            osc.stop(now + 0.35);
+        }
+
+        function playShieldHitSFX() {
+            if (!audioCtx) initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'sine';
+            // Double metallic frequency sweep
+            osc.frequency.setValueAtTime(587.33, now); // D5
+            osc.frequency.exponentialRampToValueAtTime(1174.66, now + 0.15); // Sweep up
+
+            gainNode.gain.setValueAtTime(0.18, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.005, now + 0.15);
+
+            osc.connect(gainNode);
+            gainNode.connect(mainGainNode);
+
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
+
+        function playGameOverSFX() {
+            if (!audioCtx) initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            // Melancholic deep dive
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.linearRampToValueAtTime(45, now + 0.65);
+
+            gainNode.gain.setValueAtTime(0.24, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.005, now + 0.65);
+
+            osc.connect(gainNode);
+            gainNode.connect(mainGainNode);
+
+            osc.start(now);
+            osc.stop(now + 0.65);
+        }
+
+        // Handle music & synthesized node master volume updates
+        function updateAudioVolumes() {
+            let mute = false;
+            let levelVal = 0.5;
+
+            if (runningOnIOS) {
+                const mtEl = document.getElementById('muteToggle');
+                mute = mtEl ? mtEl.checked : false;
+                levelVal = mute ? 0 : 0.5;
+            } else {
+                const vsEl = document.getElementById('volumeSlider');
+                levelVal = vsEl ? parseFloat(vsEl.value) : 0.5;
+                if (isNaN(levelVal)) levelVal = 0.5;
+            }
+
+            // Sync dynamic synthesizer main gain node
+            if (mainGainNode && audioCtx) {
+                mainGainNode.gain.setValueAtTime(levelVal, audioCtx.currentTime);
+            }
+
+            // Sync HTML audio element
+            if (backgroundMusic) {
+                if (runningOnIOS) {
+                    backgroundMusic.muted = mute;
+                } else {
+                    backgroundMusic.volume = levelVal;
+                }
+            }
+        }
+
+        // Initialize Audio Slider Configurations
+        function setupAudioSystem() {
+            const vs = document.getElementById('volumeSlider');
+            const mt = document.getElementById('muteToggle');
+            const vw = document.getElementById('volWrap');
+            const mw = document.getElementById('muteWrap');
+
+            if (runningOnIOS) {
+                if (vs) vs.style.display = 'none';
+                if (vw) vw.style.display = 'none';
+                if (mw) mw.style.display = 'flex';
+
+                const storedMute = localStorage.getItem(muteKey);
+                if (storedMute !== null && mt) {
+                    mt.checked = (storedMute === 'true');
+                }
+                
+                if (mt) {
+                    mt.addEventListener('change', () => {
+                        localStorage.setItem(muteKey, mt.checked.toString());
+                        updateAudioVolumes();
+                    });
+                }
+            } else {
+                if (mt) mt.style.display = 'none';
+                if (mw) mw.style.display = 'none';
+                if (vs) vs.style.display = 'flex';
+                if (vw) vw.style.display = 'flex';
+
+                const storedVol = localStorage.getItem(volumeKey);
+                if (storedVol !== null && vs) {
+                    vs.value = parseFloat(storedVol);
+                }
+
+                if (vs) {
+                    const handleInput = () => {
+                        localStorage.setItem(volumeKey, vs.value);
+                        updateAudioVolumes();
+                    };
+                    vs.addEventListener('input', handleInput);
+                    vs.addEventListener('change', handleInput);
+                }
+            }
+            updateAudioVolumes();
+        }
+
+        /***************************************************
+         *              FIRESTORE LEADERBOARD LOGIC        *
+         ***************************************************/
+        let globalRankingsData = [];
+
+        function queryGlobalLeaderboard() {
+            const queryLimit = 150;
+            const inlineMax = 5;
+            const modalMax = 100;
+
+            db.collection(leaderboardCollection)
+                .orderBy("level", "desc")
+                .orderBy("timestamp", "desc")
+                .limit(queryLimit)
+                .get()
+                .then((snap) => {
+                    globalRankingsData = [];
+                    const duplicateFilt = new Set();
+
+                    if (!snap.empty) {
+                        snap.forEach((doc) => {
+                            const data = doc.data();
+                            if (data && data.level !== undefined) {
+                                // Unique levels/records only
+                                const hash = `${data.playerName}_${data.level}`;
+                                if (!duplicateFilt.has(hash) && globalRankingsData.length < modalMax) {
+                                    globalRankingsData.push({
+                                        name: data.playerName || 'ANON',
+                                        level: data.level
+                                    });
+                                    duplicateFilt.add(hash);
+                                }
+                            }
+                        });
+                    }
+
+                    renderGlobalLeaderboards(inlineMax);
+                })
+                .catch((e) => {
+                    console.error("Firebase fetch error: ", e);
+                    const errStr = `<div class="panel-loader">Database offline.</div>`;
+                    document.getElementById('globalListStart').innerHTML = errStr;
+                    document.getElementById('globalListGame').innerHTML = errStr;
+                });
+        }
+
+        function renderGlobalLeaderboards(inlineMax) {
+            const listStart = document.getElementById('globalListStart');
+            const listGame = document.getElementById('globalListGame');
+            const modalBody = document.getElementById('globalModalBody');
+
+            let inlineHtml = '<ul class="leaderboard-list">';
+            let modalHtml = '<ul class="leaderboard-list">';
+
+            if (globalRankingsData.length > 0) {
+                // Start screen top 5
+                inlineHtml += globalRankingsData.slice(0, inlineMax).map((p, idx) => `
+                    <li>
+                        <span class="rank">#${idx + 1}</span>
+                        <span class="name">${p.name}</span>
+                        <span class="score">LVL ${p.level}</span>
+                    </li>
+                `).join('');
+                inlineHtml += '</ul>';
+
+                // Modal screen top 100
+                modalHtml += globalRankingsData.map((p, idx) => `
+                    <li>
+                        <span class="rank">#${idx + 1}</span>
+                        <span class="name">${p.name}</span>
+                        <span class="score">LEVEL ${p.level}</span>
+                    </li>
+                `).join('');
+                modalHtml += '</ul>';
+            } else {
+                const emptyMsg = '<p style="text-align:center;font-style:italic;color:#8e88a5;padding:10px;">No ranks reported yet. Make history!</p>';
+                inlineHtml = emptyMsg;
+                modalHtml = emptyMsg;
+            }
+
+            if (listStart) listStart.innerHTML = inlineHtml;
+            if (listGame) listGame.innerHTML = inlineHtml; // Mirrors identical inline structure
+            if (modalBody) modalBody.innerHTML = modalHtml;
+        }
+
+        function uploadGlobalRecord(finalLevel) {
+            const playerSignature = playerName.toUpperCase();
+            if (!playerSignature) return;
+
+            db.collection(leaderboardCollection).add({
+                playerName: playerSignature,
+                level: Math.max(1, finalLevel),
+                version: version,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                console.log("Stats logged in neural net.");
+                queryGlobalLeaderboard();
+            })
+            .catch((e) => console.error("Firebase write error: ", e));
+        }
+
+        function incrementWarpGamesCount() {
+            db.collection("globalStats").doc(statsDoc).set({
+                totalGamesPlayed: firebase.firestore.FieldValue.increment(1),
+                gameTitle: gameTitle,
+                version: version
+            }, { merge: true })
+            .then(() => {
+                displayWarpStatsCount();
+            })
+            .catch(console.error);
+        }
+
+        function displayWarpStatsCount() {
+            db.collection("globalStats").doc(statsDoc).get()
+            .then((doc) => {
+                const count = doc.exists ? (doc.data().totalGamesPlayed || 0) : 0;
+                const fmtStr = `Worldwide Flights: ${count}`;
+                document.getElementById('globalGamesPlayedStart').innerText = fmtStr;
+                document.getElementById('globalGamesPlayedGame').innerText = fmtStr;
+            })
+            .catch((e) => {
+                const errStr = `Worldwide Flights: Offline`;
+                document.getElementById('globalGamesPlayedStart').innerText = errStr;
+                document.getElementById('globalGamesPlayedGame').innerText = errStr;
+            });
+        }
+
+        /***************************************************
+         *              SESSION LOCAL RANKINGS              *
+         ***************************************************/
+        let sessionFlightsLog = {}; // Stores highest level by round num
+        let flightRoundIndex = 0;
+
+        function logLocalSessionFlight(round, finalLevel) {
+            sessionFlightsLog[round] = finalLevel;
+            renderLocalLeaderboard();
+        }
+
+        function renderLocalLeaderboard() {
+            const container = document.getElementById('localRankingsContent');
+            const modalBody = document.getElementById('localModalBody');
+            
+            const logEntries = Object.entries(sessionFlightsLog).map(([round, val]) => ({
+                round: parseInt(round),
+                level: val
+            }));
+
+            // Sort entries highest level first
+            logEntries.sort((a, b) => b.level - a.level);
+
+            let inlineHtml = '<ul class="leaderboard-list">';
+            let modalHtml = '<ul class="leaderboard-list">';
+
+            if (logEntries.length > 0) {
+                // Top 5 inline
+                inlineHtml += logEntries.slice(0, 5).map((e, idx) => `
+                    <li>
+                        <span class="rank">#${idx + 1}</span>
+                        <span class="name">ROUND ${e.round}</span>
+                        <span class="score">LVL ${e.level}</span>
+                    </li>
+                `).join('');
+                inlineHtml += '</ul>';
+
+                // Top 100 modal
+                modalHtml += logEntries.slice(0, 100).map((e, idx) => `
+                    <li>
+                        <span class="rank">#${idx + 1}</span>
+                        <span class="name">WARP CRUISE ROUND ${e.round}</span>
+                        <span class="score">LEVEL ${e.level}</span>
+                    </li>
+                `).join('');
+                modalHtml += '</ul>';
+            } else {
+                const emptyMsg = '<p style="text-align:center;font-style:italic;color:#8e88a5;padding:10px;">Ready for take-off.</p>';
+                inlineHtml = emptyMsg;
+                modalHtml = emptyMsg;
+            }
+
+            if (container) container.innerHTML = inlineHtml;
+            if (modalBody) modalBody.innerHTML = modalHtml;
+        }
+
+        // Profanity Check
+        function isNameOffensive(name) {
+            if (typeof offensiveWords === 'undefined') {
+                console.warn("Safety blocklist not loaded!");
+                return false;
+            }
+            if (!name) return false;
+            const term = name.toLowerCase();
+            for (const badWord of offensiveWords) {
+                if (term.includes(badWord)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /***************************************************
+         *           CANVAS ARCADE GRAPHICS ENGINE         *
+         ***************************************************/
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let playerName = "";
+        let gameStarted = false;
+        let gameOver = false;
+        let isSavingRound = false;
+
+        // Space Particle Star Layers
+        let parallaxStars = [];
+        function createParallaxStarfield() {
+            parallaxStars = [];
+            for (let i = 0; i < 110; i++) {
+                parallaxStars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    speed: Math.random() * 1.8 + 0.4,
+                    color: Math.random() < 0.2 ? 'rgba(0, 242, 254, 0.6)' : 'rgba(255, 255, 255, 0.7)'
+                });
+            }
+        }
+
+        // Game Entities
+        let ship = {
+            x: 0,
+            y: 0,
+            width: 44,
+            height: 38,
+            velX: 0,
+            acc: 0.85,
+            drag: 0.90,
+            maxVel: 13,
+            color: '#00f2fe'
+        };
+
+        let lasers = [];
+        let particles = [];
+        let floatTexts = [];
+        let asteroids = [];
+        let powerups = [];
+
+        // Game States & Stats
+        let score = 0;
+        let level = 1;
+        let frameCount = 0;
+        let lastTime = 0;
+        let screenShake = 0;
+
+        // Input Buffers
+        let leftPressed = false;
+        let rightPressed = false;
+        let spacePressed = false;
+        let spaceCooldown = 0;
+
+        // Active Power-up Timers (Millisecond based stamps)
+        let timeWarpTimer = 0; // Duration: Green slow-mo matrix
+        let overchargeTimer = 0; // Duration: Rapid double gold lasers
+        let shieldActive = false; // Bubble shield absorb-state
+
+        // Responsive Scaling Coordinates helper
+        let scaleFactorX = 1;
+
+        // Spawn controllers
+        let lastAsteroidSpawn = 0;
+        let lastPowerupSpawn = 0;
+
+        function updateScreenShake() {
+            if (screenShake > 0) {
+                screenShake *= 0.9;
+                if (screenShake < 0.2) screenShake = 0;
+            }
+        }
+
+        function triggerScreenShake(val) {
+            screenShake = val;
+        }
+
+        /***************************************************
+         *              SPACESHIP & EXHAUST DRAWING        *
+         ***************************************************/
+        function spawnParticleTrail(x, y, color) {
+            particles.push({
+                x: x,
+                y: y,
+                velX: (Math.random() - 0.5) * 1.5,
+                velY: Math.random() * 2.5 + 1.5, // Emitted downwards
+                size: Math.random() * 4 + 1.5,
+                life: 1.0,
+                decay: Math.random() * 0.04 + 0.02,
+                color: color || '#00f2fe'
+            });
+        }
+
+        function spawnShatterDebris(x, y, color, count = 12) {
+            for(let i=0; i<count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const spd = Math.random() * 5 + 2;
+                particles.push({
+                    x: x,
+                    y: y,
+                    velX: Math.cos(angle) * spd,
+                    velY: Math.sin(angle) * spd,
+                    size: Math.random() * 5 + 2,
+                    life: 1.0,
+                    decay: Math.random() * 0.05 + 0.015,
+                    color: color || '#ff007f'
+                });
+            }
+        }
+
+        function drawPlayerShip() {
+            ctx.save();
+            ctx.translate(ship.x + ship.width/2, ship.y + ship.height/2);
+
+            // Flickering engine trails
+            const overcharge = overchargeTimer > Date.now();
+            const engineColor = overcharge ? '#ffb703' : '#00f2fe';
+            const flameIntensity = 1 + Math.sin(frameCount * 0.6) * 0.25;
+            const flameHeight = overcharge ? 35 * flameIntensity : 20 * flameIntensity;
+            
+            // Thrust glow flame vector paths
+            ctx.beginPath();
+            ctx.moveTo(-10, ship.height/2 - 2);
+            ctx.lineTo(0, ship.height/2 - 2 + flameHeight);
+            ctx.lineTo(10, ship.height/2 - 2);
+            ctx.closePath();
+            
+            const flameGrad = ctx.createLinearGradient(0, ship.height/2 - 2, 0, ship.height/2 - 2 + flameHeight);
+            flameGrad.addColorStop(0, engineColor);
+            flameGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = flameGrad;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = engineColor;
+            ctx.fill();
+
+            // Emit passive trail exhaust particles
+            if (frameCount % 2 === 0) {
+                spawnParticleTrail(ship.x + ship.width/2 + (Math.random() - 0.5) * 12, ship.y + ship.height, engineColor);
+            }
+
+            // Custom geometric Sci-Fi Starfighter body
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = ship.color;
+
+            // Delta shape wings
+            ctx.fillStyle = '#0a081f';
+            ctx.strokeStyle = ship.color;
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, -ship.height/2); // Nose cone
+            ctx.lineTo(ship.width/2, ship.height/2); // Right wing tip
+            ctx.lineTo(12, ship.height/3); // Inner wing indentation right
+            ctx.lineTo(-12, ship.height/3); // Inner wing indentation left
+            ctx.lineTo(-ship.width/2, ship.height/2); // Left wing tip
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Wing tip plasma rails
+            ctx.fillStyle = overcharge ? '#ffb703' : '#ff007f';
+            ctx.fillRect(ship.width/2 - 3, ship.height/4, 3, 10);
+            ctx.fillRect(-ship.width/2, ship.height/4, 3, 10);
+
+            // Sleek glass cockpit
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(0, -ship.height/4);
+            ctx.lineTo(5, 5);
+            ctx.lineTo(-5, 5);
+            ctx.closePath();
+            ctx.fill();
+
+            // Shield Bubble Effect overlay
+            if (shieldActive) {
+                ctx.restore();
+                ctx.save();
+                ctx.translate(ship.x + ship.width/2, ship.y + ship.height/2);
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.85)';
+                ctx.fillStyle = 'rgba(0, 242, 254, 0.08)';
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = '#00f2fe';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, ship.width * 0.8, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        /***************************************************
+         *              PROCEDURAL ASTEROIDS & HAZARDS     *
+         ***************************************************/
+        function spawnAsteroidEntity() {
+            // Speed scaling factors dependent on current rank/levels
+            const levelMultiplier = 0.45;
+            const sizeSeed = Math.random();
+            
+            let ast = {
+                x: Math.random() * (canvas.width - 60) + 30,
+                y: -60,
+                velY: Math.random() * 2 + 2 + (level - 1) * levelMultiplier,
+                rotation: Math.random() * Math.PI * 2,
+                spinSpeed: (Math.random() - 0.5) * 0.06,
+                radius: 0,
+                hp: 1,
+                maxHp: 1,
+                color: '#ff3300',
+                type: 'standard', // standard | comet | meteor
+                vertices: []
+            };
+
+            // Diversified obstacle classes
+            if (sizeSeed < 0.25 && level >= 2) {
+                // FAST COMET (Streak cyan laser style)
+                ast.type = 'comet';
+                ast.radius = 12 + Math.random() * 5;
+                ast.velY = 7.5 + (level - 1) * 0.6; // High velocity
+                ast.color = '#00f2fe';
+            } else if (sizeSeed > 0.85 && level >= 3) {
+                // GIANT METEOR (Crater heavy tank splitters)
+                ast.type = 'meteor';
+                ast.radius = 42 + Math.random() * 12;
+                ast.hp = 3; // Takes multiple shots!
+                ast.maxHp = 3;
+                ast.velY = 1.3 + (level - 1) * 0.2; // Slow lumbering
+                ast.color = '#9d4edd';
+            } else {
+                // STANDARD CRATERED ASTEROID
+                ast.type = 'standard';
+                ast.radius = 18 + Math.random() * 14;
+                ast.color = '#ff6b35';
+            }
+
+            // Create irregular procedural vector polygon edge offsets
+            const numVertices = ast.type === 'comet' ? 6 : 8 + Math.floor(Math.random() * 5);
+            for(let i=0; i<numVertices; i++) {
+                const angle = (i / numVertices) * Math.PI * 2;
+                const offset = (Math.random() - 0.5) * (ast.radius * 0.3); // 30% vertex skew
+                ast.vertices.push({
+                    x: Math.cos(angle) * (ast.radius + offset),
+                    y: Math.sin(angle) * (ast.radius + offset)
+                });
+            }
+
+            asteroids.push(ast);
+        }
+
+        function drawAsteroid(ast) {
+            ctx.save();
+            ctx.translate(ast.x, ast.y);
+            ctx.rotate(ast.rotation);
+
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = ast.color;
+
+            // Linear base shade gradients
+            const grad = ctx.createRadialGradient(-5, -5, 2, 0, 0, ast.radius);
+            
+            if (ast.type === 'comet') {
+                grad.addColorStop(0, '#fff');
+                grad.addColorStop(0.3, '#00f2fe');
+                grad.addColorStop(1, '#05030a');
+            } else if (ast.type === 'meteor') {
+                grad.addColorStop(0, '#c77dff');
+                grad.addColorStop(0.4, '#7b2cbf');
+                grad.addColorStop(1, '#240046');
+            } else {
+                grad.addColorStop(0, '#ff9f1c');
+                grad.addColorStop(0.4, '#e71d36');
+                grad.addColorStop(1, '#0a050f');
+            }
+
+            ctx.fillStyle = grad;
+            ctx.strokeStyle = ast.color;
+            ctx.lineWidth = 1.5;
+
+            // Draw vector vertices
+            ctx.beginPath();
+            ctx.moveTo(ast.vertices[0].x, ast.vertices[0].y);
+            for(let i=1; i<ast.vertices.length; i++) {
+                ctx.lineTo(ast.vertices[i].x, ast.vertices[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Renders structural cracks if heavy meteor is damaged
+            if (ast.type === 'meteor' && ast.hp < ast.maxHp) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#fff';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2.5;
+                
+                // Procedural cracking lines
+                ctx.beginPath();
+                if (ast.hp === 2) {
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-ast.radius*0.6, -ast.radius*0.3);
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(ast.radius*0.5, ast.radius*0.4);
+                } else if (ast.hp === 1) {
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-ast.radius*0.6, -ast.radius*0.3);
+                    ctx.lineTo(-ast.radius*0.8, ast.radius*0.2);
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(ast.radius*0.5, ast.radius*0.4);
+                    ctx.lineTo(ast.radius*0.7, -ast.radius*0.5);
+                    ctx.moveTo(-ast.radius*0.2, ast.radius*0.1);
+                    ctx.lineTo(ast.radius*0.1, -ast.radius*0.6);
+                }
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Emit glowing engine trails if Comet
+            if (ast.type === 'comet' && frameCount % 3 === 0) {
+                particles.push({
+                    x: ast.x + (Math.random() - 0.5) * 8,
+                    y: ast.y - ast.radius,
+                    velX: (Math.random() - 0.5) * 1,
+                    velY: -ast.velY * 0.3, // Trail streams backwards
+                    size: Math.random() * 5 + 1.5,
+                    life: 0.8,
+                    decay: 0.05,
+                    color: 'rgba(0, 242, 254, 0.7)'
+                });
+            }
+        }
+
+        /***************************************************
+         *              POWER-UPS SYSTEM ENTITIES          *
+         ***************************************************/
+        function spawnPowerupEntity() {
+            const types = ['shield', 'timewarp', 'overcharge'];
+            const chosen = types[Math.floor(Math.random() * types.length)];
+            
+            let color = '#00f2fe';
+            let symbol = 'S';
+            if (chosen === 'timewarp') { color = '#39ff14'; symbol = 'T'; }
+            if (chosen === 'overcharge') { color = '#ffb703'; symbol = 'O'; }
+
+            powerups.push({
+                x: Math.random() * (canvas.width - 50) + 25,
+                y: -40,
+                type: chosen,
+                radius: 16,
+                color: color,
+                symbol: symbol,
+                velY: 1.8,
+                rotation: 0
+            });
+        }
+
+        function drawPowerup(pu) {
+            ctx.save();
+            ctx.translate(pu.x, pu.y);
+            ctx.rotate(pu.rotation);
+
+            // Glow hexagonal power ring
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = pu.color;
+            ctx.strokeStyle = pu.color;
+            ctx.lineWidth = 2.5;
+            ctx.fillStyle = 'rgba(15, 10, 30, 0.8)';
+
+            ctx.beginPath();
+            for(let i=0; i<6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                ctx.lineTo(Math.cos(angle) * pu.radius, Math.sin(angle) * pu.radius);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner core symbol representation
+            ctx.fillStyle = '#fff';
+            ctx.font = `bold 13px ${varToString('--font-display') || 'Orbitron'}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(pu.symbol, 0, 0);
+
+            ctx.restore();
+        }
+
+        // Safely extract CSS variables
+        function varToString(v) {
+            return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+        }
+
+        /***************************************************
+         *              WEAPONS & SHOOTING MECHANICS       *
+         ***************************************************/
+        function fireWingBlasters() {
+            if (gameOver || !gameStarted) return;
+            
+            const overchargeActive = overchargeTimer > Date.now();
+            const now = Date.now();
+
+            // Double wing laser firing
+            if (overchargeActive) {
+                // No lock fire arcing laser streams
+                lasers.push({
+                    x: ship.x,
+                    y: ship.y + 10,
+                    velY: -16,
+                    color: '#ffb703',
+                    width: 4,
+                    height: 18,
+                    damage: 2
+                });
+                lasers.push({
+                    x: ship.x + ship.width - 4,
+                    y: ship.y + 10,
+                    velY: -16,
+                    color: '#ffb703',
+                    width: 4,
+                    height: 18,
+                    damage: 2
+                });
+                playLaserSFX();
+            } else {
+                if (now > spaceCooldown) {
+                    lasers.push({
+                        x: ship.x,
+                        y: ship.y + 10,
+                        velY: -12,
+                        color: '#00f2fe',
+                        width: 3,
+                        height: 15,
+                        damage: 1
+                    });
+                    lasers.push({
+                        x: ship.x + ship.width - 3,
+                        y: ship.y + 10,
+                        velY: -12,
+                        color: '#00f2fe',
+                        width: 3,
+                        height: 15,
+                        damage: 1
+                    });
+                    playLaserSFX();
+                    spaceCooldown = now + 240; // Cooldown limit: 240ms standard
+                }
+            }
+        }
+
+        function drawLaser(l) {
+            ctx.save();
+            ctx.fillStyle = l.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = l.color;
+            ctx.fillRect(l.x, l.y, l.width, l.height);
+            ctx.restore();
+        }
+
+        /***************************************************
+         *           FLOATING POPUP TEXTS & EFFECTS        *
+         ***************************************************/
+        function spawnFloatingText(x, y, text, color) {
+            floatTexts.push({
+                x: x,
+                y: y,
+                text: text,
+                color: color || '#fff',
+                velY: -1.2,
+                alpha: 1.0,
+                decay: 0.02
+            });
+        }
+
+        function drawFloatingTexts() {
+            ctx.save();
+            ctx.textAlign = 'center';
+            
+            for(let i = floatTexts.length - 1; i >= 0; i--) {
+                let ft = floatTexts[i];
+                ft.y += ft.velY;
+                ft.alpha -= ft.decay;
+
+                if (ft.alpha <= 0) {
+                    floatTexts.splice(i, 1);
+                    continue;
+                }
+
+                ctx.fillStyle = ft.color;
+                ctx.globalAlpha = ft.alpha;
+                ctx.font = `bold 16px ${varToString('--font-display') || 'Orbitron'}`;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            }
+            ctx.restore();
+        }
+
+        /***************************************************
+         *           COLLISION UTILITY SHIELDS             *
+         ***************************************************/
+        function isCircleOverlapRect(circle, rect) {
+            const nearestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
+            const nearestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
+            
+            const dx = circle.x - nearestX;
+            const dy = circle.y - nearestY;
+            
+            const distSquared = (dx * dx) + (dy * dy);
+            return distSquared < (circle.radius * circle.radius);
+        }
+
+        function isCircleOverlapCircle(c1, c2) {
+            const dx = c1.x - c2.x;
+            const dy = c1.y - c2.y;
+            const distance = Math.sqrt((dx * dx) + (dy * dy));
+            return distance < (c1.radius + c2.radius);
+        }
+
+        /***************************************************
+         *               CORE ENGINE TIMERS & LOOPS        *
+         ***************************************************/
+        function initWarpStartSequence() {
+            const initials = document.getElementById('playerName').value.trim();
+            if (initials === "") {
+                alert("PLEASE ENTER YOUR PILOT SIGNATURE TO BEGIN!");
+                return;
+            }
+            if (isNameOffensive(initials)) {
+                alert("PILOT SIGNATURE DETECTED AS ILLEGAL BY SECTOR DIRECTIVES! SELECT ANOTHER.");
+                return;
+            }
+
+            playerName = initials.toUpperCase().substring(0, 10);
+            
+            // Switch layouts with animation
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'flex';
+            
+            // Audio context start
+            initAudio();
+            if (backgroundMusic) {
+                backgroundMusic.play().catch(e => console.log("Music autoplay prevented, waiting for trigger.", e));
+            }
+
+            // Sync and setup stats
+            gameStarted = true;
+            gameOver = false;
+            isSavingRound = false;
+            flightRoundIndex = 1;
+            score = 0;
+            level = 1;
+
+            createParallaxStarfield();
+            resetFlightParameters();
+            
+            // Increment worldwide stats
+            incrementWarpGamesCount();
+
+            // Run loops
+            lastTime = performance.now();
+            requestAnimationFrame(hyperdriveEngineLoop);
+        }
+
+        function resetFlightParameters() {
+            ship.x = canvas.width / 2 - ship.width / 2;
+            ship.y = canvas.height - 75;
+            ship.velX = 0;
+
+            asteroids = [];
+            lasers = [];
+            particles = [];
+            floatTexts = [];
+            powerups = [];
+
+            timeWarpTimer = 0;
+            overchargeTimer = 0;
+            shieldActive = false;
+
+            lastAsteroidSpawn = 0;
+            lastPowerupSpawn = 0;
+            frameCount = 0;
+        }
+
+        function triggerRestartWarp() {
+            if (!gameStarted || !gameOver) return;
+            
+            gameOver = false;
+            isSavingRound = false;
+            flightRoundIndex++;
+            score = 0;
+            level = 1;
+            
+            resetFlightParameters();
+            incrementWarpGamesCount();
+            
+            lastTime = performance.now();
+            requestAnimationFrame(hyperdriveEngineLoop);
+        }
+
+        function initiateDestructionCollapse() {
+            gameOver = true;
+            playGameOverSFX();
+            triggerScreenShake(30);
+            spawnShatterDebris(ship.x + ship.width/2, ship.y + ship.height/2, '#ff007f', 40);
+        }
+
+        function hyperdriveEngineLoop(timestamp) {
+            if (!gameStarted) return;
+
+            const dt = Math.min(3, (timestamp - lastTime) / (1000 / 60));
+            lastTime = timestamp;
+            frameCount++;
+
+            // Handle Matrix Slowmo Time Warp speeds
+            const isTimeWarp = timeWarpTimer > Date.now();
+            const timeDilationFactor = isTimeWarp ? 0.35 : 1.0;
+
+            updateScreenShake();
+
+            // Leveling thresholds (LVL Up every 10 shatters/dodges)
+            level = Math.floor(score / 10) + 1;
+
+            ctx.save();
+            // Screen Shake displacement
+            if (screenShake > 0) {
+                const shakeX = (Math.random() - 0.5) * screenShake;
+                const shakeY = (Math.random() - 0.5) * screenShake;
+                ctx.translate(shakeX, shakeY);
+            }
+
+            // Draw deep space background
+            // If Time Warp is active, color shifted to cyber matrix green
+            if (isTimeWarp) {
+                ctx.fillStyle = '#010f08';
+            } else {
+                ctx.fillStyle = '#05030a';
+            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Handle Parallax Starfields
+            parallaxStars.forEach((star) => {
+                // Stars double speed under Overcharge booster warp
+                const isOvercharged = overchargeTimer > Date.now();
+                const starSpeed = isOvercharged ? star.speed * 2.5 : star.speed;
+
+                star.y += starSpeed * dt * timeDilationFactor;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+
+                ctx.fillStyle = star.color;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Update Game Entities standard logic
+            if (gameOver) {
+                // Game Over Screen States
+                if (!isSavingRound) {
+                    logLocalSessionFlight(flightRoundIndex, level);
+                    uploadGlobalRecord(level);
+                    isSavingRound = true;
+                }
+
+                // Shattered particles physics still run on death
+                updateAndDrawParticles(dt, timeDilationFactor);
+
+                ctx.textAlign = 'center';
+                
+                // Draw Cyber Alert Panel
+                ctx.fillStyle = 'rgba(15, 10, 30, 0.8)';
+                ctx.strokeStyle = '#ff007f';
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = '#ff007f';
+                ctx.fillRect(150, 150, 500, 300);
+                ctx.strokeRect(150, 150, 500, 300);
+
+                const flashColor = (frameCount % 30 < 15) ? '#ff007f' : '#fff';
+                ctx.fillStyle = flashColor;
+                ctx.font = `bold 40px ${varToString('--font-display') || 'Orbitron'}`;
+                ctx.fillText('CRITICAL DAMAGE', canvas.width/2, 220);
+
+                ctx.fillStyle = '#fff';
+                ctx.shadowBlur = 0;
+                ctx.font = `300 20px ${varToString('--font-body') || 'Outfit'}`;
+                ctx.fillText(`Sector reached: LEVEL ${level}`, canvas.width/2, 280);
+                ctx.fillText(`Telemetry score: ${score} points`, canvas.width/2, 320);
+
+                ctx.fillStyle = varToString('--neon-cyan') || '#00f2fe';
+                ctx.font = `bold 16px ${varToString('--font-display') || 'Orbitron'}`;
+                const deviceFmtText = window.matchMedia("(hover: none)").matches ? 'TAP SCREEN TO RE-STEER' : 'PRESS SPACEBAR TO HYPERJUMP';
+                ctx.fillText(deviceFmtText, canvas.width/2, 390);
+
+            } else {
+                // Standard flight controls steering
+                if (leftPressed) {
+                    ship.velX = Math.max(ship.velX - ship.acc * dt, -ship.maxVel);
+                } else if (rightPressed) {
+                    ship.velX = Math.min(ship.velX + ship.acc * dt, ship.maxVel);
+                } else {
+                    ship.velX *= Math.pow(ship.drag, dt);
+                }
+
+                if (Math.abs(ship.velX) < 0.1) ship.velX = 0;
+                ship.x += ship.velX * dt;
+                
+                // Clamp boundaries
+                ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
+
+                // Draw spaceship
+                drawPlayerShip();
+
+                // Spawning Timers standard gates
+                const nowStamp = Date.now();
+                
+                // Asteroids spawn acceleration based on rank
+                const baseSpd = Math.max(400, 1200 - (level * 95));
+                if (nowStamp - lastAsteroidSpawn > baseSpd) {
+                    spawnAsteroidEntity();
+                    lastAsteroidSpawn = nowStamp;
+                }
+
+                // Power-ups spawn gate every 14 seconds
+                if (nowStamp - lastPowerupSpawn > 14000) {
+                    spawnPowerupEntity();
+                    lastPowerupSpawn = nowStamp;
+                }
+
+                // Laser systems updates
+                for (let i = lasers.length - 1; i >= 0; i--) {
+                    let l = lasers[i];
+                    l.y += l.velY * dt;
+
+                    if (l.y < -20) {
+                        lasers.splice(i, 1);
+                        continue;
+                    }
+                    drawLaser(l);
+                }
+
+                // Power-ups update
+                for(let i = powerups.length - 1; i >= 0; i--) {
+                    let pu = powerups[i];
+                    pu.y += pu.velY * dt * timeDilationFactor;
+                    pu.rotation += 0.03 * dt;
+
+                    if (pu.y > canvas.height + 30) {
+                        powerups.splice(i, 1);
+                        continue;
+                    }
+                    drawPowerup(pu);
+
+                    // Power-up overlaps player
+                    const puCircle = { x: pu.x, y: pu.y, radius: pu.radius };
+                    const shipBox = { x: ship.x, y: ship.y, width: ship.width, height: ship.height };
+                    if (isCircleOverlapRect(puCircle, shipBox)) {
+                        playPowerupSFX();
+                        
+                        if (pu.type === 'shield') {
+                            shieldActive = true;
+                            spawnFloatingText(pu.x, pu.y, 'SHIELD ACTIVATED', '#00f2fe');
+                        } else if (pu.type === 'timewarp') {
+                            timeWarpTimer = Date.now() + 8000; // 8 seconds slow
+                            spawnFloatingText(pu.x, pu.y, 'TIME WARP ENGINES', '#39ff14');
+                        } else if (pu.type === 'overcharge') {
+                            overchargeTimer = Date.now() + 6000; // 6 seconds overdrive
+                            spawnFloatingText(pu.x, pu.y, 'WEAPONS OVERCHARGED', '#ffb703');
+                        }
+
+                        powerups.splice(i, 1);
+                    }
+                }
+
+                // Asteroids update
+                for (let i = asteroids.length - 1; i >= 0; i--) {
+                    let ast = asteroids[i];
+                    ast.y += ast.velY * dt * timeDilationFactor;
+                    ast.rotation += ast.spinSpeed * dt * timeDilationFactor;
+
+                    if (ast.y > canvas.height + 50) {
+                        // Dodge points increment
+                        score++;
+                        asteroids.splice(i, 1);
+                        continue;
+                    }
+                    drawAsteroid(ast);
+
+                    // Collides with player ship
+                    const astCircle = { x: ast.x, y: ast.y, radius: ast.radius };
+                    const shipBox = { x: ship.x, y: ship.y, width: ship.width, height: ship.height };
+                    
+                    if (isCircleOverlapRect(astCircle, shipBox)) {
+                        if (shieldActive) {
+                            // Deflect collision
+                            shieldActive = false;
+                            playShieldHitSFX();
+                            triggerScreenShake(12);
+                            spawnShatterDebris(ast.x, ast.y, '#00f2fe', 10);
+                            asteroids.splice(i, 1); // Blow up obstacle
+                        } else {
+                            // Destroy player ship
+                            initiateDestructionCollapse();
+                            break;
+                        }
+                    }
+
+                    // Collides with shot Lasers
+                    for (let j = lasers.length - 1; j >= 0; j--) {
+                        let laser = lasers[j];
+                        const lasCircle = { x: laser.x + 2, y: laser.y + 7, radius: 4 }; // Laser point circle
+                        if (isCircleOverlapCircle(lasCircle, astCircle)) {
+                            // Deduct target hp
+                            ast.hp -= laser.damage;
+                            
+                            // Visual hit shatter spark
+                            spawnShatterDebris(laser.x, laser.y, '#ffffff', 4);
+                            
+                            // Splice laser shot
+                            lasers.splice(j, 1);
+
+                            if (ast.hp <= 0) {
+                                score += 2; // Extra reward points for tactical blast
+                                playExplosionSFX();
+                                triggerScreenShake(8);
+                                spawnShatterDebris(ast.x, ast.y, ast.color, 16);
+
+                                // Split Giant Meteor into shard asteroids
+                                if (ast.type === 'meteor') {
+                                    spawnFloatingText(ast.x, ast.y, '+10 METEOR BURST', '#9d4edd');
+                                    score += 8; // Giant bonus reward
+                                    
+                                    // Spawns 2 smaller standard mini shards outward
+                                    const shardLeft = {
+                                        x: ast.x - 20,
+                                        y: ast.y,
+                                        velY: ast.velY * 1.5,
+                                        rotation: Math.random() * Math.PI,
+                                        spinSpeed: 0.08,
+                                        radius: 12,
+                                        hp: 1,
+                                        maxHp: 1,
+                                        color: '#ff6b35',
+                                        type: 'standard',
+                                        vertices: []
+                                    };
+                                    const shardRight = {
+                                        x: ast.x + 20,
+                                        y: ast.y,
+                                        velY: ast.velY * 1.5,
+                                        rotation: Math.random() * Math.PI,
+                                        spinSpeed: -0.08,
+                                        radius: 12,
+                                        hp: 1,
+                                        maxHp: 1,
+                                        color: '#ff6b35',
+                                        type: 'standard',
+                                        vertices: []
+                                    };
+
+                                    // procedural irregulars vertices
+                                    for(let k=0; k<6; k++) {
+                                        const angle = (k/6)*Math.PI*2;
+                                        shardLeft.vertices.push({ x: Math.cos(angle)*12, y: Math.sin(angle)*12 });
+                                        shardRight.vertices.push({ x: Math.cos(angle)*12, y: Math.sin(angle)*12 });
+                                    }
+
+                                    asteroids.push(shardLeft);
+                                    asteroids.push(shardRight);
+                                }
+
+                                asteroids.splice(i, 1);
+                                break;
+                            } else {
+                                // Hit registered but not dead (Heavy Meteor)
+                                playShieldHitSFX();
+                            }
+                        }
+                    }
+                }
+
+                // Update particles trail exhaust
+                updateAndDrawParticles(dt, timeDilationFactor);
+
+                // Live dynamic stats hud
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'left';
+                ctx.font = `bold 16px ${varToString('--font-display') || 'Orbitron'}`;
+                ctx.fillText(`SECTOR: LVL ${level}`, 20, 35);
+                ctx.fillText(`TELEMETRY: ${score}`, 20, 60);
+
+                // Render active buff countdown bars
+                let buffY = 85;
+                if (shieldActive) {
+                    ctx.fillStyle = 'rgba(0, 242, 254, 0.8)';
+                    ctx.font = `bold 12px ${varToString('--font-display') || 'Orbitron'}`;
+                    ctx.fillText('SHIELD MATRIX ACTIVE', 20, buffY);
+                    buffY += 20;
+                }
+                if (timeWarpTimer > Date.now()) {
+                    const timeRem = Math.max(0, (timeWarpTimer - Date.now()) / 1000).toFixed(1);
+                    ctx.fillStyle = 'rgba(57, 255, 20, 0.8)';
+                    ctx.font = `bold 12px ${varToString('--font-display') || 'Orbitron'}`;
+                    ctx.fillText(`TIME DILATION: ${timeRem}S`, 20, buffY);
+                    buffY += 20;
+                }
+                if (overchargeTimer > Date.now()) {
+                    const timeRem = Math.max(0, (overchargeTimer - Date.now()) / 1000).toFixed(1);
+                    ctx.fillStyle = 'rgba(255, 183, 3, 0.8)';
+                    ctx.font = `bold 12px ${varToString('--font-display') || 'Orbitron'}`;
+                    ctx.fillText(`LASERS OVERDRIVE: ${timeRem}S`, 20, buffY);
+                }
+
+                // Draw floating popups
+                drawFloatingTexts();
+            }
+
+            ctx.restore();
+            requestAnimationFrame(hyperdriveEngineLoop);
+        }
+
+        // Particle particle mechanics
+        function updateAndDrawParticles(dt, dilation) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.velX * dt * dilation;
+                p.y += p.velY * dt * dilation;
+                p.life -= p.decay * dt;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        /***************************************************
+         *              INPUT & CONTROLS BINDINGS          *
+         ***************************************************/
+        document.addEventListener('keydown', (e) => {
+            if (!gameStarted) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                leftPressed = true;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                rightPressed = true;
+            }
+            if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                if (gameOver) {
+                    triggerRestartWarp();
+                } else {
+                    fireWingBlasters();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (!gameStarted) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                leftPressed = false;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                rightPressed = false;
+            }
+        });
+
+        // Touch Control Boundaries Setup
+        function setupTouchControlEvents() {
+            const mlBtn = document.getElementById('mobileLeftBtn');
+            const mrBtn = document.getElementById('mobileRightBtn');
+            const mfBtn = document.getElementById('mobileFireBtn');
+
+            if (!mlBtn || !mrBtn || !mfBtn) return;
+
+            // Trigger Left active
+            mlBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                leftPressed = true;
+            }, { passive: false });
+            mlBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                leftPressed = false;
+            }, { passive: false });
+            mlBtn.addEventListener('mousedown', (e) => {
+                leftPressed = true;
+            });
+            mlBtn.addEventListener('mouseup', (e) => {
+                leftPressed = false;
+            });
+            mlBtn.addEventListener('mouseleave', (e) => {
+                leftPressed = false;
+            });
+
+            // Trigger Right active
+            mrBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                rightPressed = true;
+            }, { passive: false });
+            mrBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                rightPressed = false;
+            }, { passive: false });
+            mrBtn.addEventListener('mousedown', (e) => {
+                rightPressed = true;
+            });
+            mrBtn.addEventListener('mouseup', (e) => {
+                rightPressed = false;
+            });
+            mrBtn.addEventListener('mouseleave', (e) => {
+                rightPressed = false;
+            });
+
+            // Trigger Fire weapons active
+            mfBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (gameOver) {
+                    triggerRestartWarp();
+                } else {
+                    fireWingBlasters();
+                }
+            }, { passive: false });
+            mfBtn.addEventListener('mousedown', (e) => {
+                if (gameOver) {
+                    triggerRestartWarp();
+                } else {
+                    fireWingBlasters();
+                }
+            });
+
+            // Direct canvas touch re-warp support
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (gameOver) {
+                    triggerRestartWarp();
+                }
+            }, { passive: false });
+        }
+
+        /***************************************************
+         *              MODAL INTERACTION & BINDINGS       *
+         ***************************************************/
+        function configureOverlayModals() {
+            const glStart = document.getElementById('startLeaderboard');
+            const glGame = document.getElementById('gameLeaderboardBoard');
+            const lcBoard = document.getElementById('localBoard');
+
+            const gModal = document.getElementById('globalModal');
+            const lModal = document.getElementById('localModal');
+            
+            const gClose = document.getElementById('closeGlobalModalBtn');
+            const lClose = document.getElementById('closeLocalModalBtn');
+
+            // Open Global Top 100 Modals
+            if (glStart) {
+                glStart.addEventListener('click', () => {
+                    queryGlobalLeaderboard();
+                    gModal.style.display = 'flex';
+                });
+            }
+            if (glGame) {
+                glGame.addEventListener('click', () => {
+                    queryGlobalLeaderboard();
+                    gModal.style.display = 'flex';
+                });
+            }
+
+            // Open Local Round Modals
+            if (lcBoard) {
+                lcBoard.addEventListener('click', () => {
+                    renderLocalLeaderboard();
+                    lModal.style.display = 'flex';
+                });
+            }
+
+            // Close actions
+            gClose.addEventListener('click', () => gModal.style.display = 'none');
+            lClose.addEventListener('click', () => lModal.style.display = 'none');
+
+            // Close via backdrop click
+            window.addEventListener('click', (event) => {
+                if (event.target === gModal) gModal.style.display = 'none';
+                if (event.target === lModal) lModal.style.display = 'none';
+            });
+
+            // Close via ESC
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    gModal.style.display = 'none';
+                    lModal.style.display = 'none';
+                }
+            });
+        }
+
+        /***************************************************
+         *              DOM LOAD INITIALIZATIONS           *
+         ***************************************************/
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load and initialize settings
+            setupAudioSystem();
+            queryGlobalLeaderboard();
+            displayWarpStatsCount();
+            renderLocalLeaderboard();
+            configureOverlayModals();
+            setupTouchControlEvents();
+
+            // Bind pilot start actions
+            const pilotInput = document.getElementById('playerName');
+            const startBtn = document.getElementById('startGameBtn');
+
+            startBtn.addEventListener('click', initWarpStartSequence);
+            
+            pilotInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    initWarpStartSequence();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
