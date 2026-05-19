@@ -1053,7 +1053,6 @@
 
             db.collection(leaderboardCollection)
                 .orderBy("level", "desc")
-                .orderBy("timestamp", "desc")
                 .limit(queryLimit)
                 .get()
                 .then((snap) => {
