@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGI Probability Barometer</title>
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #030712;
+            --container-bg: rgba(17, 24, 39, 0.7);
+            --card-bg: rgba(31, 41, 55, 0.4);
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: rgba(75, 85, 99, 0.3);
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --header-grad-start: #f8fafc;
+            --header-grad-end: #a78bfa;
+            
+            /* Lab Colors */
+            --color-openai: #10b981;
+            --color-anthropic: #f97316;
+            --color-deepmind: #3b82f6;
+            --color-xai: #8b5cf6;
+        }
+
+        /* Light Mode Overrides (if matched with parent main site style) */
+        body.light-mode {
+            --bg-color: #f3f4f6;
+            --container-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: rgba(243, 244, 246, 0.75);
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --border-color: rgba(209, 213, 219, 0.8);
+            --accent: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.2);
+            --header-grad-start: #0f172a;
+            --header-grad-end: #6d28d9;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.004) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.004) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dashboard {
+            max-width: 1280px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Top Bar Controls */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 8px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease, transform 0.2s ease;
+            background: var(--card-bg);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+            transform: translateX(-4px);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Header Section */
+        .main-header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .main-header h1 {
+            font-family: monospace;
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0;
+            background: linear-gradient(to right, var(--header-grad-start), var(--accent), var(--header-grad-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.2));
+        }
+
+        .main-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin: 0;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        /* Cutoff Date Badge */
+        .cutoff-badge {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.1);
+            animation: pulse-border 2s infinite alternate;
+        }
+
+        body.light-mode .cutoff-badge {
+            background: rgba(220, 38, 38, 0.08);
+            border-color: rgba(220, 38, 38, 0.25);
+            color: #b91c1c;
+        }
+
+        @keyframes pulse-border {
+            from { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 8px rgba(239, 68, 68, 0.05); }
+            to { border-color: rgba(239, 68, 68, 0.6); box-shadow: 0 0 16px rgba(239, 68, 68, 0.2); }
+        }
+
+        /* Hero Split Panel */
+        .hero-split {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .hero-split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card base style */
+        .panel-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.7;
+        }
+
+        .panel-card h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .panel-card h2 i {
+            color: var(--accent);
+        }
+
+        /* Hero Gauge Specifics */
+        .hero-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 10px 0;
+        }
+
+        .hero-svg-wrapper {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 16/10;
+        }
+
+        .status-badge {
+            margin-top: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge.stable {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .status-badge.warning {
+            background-color: rgba(249, 115, 22, 0.1);
+            border-color: rgba(249, 115, 22, 0.3);
+            color: #fb923c;
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--accent);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .legend-item:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        .legend-item.dimmed {
+            opacity: 0.3;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Grid of Lab Cards */
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            .labs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .labs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lab-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .lab-card.active-card {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .lab-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .lab-card.openai::before { background-color: var(--color-openai); }
+        .lab-card.anthropic::before { background-color: var(--color-anthropic); }
+        .lab-card.deepmind::before { background-color: var(--color-deepmind); }
+        .lab-card.xai::before { background-color: var(--color-xai); }
+
+        .lab-card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .lab-gauge-wrapper {
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 16/11;
+            margin-bottom: 8px;
+        }
+
+        /* Stats Tables inside Cards */
+        .stats-table {
+            width: 100%;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stat-row.header {
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(75, 85, 99, 0.15);
+        }
+
+        .stat-row .val {
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .stat-row.trend {
+            margin-top: 4px;
+            border-top: 1px solid rgba(75, 85, 99, 0.15);
+            padding-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            text-align: center;
+            margin-top: 12px;
+            border-top: 1px solid rgba(75, 85, 99, 0.1);
+            padding-top: 10px;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Formula Explanation & Logic Panel */
+        .explanation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .explanation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .explanation-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .explanation-card h2 {
+            margin-top: 0;
+            font-size: 1.15rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-card p {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .highlight-red { color: #ef4444; font-weight: 600; }
+        .highlight-green { color: #10b981; font-weight: 600; }
+        .highlight-blue { color: #38bdf8; font-weight: 600; }
+
+        /* Formula display */
+        .math-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: monospace;
+            margin: 8px 0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .formula-main {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            text-align: center;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        .formula-interactive {
+            width: 100%;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .formula-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .formula-row span.lab-name {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(12px);
+            animation: build-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes build-in {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        
+        <!-- Top bar Navigation -->
+        <div class="top-nav fade-in">
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Portal
+            </a>
+            <button class="theme-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <header class="main-header fade-in delay-1">
+            <h1>AGI PROBABILITY BAROMETER</h1>
+            <p>Evaluating proximity to Artificial General Intelligence by tracing human employment indices across leading frontier AI research labs.</p>
+            <div class="cutoff-badge">
+                <i class="fas fa-calendar-alt"></i> Data Cutoff: June 22, 2026
+            </div>
+        </header>
+
+        <!-- Hero Section: Split Barometer & SVG Chart -->
+        <div class="hero-split fade-in delay-2">
+            
+            <!-- Industry Gauge Card -->
+            <div class="panel-card">
+                <h2><i class="fas fa-tachometer-alt"></i> Industry-wide Probability</h2>
+                <div class="hero-gauge-container">
+                    <div class="hero-svg-wrapper">
+                        <svg viewBox="0 0 300 170" width="100%" height="100%">
+                            <defs>
+                                <linearGradient id="gaugeGradHero" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#ef4444" />
+                                    <stop offset="50%" stop-color="#eab308" />
+                                    <stop offset="100%" stop-color="#22c55e" />
+                                </linearGradient>
+                                <filter id="neonGlowHero" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="4" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                            </defs>
+                            
+                            <!-- Gauge Arc Background -->
+                            <path d="M 40 140 A 110 110 0 0 1 260 140" fill="none" stroke="#1e293b" stroke-width="22" stroke-linecap="round"/>
+                            <!-- Gauge Arc Fill -->
+                            <path id="gauge-fill-hero" d="M 40 140 A 110 110 0 0 1 260 140" fill="none" stroke="url(#gaugeGradHero)" stroke-width="22" stroke-linecap="round" opacity="0.35"/>
+                            
+                            <!-- Scale Labels -->
+                            <text x="35" y="165" font-family="monospace" font-size="11" fill="#ef4444" font-weight="bold" text-anchor="middle">0% (HUMAN)</text>
+                            <text x="265" y="165" font-family="monospace" font-size="11" fill="#22c55e" font-weight="bold" text-anchor="middle">100% (AGI)</text>
+                            
+                            <!-- Needle -->
+                            <path id="needle-hero" d="M 150 140 L 48 140 L 150 135 Z" fill="#ef4444" filter="url(#neonGlowHero)" transform="rotate(0, 150, 140)"/>
+                            <circle cx="150" cy="140" r="10" fill="#f8fafc"/>
+                            <circle cx="150" cy="140" r="5" fill="#0f172a"/>
+
+                            <!-- Dynamic Counter Text -->
+                            <text id="counter-hero" x="150" y="85" font-family="monospace" font-size="38" font-weight="bold" fill="#ef4444" text-anchor="middle" filter="url(#neonGlowHero)">0.00%</text>
+                            <text x="150" y="105" font-family="monospace" font-size="10" fill="#9ca3af" text-anchor="middle" letter-spacing="1.5">P(AGI) INDEX</text>
+                        </svg>
+                    </div>
+                    <div id="status-badge" class="status-badge stable">
+                        STATUS: ANALYZING...
+                    </div>
+                </div>
+            </div>
+
+            <!-- SVG Multi-Line Chart Card -->
+            <div class="panel-card">
+                <h2><i class="fas fa-chart-line"></i> Job Listing Trajectories</h2>
+                <div class="chart-container">
+                    <div class="chart-tooltip" id="chartTooltip"></div>
+                    <svg viewBox="0 0 500 220" width="100%" height="100%" id="trendChart">
+                        <!-- Horizontal Grid Lines -->
+                        <line x1="40" y1="20" x2="480" y2="20" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                        <line x1="40" y1="62.5" x2="480" y2="62.5" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                        <line x1="40" y1="105" x2="480" y2="105" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                        <line x1="40" y1="147.5" x2="480" y2="147.5" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                        <line x1="40" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+
+                        <!-- Vertical Axes Grid Lines -->
+                        <line x1="40" y1="20" x2="40" y2="190" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                        <line x1="260" y1="20" x2="260" y2="190" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4 4" stroke-width="1" />
+                        <line x1="480" y1="20" x2="480" y2="190" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+
+                        <!-- X Axis Labels -->
+                        <text x="40" y="208" font-family="monospace" font-size="10" fill="#9ca3af" text-anchor="middle">Q1 2026</text>
+                        <text x="260" y="208" font-family="monospace" font-size="10" fill="#9ca3af" text-anchor="middle">Q2 2026</text>
+                        <text x="480" y="208" font-family="monospace" font-size="10" fill="#9ca3af" text-anchor="middle">Q3 2026</text>
+
+                        <!-- Y Axis Labels -->
+                        <text x="32" y="24" font-family="monospace" font-size="9" fill="#9ca3af" text-anchor="end">800</text>
+                        <text x="32" y="108" font-family="monospace" font-size="9" fill="#9ca3af" text-anchor="end">400</text>
+                        <text x="32" y="193" font-family="monospace" font-size="9" fill="#9ca3af" text-anchor="end">0</text>
+
+                        <!-- Lines will be dynamically generated by JS -->
+                        <g id="chartLines"></g>
+                        <g id="chartNodes"></g>
+                    </svg>
+                    
+                    <!-- Chart Legend -->
+                    <div class="chart-legend">
+                        <div class="legend-item" data-lab="openai" onclick="highlightLab('openai')">
+                            <span class="legend-color" style="background-color: var(--color-openai);"></span> OpenAI
+                        </div>
+                        <div class="legend-item" data-lab="anthropic" onclick="highlightLab('anthropic')">
+                            <span class="legend-color" style="background-color: var(--color-anthropic);"></span> Anthropic
+                        </div>
+                        <div class="legend-item" data-lab="deepmind" onclick="highlightLab('deepmind')">
+                            <span class="legend-color" style="background-color: var(--color-deepmind);"></span> Google DeepMind
+                        </div>
+                        <div class="legend-item" data-lab="xai" onclick="highlightLab('xai')">
+                            <span class="legend-color" style="background-color: var(--color-xai);"></span> xAI
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Individual Lab cards -->
+        <div id="labsGrid" class="labs-grid fade-in delay-3">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Explanation Cards -->
+        <div class="explanation-grid fade-in delay-4">
+            
+            <div class="explanation-card">
+                <h2><i class="fas fa-calculator"></i> The Obsolescence Logic</h2>
+                <p>
+                    The barometer operates on a clean premise: <strong>if AGI were imminent and capable of automating human-level tasks, AI companies would automate their own software engineering, operations, and marketing listings.</strong>
+                </p>
+                <p>
+                    A declining trend in job listings (<span class="highlight-green">Q3 &lt; Peak</span>) increases AGI probability. 
+                    Conversely, continuous expansion of the human workforce (<span class="highlight-red">Q3 &ge; Peak</span>) pushes the estimated arrival of autonomous AGI further back.
+                </p>
+                <div class="math-box">
+                    <div class="formula-main">
+                        P(AGI) = max( 0%, 100% * ( 1 - Q3 / max(Q1, Q2, Q3) ) )
+                    </div>
+                    <div class="formula-interactive" id="formulaDetail">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation-card">
+                <h2><i class="fas fa-info-circle"></i> Current Snapshot Analysis</h2>
+                <p>
+                    As of the June 22 cutoff date, the industry combined probability stands at <span class="highlight-blue" id="analysis-combined">7.55%</span>. 
+                </p>
+                <p>
+                    This is driven by a massive hiring freeze at <span class="highlight-green">Google DeepMind (-72.8% QoQ)</span> and a gradual contraction at <span class="highlight-green">xAI (-14.6% QoQ)</span>. Both labs show strong local indicators of automation or organizational consolidation.
+                </p>
+                <p>
+                    Meanwhile, <span class="highlight-red">OpenAI (+7.9% QoQ)</span> continues to scale its human labor demands. <span class="highlight-orange" style="color: var(--color-anthropic); font-weight: 600;">Anthropic</span> has slightly pulled back from its Q2 peak (-13.2% QoQ) but remains significantly above its Q1 starting levels, resulting in a mild local AGI probability of <span class="highlight-orange" style="color: var(--color-anthropic); font-weight: 600;">13.23%</span>.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Lab Data
+            const rawLabs = [
+                { 
+                    id: 'openai', 
+                    name: 'OpenAI', 
+                    q1: 452, 
+                    q2: 660, 
+                    q3: 712,
+                    color: 'var(--color-openai)',
+                    desc: 'Linear hiring growth continues. OpenAI expands human staff, pushing AGI likelihood locally to 0%.'
+                },
+                { 
+                    id: 'anthropic', 
+                    name: 'Anthropic', 
+                    q1: 309, 
+                    q2: 431, 
+                    q3: 374,
+                    color: 'var(--color-anthropic)',
+                    desc: 'Moderate pullback in listings from Q2 peak, resulting in a low local probability indicator.'
+                },
+                { 
+                    id: 'deepmind', 
+                    name: 'DeepMind', 
+                    q1: 102, 
+                    q2: 92, 
+                    q3: 25,
+                    color: 'var(--color-deepmind)',
+                    desc: 'Hiring collapse of -72.8% QoQ. DeepMind scales back human listings, signaling massive automation.'
+                },
+                { 
+                    id: 'xai', 
+                    name: 'xAI', 
+                    q1: 285, 
+                    q2: 247, 
+                    q3: 211,
+                    color: 'var(--color-xai)',
+                    desc: 'Sustained, step-down listing contraction. Second consecutive quarter of scaling back human hires.'
+                }
+            ];
+
+            // Math calculations
+            rawLabs.forEach(lab => {
+                const peak = Math.max(lab.q1, lab.q2, lab.q3);
+                lab.peakVal = peak;
+                lab.finalP = Math.max(0, 100 * (1 - (lab.q3 / peak)));
+            });
+
+            // Industry-wide Totals
+            const industryQ1 = rawLabs.reduce((sum, l) => sum + l.q1, 0);
+            const industryQ2 = rawLabs.reduce((sum, l) => sum + l.q2, 0);
+            const industryQ3 = rawLabs.reduce((sum, l) => sum + l.q3, 0);
+            const industryPeak = Math.max(industryQ1, industryQ2, industryQ3);
+            const industryFinalP = Math.max(0, 100 * (1 - (industryQ3 / industryPeak)));
+
+            // Sort descending by finalP for display hierarchy
+            const sortedLabs = [...rawLabs].sort((a, b) => b.finalP - a.finalP);
+
+            // Populate Labs Grid
+            const labsGrid = document.getElementById('labsGrid');
+            let gridHtml = '';
+            
+            sortedLabs.forEach(lab => {
+                gridHtml += `
+                    <div class="lab-card ${lab.id}" id="card-${lab.id}" onclick="selectLab('${lab.id}')">
+                        <h3>${lab.name}</h3>
+                        <div class="lab-gauge-wrapper">
+                            <svg viewBox="0 0 200 130" width="100%" height="100%">
+                                <path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+                                <path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="${lab.color}" stroke-width="12" stroke-linecap="round" opacity="0.25"/>
+                                
+                                <text x="25" y="125" font-family="monospace" font-size="9" fill="#ef4444" font-weight="bold" text-anchor="middle">0%</text>
+                                <text x="175" y="125" font-family="monospace" font-size="9" fill="#22c55e" font-weight="bold" text-anchor="middle">100%</text>
+                                
+                                <path id="needle-${lab.id}" d="M 100 110 L 40 110 L 100 107 Z" fill="#ef4444" transform="rotate(0, 100, 110)"/>
+                                <circle cx="100" cy="110" r="5" fill="#f8fafc"/>
+                                <circle cx="100" cy="110" r="2.5" fill="#0f172a"/>
+
+                                <text id="counter-${lab.id}" x="100" y="70" font-family="monospace" font-size="22" font-weight="bold" fill="#ef4444" text-anchor="middle">0.00%</text>
+                                <text x="100" y="85" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle" letter-spacing="1">LOCAL P(AGI)</text>
+                            </svg>
+                        </div>
+                        <div class="stats-table">
+                            <div class="stat-row header"><span>Quarter</span><span>Open Jobs</span></div>
+                            <div class="stat-row"><span>Q1 2026</span><span class="val" id="q1-${lab.id}">0</span></div>
+                            <div class="stat-row"><span>Q2 2026</span><span class="val" id="q2-${lab.id}">0</span></div>
+                            <div class="stat-row"><span>Q3 2026</span><span class="val" id="q3-${lab.id}">0</span></div>
+                            <div class="stat-row trend"><span>Trend (Q2&rarr;Q3)</span><span class="val" id="trend-${lab.id}">-</span></div>
+                        </div>
+                        <div class="card-desc">${lab.desc}</div>
+                    </div>
+                `;
+            });
+            labsGrid.innerHTML = gridHtml;
+
+            // Render LaTeX-like inline math details
+            const formulaDetail = document.getElementById('formulaDetail');
+            let formulaHtml = '';
+            rawLabs.forEach(lab => {
+                const subStr = `max( 0%, 100 * (1 - ${lab.q3} / ${lab.peakVal}) )`;
+                formulaHtml += `
+                    <div class="formula-row" id="formula-row-${lab.id}">
+                        <span class="lab-name">${lab.name}:</span>
+                        <span>${subStr} = <strong>${lab.finalP.toFixed(2)}%</strong></span>
+                    </div>
+                `;
+            });
+            formulaDetail.innerHTML = formulaHtml;
+
+            // Highlight OpenAI details by default in formula row
+            selectLab(sortedLabs[0].id);
+
+            // Dynamic Chart Renderer
+            const svgChart = document.getElementById('trendChart');
+            const linesGroup = document.getElementById('chartLines');
+            const nodesGroup = document.getElementById('chartNodes');
+            
+            // Map values from 0-800 to SVG height coordinates (190 to 20)
+            function getChartY(val) {
+                const minY = 190;
+                const maxY = 20;
+                return minY - (val / 800) * (minY - maxY);
+            }
+
+            // Draw line chart lines and dots
+            rawLabs.forEach(lab => {
+                const y1 = getChartY(lab.q1);
+                const y2 = getChartY(lab.q2);
+                const y3 = getChartY(lab.q3);
+                
+                // Add line path
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M 40 ${y1} L 260 ${y2} L 480 ${y3}`);
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", lab.color);
+                path.setAttribute("stroke-width", "3");
+                path.setAttribute("id", `line-${lab.id}`);
+                path.setAttribute("style", "transition: opacity 0.3s, stroke-width 0.3s;");
+                // Animate line draw
+                const length = Math.sqrt(Math.pow(220, 2) + Math.pow(y2 - y1, 2)) + Math.sqrt(Math.pow(220, 2) + Math.pow(y3 - y2, 2));
+                path.setAttribute("stroke-dasharray", length);
+                path.setAttribute("stroke-dashoffset", length);
+                
+                linesGroup.appendChild(path);
+
+                // Add interactive nodes (dots)
+                const quarters = [
+                    { x: 40, y: y1, val: lab.q1, label: 'Q1' },
+                    { x: 260, y: y2, val: lab.q2, label: 'Q2' },
+                    { x: 480, y: y3, val: lab.q3, label: 'Q3' }
+                ];
+
+                quarters.forEach((q, i) => {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", q.x);
+                    circle.setAttribute("cy", q.y);
+                    circle.setAttribute("r", "5");
+                    circle.setAttribute("fill", "#1e293b");
+                    circle.setAttribute("stroke", lab.color);
+                    circle.setAttribute("stroke-width", "3");
+                    circle.setAttribute("class", `node-${lab.id}`);
+                    circle.setAttribute("style", "cursor: pointer; transition: r 0.2s, stroke-width 0.2s;");
+
+                    // Interactive Tooltip
+                    circle.addEventListener('mouseenter', (e) => {
+                        circle.setAttribute("r", "8");
+                        showTooltip(e, `${lab.name} ${q.label}: ${q.val} listings`);
+                    });
+                    circle.addEventListener('mouseleave', () => {
+                        circle.setAttribute("r", "5");
+                        hideTooltip();
+                    });
+
+                    nodesGroup.appendChild(circle);
+                });
+            });
+
+            // Tooltip handler
+            const tooltip = document.getElementById('chartTooltip');
+            function showTooltip(e, text) {
+                const chartRect = svgChart.getBoundingClientRect();
+                const x = e.clientX - chartRect.left + 15;
+                const y = e.clientY - chartRect.top - 15;
+                tooltip.style.left = `${x}px`;
+                tooltip.style.top = `${y}px`;
+                tooltip.textContent = text;
+                tooltip.style.opacity = '1';
+            }
+            function hideTooltip() {
+                tooltip.style.opacity = '0';
+            }
+
+            // Highlighting lab on legend click
+            window.highlightLab = function(labId) {
+                const activeCard = document.getElementById(`card-${labId}`);
+                const isActive = activeCard.classList.contains('active-card');
+                
+                // Reset states
+                document.querySelectorAll('.lab-card').forEach(c => c.classList.remove('active-card'));
+                document.querySelectorAll('.legend-item').forEach(l => l.classList.remove('dimmed'));
+                rawLabs.forEach(l => {
+                    document.getElementById(`line-${l.id}`).style.opacity = '1';
+                    document.getElementById(`line-${l.id}`).style.strokeWidth = '3';
+                });
+                
+                if (!isActive) {
+                    selectLab(labId);
+                    // Dim others
+                    document.querySelectorAll('.legend-item').forEach(l => {
+                        if (l.getAttribute('data-lab') !== labId) l.classList.add('dimmed');
+                    });
+                    rawLabs.forEach(l => {
+                        if (l.id !== labId) {
+                            document.getElementById(`line-${l.id}`).style.opacity = '0.15';
+                        } else {
+                            document.getElementById(`line-${l.id}`).style.strokeWidth = '5';
+                        }
+                    });
+                }
+            };
+
+            function selectLab(labId) {
+                document.querySelectorAll('.lab-card').forEach(c => c.classList.remove('active-card'));
+                const card = document.getElementById(`card-${labId}`);
+                if (card) card.classList.add('active-card');
+
+                // Highlight math detail row
+                document.querySelectorAll('.formula-row').forEach(r => r.style.background = 'none');
+                const formulaRow = document.getElementById(`formula-row-${labId}`);
+                if (formulaRow) {
+                    formulaRow.style.background = 'rgba(56, 189, 248, 0.1)';
+                    formulaRow.style.borderRadius = '4px';
+                }
+            }
+
+            // Colors for Gauge
+            function getGaugeColor(p) {
+                let r, g, b;
+                if (p > 50) {
+                    let pct = (p - 50) / 50;
+                    r = Math.round(234 + pct * (34 - 234));
+                    g = Math.round(179 + pct * (197 - 179));
+                    b = Math.round(8 + pct * (94 - 8));
+                } else {
+                    let pct = p / 50;
+                    r = Math.round(239 + pct * (234 - 239));
+                    g = Math.round(68 + pct * (179 - 68));
+                    b = Math.round(68 + pct * (8 - 68));
+                }
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+
+            function formatTrend(current, base) {
+                if (current === 0 || base === 0) return { text: "-", color: "#9ca3af" };
+                const pct = (((current - base) / base) * 100).toFixed(1);
+                if (pct > 0) return { text: `▲ +${pct}%`, color: "#ef4444" }; // Red (More human dependency)
+                if (pct < 0) return { text: `▼ ${pct}%`, color: "#10b981" };  // Green (Fewer human dependency)
+                return { text: "0.0%", color: "#eab308" };
+            }
+
+            // --- ANIMATION SEQUENCE ---
+            const duration = 2500;
+            const startTime = performance.now() + 300;
+
+            function animate(currentTime) {
+                let timeElapsed = currentTime - startTime;
+                if (timeElapsed < 0) {
+                    requestAnimationFrame(animate);
+                    return;
+                }
+
+                let progress = Math.min(timeElapsed / duration, 1);
+                let ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+
+                // 1. Animate SVG Line Chart Drawing
+                rawLabs.forEach(lab => {
+                    const path = document.getElementById(`line-${lab.id}`);
+                    if (path) {
+                        const totalLength = path.getTotalLength();
+                        path.style.strokeDashoffset = totalLength - (totalLength * ease);
+                    }
+                });
+
+                // 2. Animate Stats Table Numbers
+                rawLabs.forEach(lab => {
+                    const q1Val = Math.floor(lab.q1 * ease);
+                    const q2Val = Math.floor(lab.q2 * ease);
+                    const q3Val = Math.floor(lab.q3 * ease);
+
+                    document.getElementById(`q1-${lab.id}`).textContent = q1Val;
+                    document.getElementById(`q2-${lab.id}`).textContent = q2Val;
+                    document.getElementById(`q3-${lab.id}`).textContent = q3Val;
+
+                    if (progress === 1) {
+                        // Display correct final trends
+                        const trendData = formatTrend(lab.q3, lab.q2);
+                        const trendEl = document.getElementById(`trend-${lab.id}`);
+                        trendEl.textContent = trendData.text;
+                        trendEl.style.color = trendData.color;
+                    }
+                });
+
+                // 3. Animate Local Card Gauges
+                rawLabs.forEach(lab => {
+                    const p = lab.finalP * ease;
+                    const color = getGaugeColor(p);
+
+                    // Counter text
+                    const counter = document.getElementById(`counter-${lab.id}`);
+                    if (counter) {
+                        counter.textContent = p.toFixed(2) + "%";
+                        counter.style.fill = color;
+                    }
+
+                    // Rotate Needle
+                    const needle = document.getElementById(`needle-${lab.id}`);
+                    if (needle) {
+                        const angle = p * 1.8; // 180 degrees max
+                        needle.setAttribute("transform", `rotate(${angle}, 100, 110)`);
+                        needle.setAttribute("fill", color);
+                    }
+                });
+
+                // 4. Animate Industry Hero Gauge
+                const hp = industryFinalP * ease;
+                const heroColor = getGaugeColor(hp);
+
+                // Counter text
+                const heroCounter = document.getElementById('counter-hero');
+                if (heroCounter) {
+                    heroCounter.textContent = hp.toFixed(2) + "%";
+                    heroCounter.style.fill = heroColor;
+                }
+
+                // Needle rotate
+                const heroNeedle = document.getElementById('needle-hero');
+                if (heroNeedle) {
+                    const angle = hp * 1.8;
+                    heroNeedle.setAttribute("transform", `rotate(${angle}, 150, 140)`);
+                    heroNeedle.setAttribute("fill", heroColor);
+                }
+
+                // Path fill dasharray update
+                const heroFill = document.getElementById('gauge-fill-hero');
+                if (heroFill) {
+                    heroFill.setAttribute("stroke-dasharray", `314.16`);
+                    const fillLength = (hp / 100) * 314.16;
+                    heroFill.setAttribute("stroke-dashoffset", 314.16 - fillLength);
+                    heroFill.style.opacity = '1';
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Update Overall Hero Status Badge
+                    const statusBadge = document.getElementById('status-badge');
+                    const industryDiff = (((industryQ3 - industryQ2) / industryQ2) * 100).toFixed(1);
+                    
+                    if (industryFinalP > 50) {
+                        statusBadge.className = "status-badge warning";
+                        statusBadge.innerHTML = `STATUS: SUSPICIOUS &bull; CONTRACTING (${industryDiff}% QoQ)`;
+                    } else if (industryFinalP > 0) {
+                        statusBadge.className = "status-badge warning";
+                        statusBadge.innerHTML = `STATUS: MILD ALERT &bull; COOLING (${industryDiff}% QoQ)`;
+                    } else {
+                        statusBadge.className = "status-badge stable";
+                        statusBadge.innerHTML = `STATUS: SECURE &bull; STABLE HUMAN FORCE (+${(-industryDiff).toFixed(1)}% Peak)`;
+                    }
+                    
+                    // Specific industry overview text update
+                    document.getElementById('analysis-combined').textContent = `${industryFinalP.toFixed(2)}%`;
+                }
+            }
+
+            requestAnimationFrame(animate);
+
+            // Dark Mode toggler script
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)');
+
+            // Set Initial Mode based on localStorage of main site or system preference
+            const darkModeEnabled = localStorage.getItem('darkMode') === 'true' || 
+                                   (localStorage.getItem('darkMode') === null && systemPreference.matches);
+
+            if (darkModeEnabled) {
+                document.body.classList.remove('light-mode');
+                darkModeToggle.querySelector('i').className = 'fas fa-sun';
+            } else {
+                document.body.classList.add('light-mode');
+                darkModeToggle.querySelector('i').className = 'fas fa-moon';
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                const isLight = document.body.classList.toggle('light-mode');
+                localStorage.setItem('darkMode', !isLight);
+
+                const icon = darkModeToggle.querySelector('i');
+                icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+            });
+        });
+    </script>
+</body>
+</html>
