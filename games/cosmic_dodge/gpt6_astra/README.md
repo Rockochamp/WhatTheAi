@@ -2,7 +2,7 @@
 
 The GPT-6 Astra edition of Cosmic Dodge. It is a standalone Canvas game within the existing whatthe.ai static site. GPT-6 Astra is the authoring-model attribution; gameplay does not call an AI model API.
 
-Open `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html` from a static server serving the repository root. No build or package installation is required. The server must serve `.mjs` files as JavaScript.
+Open `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html` from a static server serving the repository root. No build or package installation is required. The browser modules use `.js` so the existing host serves the correct JavaScript content type. The local `package.json` only declares module syntax for Node-based tests.
 
 ## Controls and scoring
 
@@ -14,9 +14,9 @@ Open `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html` from a static server ser
 
 ## Files
 
-- `engine.mjs`: seeded, DOM-independent simulation. The controller advances it in fixed 1/120-second steps.
-- `game.mjs`: Canvas rendering, input, interface, sound effects, and run lifecycle.
-- `records.mjs`: safe local persistence and optional Firebase leaderboard access.
+- `engine.js`: seeded, DOM-independent simulation. The controller advances it in fixed 1/120-second steps.
+- `game.js`: Canvas rendering, input, interface, sound effects, and run lifecycle.
+- `records.js`: safe local persistence and optional Firebase leaderboard access.
 - `game.css`: responsive flight-deck styling, including touch and fullscreen controls.
 
 ## Records

@@ -1,5 +1,5 @@
-import { Flight, PHASE_COOLDOWN, SECTORS, clamp } from './engine.mjs';
-import { readRecords, addRecord, fetchGlobalRecords, saveGlobalRecord, isLiveSite } from './records.mjs';
+import { Flight, PHASE_COOLDOWN, SECTORS, clamp } from './engine.js';
+import { readRecords, addRecord, fetchGlobalRecords, saveGlobalRecord, isLiveSite } from './records.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('space');

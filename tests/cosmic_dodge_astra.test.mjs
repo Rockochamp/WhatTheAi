@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Flight, PHASE_COOLDOWN } from '../games/cosmic_dodge/gpt6_astra/engine.mjs';
-import { addRecord, readRecords, isLiveSite, saveGlobalRecord, fetchGlobalRecords } from '../games/cosmic_dodge/gpt6_astra/records.mjs';
+import { Flight, PHASE_COOLDOWN } from '../games/cosmic_dodge/gpt6_astra/engine.js';
+import { addRecord, readRecords, isLiveSite, saveGlobalRecord, fetchGlobalRecords } from '../games/cosmic_dodge/gpt6_astra/records.js';
 
 function flight() { const f = new Flight({ seed: 53 }); f.start(); f.spawnIn = 1000; f.pickupIn = 1000; return f; }
 function rock(f, x = f.player.x, y = f.player.y) { return { x, y, radius: 20, speed: 0, drift: 0, spin: 0, rotation: 0, shape: [], hit: false, passed: false }; }
