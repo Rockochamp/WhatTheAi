@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d17">
+  <meta name="description" content="Pilot the asteroid belt in Cosmic Dodge: Astra Run, the GPT-6 Astra edition. Dodge, collect starlight, and phase through danger. Free browser game with keyboard and touch controls.">
+  <title>Cosmic Dodge: Astra Run — GPT-6 Astra | What the Ai</title>
+  <link rel="icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="gpt6_astra/game.css">
+  <script src="/js/common/blocklist.js" defer></script>
+  <script type="module" src="gpt6_astra/game.mjs"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">✳</span> whatthe.ai</a>
+      <span class="breadcrumb"><span>/</span> ARCADE <span>/</span> COSMIC DODGE</span>
+      <span class="edition"><span class="status-dot"></span> GPT-6 ASTRA</span>
+    </header>
+    <main>
+      <div class="page-heading"><div><p class="eyebrow">FLIGHT DECK / 03</p><h1>Cosmic Dodge <span>Astra Run</span></h1></div><a class="back-link" href="/">All games <span aria-hidden="true">↗</span></a></div>
+      <div class="game-layout">
+        <section class="stage" id="stage" aria-label="Cosmic Dodge game">
+          <canvas id="space" tabindex="0" aria-label="Asteroid field. Steer with arrow keys or A and D. Press Space to phase and P to pause.">Your browser needs Canvas to play Cosmic Dodge.</canvas>
+          <div class="hud">
+            <div class="score-group"><span class="eyebrow">SCORE</span><strong id="score">000000</strong></div>
+            <div class="sector-group"><span class="eyebrow" id="sector">SECTOR 01</span><span id="sector-name">Quiet orbit</span></div>
+            <div class="hull-group"><span class="eyebrow">HULL</span><div id="hull" role="img" aria-label="3 of 3 hull remaining"><i></i><i></i><i></i></div></div>
+          </div>
+          <div class="fullscreen-actions"><button type="button" id="fullscreen-pause">Pause</button><button type="button" id="fullscreen-exit">Exit fullscreen</button></div>
+          <div class="overlay" id="overlay">
+            <div class="start-content" id="start-content">
+              <p class="signal"><span></span> FLIGHT SYSTEMS READY</p>
+              <h2>COSMIC<br><em>DODGE<span>.</span></em></h2>
+              <p class="intro">Find your line through the asteroid belt.<br>Stay close. Stay alive.</p>
+              <form id="launch-form">
+                <label for="pilot-name">PILOT CALLSIGN <span>optional</span></label>
+                <div class="launch-row"><input id="pilot-name" name="pilot" maxlength="16" placeholder="Anonymous" autocomplete="off" spellcheck="false" aria-describedby="name-error"><button class="launch-button" type="submit">Launch run <span aria-hidden="true">↗</span></button></div>
+                <p id="name-error" class="form-error" role="alert"></p>
+              </form>
+              <p class="start-help"><span class="desktop-hint"><kbd>←</kbd><kbd>→</kbd> steer <span class="separator">/</span> <kbd>SPACE</kbd> phase</span><span class="touch-hint">Drag to steer · tap Phase to slip through asteroids</span></p>
+            </div>
+            <div class="result-content" id="result-content" hidden>
+              <p class="signal" id="result-kicker">FLIGHT RECORDED</p>
+              <h2 id="result-title">Nice flying<span>.</span></h2>
+              <p class="result-score" id="final-score">0</p><p class="eyebrow" id="score-caption">TOTAL SCORE</p>
+              <div class="result-stats"><div><strong id="final-time">0:00</strong><span>Flight time</span></div><div><strong id="final-near">0</strong><span>Close calls</span></div><div><strong id="final-stars">0</strong><span>Starlight</span></div></div>
+              <p id="save-status" class="save-status" role="status"></p>
+              <button class="launch-button" id="restart-button" type="button">Fly again <span aria-hidden="true">↗</span></button>
+              <button class="text-button" id="change-pilot" type="button">Change pilot</button>
+            </div>
+            <div class="pause-content" id="pause-content" hidden><p class="signal">HOLDING POSITION</p><h2>Take a breath<span>.</span></h2><p>Your flight is paused.</p><button class="launch-button" id="resume-button" type="button">Resume flight <span aria-hidden="true">↗</span></button></div>
+          </div>
+          <div class="flight-message" id="flight-message" aria-live="polite"></div>
+          <div class="stage-bottom"><div class="bottom-left"><button id="stage-pause" type="button" class="stage-pause" aria-label="Pause flight" hidden>Ⅱ</button><span class="coordinates" id="distance">0000 M <span>/</span> ASTRA BELT</span></div><button id="phase-button" class="phase-button" type="button" disabled><span class="phase-icon" aria-hidden="true">◇</span><span><strong id="phase-label">PHASE READY</strong><small>SPACE / TAP</small></span><span class="charge-track"><span id="charge-fill"></span></span></button></div>
+        </section>
+        <aside class="sidebar" aria-label="Flight records and instructions">
+          <section class="log-panel"><div class="panel-heading"><h2>Flight log</h2><span class="tiny-cross" aria-hidden="true">+</span></div><div class="best-record"><span class="eyebrow">YOUR PERSONAL BEST</span><strong id="personal-best">—</strong><span id="personal-best-caption">Your first flight is waiting.</span></div><div class="tabs" role="group" aria-label="Leaderboard scope"><button id="local-tab" type="button" class="active" aria-pressed="true">This device</button><button id="global-tab" type="button" aria-pressed="false">Worldwide</button></div><ol id="leaderboard" class="leaderboard"></ol><p id="board-status" class="board-status" role="status">Your top 5 flights appear here.</p></section>
+          <section class="how-panel"><p class="eyebrow">THE FLIGHT PLAN</p><div class="instruction"><span class="instruction-icon asteroid-icon" aria-hidden="true">⬡</span><div><h3>Keep your distance. Almost.</h3><p>Skim asteroids for a close-call bonus. Chain them for up to 5× points.</p></div></div><div class="instruction"><span class="instruction-icon star-icon" aria-hidden="true">✦</span><div><h3>Follow the starlight.</h3><p>Gold stars earn points. Mint repair cells restore one hull segment.</p></div></div><div class="instruction"><span class="instruction-icon phase-icon" aria-hidden="true">◇</span><div><h3>Slip through the impossible.</h3><p>Phase through danger for a moment. Recharges every six seconds.</p></div></div></section>
+          <div class="sector-note"><span class="status-dot"></span> THE LONGER YOU FLY, THE FASTER IT GETS.</div>
+        </aside>
+      </div>
+      <footer class="control-bar"><span class="controls-text"><kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd> steer <span>·</span> <kbd>SPACE</kbd> phase <span>·</span> <kbd>P</kbd> pause</span><div class="toolbar"><button id="pause-button" type="button" disabled aria-label="Pause flight">Ⅱ <span>Pause</span></button><button id="sound-button" type="button" aria-pressed="false">♪ <span id="sound-label">Sound off</span></button><button id="fullscreen-button" type="button" aria-label="Enter fullscreen">⛶ <span>Fullscreen</span></button></div></footer>
+      <p class="credit">AN EXPERIMENT FROM WHATTHE.AI <span>DESIGNED &amp; CODED WITH GPT-6 ASTRA</span></p>
+    </main>
+  </div>
+  <noscript><p class="noscript">Enable JavaScript to play Cosmic Dodge.</p></noscript>
+</body>
+</html>
