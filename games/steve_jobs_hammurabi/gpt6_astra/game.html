@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b141b" />
+    <meta
+      name="description"
+      content="A kingdom. Ten years. Your legacy. Trade land, survive uncertain harvests, and lead your people in the GPT-6 Astra edition of Steve Jobs - Hammurabi."
+    />
+    <title>Steve Jobs - Hammurabi · GPT-6 Astra | What the Ai</title>
+    <link
+      rel="canonical"
+      href="https://whatthe.ai/games/steve_jobs_hammurabi/gpt6_astra/game.html"
+    />
+    <link rel="icon" href="/images/favicon.ico?v=1.2" />
+    <link rel="stylesheet" href="game.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar wrap">
+      <a class="home" href="/" aria-label="Back to What the Ai"
+        >← <span>What the Ai</span></a
+      >
+      <span class="edition">GPT-6 ASTRA</span>
+      <nav aria-label="Game options">
+        <button id="music-button" type="button" aria-pressed="true">
+          Music on</button
+        ><button data-dialog="help-dialog" type="button">How to play</button
+        ><button data-rank="global" type="button">Rankings</button>
+      </nav>
+    </header>
+    <main class="wrap">
+      <section id="welcome" class="welcome" aria-labelledby="game-title">
+        <div
+          class="welcome-art"
+          role="img"
+          aria-label="An ancient river kingdom at twilight"
+        ></div>
+        <div class="welcome-copy">
+          <p class="eyebrow">STEVE JOBS — THE STRATEGY GAME, REIMAGINED</p>
+          <h1 id="game-title">
+            HAMMURABI<span>A kingdom. Ten years. Your legacy.</span>
+          </h1>
+          <p class="intro">
+            The river gives. The harvest takes. Your people are counting on you.
+          </p>
+          <p class="premise">
+            Trade land, grow food, and guide a civilization through ten
+            uncertain years. Your final population is your score.
+          </p>
+          <form id="start-form" class="start-form">
+            <label for="player-name"
+              >YOUR RULER NAME <span>10 characters max</span></label
+            >
+            <div class="launch-row">
+              <input
+                id="player-name"
+                name="nickname"
+                autocomplete="nickname"
+                maxlength="10"
+                placeholder="Enter your name"
+                required
+              /><button class="primary" type="submit">
+                Begin your reign <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <p id="name-error" class="error" role="alert"></p>
+          </form>
+          <div class="starting-resources">
+            <span><strong>100</strong> people</span
+            ><span><strong>4,000</strong> bushels</span
+            ><span><strong>100</strong> acres</span>
+          </div>
+        </div>
+        <div class="hero-caption">
+          <span>THE RIVER KINGDOM</span
+          ><span>Ten years. Every decision matters.</span>
+        </div>
+      </section>
+      <section id="welcome-bottom" class="welcome-bottom">
+        <div>
+          <p class="eyebrow">THE CHALLENGE</p>
+          <h2>A small kingdom. A delicate balance.</h2>
+          <p>
+            One seed per acre. Twenty bushels per person. Weather, migration,
+            rats, and plague will test every plan.
+          </p>
+        </div>
+        <div class="welcome-ranking">
+          <div class="section-heading">
+            <h2>Hall of rulers</h2>
+            <button data-rank="global" class="text-button">
+              Global ranking ↗
+            </button>
+          </div>
+          <p id="global-preview">Loading the global ranking…</p>
+          <button data-rank="session" class="text-button">
+            View session ranking →
+          </button>
+        </div>
+      </section>
+      <section id="play" hidden aria-label="Your kingdom">
+        <div class="reign-heading">
+          <div>
+            <p class="eyebrow" id="ruler-caption">YOUR REIGN</p>
+            <h1 id="year-title" tabindex="-1">The first year</h1>
+          </div>
+          <div
+            class="year-track"
+            id="year-track"
+            aria-label="Ten-year progress"
+          ></div>
+        </div>
+        <div class="play-layout">
+          <div class="kingdom-column">
+            <section class="kingdom-view" aria-label="Kingdom overview">
+              <img
+                src="kingdom.webp"
+                alt="The river kingdom and its great ziggurat at twilight"
+                width="1672"
+                height="941"
+              />
+              <div class="kingdom-caption">
+                <span class="eyebrow">THE RIVER KINGDOM</span
+                ><span id="health-badge" class="health good">Well fed</span>
+              </div>
+              <div class="resources">
+                <div>
+                  <span>PEOPLE <small>your score</small></span
+                  ><strong id="pawns">100</strong
+                  ><small id="population-delta">Your reign begins</small>
+                </div>
+                <div>
+                  <span>FOOD <small>bushels</small></span
+                  ><strong id="food">4,000</strong
+                  ><small id="food-delta">In the granary</small>
+                </div>
+                <div>
+                  <span>LAND <small>acres</small></span
+                  ><strong id="land">100</strong
+                  ><small id="labor">1,000 acres of labor</small>
+                </div>
+              </div>
+            </section>
+            <section
+              class="panel chronicle"
+              aria-labelledby="chronicle-heading"
+            >
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">THE ROYAL CHRONICLE</p>
+                  <h2 id="chronicle-heading">A new era begins</h2>
+                </div>
+                <span id="chronicle-year" class="subtle">Year 0</span>
+              </div>
+              <div id="chronicle-content">
+                <p class="advisor">
+                  You inherited 100 acres and 4,000 bushels. Feeding everyone
+                  costs 2,000 a year, while 100 planted acres yield just
+                  300–700. A comfortable first year is not a lasting strategy.
+                </p>
+                <p class="subtle">
+                  Expand carefully. Food is both your currency and your people's
+                  lifeline.
+                </p>
+              </div>
+              <details id="history-details" hidden>
+                <summary>
+                  Earlier years <span>View your decisions and outcomes</span>
+                </summary>
+                <div id="history-list"></div>
+              </details>
+            </section>
+            <div class="reign-bottom">
+              <button data-rank="session" class="text-button">
+                Session ranking ↗</button
+              ><button data-rank="global" class="text-button">
+                Global ranking ↗</button
+              ><button data-dialog="help-dialog" class="text-button">
+                Rules & strategy ↗
+              </button>
+            </div>
+          </div>
+          <section class="panel council" aria-labelledby="council-heading">
+            <div class="section-heading council-heading">
+              <div>
+                <p class="eyebrow">THE COUNCIL AWAITS</p>
+                <h2 id="council-heading">Plan year 1</h2>
+              </div>
+              <span class="seal" aria-hidden="true">I</span>
+            </div>
+            <form id="plan-form" novalidate>
+              <fieldset>
+                <legend><span>01</span> Trade land</legend>
+                <div class="market-line">
+                  Today's price
+                  <strong><span id="price">18</span> bushels / acre</strong>
+                </div>
+                <div class="trade-controls">
+                  <label class="sr-only" for="trade-type"
+                    >Land transaction</label
+                  ><select id="trade-type">
+                    <option value="buy">Buy land</option>
+                    <option value="sell">Sell land</option></select
+                  ><label class="sr-only" for="trade">Acres to trade</label>
+                  <div class="number-control">
+                    <button
+                      type="button"
+                      data-step="trade:-1"
+                      aria-label="Trade one fewer acre"
+                    >
+                      −</button
+                    ><input
+                      id="trade"
+                      type="number"
+                      inputmode="numeric"
+                      value="0"
+                      min="0"
+                      step="1"
+                      aria-describedby="trade-note plan-error"
+                    /><button
+                      type="button"
+                      data-step="trade:1"
+                      aria-label="Trade one more acre"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <p id="trade-note" class="field-note">
+                  Keep your current land.
+                </p>
+              </fieldset>
+              <fieldset>
+                <legend><span>02</span> Plant crops</legend>
+                <div class="field-heading">
+                  <label for="plant">Acres to plant</label
+                  ><button id="plant-max" type="button" class="text-button">
+                    Plant max
+                  </button>
+                </div>
+                <div class="number-control">
+                  <button
+                    type="button"
+                    data-step="plant:-10"
+                    aria-label="Plant ten fewer acres"
+                  >
+                    −</button
+                  ><input
+                    id="plant"
+                    type="number"
+                    inputmode="numeric"
+                    value="100"
+                    min="0"
+                    step="1"
+                    aria-describedby="plant-note plan-error"
+                  /><button
+                    type="button"
+                    data-step="plant:10"
+                    aria-label="Plant ten more acres"
+                  >
+                    +
+                  </button>
+                </div>
+                <p id="plant-note" class="field-note">
+                  1 bushel per acre · harvest yields 3–7
+                </p>
+              </fieldset>
+              <fieldset>
+                <legend><span>03</span> Feed your people</legend>
+                <label for="feed" class="field-heading"
+                  >Bushels per person</label
+                >
+                <div class="number-control">
+                  <button
+                    type="button"
+                    data-step="feed:-1"
+                    aria-label="Feed one fewer bushel per person"
+                  >
+                    −</button
+                  ><input
+                    id="feed"
+                    type="number"
+                    inputmode="numeric"
+                    value="20"
+                    min="0"
+                    step="1"
+                    aria-describedby="feed-note plan-error"
+                  /><button
+                    type="button"
+                    data-step="feed:1"
+                    aria-label="Feed one more bushel per person"
+                  >
+                    +
+                  </button>
+                </div>
+                <div class="rations" aria-label="Feeding presets">
+                  <button type="button" data-feed="10">
+                    10 <span>Ration</span></button
+                  ><button type="button" data-feed="20">
+                    20 <span>Basic</span></button
+                  ><button type="button" data-feed="30">
+                    30 <span>Generous</span>
+                  </button>
+                </div>
+                <p id="feed-note" class="field-note">
+                  20 each sustains health. More can attract newcomers.
+                </p>
+              </fieldset>
+              <section class="budget" aria-label="Food budget">
+                <div>
+                  <span>After trade</span
+                  ><strong id="budget-trade">4,000</strong>
+                </div>
+                <div>
+                  <span>Seed & feeding</span
+                  ><strong id="budget-spend">−2,100</strong>
+                </div>
+                <div class="budget-total">
+                  <span>Before harvest</span
+                  ><strong id="budget-reserve">1,900</strong>
+                </div>
+                <p id="harvest-range">Expected harvest: 300–700 bushels</p>
+              </section>
+              <p id="plan-error" class="error" aria-live="polite"></p>
+              <p id="risk-warning" class="risk-warning"></p>
+              <button id="end-year" type="submit" class="primary end-year">
+                Seal decisions & end year <span aria-hidden="true">→</span>
+              </button>
+              <p class="commit-note">
+                Decisions are final. Harvest and events resolve next.
+              </p>
+            </form>
+            <section id="finished-panel" hidden>
+              <p class="eyebrow">YOUR LEGACY</p>
+              <h2 id="finished-title">A reign to remember.</h2>
+              <p id="finished-copy"></p>
+              <strong id="final-score" class="final-score">100</strong
+              ><span class="subtle">people · final score</span>
+              <div class="final-stats">
+                <div><strong id="final-year">10</strong><span>years</span></div>
+                <div>
+                  <strong id="final-land">100</strong><span>acres</span>
+                </div>
+                <div>
+                  <strong id="final-food">0</strong><span>bushels</span>
+                </div>
+              </div>
+              <p id="save-status" class="field-note" role="status"></p>
+              <button id="retry-save" class="text-button" hidden>
+                Retry global submission</button
+              ><button id="play-again" class="primary end-year">
+                Begin another reign →
+              </button>
+              <div class="result-links">
+                <button data-rank="session">Session ranking</button
+                ><button data-rank="global">Global ranking</button
+                ><button id="change-ruler" class="text-button">
+                  Change ruler
+                </button>
+              </div>
+            </section>
+          </section>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap footer">
+      <span
+        >Steve Jobs - Hammurabi <span aria-hidden="true">/</span> GPT-6
+        Astra</span
+      ><span>Built with AI. Ruled by you.</span>
+    </footer>
+    <noscript
+      ><p class="wrap error">
+        Enable JavaScript to play Hammurabi. <a href="/">Back to games</a>.
+      </p></noscript
+    >
+    <dialog id="year-dialog" aria-labelledby="report-title">
+      <div class="dialog-inner">
+        <p class="eyebrow" id="report-eyebrow">THE YEAR IN REVIEW</p>
+        <h2 id="report-title">The harvest is in.</h2>
+        <p id="report-subtitle" class="subtle"></p>
+        <div id="report-numbers" class="report-numbers"></div>
+        <div id="report-events" class="report-events"></div>
+        <p id="report-health" class="advisor"></p>
+        <button id="continue-year" class="primary end-year" autofocus>
+          Plan the next year →
+        </button>
+      </div>
+    </dialog>
+    <dialog id="rank-dialog" aria-labelledby="rank-title">
+      <div class="dialog-inner">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">HAMMURABI · GPT-6 ASTRA</p>
+            <h2 id="rank-title">Hall of rulers</h2>
+          </div>
+          <button
+            data-close="rank-dialog"
+            class="close-button"
+            aria-label="Close rankings"
+          >
+            ×
+          </button>
+        </div>
+        <div class="rank-tabs" role="group" aria-label="Ranking scope">
+          <button id="session-tab" data-rank="session" aria-pressed="false">
+            Session ranking</button
+          ><button id="global-tab" data-rank="global" aria-pressed="true">
+            Global ranking
+          </button>
+        </div>
+        <p id="rank-description" class="subtle"></p>
+        <p id="games-played" class="field-note"></p>
+        <div id="ranking-content" aria-live="polite"></div>
+        <button id="refresh-ranking" class="text-button">
+          Refresh ranking ↻
+        </button>
+      </div>
+    </dialog>
+    <dialog id="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-inner">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">THE RULER'S HANDBOOK</p>
+            <h2 id="help-title">Build a lasting kingdom.</h2>
+          </div>
+          <button
+            data-close="help-dialog"
+            class="close-button"
+            aria-label="Close how to play"
+          >
+            ×
+          </button>
+        </div>
+        <p class="help-intro">
+          Survive ten years. Finish with as many people as possible. Your people
+          are the “pawns” of the original game, and your final population is
+          your score. Your reign ends early if no one remains.
+        </p>
+        <div class="rule">
+          <strong>01 · Trade before you spend</strong>
+          <p>
+            Land costs 18–28 bushels per acre, changing each year. Buy or sell,
+            never both. Selling releases food immediately; buying increases next
+            year's potential.
+          </p>
+        </div>
+        <div class="rule">
+          <strong>02 · Seeds become a harvest</strong>
+          <p>
+            Each planted acre costs 1 bushel and yields 3–7. One person can tend
+            10 acres. You must own the land and pay for seeds and feeding before
+            the harvest arrives.
+          </p>
+        </div>
+        <div class="rule">
+          <strong>03 · Hunger has a memory</strong>
+          <p>
+            20 bushels per person restores health. Feeding less builds hunger
+            over several years; sustained hunger causes deaths. Good feeding
+            attracts immigrants. Very low rations can cause emigration.
+          </p>
+        </div>
+        <div class="rule">
+          <strong>04 · Expect the unexpected</strong>
+          <p>
+            Rats can eat 5–20% of stored food; favorable weather can add 5–15%
+            to the harvest; plague can take 5–20% of your people. Keep a
+            reserve. Luck helps, but careful planning matters.
+          </p>
+        </div>
+        <div class="rule">
+          <strong>Controls & rankings</strong>
+          <p>
+            Tap or click the buttons, or type exact numbers. Tab moves through
+            controls. Enter on the decision form commits the year; Escape closes
+            dialogs. Session ranking keeps every finished round in this tab.
+            Global ranking shows the top 100 Astra scores, ordered by final
+            population.
+          </p>
+        </div>
+        <div class="music-settings">
+          <label for="volume">Music volume</label
+          ><input
+            id="volume"
+            type="range"
+            min="0"
+            max="1"
+            step=".05"
+            value=".35"
+          />
+          <p class="field-note">
+            Elysium · the original soundtrack, with volume and mute controls on
+            every device.
+          </p>
+        </div>
+        <button data-close="help-dialog" class="primary end-year">
+          Return to the kingdom
+        </button>
+      </div>
+    </dialog>
+    <audio id="music" loop preload="none" src="/music/Elysium.mp3"></audio>
+    <script src="/js/common/blocklist.js"></script>
+    <script type="module" src="game.js?v=1"></script>
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'
+    ></script>
+  </body>
+</html>

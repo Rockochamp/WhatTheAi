@@ -1,39 +1,47 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://whatthe.ai/</loc>
-    <lastmod>2025-03-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-09-11</lastmod>
   </url>
   <url>
-    <loc>https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html</loc>
-    <lastmod>2025-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://whatthe.ai/apps/agi_barometer/gemini_3_1_pro/game.html</loc>
+    <lastmod>2026-04-01</lastmod>
   </url>
   <url>
-    <loc>https://whatthe.ai/games/steve_jobs_hammurabi/grok3_reasoning/game.html</loc>
-    <lastmod>2025-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://whatthe.ai/games/crazy_clicker/gemini_2_5_pro/game.html</loc>
-    <lastmod>2025-04-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://whatthe.ai/apps/agi_barometer/gemini_3_5_flash/game.html</loc>
+    <lastmod>2026-06-22</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/apps/yes_i_said_it/gemini_2_5_pro/game.html</loc>
     <lastmod>2025-04-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/games/BananaSurvivors/game.html</loc>
+    <lastmod>2025-12-27</lastmod>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html</loc>
+    <lastmod>2025-04-06</lastmod>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html</loc>
+    <lastmod>2026-05-20</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html</loc>
-    <lastmod>2026-09-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-09-11</lastmod>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/games/crazy_clicker/gemini_2_5_pro/game.html</loc>
+    <lastmod>2025-04-06</lastmod>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/games/steve_jobs_hammurabi/gpt6_astra/game.html</loc>
+    <lastmod>2026-09-11</lastmod>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/games/steve_jobs_hammurabi/grok3_reasoning/game.html</loc>
+    <lastmod>2025-04-06</lastmod>
   </url>
 </urlset>
