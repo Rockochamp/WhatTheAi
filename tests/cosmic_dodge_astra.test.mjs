@@ -4,9 +4,12 @@ import {
   Flight,
   PHASE_COOLDOWN,
   sweptDistance,
+  difficultyAt,
 } from "../games/cosmic_dodge/gpt6_astra/engine.js";
 import {
   addRecord,
+  rankRecords,
+  RECORD_KEY,
   readRecords,
   isLiveSite,
   saveGlobalRecord,
@@ -18,7 +21,6 @@ function flight() {
   f.start();
   f.spawnIn = 1000;
   f.pickupIn = 1000;
-  f.waveIn = 1000;
   f.repairIn = 1000;
   return f;
 }
@@ -56,7 +58,7 @@ test("movement remains bounded on desktop and mobile", () => {
     assert.ok(f.player.y <= height - 90, "leave space for thumb controls");
   }
 });
-test("movement and elapsed score are independent of update frequency", () => {
+test("movement and survival clock are independent of update frequency", () => {
   const a = flight(),
     b = flight();
   for (let i = 0; i < 60; i++) a.update(1 / 60, { axis: 1 });
@@ -71,21 +73,23 @@ test("phase protects against impacts, then requires a full cooldown", () => {
   assert.equal(f.phase(), false);
   f.asteroids.push(rock(f));
   f.update(1 / 120);
-  assert.equal(f.hp, 3);
+  assert.equal(f.hp, 1);
   advance(f, PHASE_COOLDOWN + 0.02);
   assert.equal(f.phase(), true);
 });
 test("one asteroid cannot repeatedly damage the player", () => {
   const f = flight();
+  f.hp = 2;
   f.asteroids.push(rock(f));
   advance(f, 2);
-  assert.equal(f.hp, 2);
+  assert.equal(f.hp, 1);
 });
-test("invulnerability prevents overlapping impacts from taking every hull segment", () => {
+test("a collected shield absorbs overlapping impacts only once", () => {
   const f = flight();
+  f.hp = 2;
   f.asteroids.push(rock(f), rock(f), rock(f));
   f.update(1 / 120);
-  assert.equal(f.hp, 2);
+  assert.equal(f.hp, 1);
 });
 test("game over emits once and freezes the final score", () => {
   const f = flight();
@@ -142,10 +146,10 @@ test("pickups award points and repair without exceeding full hull", () => {
   f.update(1 / 120);
   assert.equal(f.bonus, 50);
   assert.equal(f.starlight, 1);
-  f.hp = 2;
+  f.hp = 1;
   f.pickups.push(pickup("repair"), pickup("repair"));
   f.update(1 / 120);
-  assert.equal(f.hp, 3);
+  assert.equal(f.hp, 2);
   assert.equal(f.pickups.length, 0);
 });
 test("pause freezes movement, score, spawning and phase recharge", () => {
@@ -223,7 +227,7 @@ test("a burst clears nearby hazards once and cannot be spammed for score", () =>
   assert.equal(f.phase(), false);
   assert.equal(f.bonus, 25);
   f.update(0.01);
-  assert.equal(f.hp, 3);
+  assert.equal(f.hp, 1);
 });
 
 test("fast moving hazards use swept collision detection", () => {
@@ -232,16 +236,15 @@ test("fast moving hazards use swept collision detection", () => {
   r.speed = 24000;
   f.asteroids.push(r);
   f.update(1 / 120);
-  assert.equal(f.hp, 2);
+  assert.equal(f.hp, 0);
   assert.equal(sweptDistance(-20, 0, 20, 0), 0);
 });
 
 test("meteor warnings provide reaction time and do not fire while paused", () => {
   const f = flight();
-  f.elapsed = 15;
-  f.waveNumber = 1;
-  f.wave();
-  assert.ok(f.warnings.length >= 2);
+  f.cleared = 70;
+  f.warnMeteor();
+  assert.equal(f.warnings.length, 1);
   assert.ok(f.warnings.every((w) => w.left >= 1.3));
   f.pause();
   const warnings = JSON.stringify(f.warnings);
@@ -254,22 +257,71 @@ test("meteor warnings provide reaction time and do not fire while paused", () =>
   assert.ok(f.asteroids.some((r) => r.kind === "meteor"));
 });
 
-test("formation waves leave a ship-sized corridor on desktop and phone", () => {
-  for (const [w, h] of [
+test("levels follow ten cleared asteroids, never time or style bonuses", () => {
+  const f = flight();
+  advance(f, 120);
+  f.bonus = 999999;
+  assert.equal(f.level, 1);
+  for (let i = 0; i < 10; i++) {
+    f.asteroids.push(rock(f, 20, f.height + 25));
+    f.update(1 / 120);
+    assert.equal(f.score, i + 1);
+  }
+  assert.equal(f.level, 2);
+  assert.equal(f.levelProgress, 0);
+  assert.equal(f.dodged, 10);
+  assert.equal(f.drainEvents().filter((e) => e.type === "level").length, 1);
+  advance(f, 2);
+  assert.equal(f.score, 10, "offscreen asteroids are counted once");
+});
+test("burst-cleared asteroids advance levels once, impacted rocks do not", () => {
+  const f = flight();
+  f.cleared = 9;
+  const r = rock(f);
+  f.asteroids.push(r);
+  f.phase();
+  f.shatter(r);
+  assert.equal(f.score, 10);
+  assert.equal(f.level, 2);
+  const hit = rock(f, 20, f.height + 25);
+  hit.hit = true;
+  f.asteroids.push(hit);
+  f.update(1 / 120);
+  assert.equal(f.score, 10);
+});
+test("level 30 retains the original speed and density curve, with no level cap", () => {
+  assert.deepEqual(difficultyAt(1), { speed: 120, spawnRate: 1.2 });
+  assert.equal(difficultyAt(30).speed, 990);
+  assert.ok(Math.abs(difficultyAt(30).spawnRate - 9.9) < 1e-9);
+  assert.equal(difficultyAt(35).speed, 1140);
+  assert.ok(difficultyAt(40).spawnRate > difficultyAt(35).spawnRate);
+});
+test("falling times, hazard width and horizontal steering scale across screens", () => {
+  const values = [
     [390, 700],
     [1280, 640],
-  ]) {
-    const f = flight();
-    f.resize(w, h);
-    f.wave();
-    const xs = f.asteroids.map((r) => r.x).sort((a, b) => a - b);
-    const maxGap = Math.max(...xs.slice(1).map((x, i) => x - xs[i]));
-    assert.ok(
-      maxGap - 52 * f.scale > f.player.radius * 4,
-      "corridor must fit the entire ship comfortably",
-    );
-    assert.equal(f.pickups.length, 4);
-  }
+    [844, 300],
+  ].map(([width, height]) => {
+    const f = new Flight({ width, height, seed: 53 });
+    f.start();
+    f.cleared = 290;
+    const r = f.spawnAsteroid();
+    const before = f.player.x;
+    f.update(1 / 120, { axis: 1 });
+    return [r.speed / height, r.radius / width, (f.player.x - before) / width];
+  });
+  for (const value of values)
+    for (let i = 0; i < 3; i++)
+      assert.ok(Math.abs(value[i] - values[0][i]) < 1e-8);
+});
+test("a fast asteroid crossing ship and bottom in one step still ends the run", () => {
+  const f = flight(),
+    r = rock(f, f.player.x, 0);
+  r.speed = 120000;
+  f.asteroids.push(r);
+  f.update(1 / 120);
+  assert.equal(f.status, "over");
+  assert.equal(f.score, 0);
 });
 
 test("long runs stay finite and cleanup keeps the simulation bounded", () => {
@@ -308,9 +360,18 @@ test("record storage sorts, deduplicates runs, and survives corruption", () => {
     id: "one",
     playerName: "<script>pilot</script>",
     score: 500,
+    level: 51,
+    ruleset: 3,
     elapsed: 5,
   };
-  const two = { id: "two", playerName: "Astra", score: 900, elapsed: 9 };
+  const two = {
+    id: "two",
+    playerName: "Astra",
+    score: 900,
+    level: 91,
+    ruleset: 3,
+    elapsed: 9,
+  };
   let result = addRecord([], one, store);
   result = addRecord(result.records, two, store);
   result = addRecord(result.records, two, store);
@@ -333,7 +394,14 @@ test("blocked storage preserves a session record", () => {
   assert.deepEqual(readRecords(blocked), []);
   const result = addRecord(
     [],
-    { id: "one", playerName: "Astra", score: 100, elapsed: 5 },
+    {
+      id: "one",
+      playerName: "Astra",
+      score: 100,
+      level: 11,
+      ruleset: 3,
+      elapsed: 5,
+    },
     blocked,
   );
   assert.equal(result.persisted, false);
@@ -391,6 +459,8 @@ test("global retries record a run and increment the counter only once (mock data
       id: "same-run",
       playerName: "Pilot",
       score: 700,
+      level: 71,
+      ruleset: 3,
       elapsed: 35,
     };
     await saveGlobalRecord(record);
@@ -402,4 +472,26 @@ test("global retries record a run and increment the counter only once (mock data
     delete globalThis.location;
     delete globalThis.window;
   }
+});
+
+test("level rankings exclude old point runs and prefer progress over style", () => {
+  const base = {
+    id: "a",
+    playerName: "Pilot",
+    score: 290,
+    level: 30,
+    ruleset: 3,
+    elapsed: 100,
+  };
+  const ranked = rankRecords([
+    { ...base, id: "old", ruleset: 2, score: 99999 },
+    { ...base, id: "lower", level: 29, score: 289, style: 99999 },
+    base,
+    { ...base, id: "higher", score: 295, style: 0 },
+  ]);
+  assert.deepEqual(
+    ranked.map((r) => r.id),
+    ["higher", "a", "lower"],
+  );
+  assert.equal(RECORD_KEY, "cosmic_dodge_gpt6_astra_levels_v3");
 });

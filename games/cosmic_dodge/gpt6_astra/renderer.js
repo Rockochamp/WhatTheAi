@@ -1,4 +1,4 @@
-import { clamp } from "./engine.js?v=2";
+import { clamp } from "./engine.js?v=3";
 const TAU = Math.PI * 2;
 const polygon = (ctx, points, fill, stroke) => {
   ctx.beginPath();
@@ -94,7 +94,7 @@ export class Renderer {
       this.labels.push({
         x: e.x,
         y: e.y,
-        text: e.type === "repair" ? "SHIELD RESTORED" : `+${e.points}`,
+        text: e.type === "repair" ? "SHIELD READY" : `+${e.points}`,
         color,
         life: 1,
       });
@@ -150,7 +150,7 @@ export class Renderer {
     c.fillRect(0, 0, w, h);
     if (!menu && f.level > 1) {
       c.fillStyle = ["#39154612", "#072e3b20", "#37151520", "#15123b30"][
-        (f.level - 2) % 4
+        Math.min(3, Math.floor((f.level - 1) / 10))
       ];
       c.fillRect(0, 0, w, h);
     }

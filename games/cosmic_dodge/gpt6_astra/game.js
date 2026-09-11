@@ -1,18 +1,20 @@
+import { DragSteering } from "./controls.js?v=3";
+import { Soundtrack } from "./music.js?v=3";
 import {
   Flight,
   PHASE_COOLDOWN,
-  SECTOR_LENGTH,
+  ASTEROIDS_PER_LEVEL,
   SECTORS,
   clamp,
-} from "./engine.js?v=2";
-import { Renderer } from "./renderer.js?v=2";
+} from "./engine.js?v=3";
+import { Renderer } from "./renderer.js?v=3";
 import {
   readRecords,
   addRecord,
   fetchGlobalRecords,
   saveGlobalRecord,
   isLiveSite,
-} from "./records.js?v=2";
+} from "./records.js?v=3";
 const $ = (id) => document.getElementById(id),
   canvas = $("space"),
   stage = $("stage");
@@ -44,9 +46,8 @@ let runId = "",
   generation = 0,
   board = "local",
   boardRequest = 0;
-let keys = new Set(),
-  pointer = null,
-  target = null;
+const keys = new Set(),
+  steering = new DragSteering();
 let lastTime = 0,
   clock = 0,
   accumulator = 0,
@@ -57,15 +58,23 @@ const renderer = new Renderer(canvas),
   motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
 let reduced =
   pref("cosmic_dodge_reduce_motion", String(motionQuery.matches)) === "true";
-let sound = pref("cosmic_dodge_astra_sound", "false") === "true",
+let sound = pref("cosmic_dodge_astra_sound", "true") === "true",
   audioContext,
-  beat = 0,
-  beatTime = 0;
+  music;
+let musicVolume = clamp(
+  Number(pref("cosmic_dodge_music_volume", "0.65")) || 0,
+  0,
+  1,
+);
 function activateAudio() {
   if (!sound) return;
   try {
     const Audio = window.AudioContext || window.webkitAudioContext;
-    if (!audioContext && Audio) audioContext = new Audio();
+    if (!audioContext && Audio) {
+      audioContext = new Audio();
+      music = new Soundtrack(audioContext, musicVolume);
+    }
+    if (flight.status === "playing") music?.start();
     audioContext?.resume().catch(() => {});
   } catch {
     /* Optional audio. */
@@ -100,17 +109,6 @@ function tone(
     gain.disconnect();
   };
 }
-function updateMusic(dt) {
-  if (!sound || flight.status !== "playing") return;
-  beatTime -= dt;
-  if (beatTime <= 0) {
-    beatTime += 0.24;
-    const notes = [130.81, 196, 261.63, 196, 155.56, 233.08, 311.13, 233.08];
-    tone(notes[beat % 8], 0.38, "sine", 0.013);
-    if (beat % 4 === 0) tone(55, 0.22, "sine", 0.027, 30);
-    beat++;
-  }
-}
 function soundUI() {
   $("sound-button").setAttribute("aria-pressed", String(sound));
   $("sound-button").setAttribute(
@@ -137,7 +135,8 @@ function showBoard(items, status) {
     name.className = "pilot";
     name.textContent = record.playerName;
     score.className = "points";
-    score.textContent = scoreText(record.score);
+    score.textContent = `LVL ${record.level}`;
+    score.title = `${record.score} asteroids cleared · ${timeText(record.elapsed)}`;
     item.append(rank, name, score);
     $("leaderboard").append(item);
   });
@@ -146,7 +145,7 @@ function showBoard(items, status) {
 async function renderBoard() {
   const request = ++boardRequest;
   $("personal-best").textContent = records.length
-    ? scoreText(records[0].score)
+    ? `LEVEL ${records[0].level}`
     : "—";
   $("personal-best-caption").textContent = records.length
     ? `${records[0].playerName} · ${timeText(records[0].elapsed)} in flight`
@@ -159,7 +158,7 @@ async function renderBoard() {
     showBoard(
       records,
       records.length
-        ? "Your top five flights on this device."
+        ? "Ranked by level, then asteroids cleared. Your top five on this device."
         : "Clear skies. Your first flight is waiting.",
     );
     return;
@@ -178,7 +177,7 @@ async function renderBoard() {
       showBoard(
         items,
         items.length
-          ? "Top flights from around the world."
+          ? "Highest levels worldwide. Ties use asteroids cleared."
           : "Be the first to leave your mark.",
       );
   } catch {
@@ -200,12 +199,15 @@ function view(name) {
   if (name) $("flight-message").textContent = "";
   updateHUD();
 }
+function releaseSteering() {
+  const pointerId = steering.pointer?.id;
+  steering.clear();
+  if (pointerId !== undefined && canvas.hasPointerCapture(pointerId))
+    canvas.releasePointerCapture(pointerId);
+}
 function clearInput() {
   keys.clear();
-  target = null;
-  if (pointer && canvas.hasPointerCapture(pointer.id))
-    canvas.releasePointerCapture(pointer.id);
-  pointer = null;
+  releaseSteering();
 }
 function message(text, duration = 2.2, warning = false) {
   $("flight-message").textContent = text;
@@ -222,8 +224,8 @@ function startFlight() {
   renderer.reset();
   accumulator = 0;
   endAt = 0;
-  beatTime = 0;
-  beat = 0;
+  music?.stop();
+  if (music) music.index = 0;
   lastTime = 0;
   flight.start();
   view(null);
@@ -231,11 +233,12 @@ function startFlight() {
   activateAudio();
   tone(160, 0.4, "triangle", 0.045, 650);
   tone(330, 0.5, "sine", 0.025, 990, 0.12);
-  message("FIND YOUR FLOW", 1.8);
+  message("LEVEL 1 · EVERY 10 ASTEROIDS, LEVEL UP", 2.8);
 }
 function pauseFlight() {
   if (flight.status !== "playing") return;
   flight.pause();
+  music?.stop();
   clearInput();
   accumulator = 0;
   view("pause");
@@ -252,6 +255,7 @@ function resumeFlight() {
   canvas.focus({ preventScroll: true });
 }
 function hangar() {
+  music?.stop();
   generation++;
   clearInput();
   flight = new Flight({ width: renderer.w, height: renderer.h });
@@ -283,7 +287,8 @@ async function finishFlight(showResults = true) {
     distance: flight.distance,
     nearMisses: flight.nearMisses,
     starlight: flight.starlight,
-    ruleset: 2,
+    style: flight.bonus,
+    ruleset: 3,
   };
   const previousBest = records[0]?.score ?? -1,
     saved = addRecord(records, record, storage);
@@ -292,10 +297,10 @@ async function finishFlight(showResults = true) {
     record.score > previousBest ? "NEW PERSONAL BEST" : "FLIGHT COMPLETE";
   $("result-title").textContent =
     record.score > previousBest ? "That’s a new orbit." : "One more run?";
-  $("final-score").textContent = scoreText(record.score);
+  $("final-score").textContent = record.level;
   $("final-time").textContent = timeText(record.elapsed);
   $("final-near").textContent = record.nearMisses;
-  $("final-stars").textContent = record.starlight;
+  $("final-stars").textContent = record.score;
   const local = saved.persisted
     ? "Saved on this device."
     : "Saved for this session. Device storage is unavailable.";
@@ -311,7 +316,7 @@ async function finishFlight(showResults = true) {
     try {
       await saveGlobalRecord(record);
       if (token === generation) {
-        $("save-status").textContent = `${local} Worldwide score recorded.`;
+        $("save-status").textContent = `${local} Worldwide level recorded.`;
         if (board === "global") renderBoard();
       }
     } catch {
@@ -322,20 +327,24 @@ async function finishFlight(showResults = true) {
   }
 }
 function updateHUD() {
-  $("score").textContent = String(flight.score).padStart(6, "0");
-  $("sector").textContent = `SECTOR ${String(flight.level).padStart(2, "0")}`;
+  $("score").textContent = String(flight.level).padStart(2, "0");
+  $("sector").textContent =
+    `${flight.levelProgress} / ${ASTEROIDS_PER_LEVEL} TO LEVEL ${flight.level + 1}`;
   $("sector-name").textContent =
-    SECTORS[Math.min(SECTORS.length - 1, flight.level - 1)];
+    SECTORS[Math.min(SECTORS.length - 1, Math.floor((flight.level - 1) / 10))];
   $("sector-fill").style.transform =
-    `scaleX(${(flight.elapsed % SECTOR_LENGTH) / SECTOR_LENGTH})`;
+    `scaleX(${flight.levelProgress / ASTEROIDS_PER_LEVEL})`;
   $("combo").textContent = `${flight.combo}×`;
   $("combo-fill").style.transform = `scaleX(${flight.comboLeft / 5})`;
-  $("combo-description").textContent =
-    flight.combo > 1 ? "KEEP IT CLOSE" : "CLOSE CALLS BUILD COMBOS";
+  $("combo-description").textContent = `STYLE ${scoreText(flight.bonus)}`;
   Array.from($("hull").children).forEach((part, i) =>
-    part.classList.toggle("lost", i >= flight.hp),
+    part.classList.toggle("lost", i >= flight.hp - 1),
   );
-  $("hull").setAttribute("aria-label", `${flight.hp} of 3 shields remaining`);
+  $("hull").setAttribute(
+    "aria-label",
+    flight.hp > 1 ? "Shield ready" : "No shield. One impact ends the run.",
+  );
+  $("shield-label").textContent = flight.hp > 1 ? "PROTECTED" : "ONE LIFE";
   $("timer").textContent = timeText(flight.elapsed);
   $("phase-label").textContent =
     flight.phaseLeft > 0
@@ -367,7 +376,7 @@ function handleEvents() {
         break;
       case "hit":
         tone(90, 0.24, "sawtooth", 0.025, 25);
-        if (flight.hp === 1) message("LAST SHIELD · MAKE IT COUNT", 1.8, true);
+        if (flight.hp === 1) message("SHIELD LOST · STAY SHARP", 1.8, true);
         break;
       case "shatter":
         tone(180, 0.12, "triangle", 0.016, 50);
@@ -376,9 +385,9 @@ function handleEvents() {
         tone(80, 0.5, "sawtooth", 0.018, 500);
         tone(500, 0.35, "sine", 0.025, 1800);
         break;
-      case "sector":
+      case "level":
         message(
-          `SECTOR ${e.level} · ${SECTORS[Math.min(3, e.level - 1)].toUpperCase()}`,
+          `LEVEL ${e.level}${e.level >= 30 ? " · NO ROOM FOR ERROR" : " · FASTER. CLOSER."}`,
           2.5,
         );
         tone(300, 0.5, "sine", 0.025, 600);
@@ -388,6 +397,7 @@ function handleEvents() {
         tone(280, 0.16, "square", 0.008);
         break;
       case "over":
+        music?.stop();
         clearInput();
         $("play-controls").hidden = true;
         stage.dataset.state = "over";
@@ -432,11 +442,11 @@ function frame(timestamp) {
       Number(keys.has("ArrowDown") || keys.has("KeyS")) -
       Number(keys.has("ArrowUp") || keys.has("KeyW"));
     while (accumulator >= 1 / 120 && flight.status === "playing") {
-      flight.update(1 / 120, { axis, vertical, target });
+      flight.update(1 / 120, { axis, vertical, target: steering.target });
       accumulator -= 1 / 120;
     }
     handleEvents();
-    updateMusic(dt);
+    if (music) music.level = flight.level;
   }
   if (endAt && clock >= endAt) finishFlight();
   if (clock > messageUntil) $("flight-message").textContent = "";
@@ -524,7 +534,16 @@ $("sound-button").addEventListener("click", () => {
   if (sound) {
     activateAudio();
     tone(660, 0.12);
-  } else audioContext?.suspend().catch(() => {});
+  } else {
+    music?.stop();
+    audioContext?.suspend().catch(() => {});
+  }
+});
+$("music-volume").value = String(Math.round(musicVolume * 100));
+$("music-volume").addEventListener("input", (event) => {
+  musicVolume = Number(event.target.value) / 100;
+  setPref("cosmic_dodge_music_volume", String(musicVolume));
+  music?.setVolume(musicVolume);
 });
 $("motion-button").addEventListener("click", () => {
   reduced = !reduced;
@@ -586,69 +605,27 @@ window.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
       if (!event.repeat) phase();
     } else {
+      releaseSteering();
       keys.add(event.code);
-      target = null;
     }
   }
 });
 window.addEventListener("keyup", (event) => keys.delete(event.code));
 canvas.addEventListener("pointerdown", (event) => {
-  if (
-    flight.status !== "playing" ||
-    pointer ||
-    (event.pointerType === "mouse" && event.button !== 0)
-  )
+  if (flight.status !== "playing" || !steering.begin(event, flight.player))
     return;
   event.preventDefault();
   keys.clear();
   canvas.setPointerCapture(event.pointerId);
-  pointer = {
-    id: event.pointerId,
-    x: event.clientX,
-    y: event.clientY,
-    shipX: flight.player.x,
-    shipY: flight.player.y,
-  };
-  target = { x: flight.player.x, y: flight.player.y };
   canvas.focus({ preventScroll: true });
   activateAudio();
 });
 canvas.addEventListener("pointermove", (event) => {
-  if (!pointer || pointer.id !== event.pointerId || flight.status !== "playing")
-    return;
-  event.preventDefault();
-  const b = flight.bounds;
-  target = {
-    x: clamp(
-      pointer.shipX + (event.clientX - pointer.x) * 1.15,
-      b.left,
-      b.right,
-    ),
-    y: clamp(
-      pointer.shipY + (event.clientY - pointer.y) * 1.15,
-      b.top,
-      b.bottom,
-    ),
-  };
-  // Re-anchor at the edges so dragging back responds immediately, without a dead zone.
-  if (target.x === b.left || target.x === b.right) {
-    pointer.x = event.clientX;
-    pointer.shipX = target.x;
-  }
-  if (target.y === b.top || target.y === b.bottom) {
-    pointer.y = event.clientY;
-    pointer.shipY = target.y;
-  }
+  if (flight.status === "playing" && steering.move(event, flight.bounds))
+    event.preventDefault();
 });
-function endPointer(event) {
-  if (pointer?.id === event.pointerId) {
-    pointer = null;
-    // Finish a quick swipe at its last target; cancellation must stop immediately.
-    if (event.type !== "pointerup") target = null;
-  }
-}
 for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
-  canvas.addEventListener(name, endPointer);
+  canvas.addEventListener(name, (event) => steering.end(event));
 window.addEventListener("blur", pauseFlight);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) pauseFlight();

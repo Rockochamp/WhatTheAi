@@ -1,8 +1,13 @@
 // Deterministic simulation. The renderer advances this at 120 Hz in logical pixels.
 export const VERSION = "gpt6_astra";
-export const PHASE_COOLDOWN = 5;
-export const PHASE_DURATION = 1;
-export const SECTOR_LENGTH = 25;
+export const PHASE_COOLDOWN = 10;
+export const PHASE_DURATION = 0.6;
+export const ASTEROIDS_PER_LEVEL = 10;
+// o3-mini's 60 Hz curve, expressed in seconds instead of render frames.
+export const difficultyAt = (level) => ({
+  speed: (2 + (level - 1) * 0.5) * 60,
+  spawnRate: (0.02 + (level - 1) * 0.005) * 60,
+});
 export const SECTORS = [
   "Event horizon",
   "The shattered belt",
@@ -35,7 +40,9 @@ export class Flight {
     this.status = "ready";
     this.elapsed = 0;
     this.bonus = 0;
-    this.hp = 3;
+    this.hp = 1;
+    this.cleared = 0;
+    this.dodged = 0;
     this.combo = 1;
     this.comboLeft = 0;
     this.nearMisses = 0;
@@ -49,9 +56,7 @@ export class Flight {
     this.events = [];
     this.spawnIn = 0.7;
     this.pickupIn = 1.5;
-    this.repairIn = 18;
-    this.waveIn = 7;
-    this.waveNumber = 0;
+    this.repairIn = 14;
     this.destroyed = 0;
     this.player = {
       x: width / 2,
@@ -75,10 +80,13 @@ export class Flight {
     };
   }
   get score() {
-    return Math.floor(this.elapsed * 20 + 1e-8) + this.bonus;
+    return this.cleared;
   }
   get level() {
-    return Math.floor(this.elapsed / SECTOR_LENGTH) + 1;
+    return Math.floor(this.cleared / ASTEROIDS_PER_LEVEL) + 1;
+  }
+  get levelProgress() {
+    return this.cleared % ASTEROIDS_PER_LEVEL;
   }
   get distance() {
     return Math.floor(this.elapsed * 180);
@@ -108,9 +116,11 @@ export class Flight {
     return true;
   }
   shatter(rock) {
+    if (rock.hit || rock.destroyed) return;
     rock.hit = true;
     rock.destroyed = true;
     this.destroyed++;
+    this.clearAsteroid(false);
     this.bonus += 25;
     this.events.push({
       type: "shatter",
@@ -119,6 +129,13 @@ export class Flight {
       radius: rock.radius,
       points: 25,
     });
+  }
+  clearAsteroid(dodged = true) {
+    const before = this.level;
+    this.cleared++;
+    if (dodged) this.dodged++;
+    if (this.level !== before)
+      this.events.push({ type: "level", level: this.level });
   }
   resize(width, height) {
     if (
@@ -155,11 +172,9 @@ export class Flight {
     const rock = {
       x: 30 * s + this.random() * (this.width - 60 * s),
       y: -50 * s,
-      radius: (18 + this.random() * 19) * s,
-      speed:
-        (this.height / Math.max(1.65, 3.4 - this.level * 0.17)) *
-        (0.85 + this.random() * 0.28),
-      drift: (this.random() - 0.5) * 36 * s,
+      radius: ((10 + this.random() * 15) * this.width) / 800,
+      speed: (difficultyAt(this.level).speed * this.height) / 600,
+      drift: 0,
       rotation: this.random() * Math.PI * 2,
       spin: (this.random() - 0.5) * 1.5,
       shape: Array.from({ length: 10 }, () => 0.77 + this.random() * 0.23),
@@ -180,71 +195,27 @@ export class Flight {
       type,
     });
   }
-  wave() {
-    this.waveNumber++;
-    if (this.elapsed > 12 && this.waveNumber % 3 === 2) {
-      const count = Math.min(4, 2 + Math.floor(this.level / 3));
-      for (let i = 0; i < count; i++) {
-        const endX = clamp(
-          this.player.x + (i - (count - 1) / 2) * 125 * this.scale,
-          20,
-          this.width - 20,
-        );
-        this.warnings.push({
-          x: clamp(
-            endX + (this.random() - 0.5) * this.width * 0.6,
-            20,
-            this.width - 20,
-          ),
-          endX,
-          left: 1.3 + i * 0.18,
-          duration: 1.3 + i * 0.18,
-        });
-      }
-      this.events.push({
-        type: "warning",
-        text: "METEOR SHOWER · WATCH THE TRAILS",
-      });
-    } else {
-      const lanes = Math.max(5, Math.round(this.width / (73 * this.scale)));
-      const laneWidth = this.width / lanes;
-      const gap = 1 + Math.floor(this.random() * (lanes - 3));
-      const speed = this.height / Math.max(2, 3.2 - this.level * 0.12);
-      for (let i = 0; i < lanes; i++) {
-        if (i >= gap && i <= gap + 1) continue;
-        this.spawnAsteroid({
-          x: (i + 0.5) * laneWidth,
-          y: -65 * this.scale - Math.abs(i - gap) * 9 * this.scale,
-          radius: 26 * this.scale,
-          drift: 0,
-          speed,
-        });
-      }
-      for (let i = 0; i < 4; i++)
-        this.spawnPickup(
-          "star",
-          (gap + 1) * laneWidth,
-          -65 * this.scale - i * 52 * this.scale,
-        );
-    }
-    this.spawnIn = Math.max(this.spawnIn, 1.7);
+  warnMeteor() {
+    // A comet replaces a regular spawn; it never adds a bonus wall of hazards.
+    const x = (0.06 + this.random() * 0.88) * this.width;
+    this.warnings.push({ x, endX: x, left: 1.3, duration: 1.3 });
+    this.events.push({
+      type: "warning",
+      text: "COMET INBOUND · WATCH THE TRAIL",
+    });
   }
   update(dt, { axis = 0, vertical = 0, target = null } = {}) {
     if (this.status !== "playing" || !Number.isFinite(dt) || dt <= 0) return;
     dt = Math.min(dt, 0.05);
-    const oldLevel = this.level,
-      oldX = this.player.x,
+    const oldX = this.player.x,
       oldY = this.player.y,
       s = this.scale;
     this.elapsed += dt;
     for (const key of ["cooldown", "phaseLeft", "invulnerable", "comboLeft"])
       this[key] = Math.max(0, this[key] - dt);
     if (!this.comboLeft) this.combo = 1;
-    if (this.level !== oldLevel)
-      this.events.push({ type: "sector", level: this.level });
 
-    const speed =
-      Math.min(this.width, this.height) * (this.phaseLeft ? 1.28 : 0.91);
+    const speed = this.width * (this.phaseLeft ? 1.2 : 0.95);
     let dx = Number.isFinite(axis) ? clamp(axis, -1, 1) : 0;
     let dy = Number.isFinite(vertical) ? clamp(vertical, -1, 1) : 0;
     if (dx || dy) {
@@ -275,37 +246,38 @@ export class Flight {
 
     this.spawnIn -= dt;
     if (this.spawnIn <= 0) {
-      this.spawnAsteroid();
-      this.spawnIn +=
-        Math.max(0.23, 0.6 - this.level * 0.037) *
-        ((640 / this.width) * s) ** 0.45;
+      if (this.level >= 8 && this.random() < 0.1 && this.warnings.length < 2)
+        this.warnMeteor();
+      else this.spawnAsteroid();
+      // Exponential spacing reproduces the original random stream independently
+      // of display refresh rate. The small floor avoids unreadable clumps.
+      this.spawnIn += Math.max(
+        0.06,
+        -Math.log(Math.max(0.00001, 1 - this.random())) /
+          difficultyAt(this.level).spawnRate,
+      );
     }
     this.pickupIn -= dt;
     if (this.pickupIn <= 0) {
       this.spawnPickup();
-      this.pickupIn += 1.8;
+      this.pickupIn += 2.8;
     }
     this.repairIn -= dt;
     if (this.repairIn <= 0) {
       this.spawnPickup("repair");
-      this.repairIn += 20;
-    }
-    this.waveIn -= dt;
-    if (this.waveIn <= 0) {
-      this.wave();
-      this.waveIn += Math.max(5, 8 - this.level * 0.2);
+      this.repairIn += 22;
     }
     for (const warning of this.warnings) {
       warning.left -= dt;
       if (warning.left <= 0 && !warning.fired) {
         warning.fired = true;
-        const travel = 1.1;
+        const travel = 600 / (difficultyAt(this.level).speed * 1.3);
         this.spawnAsteroid({
           x: warning.x,
           y: -25 * s,
           speed: this.height / travel,
           drift: (warning.endX - warning.x) / travel,
-          radius: 18 * s,
+          radius: (14 * this.width) / 800,
           kind: "meteor",
         });
       }
@@ -333,7 +305,7 @@ export class Flight {
         rock.hit = true;
         if (this.invulnerable <= 0) {
           this.hp--;
-          this.invulnerable = 1.7;
+          this.invulnerable = 1.2;
           this.combo = 1;
           this.comboLeft = 0;
           this.events.push({ type: "hit", x: this.player.x, y: this.player.y });
@@ -368,6 +340,15 @@ export class Flight {
         }
       }
     }
+    // Check swept collisions before exits, including a rock that traverses the
+    // entire playfield in one update at extreme levels.
+    if (this.status === "playing")
+      for (const rock of this.asteroids) {
+        if (!rock.destroyed && rock.y - rock.radius > this.height) {
+          if (!rock.hit) this.clearAsteroid();
+          rock.destroyed = true;
+        }
+      }
     this.asteroids = this.asteroids.filter(
       (r) =>
         !r.destroyed &&
@@ -400,7 +381,7 @@ export class Flight {
       ) {
         pickup.collected = true;
         const points = pickup.type === "star" ? 50 * this.combo : 0;
-        if (pickup.type === "repair") this.hp = Math.min(3, this.hp + 1);
+        if (pickup.type === "repair") this.hp = Math.min(2, this.hp + 1);
         else {
           this.starlight++;
           this.bonus += points;

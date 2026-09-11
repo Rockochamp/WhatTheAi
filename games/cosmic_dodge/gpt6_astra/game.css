@@ -9,6 +9,29 @@
   --display: "Barlow Condensed", Impact, "Arial Narrow", sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 }
+.soundtrack-card {
+  margin: 20px 0 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #72f5e906;
+}
+.soundtrack-card strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 20px;
+}
+.soundtrack-card p,
+.soundtrack-card label {
+  color: var(--muted);
+  font-size: 13px;
+}
+.soundtrack-card input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--cyan);
+}
 * {
   box-sizing: border-box;
 }

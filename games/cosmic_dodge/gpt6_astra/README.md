@@ -1,46 +1,57 @@
 # Cosmic Dodge
 
-The current GPT-6 Astra slot has been rebuilt in place. The game is called **Cosmic Dodge**, and its existing URL, homepage entry, model attribution, record storage, and Firebase collections are retained.
+Updated in the existing GPT-6 Astra slot at `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html?v=3`. No new game entry or route. Serve the repository root with a static HTTP server; no installation or build step is required.
 
-Serve the repository root with a static HTTP server, then open `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html`. There is no package installation or build step.
+## Levels and the original games
+
+Both previous implementations use `floor(score / 10) + 1` for the level.
+
+- **o3-mini-high:** one point when an asteroid leaves the bottom; one collision ends the run. At a 60 Hz baseline, speed is `120 + 30 × (level − 1)` pixels/second on its 800×600 canvas, and the random spawn rate is `1.2 + 0.3 × (level − 1)` asteroids/second.
+- **Gemini 3.5 Flash:** the same ten-point level rule. Dodges earn one point; shooting earns two, with an additional eight for a giant meteor. Standard speed is `(2 + random×2 + 0.45×(level−1))×60`. Spawn intervals decrease from `1200−95×level` milliseconds to a 400 ms floor. Comets, giant meteors, shield pickups, and weapons alter the challenge.
+- **This update:** one point per asteroid dodged off the bottom or shattered by Burst. Level and asteroid count determine ranking. Starlight and close calls earn separate style points. Waiting does not advance levels. The speed and target spawn-rate parameters use the o3 curve. A frame-independent random spawn timer has a 60 ms minimum spacing; from level 8, occasional warned comets replace ordinary spawns. These modern mechanics mean records are not identical difficulty comparisons with either older model.
+
+Level 30 requires 290 cleared asteroids. Its standard falling speed is 990 logical pixels/second and its target spawn rate is 9.9/second, versus 120 and 1.2 at level 1. Level 35 requires 340 clears. There is no level cap. Falling speeds scale with height, hazard widths with width, and horizontal steering with width. Visuals, warning trails, swept collision detection, and responsive controls retain the current presentation while the challenge rises every level.
 
 ## Play
 
-- Move freely with WASD or arrow keys. Diagonal movement is normalized.
-- On touch or with a mouse, drag anywhere in the playfield. Steering is relative to the drag origin, with no jump under the finger. A quick swipe finishes at its final target. Cancellation stops movement.
-- Space or the Burst button activates one second of protection, breaks nearby asteroids, and strengthens starlight attraction. Recharge takes five seconds.
-- Three shields; green repair cells restore one. Hits provide 1.7 seconds of protection against overlapping hazards.
-- Survival scores 20 points/second. Starlight scores 50 times the combo. Close calls raise the combo up to 5 and score 60 times that combo. A burst-shattered asteroid scores 25.
-- Sectors advance every 25 seconds. Formation waves leave an open corridor. Meteor showers show their trajectories for at least 1.3 seconds before spawning.
-- P, Escape, or Pause freezes the run. Switching tabs or losing focus pauses automatically. Rotating between substantially different widths also pauses.
-- Audio, reduced effects, fullscreen where supported, device records, and worldwide records are available from the header.
+- WASD or arrow keys move freely. Diagonals are normalized. Mouse and touch use relative dragging anywhere in the field, with no teleport to the finger. A quick swipe finishes at its final target; cancellation stops it. A second thumb can press Burst while steering. Keyboard takeover clears the old drag target.
+- One life. A green cell provides one shield; shields do not stack. A shield hit gives 1.2 seconds of collision protection.
+- Space or Burst protects for 0.6 seconds and shatters nearby hazards. Recharge is 10 seconds. Comets show a trajectory for 1.3 seconds before spawning.
+- P, Escape, or Pause freezes the run and music. Focus loss, switching tabs, or a substantial orientation change pauses automatically.
+- Sound starts on the launch gesture, with a persistent mute button. Music volume and reduced effects are in How to play. Fullscreen is offered where supported.
 
-## Structure
+## Original soundtrack
 
-- `engine.js`: seeded simulation, 2D input, wave generation, swept collisions, pickups, burst, and scoring. The controller uses fixed 1/120-second steps.
-- `renderer.js`: cached space backdrop and asteroid sprites, layered ship illustration, starfield, trails, bounded particles, feedback and reduced effects.
-- `game.js`: lifecycle, DOM interface, relative pointer controls, keyboard handling, synthesized audio, preferences and leaderboard integration.
-- `game.css`: full-height desktop, phone portrait and landscape layouts, safe areas, and dialogs.
-- `records.js`: existing local persistence and production-only Firebase integration.
-- `deep-space.webp`: original space artwork, encoded at 1536×1024, approximately 163 KB.
+**Terminal Velocity** is an original 140 BPM, D minor, 32-bar electronic score, approximately 55 seconds per arrangement. It has synth chords, sub/buzz bass, stereo arpeggios, a chord-specific lead melody, kick, snare, hats, crashes, and risers. The arrangement moves through ignition, drive, drop, an airlock breakdown, and a final drive. Higher levels add arpeggio, percussion, and lead layers without speeding up the audio clock. A filtered dotted-eighth delay and compressor shape the mix.
+
+The track uses native Web Audio with no downloads, samples, third-party music, or runtime packages. A 25 ms look-ahead scheduler places notes on the audio clock rather than animation frames. Pausing stops active voices and scheduling; an interrupted clock skips stale notes. Finished sources and their per-note nodes are disconnected. Music obeys user gesture playback restrictions and the saved sound preference.
+
+## Files
+
+- `engine.js`: deterministic simulation and level curve, fixed 1/120-second updates.
+- `controls.js`: shared touch/mouse drag controller.
+- `renderer.js`: cached artwork and asteroid sprites, ship, particles and reduced effects.
+- `music.js`: original score, synthesis and audio scheduler.
+- `game.js` / `game.css`: lifecycle, responsive UI, input wiring, preferences and audio integration.
+- `records.js`: local records and production-only Firebase integration.
 
 ## Records and deployment
 
-The local key remains `cosmic_dodge_gpt6_astra_records_v1`; previous device records are preserved. The worldwide collection remains `leaderboard_cosmic_dodge_gpt6_astra`, with the existing `globalStats/stats_cosmic_dodge_gpt6_astra` counter. New runs include `ruleset: 2` to identify the revised scoring rules. Existing and new records are displayed together.
+New records use `ruleset: 3` and local key `cosmic_dodge_gpt6_astra_levels_v3`. The global collection is `leaderboard_cosmic_dodge_gpt6_astra_levels_v3`, with counter `globalStats/stats_cosmic_dodge_gpt6_astra_levels_v3`. Previous point-based device records and Firebase collections remain untouched. The new board ranks levels, then clears, with style as a final tie breaker among retrieved records. It starts fresh because the rules changed.
 
-Firebase loads only on `whatthe.ai` or `www.whatthe.ai`. Other hosts keep runs local. Device storage or worldwide connection failures do not prevent gameplay. Run IDs and transactions prevent duplicate global writes. Server rules and production leaderboard writes are outside local verification.
-
-Deploy the repository's static files through the existing site's hosting integration. The HTML uses `?v=2` for the replacement stylesheet and modules to avoid loading the prior game from browser caches. No additional homepage version or route is introduced.
+Firebase loads only on whatthe.ai / www.whatthe.ai. Local previews never upload runs. Failed storage or sync does not prevent play. Run IDs and transactions prevent duplicate submissions. Existing main-branch hosting deploys the static files. Homepage, HTML, and module links use `?v=3` to refresh cached code at the same route.
 
 ## Validation
 
-```sh
-node --test tests/cosmic_dodge_astra.test.mjs
+```
+node --test tests/cosmic_dodge_astra.test.mjs tests/cosmic_dodge_controls_music.test.mjs
 ```
 
-The 24 tests cover 2D bounds, diagonal speed, pointer targeting, timestep consistency, shield burst, collision protection, swept collisions, close calls, pickups, pause, resize, deterministic replay, meteor warning time, safe formation corridors, three-minute simulation stability at desktop and phone aspect ratios, corrupted/blocked storage, and idempotent global writes against a mock database.
+34 automated checks cover progression, legacy difficulty parameters, device scaling, single-life/shield collisions, high-speed swept collisions, one-time clears, burst cooldown, pickups, pause, deterministic simulation, resizing, long-run cleanup, record isolation, mocked idempotent submissions, touch/mouse handoff, a second steering pointer, cancellation, musical looping and scheduler interruptions.
 
-Browser QA uses desktop 1280×720, phone portrait 390×844 and 320×568, and landscape 844×390. Checks include launch, steering, burst, pause/resume, game over/restart, dialog controls, layout, and console errors. These are browser viewport checks, not tests on physical phones.
+Browser checks: 1280×720 desktop, 390×844 portrait, 320×568 small phone, and 844×390 landscape. Launch, mouse drag, keyboard movement/burst, pause/resume, results, restart, records, instructions, music volume and layout were checked with no console errors. Touch behavior also has controller-level event tests. These are viewport and automated input checks, not physical iOS/Android device testing.
+
+An offline Web Audio render verifies all nine instruments produce finite, unclipped samples and release their voices. No production test scores are submitted.
 
 ## Artwork provenance
 

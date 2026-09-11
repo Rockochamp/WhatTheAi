@@ -13,9 +13,9 @@
     />
     <title>Cosmic Dodge | What the Ai</title>
     <link rel="icon" href="/images/favicon.ico" />
-    <link rel="stylesheet" href="gpt6_astra/game.css?v=2" />
+    <link rel="stylesheet" href="gpt6_astra/game.css?v=3" />
     <script src="/js/common/blocklist.js" defer></script>
-    <script type="module" src="gpt6_astra/game.js?v=2"></script>
+    <script type="module" src="gpt6_astra/game.js?v=3"></script>
   </head>
   <body>
     <main class="arcade" id="arcade">
@@ -74,7 +74,7 @@
         <div class="vignette" aria-hidden="true"></div>
         <div class="hud" id="hud" hidden>
           <div class="score-group">
-            <span class="eyebrow">SCORE</span><strong id="score">000000</strong>
+            <span class="eyebrow">LEVEL</span><strong id="score">01</strong>
             <div class="combo-row">
               <span id="combo">1×</span
               ><span class="combo-track"><i id="combo-fill"></i></span
@@ -82,14 +82,18 @@
             </div>
           </div>
           <div class="sector-group">
-            <span id="sector">SECTOR 01</span
+            <span id="sector">0 / 10 TO LEVEL 2</span
             ><strong id="sector-name">Event horizon</strong>
             <div class="sector-track"><i id="sector-fill"></i></div>
           </div>
           <div class="hull-group">
-            <span class="eyebrow">SHIELDS</span>
-            <div id="hull" role="img" aria-label="3 of 3 shields remaining">
-              <i></i><i></i><i></i>
+            <span class="eyebrow" id="shield-label">ONE LIFE</span>
+            <div
+              id="hull"
+              role="img"
+              aria-label="No shield. One impact ends the run."
+            >
+              <i class="lost"></i>
             </div>
             <span id="timer">0:00</span>
           </div>
@@ -106,8 +110,8 @@
             </div>
             <h1>COSMIC<br /><span>DODGE</span><i aria-hidden="true">✦</i></h1>
             <p class="intro">
-              Find your flow.<br />
-              Leave the impossible behind.
+              Ten asteroids. One level higher.<br />
+              How far can you go?
             </p>
             <form id="launch-form">
               <button class="primary-button" type="submit">
@@ -159,7 +163,7 @@
             <p class="eyebrow" id="result-kicker">FLIGHT COMPLETE</p>
             <h2 id="result-title">One more run?</h2>
             <strong class="final-score" id="final-score">0</strong
-            ><span class="eyebrow">TOTAL SCORE</span>
+            ><span class="eyebrow">LEVEL REACHED</span>
             <div class="result-stats">
               <div>
                 <strong id="final-time">0:00</strong><span>Survived</span>
@@ -168,7 +172,8 @@
                 <strong id="final-near">0</strong><span>Close calls</span>
               </div>
               <div>
-                <strong id="final-stars">0</strong><span>Starlight</span>
+                <strong id="final-stars">0</strong
+                ><span>Asteroids cleared</span>
               </div>
             </div>
             <p class="save-status" id="save-status" role="status"></p>
@@ -201,7 +206,7 @@
             Ⅱ
           </button>
           <div class="steering-hint" id="steering-hint">
-            <span class="desktop-hint">WASD / ARROWS TO MOVE</span
+            <span class="desktop-hint">WASD / ARROWS · OR MOUSE DRAG</span
             ><span class="touch-hint">DRAG ANYWHERE TO STEER</span>
           </div>
           <button
@@ -287,10 +292,12 @@
         <div class="help-item">
           <span>02</span>
           <div>
-            <h3>Cut it close.</h3>
+            <h3>Earn every level.</h3>
             <p>
-              Skim past asteroids to build a 5× combo. Collect gold starlight
-              for points. Green repair cells restore a shield.
+              Clear 10 asteroids to advance one level. Dodge them off the bottom
+              or shatter them with Burst. Every level makes the field faster and
+              denser. Starlight and close calls earn style points; your level
+              decides your rank.
             </p>
           </div>
         </div>
@@ -299,16 +306,24 @@
           <div>
             <h3>Make an escape.</h3>
             <p>
-              Press Space or tap Burst for a second of protection that shatters
-              nearby asteroids. It recharges in five seconds. Watch the red
-              trails before meteor showers.
+              Press Space or tap Burst for 0.6 seconds of protection that
+              shatters nearby asteroids. It recharges in 10 seconds. Green cells
+              give you one shield; shields do not stack. Red trails warn you
+              before a comet arrives.
             </p>
           </div>
         </div>
         <p class="help-note">
-          Three shields. Endless space. Press P or Escape to pause.<br />Switching
+          One life. Make it count. Press P or Escape to pause.<br />Switching
           tabs automatically pauses your run.
         </p>
+        <div class="soundtrack-card">
+          <span class="eyebrow">ORIGINAL SOUNDTRACK</span>
+          <strong>Terminal Velocity</strong>
+          <p>140 BPM · Deep bass, driving drums, orbital synths.</p>
+          <label for="music-volume">Music volume</label>
+          <input id="music-volume" type="range" min="0" max="100" value="65" />
+        </div>
         <button
           id="motion-button"
           class="text-button"
