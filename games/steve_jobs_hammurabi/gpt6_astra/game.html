@@ -14,7 +14,7 @@
       href="https://whatthe.ai/games/steve_jobs_hammurabi/gpt6_astra/game.html"
     />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
-    <link rel="stylesheet" href="game.css?v=1" />
+    <link rel="stylesheet" href="game.css?v=2" />
   </head>
   <body>
     <header class="topbar wrap">
@@ -113,15 +113,95 @@
         </div>
         <div class="play-layout">
           <div class="kingdom-column">
-            <section class="kingdom-view" aria-label="Kingdom overview">
-              <img
-                src="kingdom.webp"
-                alt="The river kingdom and its great ziggurat at twilight"
-                width="1672"
-                height="941"
-              />
+            <section
+              class="kingdom-view living-kingdom"
+              aria-label="Kingdom overview"
+            >
+              <div id="world-dock">
+                <div id="world-shell" class="world-shell">
+                  <img
+                    class="world-fallback"
+                    src="kingdom.webp"
+                    alt="The river kingdom at twilight"
+                    width="1672"
+                    height="941"
+                  />
+                  <canvas
+                    id="kingdom-canvas"
+                    tabindex="0"
+                    role="img"
+                    aria-label="Living kingdom. One villager represents one person. Drag sideways or use the view buttons to explore."
+                    aria-describedby="world-instructions"
+                    hidden
+                  ></canvas>
+                  <div class="world-heading">
+                    <div>
+                      <p class="eyebrow">THE LIVING KINGDOM</p>
+                      <p id="world-status" role="status">
+                        Your people are getting ready.
+                      </p>
+                    </div>
+                    <button
+                      id="motion-toggle"
+                      type="button"
+                      aria-label="Pause kingdom motion"
+                      aria-pressed="true"
+                      title="Pause kingdom motion"
+                    >
+                      Ⅱ
+                    </button>
+                  </div>
+                  <div
+                    class="world-controls"
+                    role="group"
+                    aria-label="Kingdom view controls"
+                  >
+                    <button
+                      type="button"
+                      data-camera="left"
+                      aria-label="Rotate kingdom left"
+                      title="Rotate left"
+                    >
+                      ↶
+                    </button>
+                    <button
+                      type="button"
+                      data-camera="right"
+                      aria-label="Rotate kingdom right"
+                      title="Rotate right"
+                    >
+                      ↷
+                    </button>
+                    <button
+                      type="button"
+                      data-camera="out"
+                      aria-label="Zoom out of kingdom"
+                      title="Zoom out"
+                    >
+                      −
+                    </button>
+                    <button
+                      type="button"
+                      data-camera="in"
+                      aria-label="Zoom into kingdom"
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      data-camera="reset"
+                      aria-label="Reset kingdom view"
+                      title="Reset view"
+                    >
+                      ⌂
+                    </button>
+                  </div>
+                </div>
+              </div>
               <div class="kingdom-caption">
-                <span class="eyebrow">THE RIVER KINGDOM</span
+                <span id="world-instructions"
+                  >Drag sideways to explore · use + to get closer</span
                 ><span id="health-badge" class="health good">Well fed</span>
               </div>
               <div class="resources">
@@ -382,6 +462,9 @@
         <p id="report-subtitle" class="subtle"></p>
         <div id="report-numbers" class="report-numbers"></div>
         <div id="report-events" class="report-events"></div>
+        <button id="replay-year" type="button" class="text-button">
+          Watch this year again ↻
+        </button>
         <p id="report-health" class="advisor"></p>
         <button id="continue-year" class="primary end-year" autofocus>
           Plan the next year →
@@ -491,6 +574,14 @@
             value=".35"
           />
           <p class="field-note">
+            Explore the living kingdom by dragging sideways, using the view
+            buttons, or focusing the scene and pressing the arrow keys and + /
+            −. One villager represents one person. Each year shows the harvest,
+            arrivals, and losses; skip anytime or watch it again from the
+            report. Pause kingdom motion with the Ⅱ button. Your device's
+            reduced-motion setting is also respected.
+          </p>
+          <p class="field-note">
             Elysium · the original soundtrack, with volume and mute controls on
             every device.
           </p>
@@ -502,7 +593,40 @@
     </dialog>
     <audio id="music" loop preload="none" src="/music/Elysium.mp3"></audio>
     <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=1"></script>
+    <dialog
+      id="cinema-dialog"
+      class="cinema-dialog"
+      aria-labelledby="cinema-title"
+    >
+      <div class="cinema-header">
+        <div>
+          <p class="eyebrow">A YEAR IN THE LIFE OF YOUR KINGDOM</p>
+          <h2 id="cinema-title">The seasons turn</h2>
+        </div>
+        <button id="skip-year" type="button" autofocus>Skip to report →</button>
+      </div>
+      <div id="cinema-stage"></div>
+      <div class="cinema-ledger" aria-label="Year in progress">
+        <div><span>People</span><strong id="cinema-people">100</strong></div>
+        <div><span>Food</span><strong id="cinema-food">4,000</strong></div>
+        <div><span>Land</span><strong id="cinema-land">100</strong></div>
+      </div>
+      <div id="cinema-caption" class="cinema-caption" aria-live="polite">
+        <h3 id="cinema-event">The harvest comes home</h3>
+        <p id="cinema-detail"></p>
+      </div>
+      <div
+        class="cinema-progress"
+        role="progressbar"
+        aria-label="Year animation"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <span id="cinema-progress-fill"></span>
+      </div>
+    </dialog>
+    <script type="module" src="game.js?v=2"></script>
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"

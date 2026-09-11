@@ -1,4 +1,11 @@
 {
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build:world": "esbuild world3d.js --bundle --minify --format=esm --outfile=world3d.bundle.js --legal-comments=linked"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "three": "0.186.0"
+  }
 }

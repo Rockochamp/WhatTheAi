@@ -1379,6 +1379,321 @@ dialog h2 {
     font-size: 1.2rem;
   }
 }
+/* The settlement is a playable 3D view; its resources stay in normal flow. */
+.kingdom-view.living-kingdom {
+  height: auto;
+  background: #10232e;
+}
+.living-kingdom::after {
+  display: none;
+}
+.world-shell {
+  position: relative;
+  height: 440px;
+  overflow: hidden;
+  background: #183847;
+  isolation: isolate;
+}
+.world-shell canvas,
+.world-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.world-shell canvas {
+  touch-action: pan-y;
+  cursor: grab;
+  outline-offset: -4px;
+}
+.world-shell canvas:active {
+  cursor: grabbing;
+}
+.world-shell canvas[hidden] {
+  display: none;
+}
+.world-fallback {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  object-position: 65% center;
+  z-index: -1;
+}
+.world-ready .world-fallback {
+  visibility: hidden;
+}
+.world-heading {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px;
+  pointer-events: none;
+  background: linear-gradient(#0b202dba, transparent);
+}
+.world-heading .eyebrow {
+  color: #f2deb4;
+  margin-bottom: 6px;
+}
+#world-status {
+  color: #d5e0e2;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-shadow: 0 1px 5px #0b202d;
+}
+#motion-toggle,
+.world-controls button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  border: 1px solid #b3d6dc45;
+  background: #102a36e8;
+  color: #f6ebd3;
+  border-radius: 9px;
+  font:
+    1.4rem/1 system-ui,
+    sans-serif;
+  pointer-events: auto;
+}
+#motion-toggle {
+  font-size: 1rem;
+}
+.world-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid #b3d6dc26;
+  border-radius: 14px;
+  background: #10253288;
+}
+.world-controls button:hover,
+#motion-toggle:hover {
+  background: #254c5c;
+  border-color: var(--gold);
+}
+.living-kingdom .kingdom-caption {
+  padding: 14px 22px 0;
+}
+#world-instructions {
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+.living-kingdom .resources {
+  position: static;
+  padding-top: 18px;
+}
+#replay-year {
+  width: 100%;
+  margin: 8px 0 16px;
+  min-height: 44px;
+}
+#replay-year:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cinema-dialog {
+  max-width: 1080px;
+  width: calc(100% - 36px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  border-color: #6d8a8c;
+}
+.cinema-dialog::backdrop {
+  background: #020b11ed;
+}
+.cinema-header {
+  padding: 17px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cinema-header .eyebrow {
+  font-size: 0.6rem;
+}
+.cinema-header h2 {
+  margin-top: 3px;
+  font-size: 1.7rem;
+}
+#skip-year {
+  min-height: 44px;
+  flex-shrink: 0;
+  padding: 9px 14px;
+  font-size: 0.78rem;
+}
+#cinema-stage .world-shell {
+  height: clamp(200px, calc(100dvh - 310px), 600px);
+}
+.cinematic .world-heading,
+.cinematic .world-controls {
+  display: none;
+}
+.cinematic canvas {
+  cursor: default;
+}
+.cinema-ledger {
+  display: flex;
+  justify-content: center;
+  gap: clamp(28px, 7vw, 90px);
+  padding: 14px 20px 0;
+  border-top: 1px solid var(--line);
+}
+.cinema-ledger > div {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+.cinema-ledger span {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.cinema-ledger strong {
+  font:
+    1.7rem/1.2 Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+  color: #f7e6c5;
+}
+.cinema-caption {
+  text-align: center;
+  padding: 15px 24px 20px;
+  min-height: 96px;
+}
+.cinema-caption h3 {
+  font:
+    1.4rem/1.3 Georgia,
+    serif;
+  color: var(--gold);
+  margin: 0 0 6px;
+}
+.cinema-caption p {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.cinema-caption[data-kind="arrivals"] h3 {
+  color: var(--good);
+}
+.cinema-caption[data-kind="starvation"] h3,
+.cinema-caption[data-kind="plague"] h3 {
+  color: #e4b5b0;
+}
+.cinema-progress {
+  height: 3px;
+  background: #2c4651;
+}
+#cinema-progress-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--gold);
+}
+@media (max-width: 1100px) and (min-width: 851px) {
+  .world-shell {
+    height: 390px;
+  }
+}
+@media (max-width: 550px) {
+  .world-shell {
+    height: 330px;
+  }
+  .world-heading {
+    padding: 16px;
+  }
+  .world-heading .eyebrow {
+    font-size: 0.6rem;
+  }
+  #world-status {
+    font-size: 0.63rem;
+  }
+  .living-kingdom .kingdom-caption {
+    padding: 12px 15px 0;
+    align-items: flex-start;
+  }
+  #world-instructions {
+    max-width: 175px;
+    font-size: 0.64rem;
+  }
+  .living-kingdom .resources {
+    padding-top: 16px;
+  }
+  .health {
+    white-space: nowrap;
+    font-size: 0.7rem;
+  }
+  .cinema-dialog {
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 12px;
+  }
+  .cinema-header {
+    padding: 13px 15px;
+  }
+  .cinema-header h2 {
+    font-size: 1.24rem;
+  }
+  .cinema-header .eyebrow {
+    font-size: 0.48rem;
+  }
+  #skip-year {
+    padding: 8px 10px;
+    font-size: 0.65rem;
+  }
+  #cinema-stage .world-shell {
+    height: clamp(200px, calc(100dvh - 285px), 480px);
+  }
+  .cinema-ledger strong {
+    font-size: 1.4rem;
+  }
+  .cinema-caption {
+    padding: 13px 15px 18px;
+    min-height: 100px;
+  }
+  .cinema-caption h3 {
+    font-size: 1.2rem;
+  }
+  .cinema-caption p {
+    font-size: 0.74rem;
+  }
+}
+@media (max-height: 550px) and (min-width: 551px) {
+  .cinema-header {
+    padding: 9px 20px;
+  }
+  .cinema-header h2 {
+    font-size: 1.25rem;
+  }
+  #cinema-stage .world-shell {
+    height: max(160px, calc(100dvh - 222px));
+  }
+  .cinema-ledger {
+    padding-top: 8px;
+  }
+  .cinema-ledger strong {
+    font-size: 1.2rem;
+  }
+  .cinema-caption {
+    padding: 8px 16px 12px;
+    min-height: 60px;
+  }
+  .cinema-caption h3 {
+    font-size: 1.1rem;
+    margin-bottom: 3px;
+  }
+  .cinema-caption p {
+    font-size: 0.7rem;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

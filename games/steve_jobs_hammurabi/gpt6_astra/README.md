@@ -17,9 +17,23 @@ The engine fixes the original collapse-year off-by-one. Invalid fractional/non-f
 
 Responsive kingdom view, direct numeric entry and touch steppers, full before-harvest budget, feeding-risk preview, annual reports, chronicle history and final legacy. Native dialogs support Escape and keyboard focus. Reduced-motion preferences disable animation. Session ranking survives reload in the same tab; blocked storage falls back to memory. Network failures never block playing. Local previews never submit production scores.
 
+## The living kingdom (v2)
+
+A real-time 3D settlement replaces the static overview during play. Each person has an animated villager, up to the maximum possible 600. Houses, markets, palms, river water, a sailing boat, flags, smoke, planted fields and granary stores bring the town to life. Horizontal pointer dragging, on-screen 44px controls, and focused-scene arrow keys / + / − / Home rotate, zoom and reset the camera. Vertical touch scrolling stays available.
+
+At year-end, a skippable sequence presents the actual engine report in order: harvest, starvation, arrivals, departures and the year's random event. Deaths are shown without gore; new families walk through the gate. Camera close-ups and population/food counters explain each event, including years with both arrivals and deaths. The report can replay the same sequence without rerolling a year or submitting another score.
+
+Motion can be paused, follows the device's reduced-motion preference, and stops when the scene is offscreen or the tab is hidden. Architecture is batched by material; people and wheat use instanced rendering. Pixel density and shadow resolution are capped for mobile hardware, with an adaptive resolution fallback. If WebGL is unavailable or lost, the original panorama and the entire strategy/ranking interface remain usable.
+
+The renderer is lazy-loaded only when a reign starts. All production JavaScript is served from this game folder, without a runtime CDN dependency. `scene-model.js` only translates resolved reports; its independent visual RNG cannot affect game outcomes.
+
+### Rebuild the renderer
+
+In this folder, run `pnpm install --frozen-lockfile`, then `pnpm run build:world`. Commit `world3d.bundle.js` and its generated legal notice with the source changes. Three.js and esbuild versions are pinned in `package.json` and `pnpm-lock.yaml`. Three.js is MIT licensed; see `THREE-LICENSE.txt`.
+
 ## Verification
 
-`node --test tests/hammurabi_astra.test.mjs` from the repository root. Includes 1,000 deterministic comparisons with the actual Grok source, 500 full campaigns, input/resource boundaries, session round/tie preservation, malformed storage, and idempotent global submissions against a local database double.
+`node --test tests/hammurabi_astra.test.mjs tests/hammurabi_scene.test.mjs` from the repository root. Includes 1,000 deterministic comparisons with the actual Grok source, 500 full campaigns, 2,000 checks of animation accounting against engine outcomes, independent visual randomness, connected walking routes, camera/population limits, input/resource boundaries, session round/tie preservation, malformed storage, and idempotent global submissions against a local database double.
 
 ## Artwork
 

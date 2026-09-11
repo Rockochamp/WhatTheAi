@@ -13,6 +13,7 @@ import {
   isLiveSite,
 } from "./records.js?v=1";
 import { createMusic } from "./music.js?v=1";
+import { createKingdomScene } from "./scene.js?v=2";
 const $ = (id) => document.getElementById(id);
 const fmt = (value) =>
   Number.isFinite(value) ? Math.floor(value).toLocaleString() : "—";
@@ -39,6 +40,10 @@ function safeStorage(kind) {
 const local = safeStorage("localStorage"),
   session = safeStorage("sessionStorage");
 const music = createMusic($("music"), $("music-button"), $("volume"), local);
+const kingdom = createKingdomScene(local);
+let lastYear = null,
+  replaying = false,
+  suppressReportClose = false;
 let sessions = readSession(session),
   state = null,
   player = "",
@@ -97,6 +102,7 @@ function previewPlan() {
   if (!state || finished) return;
   const plan = readPlan(),
     budget = forecast(state, plan);
+  kingdom.setPlan(plan);
   $("budget-trade").textContent = fmt(budget.available);
   $("budget-spend").textContent = Number.isFinite(budget.foodForPeople)
     ? `−${fmt(plan.plant + budget.foodForPeople)}`
@@ -276,6 +282,7 @@ function renderChronicle(report) {
   );
 }
 function showYearReport(report) {
+  $("replay-year").hidden = !kingdom.canAnimate();
   $("report-eyebrow").textContent =
     `YEAR ${report.year} · SEALED IN THE CHRONICLE`;
   $("report-title").textContent =
@@ -320,6 +327,8 @@ function showYearReport(report) {
   openDialog("year-dialog");
 }
 function startReign() {
+  kingdom.reset();
+  lastYear = null;
   state = initialState();
   history = [];
   finished = false;
@@ -349,6 +358,7 @@ function startReign() {
   $("history-details").hidden = true;
   $("history-details").open = false;
   renderState();
+  kingdom.setState(state);
   resetPlan();
   music.start();
   $("year-title").focus();
@@ -407,9 +417,10 @@ $("plant-max").addEventListener("click", () => {
   );
   previewPlan();
 });
-$("plan-form").addEventListener("submit", (event) => {
+$("plan-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (locked || finished) return;
+  const before = { ...state };
   const plan = readPlan(),
     outcome = advanceYear(state, plan);
   if (!outcome.ok) {
@@ -424,11 +435,39 @@ $("plan-form").addEventListener("submit", (event) => {
   renderChronicle(outcome.report);
   $("end-year").disabled = true;
   if (finished) finishReign();
-  showYearReport(outcome.report);
   music.chime(finished ? "end" : "year");
+  lastYear = { before, plan, report: outcome.report, after: { ...state } };
+  try {
+    await kingdom.playYear(before, plan, outcome.report, state);
+  } finally {
+    kingdom.reset();
+    showYearReport(outcome.report);
+  }
+});
+$("replay-year").addEventListener("click", async () => {
+  if (!lastYear || replaying) return;
+  replaying = true;
+  suppressReportClose = true;
+  $("year-dialog").close();
+  try {
+    await kingdom.playYear(
+      lastYear.before,
+      lastYear.plan,
+      lastYear.report,
+      lastYear.after,
+    );
+  } finally {
+    kingdom.reset();
+    showYearReport(lastYear.report);
+    replaying = false;
+  }
 });
 $("continue-year").addEventListener("click", () => $("year-dialog").close());
 $("year-dialog").addEventListener("close", () => {
+  if (suppressReportClose) {
+    suppressReportClose = false;
+    return;
+  }
   locked = false;
   if (!finished) resetPlan(readPlan().feed);
   $("year-title").focus();
