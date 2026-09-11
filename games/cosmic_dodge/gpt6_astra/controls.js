@@ -1,4 +1,4 @@
-import { clamp } from "./engine.js?v=3";
+import { clamp } from "./engine.js?v=4";
 
 // A relative drag keeps the ship above the finger and allows a second thumb
 // to press Burst without taking over the steering pointer.

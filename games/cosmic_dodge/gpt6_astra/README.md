@@ -1,6 +1,6 @@
 # Cosmic Dodge
 
-Updated in the existing GPT-6 Astra slot at `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html?v=3`. No new game entry or route. Serve the repository root with a static HTTP server; no installation or build step is required.
+Updated in the existing GPT-6 Astra slot at `/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html?v=4`. No new game entry or route. Serve the repository root with a static HTTP server; no installation or build step is required.
 
 ## Levels and the original games
 
@@ -39,12 +39,12 @@ The track uses native Web Audio with no downloads, samples, third-party music, o
 
 New records use `ruleset: 3` and local key `cosmic_dodge_gpt6_astra_levels_v3`. The global collection is `leaderboard_cosmic_dodge_gpt6_astra_levels_v3`, with counter `globalStats/stats_cosmic_dodge_gpt6_astra_levels_v3`. Previous point-based device records and Firebase collections remain untouched. The new board ranks levels, then clears, with style as a final tie breaker among retrieved records. It starts fresh because the rules changed.
 
-Firebase loads only on whatthe.ai / www.whatthe.ai. Local previews never upload runs. Failed storage or sync does not prevent play. Run IDs and transactions prevent duplicate submissions. Existing main-branch hosting deploys the static files. Homepage, HTML, and module links use `?v=3` to refresh cached code at the same route.
+Firebase loads only on whatthe.ai / www.whatthe.ai. Local previews never upload runs. Failed storage or sync does not prevent play. Run IDs and transactions prevent duplicate submissions. Existing main-branch hosting deploys the static files. Homepage, HTML, and module links use `?v=4` to refresh cached code at the same route.
 
 ## Validation
 
 ```
-node --test tests/cosmic_dodge_astra.test.mjs tests/cosmic_dodge_controls_music.test.mjs
+node --test tests/cosmic_dodge_astra.test.mjs tests/cosmic_dodge_controls_music.test.mjs tests/cosmic_dodge_session.test.mjs
 ```
 
 34 automated checks cover progression, legacy difficulty parameters, device scaling, single-life/shield collisions, high-speed swept collisions, one-time clears, burst cooldown, pickups, pause, deterministic simulation, resizing, long-run cleanup, record isolation, mocked idempotent submissions, touch/mouse handoff, a second steering pointer, cancellation, musical looping and scheduler interruptions.
@@ -58,3 +58,13 @@ An offline Web Audio render verifies all nine instruments produce finite, unclip
 Generated with the built-in ImageGen tool for this project, then converted to WebP with Sharp. Final asset: `games/cosmic_dodge/gpt6_astra/deep-space.webp`.
 
 Prompt: "Use case: stylized-concept. Asset type: original background artwork for the playable Cosmic Dodge space arcade game. Create a cinematic deep-space environment, wide 1536x1024 composition, premium science-fiction game art with rich painterly volumetric detail. A gigantic dark violet planet with a brilliant thin lavender-blue atmospheric crescent occupies the right third, partially cropped by the right edge. A diagonal glowing belt of icy planetary rings sweeps behind it from lower right to upper center. Delicate teal nebula filaments and sparse distant stars in an almost black navy cosmos. The left half is mostly dark negative space for game title overlay, with restrained purple nebula. Cold electric cyan and ultraviolet highlights, small warm sunlight accents. Sublime scale, deep contrast, refined physical lighting, beautiful and atmospheric. This is a background layer: NO spaceships, NO foreground asteroids, NO text, NO logos, NO letters, NO UI. Avoid overly bright or busy central gameplay area."
+
+## Nicknames and rankings
+
+The nickname field is above Play and saved between visits. Blank names still play as Anonymous. Session ranking and Global ranking buttons are on both the start and results screens; Rankings in the header opens the same panel. Device bests remains available as a third tab.
+
+Every completed round is retained in the session ranking, including ties and rounds below the top ten. Each entry shows its round number, nickname, level, cleared asteroids, and survival time. Results show the round number and its position in this session. Session history uses sessionStorage key `cosmic_dodge_gpt6_astra_session_v3`, survives refresh in that tab, and falls back to memory if storage is blocked. A new tab has a separate session. Existing device bests and global records use their unchanged ruleset-3 storage and collection. Both now display the available top ten entries.
+
+During play the cursor is hidden over the canvas. Pause, results, menus, and interactive buttons retain a visible cursor.
+
+The additional three session tests cover all-round retention, tied levels, idempotent saves, refresh persistence, storage isolation, corrupted history, and blocked storage. Total automated checks: 37.

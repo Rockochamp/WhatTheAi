@@ -1,26 +1,32 @@
-import { DragSteering } from "./controls.js?v=3";
-import { Soundtrack } from "./music.js?v=3";
+import { DragSteering } from "./controls.js?v=4";
+import { Soundtrack } from "./music.js?v=4";
 import {
   Flight,
   PHASE_COOLDOWN,
   ASTEROIDS_PER_LEVEL,
   SECTORS,
   clamp,
-} from "./engine.js?v=3";
-import { Renderer } from "./renderer.js?v=3";
+} from "./engine.js?v=4";
+import { Renderer } from "./renderer.js?v=4";
 import {
   readRecords,
+  readSessionRecords,
+  addSessionRecord,
   addRecord,
   fetchGlobalRecords,
   saveGlobalRecord,
   isLiveSite,
-} from "./records.js?v=3";
+} from "./records.js?v=4";
 const $ = (id) => document.getElementById(id),
   canvas = $("space"),
   stage = $("stage");
 const storage = {
   getItem: (key) => localStorage.getItem(key),
   setItem: (key, value) => localStorage.setItem(key, value),
+};
+const tabStorage = {
+  getItem: (key) => sessionStorage.getItem(key),
+  setItem: (key, value) => sessionStorage.setItem(key, value),
 };
 const pref = (key, fallback) => {
   try {
@@ -41,10 +47,12 @@ const timeText = (value) =>
   `${Math.floor(value / 60)}:${String(Math.floor(value % 60)).padStart(2, "0")}`;
 let flight = new Flight(),
   records = readRecords(storage),
+  rounds = readSessionRecords(tabStorage),
   pilot = pref("cosmic_dodge_astra_pilot", "");
 let runId = "",
   generation = 0,
-  board = "local",
+  board = "session",
+  roundNumber = rounds.reduce((max, record) => Math.max(max, record.round), 0),
   boardRequest = 0;
 const keys = new Set(),
   steering = new DragSteering();
@@ -125,7 +133,7 @@ function motionUI() {
 }
 function showBoard(items, status) {
   $("leaderboard").replaceChildren();
-  items.slice(0, 5).forEach((record, index) => {
+  items.forEach((record, index) => {
     const item = document.createElement("li"),
       rank = document.createElement("span"),
       name = document.createElement("span"),
@@ -133,7 +141,16 @@ function showBoard(items, status) {
     rank.className = "rank";
     rank.textContent = String(index + 1).padStart(2, "0");
     name.className = "pilot";
-    name.textContent = record.playerName;
+    const title = document.createElement("strong"),
+      detail = document.createElement("small");
+    title.textContent =
+      board === "session"
+        ? `Round ${record.round} · ${record.playerName}`
+        : record.playerName;
+    detail.textContent = `${record.score} asteroids · ${timeText(record.elapsed)}`;
+    name.append(title, detail);
+    if (board === "session" && record.id === runId)
+      item.classList.add("latest-round");
     score.className = "points";
     score.textContent = `LVL ${record.level}`;
     score.title = `${record.score} asteroids cleared · ${timeText(record.elapsed)}`;
@@ -150,15 +167,30 @@ async function renderBoard() {
   $("personal-best-caption").textContent = records.length
     ? `${records[0].playerName} · ${timeText(records[0].elapsed)} in flight`
     : "Your next great run starts here.";
-  for (const scope of ["local", "global"]) {
+  for (const scope of ["session", "local", "global"]) {
     $(`${scope}-tab`).classList.toggle("active", scope === board);
     $(`${scope}-tab`).setAttribute("aria-pressed", String(scope === board));
+  }
+  $("board-heading").textContent =
+    board === "session"
+      ? "Session ranking"
+      : board === "global"
+        ? "Global ranking"
+        : "Device bests";
+  if (board === "session") {
+    showBoard(
+      rounds,
+      rounds.length
+        ? `${rounds.length} completed ${rounds.length === 1 ? "round" : "rounds"} in this tab. Every round is kept, including ties. Highest level first.`
+        : "No rounds yet. Play a round to start your session ranking. Your rounds stay here when you refresh this tab.",
+    );
+    return;
   }
   if (board === "local") {
     showBoard(
       records,
       records.length
-        ? "Ranked by level, then asteroids cleared. Your top five on this device."
+        ? "Ranked by level, then asteroids cleared. Your top ten on this device."
         : "Clear skies. Your first flight is waiting.",
     );
     return;
@@ -170,7 +202,7 @@ async function renderBoard() {
     );
     return;
   }
-  showBoard([], "Connecting to the worldwide flight log…");
+  showBoard([], "Loading global ranking…");
   try {
     const items = await fetchGlobalRecords();
     if (request === boardRequest)
@@ -184,7 +216,7 @@ async function renderBoard() {
     if (request === boardRequest)
       showBoard(
         [],
-        "The worldwide log is unavailable. Your device records still work. Tap Worldwide to retry.",
+        "Global ranking is unavailable. Your session and device rankings still work. Tap Global to retry.",
       );
   }
 }
@@ -217,6 +249,7 @@ function message(text, duration = 2.2, warning = false) {
 function startFlight() {
   clearInput();
   generation++;
+  roundNumber++;
   const seed = new Uint32Array(1);
   crypto.getRandomValues(seed);
   flight = new Flight({ width: renderer.w, height: renderer.h, seed: seed[0] });
@@ -280,6 +313,7 @@ async function finishFlight(showResults = true) {
   const token = generation;
   const record = {
     id: runId,
+    round: roundNumber,
     playerName: pilot || "Anonymous",
     score: flight.score,
     elapsed: Number(flight.elapsed.toFixed(2)),
@@ -293,6 +327,10 @@ async function finishFlight(showResults = true) {
   const previousBest = records[0]?.score ?? -1,
     saved = addRecord(records, record, storage);
   records = saved.records;
+  rounds = addSessionRecord(rounds, record, tabStorage);
+  const sessionPlace = rounds.findIndex((entry) => entry.id === record.id) + 1;
+  $("round-summary").textContent =
+    `Round ${record.round} · #${sessionPlace} of ${rounds.length} this session`;
   $("result-kicker").textContent =
     record.score > previousBest ? "NEW PERSONAL BEST" : "FLIGHT COMPLETE";
   $("result-title").textContent =
@@ -466,7 +504,7 @@ $("launch-form").addEventListener("submit", (event) => {
     typeof offensiveWords !== "undefined" &&
     offensiveWords.some((word) => name.toLowerCase().includes(word));
   if (blocked) {
-    $("name-error").textContent = "Please choose another callsign.";
+    $("name-error").textContent = "Please choose another nickname.";
     $("pilot-name").focus();
     return;
   }
@@ -491,22 +529,29 @@ $("phase-button").addEventListener("pointerdown", (event) => {
 $("phase-button").addEventListener("click", (event) => {
   if (event.detail === 0) phase();
 });
-$("local-tab").addEventListener("click", () => {
-  board = "local";
-  renderBoard();
-});
-$("global-tab").addEventListener("click", () => {
-  board = "global";
-  renderBoard();
-});
+for (const scope of ["session", "local", "global"]) {
+  $(`${scope}-tab`).addEventListener("click", () => {
+    board = scope;
+    renderBoard();
+  });
+}
 function openDialog(id) {
   pauseFlight();
   $(id).showModal();
 }
-$("records-button").addEventListener("click", () => {
+function openRankings(scope = "session") {
+  board = scope;
   openDialog("records-dialog");
   renderBoard();
-});
+}
+$("records-button").addEventListener("click", () => openRankings());
+document
+  .querySelectorAll("[data-ranking]")
+  .forEach((button) =>
+    button.addEventListener("click", () =>
+      openRankings(button.dataset.ranking),
+    ),
+  );
 $("help-button").addEventListener("click", () => openDialog("help-dialog"));
 document
   .querySelectorAll(".close-dialog")

@@ -184,6 +184,9 @@ canvas {
   touch-action: none;
   outline: none;
 }
+.stage[data-state="playing"] canvas {
+  cursor: none;
+}
 .vignette {
   position: absolute;
   inset: 0;
@@ -1423,5 +1426,297 @@ dialog::backdrop {
   *::after {
     scroll-behavior: auto !important;
     transition: none !important;
+  }
+}
+.nickname-field {
+  text-align: left;
+  margin: 0 0 14px;
+}
+@media (min-width: 701px) and (min-height: 501px) and (max-height: 800px) {
+  .stage[data-state="ready"] .overlay {
+    padding-block: 22px;
+  }
+  #start-content h1 {
+    font-size: 94px;
+    margin-bottom: 18px;
+  }
+  #start-content .intro {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+  #start-content .menu-kicker {
+    margin-bottom: 12px;
+  }
+  #start-content .personal-record #personal-best-caption {
+    display: none;
+  }
+}
+.nickname-field label {
+  display: block;
+  margin-bottom: 8px;
+  font: 700 11px var(--sans);
+  letter-spacing: 1.2px;
+  color: #dce9fc;
+}
+.nickname-field label span {
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-left: 5px;
+}
+.nickname-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #acdbf36b;
+  border-radius: 6px;
+  background: #081327db;
+  font-size: 16px;
+  color: var(--white);
+}
+.nickname-field input::placeholder {
+  color: #a3b6cf;
+}
+.nickname-field small {
+  display: block;
+  margin-top: 6px;
+  color: #92a5bf;
+  font-size: 10px;
+}
+#launch-form #name-error {
+  margin: 0 0 10px;
+}
+#launch-form #name-error:empty {
+  display: none;
+}
+.ranking-links {
+  display: flex;
+  gap: 8px;
+  max-width: 340px;
+  margin-top: 18px;
+}
+.ranking-links button {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid #9dbce149;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #0e1c34d9;
+  font-size: 12px;
+  font-weight: 600;
+  color: #dbe9ff;
+  white-space: nowrap;
+}
+.ranking-links button:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: #163c48;
+}
+.ranking-links button span {
+  margin-left: 4px;
+  color: var(--cyan);
+}
+.personal-record {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 9px;
+  row-gap: 4px;
+  max-width: 340px;
+  min-height: 36px;
+  margin-top: 7px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #96a8c2;
+  font: 9px var(--mono);
+  text-align: left;
+}
+.personal-record strong {
+  color: #d4c6ff;
+  font-size: 12px;
+}
+.personal-record #personal-best-caption {
+  width: 100%;
+  max-width: none;
+  font: 10px var(--sans);
+}
+.round-summary {
+  margin: 9px 0 0;
+  font: 12px var(--mono);
+  color: var(--cyan);
+}
+.result-content .ranking-links {
+  max-width: none;
+  margin-top: 12px;
+}
+.board-heading {
+  margin: 20px 0 0;
+  font-size: 16px;
+}
+#records-dialog .tabs {
+  gap: 3px;
+}
+#records-dialog .tabs button {
+  flex: 1;
+  padding: 13px 6px;
+  font-size: 13px;
+  min-height: 44px;
+  white-space: nowrap;
+}
+#leaderboard .pilot strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 500;
+}
+#leaderboard .pilot small {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+#leaderboard .latest-round {
+  background: #72f5e90c;
+  border-left: 2px solid var(--cyan);
+  padding-left: 9px;
+}
+@media (max-width: 700px) {
+  .ranking-links {
+    margin: 16px auto 0;
+    max-width: 295px;
+  }
+  .personal-record {
+    justify-content: center;
+    margin: 5px auto 0;
+    text-align: center;
+  }
+  .personal-record #personal-best-caption {
+    display: none;
+  }
+  .result-content .ranking-links {
+    margin-top: 10px;
+  }
+  #leaderboard li {
+    gap: 9px;
+  }
+  #leaderboard .points {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  #records-dialog .tabs button {
+    font-size: 12px;
+  }
+}
+@media (max-width: 700px) and (max-height: 720px) {
+  .stage[data-state="over"] .overlay {
+    padding-block: 12px;
+  }
+  .stage[data-state="ready"] .overlay {
+    padding-block: 12px;
+  }
+  #start-content .menu-kicker {
+    display: none;
+  }
+  #start-content h1 {
+    font-size: 72px;
+    margin-bottom: 14px;
+  }
+  #start-content .intro {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+  .nickname-field {
+    margin-bottom: 10px;
+  }
+  .nickname-field input {
+    min-height: 44px;
+  }
+  #start-content .launch-hint {
+    margin-top: 9px;
+  }
+  #start-content .ranking-links {
+    margin-top: 10px;
+  }
+  .result-content.overlay-card {
+    margin-block: auto;
+    padding: 17px;
+  }
+  .result-content .final-score {
+    font-size: 43px;
+  }
+  .result-content h2 {
+    font-size: 23px;
+    margin: 8px 0;
+  }
+  .result-content .result-stats {
+    padding: 9px 0;
+    margin-top: 10px;
+  }
+  .result-content .round-summary {
+    font-size: 11px;
+    margin-top: 6px;
+  }
+  .result-content .save-status {
+    margin: 8px 0;
+  }
+  .result-content .primary-button {
+    min-height: 44px;
+    margin-top: 9px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  #start-content {
+    margin-block: auto;
+  }
+  #start-content .menu-kicker {
+    display: none;
+  }
+  #start-content #launch-form {
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    column-gap: 12px;
+    align-items: end;
+  }
+  #start-content .nickname-field {
+    margin: 0;
+  }
+  #start-content .nickname-field label span,
+  #nickname-hint {
+    display: none;
+  }
+  #start-content .nickname-field input {
+    min-height: 44px;
+  }
+  #start-content .primary-button {
+    min-height: 44px;
+  }
+  #start-content #name-error {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 6px;
+  }
+  #start-content .ranking-links {
+    margin-top: 10px;
+  }
+  #start-content .personal-record {
+    display: none;
+  }
+  .result-content.overlay-card {
+    width: 440px;
+    margin-block: auto;
+  }
+  .result-content .round-summary {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+  .result-content .ranking-links {
+    margin-top: 7px;
+  }
+  .result-content .ranking-links button {
+    min-height: 36px;
   }
 }

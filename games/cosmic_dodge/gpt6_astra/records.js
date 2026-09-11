@@ -11,7 +11,7 @@ export const validRecord = (r) =>
   r.ruleset === 3 &&
   Number.isSafeInteger(r.level) &&
   r.level === Math.floor(r.score / 10) + 1;
-export const rankRecords = (records) =>
+export const rankRecords = (records, limit = 10) =>
   records
     .filter(validRecord)
     .sort(
@@ -20,7 +20,34 @@ export const rankRecords = (records) =>
         b.score - a.score ||
         (b.style || 0) - (a.style || 0),
     )
-    .slice(0, 10);
+    .slice(0, limit);
+export const SESSION_KEY = "cosmic_dodge_gpt6_astra_session_v3";
+export function rankSessionRecords(records) {
+  return rankRecords(
+    records.filter((r) => Number.isSafeInteger(r?.round) && r.round > 0),
+    Infinity,
+  );
+}
+export function readSessionRecords(storage) {
+  try {
+    const value = JSON.parse(storage.getItem(SESSION_KEY) || "[]");
+    return Array.isArray(value) ? rankSessionRecords(value) : [];
+  } catch {
+    return [];
+  }
+}
+export function addSessionRecord(records, record, storage) {
+  const ranked = rankSessionRecords([
+    ...records.filter((r) => r.id !== record.id),
+    record,
+  ]);
+  try {
+    storage.setItem(SESSION_KEY, JSON.stringify(ranked));
+  } catch {
+    /* Keep every completed round in memory when storage is blocked. */
+  }
+  return ranked;
+}
 export function readRecords(storage) {
   try {
     const value = JSON.parse(storage.getItem(RECORD_KEY) || "[]");
