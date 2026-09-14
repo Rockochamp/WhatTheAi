@@ -33,7 +33,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
     <link rel="preload" as="image" href="cover-v3.webp" />
-    <link rel="stylesheet" href="game.css?v=3" />
+    <link rel="stylesheet" href="game.css?v=4" />
   </head>
   <body>
     <canvas
@@ -300,17 +300,6 @@
         ><button data-scope="global" aria-pressed="false">Global</button>
       </div>
       <p id="rank-status" class="subtle" role="status"></p>
-      <label class="rank-era" for="rank-era"
-        >Difficulty era
-        <select id="rank-era">
-          <option value="2">Horde update · current</option>
-          <option value="1">Original difficulty · archive</option>
-        </select>
-      </label>
-      <p class="subtle">
-        A harder jungle gets its own board. Your previous scores remain in the
-        archive.
-      </p>
       <ol id="rank-list" class="rank-list"></ol>
       <button id="refresh-rank" class="secondary full" hidden>
         Refresh global ranking
@@ -472,6 +461,6 @@
       </div></noscript
     >
     <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=3"></script>
+    <script type="module" src="game.js?v=4"></script>
   </body>
 </html>

@@ -1,20 +1,4 @@
 @charset "UTF-8";
-.rank-era {
-  display: grid;
-  gap: 8px;
-  margin: 18px 0 10px;
-  color: #a9bdab;
-}
-.rank-era select {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px;
-  border: 1px solid #adc6a440;
-  border-radius: 8px;
-  background: #12251f;
-  color: #f5efd9;
-  font: inherit;
-}
 .bestiary {
   display: grid;
   gap: 10px;

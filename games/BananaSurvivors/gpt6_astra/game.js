@@ -18,8 +18,6 @@ import { createAudio } from "./audio.js?v=3";
 import {
   SESSION_KEY,
   DEVICE_KEY,
-  LEGACY_SESSION_KEY,
-  LEGACY_DEVICE_KEY,
   readRecords,
   addRecord,
   rankRecords,
@@ -508,18 +506,12 @@ function finish(retired = false) {
 }
 async function showRanking() {
   const request = ++rankRequest;
-  const era = Number($("rank-era").value);
   all("[data-scope]").forEach((button) =>
     button.setAttribute("aria-pressed", String(button.dataset.scope === scope)),
   );
   $("refresh-rank").hidden = scope !== "global";
   $("rank-list").replaceChildren();
   let records = scope === "session" ? sessionRecords : deviceRecords;
-  if (era === 1)
-    records =
-      scope === "session"
-        ? readRecords(session, LEGACY_SESSION_KEY)
-        : readRecords(local, LEGACY_DEVICE_KEY);
   if (scope === "global") {
     if (!isLiveSite()) {
       $("rank-status").textContent =
@@ -528,7 +520,7 @@ async function showRanking() {
     }
     $("rank-status").textContent = "Connecting to the hall of survivors…";
     try {
-      const data = await fetchGlobalRecords(era);
+      const data = await fetchGlobalRecords(RULESET);
       if (request !== rankRequest) return;
       records = data.records;
       $("rank-status").textContent =
@@ -586,7 +578,6 @@ function openPanel(name) {
   openDialog(`${name}-dialog`);
   if (name === "rank") showRanking();
 }
-$("rank-era").addEventListener("change", showRanking);
 all("[data-open]").forEach((button) =>
   button.addEventListener("click", () => openPanel(button.dataset.open)),
 );
