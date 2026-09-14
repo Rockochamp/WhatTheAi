@@ -1,4 +1,36 @@
 @charset "UTF-8";
+.rank-era {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 10px;
+  color: #a9bdab;
+}
+.rank-era select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #adc6a440;
+  border-radius: 8px;
+  background: #12251f;
+  color: #f5efd9;
+  font: inherit;
+}
+.bestiary {
+  display: grid;
+  gap: 10px;
+}
+.bestiary p {
+  margin: 0;
+  padding: 12px;
+  border-left: 2px solid #c68273;
+  color: #b9c8bc;
+  line-height: 1.5;
+}
+.bestiary strong {
+  display: block;
+  color: #f5efd9;
+  margin-bottom: 4px;
+}
 :root {
   color-scheme: dark;
   --cream: #f5efd9;
@@ -117,7 +149,7 @@ input[type="checkbox"] {
   overflow: auto;
   overscroll-behavior: contain;
   min-height: 100dvh;
-  background: #10251c url("cover.webp") 64% center/cover no-repeat;
+  background: #10251c url("cover-v3.webp") 64% center/cover no-repeat;
   isolation: isolate;
 }
 .menu::before {
@@ -1278,7 +1310,7 @@ dialog > h2 {
 }
 @media (max-width: 480px) {
   .menu {
-    background-position: 59% top;
+    background-position: 82% top;
     background-size: auto 760px;
   }
   .menu::before {

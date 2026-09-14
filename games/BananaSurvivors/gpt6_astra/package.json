@@ -2,6 +2,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test ../../../tests/banana_astra.test.mjs ../../../tests/banana_effects.test.mjs"
+    "test": "node --test ../../../tests/banana_astra.test.mjs ../../../tests/banana_effects.test.mjs ../../../tests/banana_horde.test.mjs"
   }
 }

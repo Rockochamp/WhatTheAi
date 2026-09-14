@@ -34,6 +34,7 @@ const ticks = (s, n, input = {}) => {
 const empty = () => {
   const s = createRun(77);
   s.spawnClock = 1e6;
+  s.encounter = 7;
   s.supplyClock = 1e6;
   return s;
 };
@@ -418,6 +419,8 @@ test("ten-minute stress run keeps all entity collections bounded", () => {
   let maxima = { enemies: 0, shots: 0, drops: 0, hazards: 0 };
   for (let i = 0; i < 36000; i++) {
     if (s.phase === "upgrade") chooseUpgrade(s, s.choices[0]);
+    // Dash replaces the grace timer: replenish fixture-only immunity every step.
+    s.player.invulnerable = 1e6;
     update(s, 1 / 60, {
       x: Math.cos(i / 180),
       y: Math.sin(i / 180),
@@ -431,7 +434,10 @@ test("ten-minute stress run keeps all entity collections bounded", () => {
   assert.ok(maxima.shots <= MAX_SHOTS);
   assert.ok(maxima.drops <= MAX_DROPS);
   assert.ok(maxima.hazards <= 65);
-  assert.ok(s.bosses > 3);
+  // The fixed orbit does not chase champions; pressure continues even with a boss alive.
+  assert.ok(s.bosses >= 1);
+  assert.ok(maxima.enemies >= 180);
+  assert.ok(s.time > 590);
 });
 
 test("Global score submission retries are idempotent, including the total count", async () => {
@@ -495,11 +501,11 @@ test("Global score submission retries are idempotent, including the total count"
   try {
     await saveGlobalRecord(record("actual-run"));
     await saveGlobalRecord(record("actual-run"));
-    const result = await fetchGlobalRecords();
+    const result = await fetchGlobalRecords(1);
     assert.equal(result.records.length, 1);
     assert.equal(result.total, 1);
     await saveGlobalRecord({ ...record("second-run", 100), round: 2 });
-    const ties = await fetchGlobalRecords();
+    const ties = await fetchGlobalRecords(1);
     assert.equal(ties.records.length, 2);
     assert.equal(ties.total, 2);
     assert.ok(
@@ -507,6 +513,14 @@ test("Global score submission retries are idempotent, including the total count"
         key.includes("banana_survivors_gpt6_astra_v1"),
       ),
     );
+    const fresh = { ...record("horde-run", 250), ruleset: 2 };
+    await saveGlobalRecord(fresh);
+    await saveGlobalRecord(fresh);
+    const current = await fetchGlobalRecords();
+    assert.equal(current.records.length, 1);
+    assert.equal(current.records[0].ruleset, 2);
+    assert.equal(current.total, 1);
+    assert.equal((await fetchGlobalRecords(1)).total, 2);
   } finally {
     delete globalThis.location;
     delete globalThis.window;

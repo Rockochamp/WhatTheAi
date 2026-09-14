@@ -5,21 +5,28 @@ export function createGore(random = Math.random) {
   const blood = [],
     chunks = [],
     stains = [];
+  let budget = GORE_LIMITS;
   const trim = (list, cap) => {
     if (list.length > cap) list.splice(0, list.length - cap);
   };
   function stain(x, y, size, heavy = false) {
+    const shape = Math.floor(random() * 6);
     stains.push({
       x,
       y,
       size,
       angle: random() * TAU,
-      shape: Math.floor(random() * 6),
+      points: Array.from({ length: 12 }, (_, i) => {
+        const a = (i / 12) * TAU;
+        const r =
+          0.64 + 0.27 * Math.sin(i * 2.7 + shape) + 0.1 * Math.cos(i * 5.1);
+        return [Math.cos(a) * r, Math.sin(a) * r * 0.72];
+      }),
       life: heavy ? 48 : 30,
       max: heavy ? 48 : 30,
       heavy,
     });
-    trim(stains, GORE_LIMITS.stains);
+    trim(stains, budget.stains);
   }
   function emit(
     event,
@@ -27,6 +34,7 @@ export function createGore(random = Math.random) {
     { low = false, quiet = false, enabled = true } = {},
   ) {
     if (!enabled || !["hit", "kill", "hurt"].includes(event.type)) return;
+    budget = low ? { blood: 110, chunks: 24, stains: 60 } : GORE_LIMITS;
     const dead = event.type === "kill",
       hurt = event.type === "hurt";
     const x = hurt ? player.x : event.x,
@@ -36,15 +44,15 @@ export function createGore(random = Math.random) {
       big = event.size >= 90,
       amount = dead
         ? boss
-          ? 48
+          ? 65
           : big
-            ? 30
-            : 21
+            ? 42
+            : 29
         : hurt
-          ? 13
+          ? 18
           : event.critical
-            ? 8
-            : 4;
+            ? 12
+            : 6;
     const count = Math.max(
       2,
       Math.round(amount * (low ? 0.38 : quiet ? 0.5 : 1)),
@@ -53,7 +61,7 @@ export function createGore(random = Math.random) {
       spread = dead ? TAU : 1.5;
     for (let i = 0; i < count; i++) {
       const angle = direction + (random() - 0.5) * spread,
-        speed = (dead ? 65 : 35) + random() * (boss ? 260 : dead ? 165 : 100);
+        speed = (dead ? 90 : 45) + random() * (boss ? 310 : dead ? 215 : 130);
       blood.push({
         x,
         y,
@@ -61,17 +69,18 @@ export function createGore(random = Math.random) {
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         vz: 55 + random() * 150,
-        size: (dead ? 2.7 : 1.8) + random() * (big ? 4 : 2.7),
+        size: (dead ? 3.4 : 2.1) + random() * (big ? 4.5 : 3.2),
+        streak: dead && i < 4 ? 5.5 : 2.5,
         life: 1.1,
         red: hurt ? 2 : i % 3,
       });
     }
     if (dead) {
-      stain(x, y, (boss ? 48 : big ? 31 : 22) * (0.8 + random() * 0.4), true);
-      const pieces = low ? 2 : boss ? 12 : big ? 8 : 5;
+      stain(x, y, (boss ? 62 : big ? 43 : 31) * (0.8 + random() * 0.4), true);
+      const pieces = low ? 2 : quiet ? 4 : boss ? 16 : big ? 10 : 7;
       for (let i = 0; i < pieces; i++) {
         const angle = random() * TAU,
-          speed = 60 + random() * (boss ? 205 : 125);
+          speed = 85 + random() * (boss ? 245 : 160);
         chunks.push({
           x,
           y,
@@ -79,19 +88,19 @@ export function createGore(random = Math.random) {
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           vz: 105 + random() * 170,
-          size: (big ? 7 : 4.5) + random() * 4,
+          size: (big ? 9 : 6.5) + random() * 5,
           angle: random() * TAU,
           spin: (random() - 0.5) * 16,
-          kind: i % 3,
+          kind: i % 5,
           life: 15 + random() * 6,
           max: 21,
           bounced: false,
         });
       }
     } else if (hurt || event.critical) stain(x, y, hurt ? 13 : 7);
-    trim(blood, low ? 110 : GORE_LIMITS.blood);
-    trim(chunks, low ? 24 : GORE_LIMITS.chunks);
-    trim(stains, low ? 60 : GORE_LIMITS.stains);
+    trim(blood, budget.blood);
+    trim(chunks, budget.chunks);
+    trim(stains, budget.stains);
   }
   function update(dt) {
     if (!Number.isFinite(dt) || dt <= 0) return;
@@ -144,15 +153,9 @@ export function createGore(random = Math.random) {
       ctx.globalAlpha = Math.min(1, s.life / 6) * (s.heavy ? 0.8 : 0.62);
       ctx.fillStyle = s.heavy ? "#721017" : "#9d1420";
       ctx.beginPath();
-      for (let i = 0; i < 12; i++) {
-        const a = (i / 12) * TAU,
-          r =
-            size *
-            (0.64 +
-              0.27 * Math.sin(i * 2.7 + s.shape) +
-              0.1 * Math.cos(i * 5.1));
-        const x = Math.cos(a) * r,
-          y = Math.sin(a) * r * 0.72;
+      for (let i = 0; i < s.points.length; i++) {
+        const x = s.points[i][0] * size,
+          y = s.points[i][1] * size;
         i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
       }
       ctx.closePath();
@@ -233,6 +236,49 @@ export function createGore(random = Math.random) {
         ctx.strokeStyle = "#d94d59";
         ctx.lineWidth = r * 0.38;
         ctx.stroke();
+      } else if (c.kind === 3) {
+        // A torn eye socket with a dangling strand of tissue.
+        ctx.strokeStyle = "#c34250";
+        ctx.lineWidth = r * 0.28;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(r, r, r * 1.7, -r, r * 2, r * 0.6);
+        ctx.stroke();
+        ctx.fillStyle = "#82111d";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 1.2, r, -0.3, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = "#efcead";
+        ctx.beginPath();
+        ctx.arc(-r * 0.1, -r * 0.12, r * 0.65, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = "#e99a32";
+        ctx.beginPath();
+        ctx.arc(r * 0.1, -r * 0.14, r * 0.36, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = "#1a0809";
+        ctx.beginPath();
+        ctx.arc(r * 0.17, -r * 0.14, r * 0.16, 0, TAU);
+        ctx.fill();
+      } else if (c.kind === 4) {
+        // Broken ribs and wet connective tissue, readable even at phone scale.
+        ctx.fillStyle = "#8b1725";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 1.4, r * 0.85, 0, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = "#e7c7a3";
+        ctx.lineWidth = r * 0.22;
+        for (let j = -1; j <= 1; j++) {
+          ctx.beginPath();
+          ctx.moveTo(j * r * 0.48, r * 0.7);
+          ctx.quadraticCurveTo(
+            j * r * 0.48 - r * 0.45,
+            -r * 0.25,
+            j * r * 0.48 + r * 0.25,
+            -r,
+          );
+          ctx.stroke();
+        }
       } else {
         ctx.fillStyle = "#82111d";
         ctx.beginPath();
@@ -266,8 +312,8 @@ export function createGore(random = Math.random) {
       ctx.beginPath();
       ctx.moveTo(p.x, p.y - d.z * scale);
       ctx.lineTo(
-        p.x - (d.vx / speed) * d.size * 2.2 * scale,
-        p.y - d.z * scale - (d.vy / speed) * d.size * 2.2 * scale,
+        p.x - (d.vx / speed) * d.size * d.streak * scale,
+        p.y - d.z * scale - (d.vy / speed) * d.size * d.streak * scale,
       );
       ctx.stroke();
     }

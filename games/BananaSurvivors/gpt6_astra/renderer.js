@@ -1,5 +1,5 @@
-import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=2";
-import { createGore } from "./gore.js?v=2";
+import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=3";
+import { createGore } from "./gore.js?v=3";
 const SPRITES = [
   [31, 35, 385, 382],
   [528, 162, 247, 250],
@@ -9,6 +9,14 @@ const SPRITES = [
   [510, 502, 321, 325],
   [1011, 616, 186, 211],
   [1330, 427, 427, 435],
+];
+const VETERANS = [
+  [40, 10, 420, 465],
+  [550, 67, 485, 415],
+  [1054, 27, 468, 446],
+  [39, 485, 483, 527],
+  [520, 564, 546, 393],
+  [1091, 468, 420, 545],
 ];
 const TAU = Math.PI * 2;
 export async function createRenderer(canvas) {
@@ -22,15 +30,21 @@ export async function createRenderer(canvas) {
         reject(Error("The game artwork could not load. Please retry."));
       image.src = src;
     });
-  const [atlas, ground] = await Promise.all([
+  const [atlas, ground, veterans] = await Promise.all([
     load(new URL("./characters.webp", import.meta.url)),
     load(new URL("./ground.webp", import.meta.url)),
+    load(new URL("./veterans.webp", import.meta.url)),
   ]);
-  const sprites = SPRITES.map((rect) => {
+  const crops = SPRITES.map((rect, i) => ({
+    image: i ? atlas : veterans,
+    rect: i ? rect : VETERANS[0],
+  }));
+  crops.push(...VETERANS.slice(1).map((rect) => ({ image: veterans, rect })));
+  const sprites = crops.map(({ image, rect }) => {
     const surface = document.createElement("canvas");
     surface.width = rect[2];
     surface.height = rect[3];
-    surface.getContext("2d").drawImage(atlas, ...rect, 0, 0, rect[2], rect[3]);
+    surface.getContext("2d").drawImage(image, ...rect, 0, 0, rect[2], rect[3]);
     return surface;
   });
   const flashes = sprites.map((source) => {
@@ -418,12 +432,13 @@ export async function createRenderer(canvas) {
         ring(q.x, q.y, e.r * scale * 1.5, "#eec47e", 0.65);
         continue;
       }
-      if (e.windup > 0 && (e.action === "charge" || e.action === "spit")) {
+      if (e.windup > 0 && ["charge", "spit", "bones"].includes(e.action)) {
         ctx.save();
         ctx.translate(q.x, q.y);
         ctx.rotate(Math.atan2(e.ay, e.ax));
-        const length = (e.type === "boss" ? 340 : 210) * scale;
-        ctx.fillStyle = "#fb975536";
+        const length =
+          (e.action === "bones" ? 390 : e.type === "boss" ? 340 : 210) * scale;
+        ctx.fillStyle = e.action === "bones" ? "#a6dfff36" : "#fb975536";
         ctx.fillRect(0, -e.r * scale, length, e.r * 2 * scale);
         ctx.strokeStyle = "#ffd49c";
         ctx.lineWidth = 2;
@@ -433,6 +448,13 @@ export async function createRenderer(canvas) {
       }
       if (e.windup > 0 && e.action === "burst")
         ring(q.x, q.y, (e.r + 20) * scale, "#ffb68b", 0.8);
+      if (e.windup > 0 && e.action === "rupture") {
+        circle(q.x, q.y, 108 * scale, "#ff472c36");
+        ring(q.x, q.y, 108 * scale, "#ffd3a8");
+        ring(q.x, q.y, 108 * scale * (1 - e.windup / 0.9), "#ff7057");
+      }
+      if (e.windup > 0 && e.action === "brood")
+        ring(q.x, q.y, (45 + 9 * Math.sin(now * 9)) * scale, "#e9a0f4");
     }
     for (const d of s.drops) {
       if (!visible(d.x, d.y, 20)) continue;
@@ -523,6 +545,10 @@ export async function createRenderer(canvas) {
                 ? 0
                 : Math.sin(now * 7 + e.id) * 0.035,
           flash: e.hit > 0,
+          squash:
+            e.action === "rupture" && e.windup > 0
+              ? 1 + (1 - e.windup / 0.9) * 0.24
+              : 1,
           alpha: e.born > 0 ? 1 - e.born / 0.65 : 1,
         });
         if (
@@ -578,6 +604,20 @@ export async function createRenderer(canvas) {
         circle(q.x, q.y, 8 * scale, "#03130b60");
         circle(q.x, q.y - lift, 12 * scale, "#60442a");
         circle(q.x - 3 * scale, q.y - lift - 3 * scale, 7 * scale, "#cba06e");
+      } else if (b.kind === "bone") {
+        ctx.save();
+        ctx.translate(q.x, q.y);
+        ctx.rotate(Math.atan2(b.vy, b.vx));
+        ctx.strokeStyle = "#d9f1ff";
+        ctx.lineWidth = 5 * scale;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(-10 * scale, 0);
+        ctx.lineTo(10 * scale, 0);
+        ctx.stroke();
+        circle(-9 * scale, -3 * scale, 3.5 * scale, "#e9e0ca");
+        circle(9 * scale, 3 * scale, 3.5 * scale, "#e9e0ca");
+        ctx.restore();
       } else if (b.hostile) {
         circle(q.x, q.y, b.r * scale + 3, "#def69250");
         circle(q.x, q.y, b.r * scale, "#b7e782");

@@ -1,5 +1,5 @@
 // All gameplay lives here, independent of pixels, audio, storage and wall time.
-export const RULESET = 1,
+export const RULESET = 2,
   WAVE_SECONDS = 50,
   MAX_ENEMIES = 220,
   MAX_SHOTS = 280,
@@ -222,6 +222,46 @@ export const ENEMIES = {
     score: 5,
     size: 37,
   },
+  carver: {
+    sprite: 8,
+    hp: 44,
+    speed: 110,
+    r: 18,
+    damage: 17,
+    xp: 3,
+    score: 24,
+    size: 75,
+  },
+  bloat: {
+    sprite: 9,
+    hp: 92,
+    speed: 61,
+    r: 27,
+    damage: 24,
+    xp: 5,
+    score: 32,
+    size: 98,
+  },
+  ribcannon: {
+    sprite: 10,
+    hp: 115,
+    speed: 46,
+    r: 24,
+    damage: 19,
+    xp: 7,
+    score: 44,
+    size: 96,
+  },
+  broodmother: {
+    sprite: 11,
+    hp: 245,
+    speed: 36,
+    r: 31,
+    damage: 22,
+    xp: 12,
+    score: 70,
+    size: 112,
+  },
   boss: {
     sprite: 7,
     hp: 640,
@@ -249,13 +289,17 @@ export class SpatialGrid {
     this.cells.clear();
     for (const item of items) {
       if (item.dead) continue;
-      const key = `${Math.floor(item.x / this.size)},${Math.floor(item.y / this.size)}`;
+      // Arena and weapon queries fit within +/-64 cells; numeric keys avoid strings per frame.
+      const key =
+        (Math.floor(item.x / this.size) + 64) * 128 +
+        Math.floor(item.y / this.size) +
+        64;
       let cell = this.cells.get(key);
       if (!cell) this.cells.set(key, (cell = []));
       cell.push(item);
     }
   }
-  query(x, y, r) {
+  query(x, y, r, limit = Infinity) {
     const out = [];
     for (
       let cx = Math.floor((x - r) / this.size);
@@ -267,8 +311,12 @@ export class SpatialGrid {
         cy <= Math.floor((y + r) / this.size);
         cy++
       ) {
-        const cell = this.cells.get(`${cx},${cy}`);
-        if (cell) out.push(...cell);
+        const cell = this.cells.get((cx + 64) * 128 + cy + 64);
+        if (cell)
+          for (const item of cell) {
+            out.push(item);
+            if (out.length >= limit) return out;
+          }
       }
     return out;
   }
@@ -310,7 +358,8 @@ export function createRun(seed = 1, loadout = "classic") {
     events: [],
     grid: new SpatialGrid(),
     nextId: 1,
-    spawnClock: 1.0,
+    spawnClock: 0.35,
+    encounter: 0,
     supplyClock: 16,
     transition: 0,
     cache: { x: 280, y: -170, claimed: false },
@@ -470,27 +519,26 @@ export function spawnEnemy(s, type = "meatball", position) {
   }
   const def = ENEMIES[type] || ENEMIES.meatball,
     a = s.random() * Math.PI * 2,
-    range = 480 + s.random() * 130;
+    range = 390 + s.random() * 150;
   const x =
       position?.x ?? clamp(s.player.x + Math.cos(a) * range, -ARENA, ARENA),
     y = position?.y ?? clamp(s.player.y + Math.sin(a) * range, -ARENA, ARENA);
-  const scale =
-    1 + (s.wave - 1) * 0.22 + Math.pow(Math.max(0, s.wave - 4), 2) * 0.12;
+  const pressure = hordePressure(s);
   const hp =
     type === "boss"
-      ? 500 + s.wave * 180 + s.wave * s.wave * 28
-      : def.hp * scale;
+      ? 600 + s.wave * 220 + s.wave * s.wave * 40 + s.time * 1.4
+      : def.hp * pressure.health;
   const e = {
     id: s.nextId++,
     type,
     ...def,
-    damage:
-      def.damage * (1 + (s.wave - 1) * 0.055 + Math.max(0, s.wave - 5) * 0.055),
+    damage: def.damage * pressure.damage,
     x,
     y,
     hp,
     maxHp: hp,
-    speed: def.speed * (1 + Math.min(0.8, (s.wave - 1) * 0.025)),
+    speed: def.speed * pressure.speed,
+    sprite: type === "boss" && s.wave % 3 === 0 ? 12 : def.sprite,
     born: 0.65,
     age: 0,
     hit: 0,
@@ -512,6 +560,94 @@ export function spawnEnemy(s, type = "meatball", position) {
     event(s, "boss", { wave: s.wave, name: bossName(s.wave) });
   }
   return e;
+}
+// Time keeps pressure climbing even when a player stalls a champion.
+export function hordePressure(s) {
+  const t = Math.max(0, s.time),
+    w = Math.max(0, s.wave - 1);
+  return {
+    interval: Math.max(0.18, 0.64 / (1 + t / 90 + w * 0.1)),
+    pack: Math.min(6, 1 + Math.floor(t / 32)),
+    health: 1 + w * 0.28 + t * 0.004 + Math.max(0, w - 3) ** 2 * 0.13,
+    damage: 1 + w * 0.065 + t * 0.0025,
+    speed: 1.22 + Math.min(0.75, t * 0.0018) + Math.min(0.35, w * 0.035),
+  };
+}
+export const ENCOUNTERS = [
+  {
+    at: 8,
+    type: "hound",
+    name: "HOUNDS",
+    tip: "Watch the charge lanes. Dash across them.",
+  },
+  {
+    at: 20,
+    type: "carver",
+    name: "CARVERS",
+    tip: "They circle your flank. Keep an escape route.",
+  },
+  {
+    at: 34,
+    type: "bloat",
+    name: "BLOATS",
+    tip: "Drop them before they swell. Escape the red circle.",
+  },
+  {
+    at: 58,
+    type: "spitter",
+    name: "SPITTERS",
+    tip: "Close the distance between volleys.",
+  },
+  {
+    at: 78,
+    type: "ribcannon",
+    name: "RIBCANNONS",
+    tip: "Three bone shots. Sidestep the marked aim line.",
+  },
+  {
+    at: 100,
+    type: "splitter",
+    name: "SPLITTERS",
+    tip: "Big kills become little problems.",
+  },
+  {
+    at: 125,
+    type: "broodmother",
+    name: "BROODMOTHERS",
+    tip: "Cut down the mothers before their broods surround you.",
+  },
+];
+export function enemyForTime(s) {
+  const t = s.time,
+    r = s.random();
+  if (t >= 125 && r > 0.95) return "broodmother";
+  if (t >= 100 && r > 0.86) return "splitter";
+  if (t >= 78 && r > 0.76) return "ribcannon";
+  if (t >= 58 && r > 0.67) return "spitter";
+  if (t >= 34 && r > 0.55) return "bloat";
+  if (t >= 20 && r > 0.41) return "carver";
+  if (t >= 8 && r > 0.25) return "hound";
+  return t >= 45 && r < 0.1 ? "brute" : "meatball";
+}
+function spawnPackMember(s, type) {
+  // Limit costly specialists; ordinary mobs fill the remaining pack slots.
+  const cap = { broodmother: 4, ribcannon: 10, spitter: 12, bloat: 18 }[type];
+  if (cap && s.enemies.filter((e) => !e.dead && e.type === type).length >= cap)
+    type = "meatball";
+  if (s.enemies.length >= MAX_ENEMIES) {
+    let index = -1,
+      farthest = 560 * 560;
+    s.enemies.forEach((e, i) => {
+      const d = dist2(e, s.player);
+      if (e.type !== "boss" && d > farthest) {
+        index = i;
+        farthest = d;
+      }
+    });
+    if (index < 0) return;
+    s.enemies.splice(index, 1);
+  }
+  spawnEnemy(s, type);
 }
 export function bossName(wave) {
   return ["The Cleaver King", "The Bonebreaker", "The Marrow Witch"][
@@ -555,7 +691,7 @@ function kill(s, e, weapon) {
   s.bestCombo = Math.max(s.bestCombo, s.combo);
   s.comboTime = 3.8;
   s.score += Math.round(e.score * multiplier(s));
-  s.charge += e.type === "boss" ? 25 : 3;
+  s.charge += e.type === "boss" ? 25 : 2;
   event(s, "kill", { x: e.x, y: e.y, size: e.size, sprite: e.sprite, weapon });
   drop(s, e.x, e.y, "xp", e.xp);
   if (e.type === "splitter")
@@ -578,9 +714,9 @@ function kill(s, e, weapon) {
       wave: s.wave,
       score: Math.round(e.score * multiplier(s)),
     });
-  } else if (s.random() < 0.012 + (s.perks.luck || 0) * 0.005) {
+  } else if (s.random() < 0.006 + (s.perks.luck || 0) * 0.003) {
     const r = s.random();
-    drop(s, e.x, e.y, r < 0.6 ? "heal" : r < 0.82 ? "magnet" : "nuke");
+    drop(s, e.x, e.y, r < 0.4 ? "heal" : r < 0.8 ? "magnet" : "nuke");
   }
   if (s.charge >= 100 && s.frenzy <= 0) {
     s.charge = 0;
@@ -863,7 +999,31 @@ function enemiesStep(s, dt) {
       my = d.y,
       speed = e.speed;
     e.attack -= dt;
-    if (e.type === "spitter") {
+    if (e.type === "carver" && distance > 85 && !e.windup && !e.charge) {
+      const side = e.id % 2 ? 1 : -1;
+      const flank =
+        distance < 360 && Math.sin(e.age * 1.8) > -0.35 ? 0.85 : 0.15;
+      mx = d.x - d.y * side * flank;
+      my = d.y + d.x * side * flank;
+    }
+    if (e.type === "bloat" && distance < 135 && !e.windup) {
+      e.windup = 0.9;
+      e.action = "rupture";
+    } else if (e.type === "ribcannon" || e.type === "broodmother") {
+      if (distance < 260) {
+        mx = -d.x;
+        my = -d.y;
+      } else if (distance < 410) {
+        mx = 0;
+        my = 0;
+      }
+      if (e.attack <= 0 && distance < 650 && !e.windup) {
+        e.windup = e.type === "ribcannon" ? 0.85 : 1.2;
+        e.action = e.type === "ribcannon" ? "bones" : "brood";
+        e.ax = d.x;
+        e.ay = d.y;
+      }
+    } else if (e.type === "spitter") {
       if (distance < 230) {
         mx = -d.x;
         my = -d.y;
@@ -902,7 +1062,7 @@ function enemiesStep(s, dt) {
           delay: 1.05,
           life: 1.5,
           friendly: false,
-          damage: 28,
+          damage: e.damage * 1.12,
         });
     }
     if (e.windup > 0) {
@@ -921,7 +1081,7 @@ function enemiesStep(s, dt) {
             vy: e.ay * 195,
             life: 3.6,
             r: 9,
-            damage: 13,
+            damage: e.damage,
           });
           e.attack = 2.7;
         }
@@ -937,7 +1097,7 @@ function enemiesStep(s, dt) {
               vy: Math.sin(a) * 160,
               life: 4,
               r: 9,
-              damage: 18,
+              damage: e.damage * 0.72,
             });
           }
           e.attack = 3.7;
@@ -945,6 +1105,54 @@ function enemiesStep(s, dt) {
         if (e.action === "slam") {
           event(s, "slam", { x: p.x, y: p.y });
           e.attack = 3.2;
+        }
+        if (e.action === "bones") {
+          const aim = Math.atan2(e.ay, e.ax);
+          for (let i = -1; i <= 1; i++) {
+            const a = aim + i * 0.23;
+            shoot(s, {
+              kind: "bone",
+              hostile: true,
+              x: e.x,
+              y: e.y,
+              vx: Math.cos(a) * 245,
+              vy: Math.sin(a) * 245,
+              life: 3.0,
+              r: 8,
+              damage: e.damage,
+            });
+          }
+          event(s, "enemyVolley", { x: e.x, y: e.y });
+          e.attack = 3.6;
+        }
+        if (e.action === "brood") {
+          const room = Math.max(
+            0,
+            32 -
+              s.enemies.filter((m) => !m.dead && m.type === "meatling").length,
+          );
+          for (let i = 0; i < Math.min(3, room); i++) {
+            const a = e.age + (i * Math.PI * 2) / 3;
+            spawnEnemy(s, "meatling", {
+              x: e.x + Math.cos(a) * 38,
+              y: e.y + Math.sin(a) * 38,
+            });
+          }
+          event(s, "brood", { x: e.x, y: e.y });
+          e.attack = 6.5;
+        }
+        if (e.action === "rupture") {
+          hazard(s, {
+            x: e.x,
+            y: e.y,
+            r: 108,
+            delay: 0,
+            life: 0.3,
+            friendly: false,
+            damage: e.damage * 1.25,
+          });
+          kill(s, e, "rupture");
+          continue;
         }
       }
     }
@@ -961,7 +1169,8 @@ function enemiesStep(s, dt) {
     } else if (!e.windup) {
       let sx = 0,
         sy = 0;
-      for (const other of s.grid.query(e.x, e.y, e.r + 50)) {
+      // Separation is cosmetic; cap its neighbor work. Damage queries remain complete.
+      for (const other of s.grid.query(e.x, e.y, e.r + 50, 28)) {
         if (other.id === e.id || other.dead) continue;
         const dd = Math.hypot(e.x - other.x, e.y - other.y),
           rr = e.r + other.r;
@@ -983,7 +1192,8 @@ function enemiesStep(s, dt) {
     e.ky *= Math.exp(-dt * 8);
     e.x = clamp(e.x + (mx * speed + e.kx) * dt, -ARENA - 70, ARENA + 70);
     e.y = clamp(e.y + (my * speed + e.ky) * dt, -ARENA - 70, ARENA + 70);
-    if (distance < e.r + p.r) hurt(s, e.damage, -d.x, -d.y);
+    if (Math.hypot(e.x - p.x, e.y - p.y) < e.r + p.r)
+      hurt(s, e.damage, -d.x, -d.y);
     // Recycle far-away mobs instead of accumulating unreachable objects.
     if (distance > 1050 && e.type !== "boss") {
       const a = s.random() * Math.PI * 2;
@@ -1112,7 +1322,7 @@ export function update(s, dt, input = {}) {
     if (s.transition <= 0) {
       s.wave++;
       s.waveTime = 0;
-      s.spawnClock = 1;
+      s.spawnClock = 0.35;
       s.cache = {
         x: clamp(p.x + Math.cos(s.wave * 2.4) * 360, -ARENA + 80, ARENA - 80),
         y: clamp(p.y + Math.sin(s.wave * 2.4) * 360, -ARENA + 80, ARENA - 80),
@@ -1125,27 +1335,18 @@ export function update(s, dt, input = {}) {
     if (s.waveTime >= WAVE_SECONDS) spawnEnemy(s, "boss");
   }
   if (s.transition <= 0) {
+    const next = ENCOUNTERS[s.encounter];
+    if (next && s.time >= next.at) {
+      s.encounter++;
+      spawnPackMember(s, next.type);
+      event(s, "encounter", { name: next.name, tip: next.tip });
+    }
     s.spawnClock -= dt;
     if (s.spawnClock <= 0) {
-      s.spawnClock = s.bossId
-        ? Math.max(0.65, 1.8 - s.wave * 0.07)
-        : Math.max(
-            0.19,
-            0.9 - s.wave * 0.055 - Math.min(0.35, s.waveTime * 0.005),
-          );
-      const r = s.random();
-      const type =
-        s.wave >= 3 && r > 0.86
-          ? "splitter"
-          : s.wave >= 2 && r > 0.73
-            ? "spitter"
-            : s.wave >= 2 && r > 0.57
-              ? "brute"
-              : s.waveTime > 16 && r > 0.6
-                ? "hound"
-                : "meatball";
-      const pack = 1 + Math.min(4, Math.floor((s.wave - 1) / 4));
-      for (let i = 0; i < pack; i++) spawnEnemy(s, type);
+      const pressure = hordePressure(s);
+      s.spawnClock = pressure.interval * (s.bossId ? 1.18 : 1);
+      for (let i = 0; i < pressure.pack; i++)
+        spawnPackMember(s, enemyForTime(s));
     }
   }
   s.supplyClock -= dt;

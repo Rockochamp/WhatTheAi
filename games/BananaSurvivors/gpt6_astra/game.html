@@ -28,12 +28,12 @@
     />
     <meta
       property="og:image"
-      content="https://whatthe.ai/games/BananaSurvivors/gpt6_astra/cover.webp"
+      content="https://whatthe.ai/games/BananaSurvivors/gpt6_astra/cover-v3.webp"
     />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
-    <link rel="preload" as="image" href="cover.webp" />
-    <link rel="stylesheet" href="game.css?v=2" />
+    <link rel="preload" as="image" href="cover-v3.webp" />
+    <link rel="stylesheet" href="game.css?v=3" />
   </head>
   <body>
     <canvas
@@ -300,6 +300,17 @@
         ><button data-scope="global" aria-pressed="false">Global</button>
       </div>
       <p id="rank-status" class="subtle" role="status"></p>
+      <label class="rank-era" for="rank-era"
+        >Difficulty era
+        <select id="rank-era">
+          <option value="2">Horde update · current</option>
+          <option value="1">Original difficulty · archive</option>
+        </select>
+      </label>
+      <p class="subtle">
+        A harder jungle gets its own board. Your previous scores remain in the
+        archive.
+      </p>
       <ol id="rank-list" class="rank-list"></ol>
       <button id="refresh-rank" class="secondary full" hidden>
         Refresh global ranking
@@ -412,6 +423,29 @@
         each boss restores one.
       </p>
       <div id="armory" class="armory"></div>
+      <h3>Know your meat.</h3>
+      <div class="bestiary">
+        <p>
+          <strong>Carver · 0:20</strong> Hooked flankers circle around you. Keep
+          moving through open ground.
+        </p>
+        <p>
+          <strong>Bloat · 0:34</strong> Its swelling belly marks a blast radius.
+          Kill it before detonation or dash clear.
+        </p>
+        <p>
+          <strong>Ribcannon · 1:18</strong> A marked aim line precedes a
+          three-shot bone volley. Move sideways.
+        </p>
+        <p>
+          <strong>Broodmother · 2:05</strong> Breeds fast meatlings. Prioritize
+          the mother before the pack grows.
+        </p>
+      </div>
+      <p class="subtle">
+        Mixed packs grow every 32 seconds. Hounds arrive at 0:08; spitters,
+        brutes and splitters join later. Champion fights keep the horde coming.
+      </p>
       <h3>Read the jungle</h3>
       <p class="subtle">
         Amber lanes warn of charges. Orange circles mark incoming slams. Green
@@ -438,6 +472,6 @@
       </div></noscript
     >
     <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=2"></script>
+    <script type="module" src="game.js?v=3"></script>
   </body>
 </html>

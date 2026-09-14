@@ -17,7 +17,7 @@ test("gore produces spray, flesh/bone fragments and persistent ground stains", (
   const gore = createGore(rng(17));
   gore.emit({ type: "kill", x: 80, y: 0, size: 160 }, player);
   assert.ok(gore.counts.blood >= 40);
-  assert.equal(gore.counts.chunks, 12);
+  assert.equal(gore.counts.chunks, 16);
   assert.equal(gore.counts.stains, 1);
   for (let i = 0; i < 90; i++) gore.update(1 / 60);
   assert.equal(gore.counts.blood, 0);

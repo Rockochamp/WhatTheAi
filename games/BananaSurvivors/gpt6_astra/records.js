@@ -1,5 +1,7 @@
-export const SESSION_KEY = "banana_astra_session_v1",
-  DEVICE_KEY = "banana_astra_device_v1";
+export const SESSION_KEY = "banana_astra_session_v2",
+  DEVICE_KEY = "banana_astra_device_v2",
+  LEGACY_SESSION_KEY = "banana_astra_session_v1",
+  LEGACY_DEVICE_KEY = "banana_astra_device_v1";
 const integer = (n, max) => Number.isInteger(n) && n >= 0 && n <= max;
 export function validRecord(r) {
   return (
@@ -21,7 +23,7 @@ export function validRecord(r) {
     integer(r.round, 1e7) &&
     r.round > 0 &&
     Number.isFinite(r.createdAt) &&
-    r.ruleset === 1 &&
+    [1, 2].includes(r.ruleset) &&
     ["classic", "ranger", "bruiser"].includes(r.loadout)
   );
 }
@@ -43,7 +45,10 @@ export function readRecords(storage, key = SESSION_KEY) {
   try {
     const list = JSON.parse(storage.getItem(key) || "[]");
     return Array.isArray(list)
-      ? rankRecords(list, key === SESSION_KEY ? Infinity : 100)
+      ? rankRecords(
+          list,
+          [SESSION_KEY, LEGACY_SESSION_KEY].includes(key) ? Infinity : 100,
+        )
       : [];
   } catch {
     return [];
@@ -69,8 +74,10 @@ const firebaseConfig = {
   messagingSenderId: "940230809594",
   appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643",
 };
-const COLLECTION = "leaderboard_banana_survivors_gpt6_astra_v1";
-const STATS = "stats_banana_survivors_gpt6_astra_v1";
+const collectionFor = (ruleset) =>
+  `leaderboard_banana_survivors_gpt6_astra_v${ruleset === 1 ? 1 : 2}`;
+const statsFor = (ruleset) =>
+  `stats_banana_survivors_gpt6_astra_v${ruleset === 1 ? 1 : 2}`;
 export const isLiveSite = () =>
   typeof location !== "undefined" &&
   ["whatthe.ai", "www.whatthe.ai"].includes(location.hostname);
@@ -141,12 +148,16 @@ function bounded(promise) {
     );
   });
 }
-export async function fetchGlobalRecords() {
+export async function fetchGlobalRecords(ruleset = 2) {
   const db = await database();
   const [snapshot, stats] = await bounded(
     Promise.all([
-      db.collection(COLLECTION).orderBy("score", "desc").limit(100).get(),
-      db.collection("globalStats").doc(STATS).get(),
+      db
+        .collection(collectionFor(ruleset))
+        .orderBy("score", "desc")
+        .limit(100)
+        .get(),
+      db.collection("globalStats").doc(statsFor(ruleset)).get(),
     ]),
   );
   return {
@@ -161,22 +172,22 @@ export async function fetchGlobalRecords() {
 export async function saveGlobalRecord(record) {
   if (!validRecord(record)) throw Error("Invalid run");
   const db = await database(),
-    reference = db.collection(COLLECTION).doc(record.id),
-    stats = db.collection("globalStats").doc(STATS);
+    reference = db.collection(collectionFor(record.ruleset)).doc(record.id),
+    stats = db.collection("globalStats").doc(statsFor(record.ruleset));
   // One immutable run ID makes both the score and game count safe to retry.
   await bounded(
     db.runTransaction(async (transaction) => {
       if ((await transaction.get(reference)).exists) return;
       transaction.set(reference, {
         ...record,
-        version: "gpt6_astra_v1",
+        version: `gpt6_astra_v${record.ruleset}`,
         timestamp: window.firebase.firestore.FieldValue.serverTimestamp(),
       });
       transaction.set(
         stats,
         {
           gameTitle: "banana_survivors",
-          version: "gpt6_astra_v1",
+          version: `gpt6_astra_v${record.ruleset}`,
           totalGamesPlayed: window.firebase.firestore.FieldValue.increment(1),
         },
         { merge: true },
