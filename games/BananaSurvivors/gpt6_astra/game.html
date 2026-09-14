@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#10251c" />
+    <title>Banana Survivors · GPT-6 Astra | What the Ai</title>
+    <meta
+      name="description"
+      content="One banana. Endless meat monsters. Play the free GPT-6 Astra Banana Survivors: evolving weapons, boss battles, jungle action, and global rankings on mobile and desktop."
+    />
+    <link
+      rel="canonical"
+      href="https://whatthe.ai/games/BananaSurvivors/gpt6_astra/game.html"
+    />
+    <meta property="og:title" content="Banana Survivors · GPT-6 Astra" />
+    <meta
+      property="og:description"
+      content="You are the snack. Make them regret it. A free jungle survival roguelite with evolving weapons and endless boss waves."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://whatthe.ai/games/BananaSurvivors/gpt6_astra/game.html"
+    />
+    <meta
+      property="og:image"
+      content="https://whatthe.ai/games/BananaSurvivors/gpt6_astra/cover.webp"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/images/favicon.ico?v=1.2" />
+    <link rel="preload" as="image" href="cover.webp" />
+    <link rel="stylesheet" href="game.css?v=1" />
+  </head>
+  <body>
+    <canvas
+      id="arena"
+      tabindex="0"
+      aria-label="Banana Survivors arena. Move with WASD, arrow keys, mouse drag, or touch. Space or the dash button dodges attacks."
+    ></canvas>
+    <main id="menu" class="menu">
+      <nav class="menu-nav">
+        <a href="/">← What the Ai</a><span class="edition">GPT-6 ASTRA</span
+        ><button class="quiet-button" data-open="help">
+          How to play <span>↗</span>
+        </button>
+      </nav>
+      <div class="menu-content">
+        <p class="eyebrow">ONE BANANA. ZERO CHILL.</p>
+        <h1>
+          <span>BANANA</span><br />SURVIVORS<span class="title-period">.</span>
+        </h1>
+        <p class="tagline">You are the snack.<br />Make them regret it.</p>
+        <p class="menu-description">
+          Outrun the horde. Build something ridiculous.<br />Survive one more
+          wave.
+        </p>
+        <form id="start-form">
+          <label for="nickname"
+            >YOUR NAME <span>for the hall of survivors</span></label
+          >
+          <input
+            id="nickname"
+            name="nickname"
+            maxlength="10"
+            placeholder="Banana"
+            autocomplete="nickname"
+            spellcheck="false"
+            aria-describedby="name-error"
+          />
+          <p id="name-error" class="form-error" role="alert"></p>
+          <fieldset class="loadouts">
+            <legend>PICK YOUR PEEL</legend>
+            <label class="loadout"
+              ><input
+                type="radio"
+                name="loadout"
+                value="classic"
+                checked
+              /><span
+                ><strong>The original</strong
+                ><small>Blaster II · focused</small></span
+              ></label
+            >
+            <label class="loadout"
+              ><input type="radio" name="loadout" value="ranger" /><span
+                ><strong>The ranger</strong
+                ><small>Blaster + rang · swift</small></span
+              ></label
+            >
+            <label class="loadout"
+              ><input type="radio" name="loadout" value="bruiser" /><span
+                ><strong>The bruiser</strong
+                ><small>Blaster + peels · tough</small></span
+              ></label
+            >
+          </fieldset>
+          <button
+            id="start-button"
+            class="primary start"
+            type="submit"
+            disabled
+          >
+            <span>Bringing the jungle to life…</span
+            ><span aria-hidden="true">→</span>
+          </button>
+          <p id="load-status" role="status">
+            Loading the artwork. Your first run is almost ready.
+          </p>
+        </form>
+        <div class="menu-actions">
+          <button data-open="rank">Hall of survivors ↗</button
+          ><button data-open="settings">Sound & settings</button>
+        </div>
+        <div class="personal">
+          <span>PERSONAL BEST <strong id="personal-best">—</strong></span
+          ><span>BEST WAVE <strong id="personal-wave">—</strong></span>
+        </div>
+      </div>
+      <footer class="menu-foot">
+        <span>ENDLESS WAVES <i>·</i> EVOLVING WEAPONS <i>·</i> NO DOWNLOAD</span
+        ><span>Made with AI. Survived by you.</span>
+      </footer>
+    </main>
+
+    <div id="hud" class="hud" hidden>
+      <header class="hud-top">
+        <div class="health-group">
+          <div class="hud-label">
+            <span>STAY FRESH</span><span id="hp-text">100 / 100</span>
+          </div>
+          <div
+            class="health-track"
+            role="progressbar"
+            aria-label="Health"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="100"
+          >
+            <span id="hp-fill"></span>
+          </div>
+        </div>
+        <div class="wave-clock">
+          <strong id="wave-text">WAVE 01</strong
+          ><span id="time-text">00:00</span>
+        </div>
+        <div class="score-group">
+          <span class="hud-label">SCORE</span><strong id="score-text">0</strong
+          ><small><span id="kills-text">0</span> kills</small>
+        </div>
+        <div class="hud-actions">
+          <button
+            id="sound-button"
+            class="icon-button"
+            aria-label="Mute sound"
+            title="Sound on"
+          >
+            ♫</button
+          ><button
+            id="pause-button"
+            class="icon-button"
+            aria-label="Pause game"
+            title="Pause (P / Esc)"
+          >
+            Ⅱ
+          </button>
+        </div>
+      </header>
+      <div class="xp-row">
+        <span id="level-text">LV 1</span>
+        <div
+          class="xp-track"
+          role="progressbar"
+          aria-label="Experience to next level"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <span id="xp-fill"></span>
+        </div>
+        <span id="xp-text">0 / 12</span>
+      </div>
+      <div id="boss-hud" class="boss-hud" hidden>
+        <div>
+          <span id="boss-name">THE CLEAVER KING</span><span id="boss-hp"></span>
+        </div>
+        <div class="boss-track"><span id="boss-fill"></span></div>
+      </div>
+      <div id="announcement" class="announcement" aria-live="polite">
+        <strong></strong><span></span>
+      </div>
+      <div class="bottom-hud">
+        <div class="combo-group">
+          <span id="combo-text">MAKE IT A STREAK</span>
+          <div class="combo-track"><span id="combo-fill"></span></div>
+          <small id="frenzy-text">Overripe charge 0%</small>
+        </div>
+        <div
+          id="weapon-rail"
+          class="weapon-rail"
+          aria-label="Equipped weapons"
+        ></div>
+      </div>
+      <p id="control-hint" class="control-hint">
+        WASD / ARROWS · HOLD MOUSE TO STEER · SPACE TO DASH
+      </p>
+      <button id="dash-button" class="dash-button" aria-label="Dash">
+        <span class="dash-symbol">↗</span><strong>DASH</strong
+        ><small id="dash-time">READY</small>
+      </button>
+      <div id="touch-stick" class="touch-stick" hidden aria-hidden="true">
+        <span></span>
+      </div>
+    </div>
+    <div id="live-message" class="sr-only" aria-live="polite"></div>
+
+    <dialog
+      id="upgrade-dialog"
+      class="upgrade-dialog"
+      aria-labelledby="upgrade-title"
+    >
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow" id="upgrade-label">LEVEL UP</p>
+          <h2 id="upgrade-title">Make it riper.</h2>
+        </div>
+        <span class="level-seal" id="upgrade-level">2</span>
+      </div>
+      <p class="subtle" id="upgrade-subtitle">
+        Choose your edge. The jungle can wait.
+      </p>
+      <div id="upgrade-cards" class="upgrade-cards"></div>
+      <div class="upgrade-footer">
+        <button id="reroll-button" class="secondary">Reroll · 2 left</button
+        ><span id="build-note">4 weapon slots · rank V evolves a weapon</span>
+      </div>
+    </dialog>
+
+    <dialog id="pause-dialog" aria-labelledby="pause-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">TAKE A BREATHER</p>
+          <h2 id="pause-title">Still fresh.</h2>
+        </div>
+        <span class="modal-mark">Ⅱ</span>
+      </div>
+      <p class="subtle">The jungle is waiting for you.</p>
+      <button id="resume-button" class="primary full">
+        Back to the mayhem →
+      </button>
+      <div class="pause-grid">
+        <button data-open="settings" class="secondary">Sound & settings</button
+        ><button data-open="help" class="secondary">Controls & armory</button>
+      </div>
+      <button id="retire-button" class="text-button">
+        End this run & keep my score
+      </button>
+    </dialog>
+
+    <dialog
+      id="results-dialog"
+      class="results-dialog"
+      aria-labelledby="results-title"
+    >
+      <p class="eyebrow" id="result-label">A PEEL WELL FOUGHT</p>
+      <h2 id="results-title">That was bananas.</h2>
+      <p class="subtle" id="result-message"></p>
+      <div class="result-score">
+        <span>FINAL SCORE</span><strong id="result-score">0</strong
+        ><small id="result-best"></small>
+      </div>
+      <div class="result-grid" id="result-stats"></div>
+      <div id="result-build" class="result-build"></div>
+      <p id="save-status" role="status" class="subtle"></p>
+      <button id="retry-save" class="text-button" hidden>
+        Retry global save</button
+      ><button id="again-button" class="primary full">One more run →</button>
+      <div class="pause-grid">
+        <button id="result-rank" class="secondary">See rankings</button
+        ><button id="menu-button" class="secondary">Change your peel</button>
+      </div>
+    </dialog>
+
+    <dialog id="rank-dialog" aria-labelledby="rank-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">BANANA SURVIVORS · ASTRA</p>
+          <h2 id="rank-title">Hall of survivors.</h2>
+        </div>
+        <button data-close class="close-button" aria-label="Close rankings">
+          ×
+        </button>
+      </div>
+      <div class="rank-tabs" role="group" aria-label="Ranking scope">
+        <button data-scope="session" aria-pressed="true">This session</button
+        ><button data-scope="device" aria-pressed="false">This device</button
+        ><button data-scope="global" aria-pressed="false">Global</button>
+      </div>
+      <p id="rank-status" class="subtle" role="status"></p>
+      <ol id="rank-list" class="rank-list"></ol>
+      <button id="refresh-rank" class="secondary full" hidden>
+        Refresh global ranking
+      </button>
+    </dialog>
+
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">MAKE YOURSELF AT HOME</p>
+          <h2 id="settings-title">Your kind of chaos.</h2>
+        </div>
+        <button data-close class="close-button" aria-label="Close settings">
+          ×
+        </button>
+      </div>
+      <label class="setting"
+        ><span
+          ><strong>Music & effects</strong
+          ><small>Original jungle breakbeat soundtrack</small></span
+        ><input id="audio-enabled" type="checkbox" checked /></label
+      ><label class="volume-label" for="volume">Volume</label
+      ><input
+        id="volume"
+        type="range"
+        min="0"
+        max="1"
+        step=".05"
+        value=".45"
+      /><label class="setting"
+        ><span
+          ><strong>Reduced effects</strong
+          ><small>Fewer particles; no screen shake</small></span
+        ><input id="reduced-effects" type="checkbox" /></label
+      ><label class="setting"
+        ><span
+          ><strong>Battery saver</strong
+          ><small>Lower pixel density and fewer effects</small></span
+        ><input id="battery-saver" type="checkbox" /></label
+      ><button id="fullscreen-button" class="secondary full">
+        Toggle fullscreen ↗
+      </button>
+      <p class="subtle">
+        The game pauses when you leave the tab. Device reduced-motion
+        preferences are respected.
+      </p>
+    </dialog>
+
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">THE SURVIVOR'S FIELD GUIDE</p>
+          <h2 id="help-title">Small fruit. Big plans.</h2>
+        </div>
+        <button data-close class="close-button" aria-label="Close help">
+          ×
+        </button>
+      </div>
+      <div class="help-controls">
+        <p>
+          <strong>Move</strong> WASD, arrow keys, or hold and drag your mouse.
+          On touchscreens, drag anywhere in the arena to create a joystick.
+        </p>
+        <p>
+          <strong>Dash</strong> Space, Shift, right-click, or the DASH button.
+          You are invulnerable during the dash. Aim with your movement; the last
+          direction is remembered.
+        </p>
+        <p>
+          <strong>Shoot</strong> Automatic. Your weapons target nearby enemies.
+          Concentrate on movement and collecting the golden XP.
+        </p>
+        <p>
+          <strong>Pause</strong> P or Escape. Select upgrades with 1 / 2 / 3; R
+          rerolls. You can use every menu with the keyboard.
+        </p>
+      </div>
+      <h3>Build something ridiculous</h3>
+      <p class="subtle">
+        Equip up to four weapon families. Improve each to rank V to unlock its
+        evolution. Perks apply to your whole build. You start with two rerolls;
+        each boss restores one.
+      </p>
+      <div id="armory" class="armory"></div>
+      <h3>Read the jungle</h3>
+      <p class="subtle">
+        Amber lanes warn of charges. Orange circles mark incoming slams. Green
+        orbs hurt. Golden diamonds grant XP; glowing supplies heal, attract XP,
+        clear enemies, or trigger overripe frenzy. Follow the small gold arrow
+        to a supply cache.
+      </p>
+      <h3>One more wave</h3>
+      <p class="subtle">
+        Every 50 seconds, a champion enters. Defeat it for healing and an
+        upgrade, then face the next wave. Kills build a streak multiplier and
+        charge seven seconds of overripe firepower. Waves continue endlessly.
+        Ranking score = combat score + 2 per second + 250 per defeated boss. All
+        loadouts play the same rules.
+      </p>
+      <a class="legacy-link" href="../game.html"
+        >Play the original Gemini 3 Pro version ↗</a
+      >
+    </dialog>
+    <noscript
+      ><div class="no-script">
+        Banana Survivors needs JavaScript to run.
+        <a href="/">Return to What the Ai</a>
+      </div></noscript
+    >
+    <script src="/js/common/blocklist.js"></script>
+    <script type="module" src="game.js?v=1"></script>
+  </body>
+</html>

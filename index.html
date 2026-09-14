@@ -85,7 +85,7 @@
                   "@type": "ListItem",
                   "position": 5,
                   "name": "Banana Survivors",
-                  "url": "https://whatthe.ai/games/BananaSurvivors/game.html"
+                  "url": "https://whatthe.ai/games/BananaSurvivors/gpt6_astra/game.html"
                 },
                 {
                   "@type": "ListItem",
@@ -335,14 +335,15 @@
           <a
             class="game-link"
             id="game-link-5"
-            href="/games/BananaSurvivors/game.html"
-            aria-label="Open Banana Survivors — Gemini 3 Pro"
+            href="/games/BananaSurvivors/gpt6_astra/game.html?v=1"
+            aria-label="Open Banana Survivors — GPT-6 Astra"
           >
             <div class="thumbnail">
               <span class="thumbnail-fallback" aria-hidden="true"
                 >Banana Survivors</span
               ><img
-                src="/images/BananaSurvivors.webp"
+                src="/games/BananaSurvivors/gpt6_astra/cover.webp"
+                style="object-position: 78% center"
                 alt=""
                 width="400"
                 height="400"
@@ -357,7 +358,27 @@
               </svg>
             </div>
           </a>
-          <div class="game-info"><p class="model-name">Gemini 3 Pro</p></div>
+          <div class="game-info">
+            <p class="model-name">GPT-6 Astra</p>
+            <label class="visually-hidden" for="version-select-5"
+              >Choose a model for Banana Survivors</label
+            >
+            <select class="version-select" id="version-select-5" hidden>
+              <option value="/games/BananaSurvivors/gpt6_astra/game.html?v=1">
+                GPT-6 Astra
+              </option>
+              <option value="/games/BananaSurvivors/game.html">
+                Gemini 3 Pro
+              </option>
+            </select>
+            <noscript
+              ><ul class="version-fallback">
+                <li>
+                  <a href="/games/BananaSurvivors/game.html">Gemini 3 Pro</a>
+                </li>
+              </ul></noscript
+            >
+          </div>
         </article>
         <article class="game-item" data-game-id="6" style="--order: 5">
           <a
