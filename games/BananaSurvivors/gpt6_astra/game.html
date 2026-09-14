@@ -33,7 +33,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
     <link rel="preload" as="image" href="cover.webp" />
-    <link rel="stylesheet" href="game.css?v=1" />
+    <link rel="stylesheet" href="game.css?v=2" />
   </head>
   <body>
     <canvas
@@ -319,17 +319,45 @@
       <label class="setting"
         ><span
           ><strong>Music & effects</strong
-          ><small>Original jungle breakbeat soundtrack</small></span
+          ><small
+            >Heavy guitars, industrial drums & visceral impacts</small
+          ></span
         ><input id="audio-enabled" type="checkbox" checked /></label
       ><label class="volume-label" for="volume">Volume</label
+      ><input id="volume" type="range" min="0" max="1" step=".05" value=".45" />
+      <label class="volume-label" for="music-volume">Soundtrack</label
       ><input
-        id="volume"
+        id="music-volume"
         type="range"
         min="0"
         max="1"
         step=".05"
-        value=".45"
-      /><label class="setting"
+        value=".8"
+      />
+      <label class="volume-label" for="effects-volume">Combat effects</label
+      ><input
+        id="effects-volume"
+        type="range"
+        min="0"
+        max="1"
+        step=".05"
+        value=".9"
+      />
+      <p id="music-status" class="subtle" role="status">
+        MEATGRINDER · original industrial survival soundtrack
+      </p>
+      <button id="retry-audio" class="secondary" hidden>
+        Retry soundtrack
+      </button>
+      <label class="setting"
+        ><span
+          ><strong>Blood & gore</strong
+          ><small
+            >Blood sprays, flying flesh, bones & lingering stains</small
+          ></span
+        ><input id="gore-enabled" type="checkbox" checked
+      /></label>
+      <label class="setting"
         ><span
           ><strong>Reduced effects</strong
           ><small>Fewer particles; no screen shake</small></span
@@ -410,6 +438,6 @@
       </div></noscript
     >
     <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=1"></script>
+    <script type="module" src="game.js?v=2"></script>
   </body>
 </html>

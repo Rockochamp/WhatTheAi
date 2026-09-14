@@ -1,4 +1,5 @@
-import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=1";
+import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=2";
+import { createGore } from "./gore.js?v=2";
 const SPRITES = [
   [31, 35, 385, 382],
   [528, 162, 247, 250],
@@ -53,6 +54,7 @@ export async function createRenderer(canvas) {
   sg.fillStyle = rad;
   sg.fillRect(0, 0, 128, 128);
   const random = rng(93014);
+  const gore = createGore(rng(77151));
   let width = 0,
     height = 0,
     scale = 1,
@@ -193,8 +195,13 @@ export async function createRenderer(canvas) {
     }
     ctx.restore();
   }
-  function emit(events, s) {
+  function emit(events, s, settings = {}) {
     for (const e of events) {
+      gore.emit(e, s.player, {
+        low: settings.low || low,
+        quiet: settings.quiet || quiet,
+        enabled: settings.gore !== false,
+      });
       if (e.type === "hit" && !quiet && numbers.length < 25) {
         numbers.push({
           x: e.x + (random() - 0.5) * 18,
@@ -372,6 +379,9 @@ export async function createRenderer(canvas) {
       ctx.translate((random() - 0.5) * shake, (random() - 0.5) * shake);
     shake *= Math.exp(-dt * 12);
     background();
+    if (input.gore === false) gore.clear();
+    gore.update(dt);
+    gore.ground(ctx, point, scale, visible);
     cache(s);
     const st = stats(s),
       p = s.player;
@@ -584,6 +594,7 @@ export async function createRenderer(canvas) {
         circle(q.x, q.y, 3 * scale, "#fff7c2");
       }
     }
+    gore.airborne(ctx, point, scale, visible);
     for (const effect of fx) {
       effect.life -= dt;
       const alpha = Math.max(0, effect.life / effect.max),
@@ -714,6 +725,7 @@ export async function createRenderer(canvas) {
       return { width, height };
     },
     reset() {
+      gore.clear();
       fx = [];
       numbers = [];
       ghosts = [];

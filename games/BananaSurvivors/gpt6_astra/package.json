@@ -1,1 +1,7 @@
-{"private":true,"type":"module","scripts":{"test":"node --test ../../../tests/banana_astra.test.mjs"}}
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test ../../../tests/banana_astra.test.mjs ../../../tests/banana_effects.test.mjs"
+  }
+}

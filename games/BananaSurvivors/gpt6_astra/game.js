@@ -11,10 +11,10 @@ import {
   multiplier,
   bossName,
   RULESET,
-} from "./engine.js?v=1";
-import { createRenderer } from "./renderer.js?v=1";
-import { createControls } from "./controls.js?v=1";
-import { createAudio } from "./audio.js?v=1";
+} from "./engine.js?v=2";
+import { createRenderer } from "./renderer.js?v=2";
+import { createControls } from "./controls.js?v=2";
+import { createAudio } from "./audio.js?v=2";
 import {
   SESSION_KEY,
   DEVICE_KEY,
@@ -24,7 +24,7 @@ import {
   isLiveSite,
   fetchGlobalRecords,
   saveGlobalRecord,
-} from "./records.js?v=1";
+} from "./records.js?v=2";
 const $ = (id) => document.getElementById(id),
   all = (selector) => [...document.querySelectorAll(selector)],
   format = (n) => Math.floor(n).toLocaleString(),
@@ -61,6 +61,11 @@ const options = {
   volume: Number.isFinite(saved.volume)
     ? Math.max(0, Math.min(1, saved.volume))
     : 0.45,
+  musicVolume: Number.isFinite(saved.musicVolume) ? saved.musicVolume : 0.8,
+  effectsVolume: Number.isFinite(saved.effectsVolume)
+    ? saved.effectsVolume
+    : 0.9,
+  gore: saved.gore !== false,
   quiet: !!saved.quiet,
   low: !!saved.low,
 };
@@ -84,7 +89,17 @@ let sessionRecords = readRecords(session),
   input = {},
   ready = false;
 let round = Math.max(0, ...sessionRecords.map((r) => r.round));
-const sound = createAudio();
+const sound = createAudio({
+  onStatus(status) {
+    $("music-status").textContent = {
+      loading: "Loading Meatgrinder… combat effects are ready.",
+      ready: "MEATGRINDER · 144 BPM · guitars, breakbeats & combat surge",
+      unavailable:
+        "Soundtrack could not load. Combat effects remain available.",
+    }[status];
+    $("retry-audio").hidden = status !== "unavailable";
+  },
+});
 sound.configure(options);
 const paths = {
   seed: '<path d="M6 18C-1 4 16-1 19 5c3 6-7 16-13 13Z"/><path d="m7 16 9-10"/>',
@@ -168,6 +183,9 @@ function configure() {
   write("banana_astra_settings", options);
   $("audio-enabled").checked = options.audio;
   $("volume").value = options.volume;
+  $("music-volume").value = options.musicVolume;
+  $("effects-volume").value = options.effectsVolume;
+  $("gore-enabled").checked = options.gore;
   $("reduced-effects").checked = options.quiet;
   $("battery-saver").checked = options.low;
   $("sound-button").textContent = options.audio ? "♫" : "♪̸";
@@ -304,9 +322,15 @@ function renderChoices() {
 }
 function consumeEvents() {
   if (!run.events.length) return;
-  renderer.emit(run.events, run);
+  renderer.emit(run.events, run, {
+    ...options,
+    quiet: options.quiet || motion.matches,
+  });
   for (const e of run.events) {
-    sound.sound(e.type);
+    sound.sound(e.type, {
+      ...e,
+      pan: Number.isFinite(e.x) ? (e.x - run.player.x) / 600 : 0,
+    });
     if (e.type === "boss")
       announce(e.name, "CHAMPION INCOMING · WATCH THE ATTACK WARNINGS", 3.6);
     if (e.type === "bossDefeated")
@@ -369,6 +393,7 @@ function start() {
   currentRecord = null;
   round++;
   renderer.reset();
+  sound.resetRun();
   controls.reset();
   accumulator = 0;
   buildSignature = "";
@@ -640,6 +665,24 @@ $("volume").addEventListener("input", () => {
   configure();
   sound.sound("xp");
 });
+for (const [id, key] of [
+  ["music-volume", "musicVolume"],
+  ["effects-volume", "effectsVolume"],
+])
+  $(id).addEventListener("input", () => {
+    options[key] = Number($(id).value);
+    sound.unlock();
+    configure();
+    if (key === "effectsVolume") sound.sound("shoot");
+  });
+$("gore-enabled").addEventListener("change", () => {
+  options.gore = $("gore-enabled").checked;
+  configure();
+});
+$("retry-audio").addEventListener("click", () => {
+  sound.unlock();
+  sound.retry();
+});
 $("reduced-effects").addEventListener("change", () => {
   options.quiet = $("reduced-effects").checked;
   configure();
@@ -735,10 +778,13 @@ function frame(timestamp) {
       }
       announcementTime -= elapsed;
       if (announcementTime <= 0) $("announcement").classList.remove("active");
-      sound.setIntensity(run.frenzy > 0 ? 2 : run.bossId ? 1 : 0);
+      sound.setIntensity(run.frenzy > 0 ? 2 : run.bossId ? 1 : 0, {
+        health: run.player.hp / run.player.maxHp,
+      });
     } else accumulator = 0;
     renderer.draw(run, playing ? elapsed : 0, {
       ...input,
+      gore: options.gore,
       quiet: options.quiet || motion.matches,
       low: options.low,
     });

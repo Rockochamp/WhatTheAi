@@ -599,7 +599,13 @@ function hit(s, e, damage, weapon, kx = 0, ky = 0) {
   s.stats.damage += Math.min(e.hp + amount, amount);
   s.weaponDamage[weapon] =
     (s.weaponDamage[weapon] || 0) + Math.min(e.hp + amount, amount);
-  event(s, "hit", { x: e.x, y: e.y, amount: Math.round(amount), critical });
+  event(s, "hit", {
+    x: e.x,
+    y: e.y,
+    amount: Math.round(amount),
+    critical,
+    weapon,
+  });
   if (e.hp <= 0) kill(s, e, weapon);
 }
 function hurt(s, amount, dx = 0, dy = 0) {
@@ -697,7 +703,7 @@ function fireWeapons(s, dt) {
         });
       }
       s.cooldowns[id] = (rank >= 4 ? 1.1 : 1.35) / st.haste;
-      event(s, "throw");
+      event(s, "throw", { weapon: id });
     } else if (id === "coconut") {
       const count = rank >= 5 ? 3 : rank >= 3 ? 2 : 1;
       for (let i = 0; i < count; i++)
@@ -716,7 +722,7 @@ function fireWeapons(s, dt) {
           burn: rank >= 4,
         });
       s.cooldowns[id] = 2.4 / st.haste;
-      event(s, "throw");
+      event(s, "throw", { weapon: id });
     } else if (id === "lightning") {
       const points = [{ x: p.x, y: p.y }],
         seen = new Set();

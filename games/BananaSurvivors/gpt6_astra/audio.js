@@ -1,267 +1,499 @@
-// Original, synthesized jungle breakbeat. No samples, downloads or autoplay.
-export function createAudio() {
+// MEATGRINDER: phase-aligned original industrial score + positional combat Foley.
+export const MUSIC_BPM = 144,
+  MUSIC_SECONDS = (32 * 4 * 60) / MUSIC_BPM;
+export const MAX_FX_VOICES = 40;
+const lengths = {
+  shot: 0.14,
+  hit: 0.17,
+  kill: 0.36,
+  bigKill: 0.62,
+  slice: 0.25,
+  toss: 0.24,
+  lightning: 0.42,
+  explode: 0.95,
+  hurt: 0.38,
+  dash: 0.27,
+  xp: 0.16,
+  level: 0.8,
+  upgrade: 0.45,
+  evolution: 1.6,
+  boss: 1.8,
+  death: 1.4,
+  pickup: 0.42,
+  cache: 0.72,
+  frenzy: 1.05,
+  wave: 0.7,
+};
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+export function makeEffect(kind, sampleRate = 44100, seed = 734) {
+  const duration = lengths[kind] || 0.2,
+    data = new Float32Array(Math.round(duration * sampleRate));
+  let random = seed >>> 0,
+    low = 0,
+    phase = 0,
+    second = 0,
+    peak = 0;
+  const chime = [
+    "xp",
+    "level",
+    "upgrade",
+    "evolution",
+    "pickup",
+    "cache",
+    "frenzy",
+    "wave",
+  ].includes(kind);
+  for (let i = 0; i < data.length; i++) {
+    const t = i / sampleRate,
+      u = t / duration;
+    random = (Math.imul(random, 1664525) + 1013904223) >>> 0;
+    const noise = random / 2147483648 - 1;
+    let value = 0,
+      frequency = 90,
+      decay = 14;
+    if (kind === "shot") {
+      frequency = 65 + 155 * Math.exp(-t * 85);
+      decay = 32;
+      low += 0.42 * (noise - low);
+      value =
+        low * Math.exp(-t * 68) * 0.85 + noise * Math.exp(-t * 280) * 0.42;
+    } else if (kind === "hit" || kind === "kill" || kind === "bigKill") {
+      const big = kind === "bigKill";
+      frequency = (big ? 50 : 92) + (big ? 170 : 340) * Math.exp(-t * 25);
+      decay = kind === "hit" ? 32 : big ? 7 : 12;
+      const cutoff = 0.07 + 0.4 * Math.exp(-t * 17);
+      low += cutoff * (noise - low);
+      const pulse = 0.45 + 0.55 * Math.pow(Math.sin(t * (big ? 76 : 139)), 2);
+      value =
+        low * pulse * Math.exp(-t * (big ? 6 : 11)) * 1.6 +
+        noise * Math.exp(-t * 100) * 0.22;
+      value += Math.sin(t * 2 * Math.PI * 1370) * Math.exp(-t * 73) * 0.14;
+    } else if (kind === "slice" || kind === "dash") {
+      frequency = kind === "dash" ? 100 + u * 750 : 260 - u * 180;
+      decay = 10;
+      low += (0.03 + 0.55 * Math.sin(u * Math.PI)) * (noise - low);
+      value = (noise - low) * Math.sin(Math.PI * u) ** 0.7 * 0.62;
+    } else if (kind === "toss") {
+      frequency = 180 - 110 * u;
+      decay = 24;
+      value = noise * Math.exp(-t * 100) * 0.45;
+    } else if (kind === "lightning") {
+      frequency = 65 + 40 * Math.sin(t * 63);
+      decay = 8;
+      low += 0.45 * (noise - low);
+      value =
+        (noise - low) *
+          (Math.sin(t * 680) > -0.2 ? 1 : 0.05) *
+          Math.exp(-t * 6) *
+          0.85 +
+        Math.sin(t * 2 * Math.PI * 191) * Math.exp(-t * 10) * 0.13;
+    } else if (kind === "explode" || kind === "hurt") {
+      frequency = (kind === "explode" ? 28 : 45) + 125 * Math.exp(-t * 32);
+      decay = kind === "explode" ? 5 : 14;
+      low += 0.16 * (noise - low);
+      value =
+        low * Math.exp(-t * (kind === "explode" ? 4 : 13)) * 1.7 +
+        noise * Math.exp(-t * 115) * 0.4;
+    } else if (kind === "boss") {
+      frequency = 55 + 10 * Math.sin(t * 5);
+      decay = 1.6;
+      low += 0.06 * (noise - low);
+      value =
+        low * 0.6 * Math.exp(-t * 2) +
+        Math.sin(2 * Math.PI * 58.27 * t) * Math.exp(-t * 1.4) * 0.34;
+      value +=
+        Math.sin(2 * Math.PI * (160 * t - 23 * t * t)) *
+        0.22 *
+        Math.sin(Math.PI * u);
+    } else if (kind === "death") {
+      frequency = 95 * Math.exp(-t * 2.2) + 23;
+      decay = 2.8;
+      low += 0.15 * (noise - low);
+      value = low * Math.exp(-t * 8) * 0.7;
+    } else if (chime) {
+      const root =
+        kind === "xp"
+          ? 880
+          : kind === "evolution"
+            ? 146.83
+            : kind === "frenzy"
+              ? 110
+              : 293.66;
+      const notes = kind === "xp" ? [1, 1.5] : [1, 1.498, 2, 2.378];
+      notes.forEach((ratio, j) => {
+        const elapsed = t - j * (kind === "xp" ? 0 : 0.055);
+        if (elapsed >= 0)
+          value +=
+            Math.sin(
+              2 * Math.PI * root * ratio * elapsed +
+                0.35 * Math.sin(2 * Math.PI * root * ratio * 2 * elapsed),
+            ) *
+            Math.exp(-elapsed * (kind === "xp" ? 31 : 6)) *
+            0.28;
+      });
+      if (["evolution", "frenzy", "wave"].includes(kind)) {
+        frequency = 42 + 90 * Math.exp(-t * 18);
+        decay = 4;
+        low += 0.2 * (noise - low);
+        value += low * Math.exp(-t * 6) * 0.6;
+      }
+    }
+    phase += (2 * Math.PI * frequency) / sampleRate;
+    second += (2 * Math.PI * frequency * 1.97) / sampleRate;
+    if (!chime || ["evolution", "frenzy", "wave"].includes(kind))
+      value +=
+        (Math.sin(phase) + 0.14 * Math.sin(second)) *
+        Math.exp(-t * decay) *
+        0.55;
+    const envelope =
+      Math.min(1, t / 0.0015) * Math.min(1, (duration - t) / 0.018);
+    value = Math.tanh(value * 1.6) * envelope;
+    data[i] = value;
+    peak = Math.max(peak, Math.abs(value));
+  }
+  const gain = 0.78 / Math.max(0.78, peak);
+  for (let i = 0; i < data.length; i++) data[i] *= gain;
+  return data;
+}
+export function createAudio({ onStatus = () => {} } = {}) {
   let ctx,
     master,
     musicBus,
     fxBus,
-    noise,
-    timer,
+    baseGain,
+    surgeGain,
+    compressor,
+    loading,
     enabled = true,
     volume = 0.45,
+    musicVolume = 0.8,
+    effectsVolume = 0.9,
     playing = false,
-    next = 0,
-    step = 0,
     intensity = 0,
-    lastShot = 0,
+    offset = 0,
+    started = 0,
+    transport = false,
+    disposed = false,
+    xpPitch = 0,
     lastXP = 0,
-    voices = 0;
-  const BPM = 128,
-    beat = 60 / BPM / 4;
-  const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
+    lastHeartbeat = -10;
+  const buffers = [],
+    samples = new Map(),
+    tracks = [],
+    voices = new Set(),
+    lastSounds = new Map();
+  let lowHealth = false;
   function init() {
-    if (ctx) return;
+    if (ctx || disposed) return;
     const Audio = window.AudioContext || window.webkitAudioContext;
     if (!Audio) return;
     ctx = new Audio();
     master = ctx.createGain();
     master.gain.value = 0;
-    const limiter = ctx.createDynamicsCompressor();
-    limiter.threshold.value = -15;
-    limiter.knee.value = 12;
-    limiter.ratio.value = 5;
-    limiter.attack.value = 0.003;
-    limiter.release.value = 0.2;
     musicBus = ctx.createGain();
-    musicBus.gain.value = 0.68;
     fxBus = ctx.createGain();
-    fxBus.gain.value = 0.6;
+    baseGain = ctx.createGain();
+    surgeGain = ctx.createGain();
+    surgeGain.gain.value = 0;
+    compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -9;
+    compressor.knee.value = 9;
+    compressor.ratio.value = 5;
+    compressor.attack.value = 0.004;
+    compressor.release.value = 0.14;
+    const highpass = ctx.createBiquadFilter();
+    highpass.type = "highpass";
+    highpass.frequency.value = 27;
+    baseGain.connect(musicBus);
+    surgeGain.connect(musicBus);
     musicBus.connect(master);
     fxBus.connect(master);
-    master.connect(limiter);
-    limiter.connect(ctx.destination);
-    noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    const data = noise.getChannelData(0);
-    let seed = 77;
-    for (let i = 0; i < data.length; i++) {
-      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-      data[i] = seed / 2147483648 - 1;
-    }
+    master.connect(highpass);
+    highpass.connect(compressor);
+    compressor.connect(ctx.destination);
   }
-  function tone(
-    frequency,
-    t,
-    duration,
-    gain = 0.15,
-    type = "sine",
-    bus = musicBus,
-    endFrequency,
-  ) {
-    if (!ctx || voices > 70) return;
-    voices++;
-    const oscillator = ctx.createOscillator(),
-      envelope = ctx.createGain();
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, t);
-    if (endFrequency)
-      oscillator.frequency.exponentialRampToValueAtTime(
-        Math.max(20, endFrequency),
-        t + duration,
-      );
-    envelope.gain.setValueAtTime(0.0001, t);
-    envelope.gain.exponentialRampToValueAtTime(
-      Math.max(0.0002, gain),
-      t + 0.008,
+  function setMix() {
+    if (!ctx) return;
+    master.gain.setTargetAtTime(enabled ? volume : 0, ctx.currentTime, 0.035);
+    musicBus.gain.setTargetAtTime(
+      playing ? musicVolume : 0,
+      ctx.currentTime,
+      0.07,
     );
-    envelope.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    oscillator.connect(envelope);
-    envelope.connect(bus);
-    oscillator.start(t);
-    oscillator.stop(t + duration + 0.025);
-    oscillator.onended = () => {
-      oscillator.disconnect();
-      envelope.disconnect();
-      voices--;
-    };
+    fxBus.gain.setTargetAtTime(effectsVolume, ctx.currentTime, 0.04);
+    surgeGain.gain.setTargetAtTime(
+      intensity === 2 ? 0.9 : intensity === 1 ? 0.66 : lowHealth ? 0.25 : 0,
+      ctx.currentTime,
+      0.28,
+    );
+    baseGain.gain.setTargetAtTime(
+      intensity > 0 ? 0.88 : 1,
+      ctx.currentTime,
+      0.2,
+    );
   }
-  function hiss(t, duration, gain, freq = 6000, bus = musicBus) {
-    if (!ctx || voices > 70) return;
-    voices++;
-    const source = ctx.createBufferSource(),
-      filter = ctx.createBiquadFilter(),
-      envelope = ctx.createGain();
-    source.buffer = noise;
-    filter.type = "highpass";
-    filter.frequency.value = freq;
-    envelope.gain.setValueAtTime(gain, t);
-    envelope.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    source.connect(filter);
-    filter.connect(envelope);
-    envelope.connect(bus);
-    source.start(t);
-    source.stop(t + duration);
-    source.onended = () => {
-      source.disconnect();
-      filter.disconnect();
-      envelope.disconnect();
-      voices--;
-    };
-  }
-  function schedule() {
-    if (!playing || !enabled || !ctx || ctx.state !== "running") return;
-    if (next < ctx.currentTime) next = ctx.currentTime + 0.04;
-    while (next < ctx.currentTime + 0.12) {
-      const bar = Math.floor(step / 16),
-        i = step % 16,
-        root = [38, 34, 41, 36][Math.floor(bar / 2) % 4],
-        t = next + (i % 2 ? 0.012 : 0);
-      // Syncopated kick, a dry backbeat, shuffled hats, and woody percussion.
-      if ([0, 6, 8, 11].includes(i) || (intensity > 0 && i === 14))
-        tone(135, t, 0.17, 0.55, "sine", musicBus, 43);
-      if (i === 4 || i === 12) {
-        hiss(t, 0.11, 0.2, 1300);
-        tone(175, t, 0.12, 0.15, "triangle", musicBus, 100);
-      }
-      if (i % 2 === 0 || intensity > 0)
-        hiss(t, i === 10 ? 0.1 : 0.035, i % 4 === 2 ? 0.072 : 0.042, 7000);
-      if ([3, 7, 15].includes(i))
-        tone(310 + (i % 3) * 80, t, 0.045, 0.065, "sine", musicBus, 170);
-      if ([0, 3, 6, 8, 10, 14].includes(i)) {
-        const interval = { 0: 0, 3: 12, 6: 7, 8: 0, 10: 10, 14: 7 }[i];
-        tone(
-          midi(root + interval),
-          t,
-          beat * (i === 0 ? 2.7 : 1.4),
-          0.19,
-          "triangle",
+  async function loadTracks() {
+    if (!ctx || loading || !enabled || disposed) return loading;
+    if (buffers[0] && buffers[1]) return;
+    onStatus("loading");
+    loading = (async () => {
+      const controller = new AbortController(),
+        timeout = setTimeout(() => controller.abort(), 16000);
+      try {
+        await Promise.all(
+          ["meatgrinder.mp3", "meatgrinder-surge.mp3"].map(async (name, i) => {
+            if (buffers[i]) return;
+            const response = await fetch(new URL(name, import.meta.url), {
+              signal: controller.signal,
+            });
+            if (!response.ok) throw Error("Soundtrack unavailable");
+            const data = await response.arrayBuffer();
+            const decoded = await ctx.decodeAudioData(data);
+            if (!disposed) buffers[i] = decoded;
+          }),
         );
-        tone(midi(root + interval - 12), t, 0.17, 0.1);
-      }
-      // Glassy marimba motif: a four-bar call and response, changing every phrase.
-      const motifs = [
-        [0, null, 7, 10, null, 12, 7, null],
-        [0, 3, null, 7, 10, null, 7, 3],
-        [12, null, 10, 7, null, 3, 7, null],
-        [7, 3, null, 0, 3, 7, null, 10],
-      ];
-      if (i % 2 === 0) {
-        const note = motifs[bar % 4][i / 2];
-        if (note !== null) {
-          const f = midi(root + 24 + note);
-          tone(f, t, 0.25, 0.12);
-          tone(f * 2.01, t, 0.085, 0.035);
+        if (!disposed) {
+          onStatus("ready");
+          if (playing) {
+            stopTracks();
+            startTracks();
+          }
         }
+      } catch {
+        if (!disposed) {
+          onStatus("unavailable");
+          if (playing && buffers[0]) startTracks();
+        }
+      } finally {
+        clearTimeout(timeout);
+        loading = null;
       }
-      if (i === 0) {
-        [0, 3, 7, 10].forEach((n, j) =>
-          tone(midi(root + 12 + n), t + j * 0.025, 1.5, 0.023, "triangle"),
-        );
-      }
-      if (intensity === 2 && i % 2 === 1)
-        tone(midi(root + 36 + [0, 7, 10, 12][i % 4]), t, 0.09, 0.035, "sine");
-      step++;
-      next += beat;
-    }
+    })();
+    return loading;
   }
-  function apply() {
-    if (master && ctx)
-      master.gain.setTargetAtTime(enabled ? volume : 0, ctx.currentTime, 0.05);
+  function startTracks() {
+    if (
+      !ctx ||
+      transport ||
+      !playing ||
+      !enabled ||
+      !buffers[0] ||
+      ctx.state !== "running" ||
+      disposed
+    )
+      return;
+    started = ctx.currentTime + 0.025;
+    transport = true;
+    buffers.forEach((buffer, i) => {
+      if (!buffer) return;
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.loopStart = 0;
+      source.loopEnd = Math.min(MUSIC_SECONDS, buffer.duration);
+      source.connect(i ? surgeGain : baseGain);
+      source.start(started, offset % source.loopEnd);
+      tracks.push(source);
+    });
+    setMix();
+  }
+  function stopTracks() {
+    if (transport && ctx)
+      offset =
+        (offset + Math.max(0, ctx.currentTime - started)) % MUSIC_SECONDS;
+    transport = false;
+    for (const source of tracks.splice(0)) {
+      try {
+        source.stop();
+      } catch {}
+      source.disconnect();
+    }
   }
   async function unlock() {
     try {
       init();
       if (ctx?.state === "suspended") await ctx.resume();
-      apply();
+      setMix();
+      loadTracks();
+      startTracks();
     } catch {
-      /* Silent play remains available. */
+      /* Audio failure must not stop a run. */
     }
   }
-  function start() {
-    playing = true;
-    if (!timer) timer = setInterval(schedule, 25);
-    if (ctx) next = ctx.currentTime + 0.04;
+  function sample(name) {
+    if (!samples.has(name)) {
+      const data = makeEffect(name, ctx.sampleRate);
+      const buffer = ctx.createBuffer(1, data.length, ctx.sampleRate);
+      buffer.copyToChannel(data, 0);
+      samples.set(name, buffer);
+    }
+    return samples.get(name);
+  }
+  function play(
+    name,
+    { gain = 1, pan = 0, rate = 1, delay = 0, priority = false } = {},
+  ) {
+    if (!enabled || !ctx || ctx.state !== "running" || disposed) return;
+    if (voices.size >= MAX_FX_VOICES) {
+      if (!priority) return;
+      const oldest = voices.values().next().value;
+      oldest.stop();
+    }
+    const source = ctx.createBufferSource(),
+      envelope = ctx.createGain(),
+      panner = ctx.createStereoPanner?.();
+    source.buffer = sample(name);
+    source.playbackRate.value = rate;
+    envelope.gain.value = gain;
+    source.connect(envelope);
+    if (panner) {
+      panner.pan.value = clamp(pan, -0.8, 0.8);
+      envelope.connect(panner);
+      panner.connect(fxBus);
+    } else envelope.connect(fxBus);
+    let ended = false;
+    const cleanup = () => {
+      if (ended) return;
+      ended = true;
+      voices.delete(voice);
+      source.disconnect();
+      envelope.disconnect();
+      panner?.disconnect();
+    };
+    const voice = {
+      stop() {
+        try {
+          source.stop();
+        } catch {}
+        cleanup();
+      },
+    };
+    voices.add(voice);
+    source.onended = cleanup;
+    source.start(ctx.currentTime + delay);
+  }
+  function sound(type, event = {}) {
+    if (!ctx || !enabled || disposed) return;
+    const t = ctx.currentTime,
+      pan = clamp(event.pan || 0, -0.75, 0.75),
+      jitter = 0.94 + Math.random() * 0.12;
+    const limits = {
+      hit: 0.035,
+      kill: 0.045,
+      shoot: 0.055,
+      throw: 0.07,
+      explode: 0.09,
+      lightning: 0.09,
+      xp: 0.08,
+    };
+    if (t - (lastSounds.get(type) ?? -100) < (limits[type] || 0)) return;
+    lastSounds.set(type, t);
+    if (type === "shoot") play("shot", { gain: 0.43, rate: jitter });
+    else if (type === "hit")
+      play(
+        event.weapon === "peels" || event.weapon === "boomerang"
+          ? "slice"
+          : "hit",
+        { gain: event.critical ? 0.56 : 0.28, pan, rate: jitter },
+      );
+    else if (type === "kill")
+      play(event.size > 100 ? "bigKill" : "kill", {
+        gain: event.size > 100 ? 0.82 : 0.62,
+        pan,
+        rate: jitter,
+      });
+    else if (type === "throw")
+      play(event.weapon === "coconut" ? "toss" : "slice", {
+        gain: 0.47,
+        rate: jitter,
+      });
+    else if (type === "explode") {
+      play("explode", { gain: 0.76, pan, priority: true });
+    } else if (type === "hurt") {
+      play("hurt", { gain: 0.95, priority: true });
+      musicBus.gain.cancelScheduledValues(t);
+      musicBus.gain.setTargetAtTime(musicVolume * 0.58, t, 0.015);
+      musicBus.gain.setTargetAtTime(playing ? musicVolume : 0, t + 0.2, 0.16);
+    } else if (type === "xp") {
+      if (t - lastXP > 1.1) xpPitch = 0;
+      lastXP = t;
+      play("xp", { gain: 0.17, rate: 2 ** (((xpPitch++ % 5) * 2) / 12) });
+    } else if (type === "bossDefeated")
+      play("evolution", { gain: 0.82, priority: true });
+    else if (type === "dash") play("dash", { gain: 0.68 });
+    else if (type === "lightning") play("lightning", { gain: 0.59, pan });
+    else if (lengths[type])
+      play(type, {
+        gain: ["death", "boss", "evolution"].includes(type) ? 0.95 : 0.62,
+        priority: true,
+      });
   }
   function pause() {
     playing = false;
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-    if (musicBus && ctx)
-      musicBus.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
+    stopTracks();
+    setMix();
   }
   function resume() {
-    if (musicBus && ctx)
-      musicBus.gain.setTargetAtTime(0.68, ctx.currentTime, 0.05);
-    start();
+    playing = true;
+    setMix();
+    startTracks();
+    if (ctx) loadTracks();
   }
-  function sound(type) {
-    if (!enabled || !ctx || ctx.state !== "running") return;
-    const t = ctx.currentTime;
-    if (type === "shoot") {
-      if (t - lastShot < 0.095) return;
-      lastShot = t;
-      tone(680, t, 0.05, 0.06, "triangle", fxBus, 250);
-    } else if (type === "xp") {
-      if (t - lastXP < 0.07) return;
-      lastXP = t;
-      tone(midi(79 + (step % 5)), t, 0.1, 0.075, "sine", fxBus);
-    } else if (type === "hurt") {
-      hiss(t, 0.12, 0.18, 300, fxBus);
-      tone(135, t, 0.15, 0.2, "sawtooth", fxBus, 50);
-    } else if (type === "dash" || type === "throw") {
-      hiss(t, type === "dash" ? 0.2 : 0.08, 0.065, 2800, fxBus);
-      tone(220, t, 0.12, 0.045, "triangle", fxBus, 650);
-    } else if (type === "lightning") {
-      hiss(t, 0.12, 0.09, 1700, fxBus);
-    } else if (type === "explode") {
-      hiss(t, 0.22, 0.14, 150, fxBus);
-      tone(95, t, 0.2, 0.24, "sine", fxBus, 30);
-    } else if (
-      [
-        "level",
-        "upgrade",
-        "cache",
-        "pickup",
-        "evolution",
-        "bossDefeated",
-        "frenzy",
-      ].includes(type)
-    ) {
-      const notes =
-        type === "evolution" ? [62, 65, 69, 74, 77, 81] : [74, 77, 81];
-      notes.forEach((n, i) =>
-        tone(midi(n), t + i * 0.055, 0.34, 0.1, "sine", fxBus),
-      );
-    } else if (type === "boss") {
-      [38, 39, 38].forEach((n, i) =>
-        tone(midi(n), t + i * 0.22, 0.38, 0.15, "sawtooth", fxBus),
-      );
-    } else if (type === "death") {
-      [69, 65, 62, 50].forEach((n, i) =>
-        tone(midi(n), t + i * 0.13, 0.5, 0.12, "triangle", fxBus),
-      );
-    }
+  function resetRun() {
+    stopTracks();
+    offset = 0;
+    intensity = 0;
+    lowHealth = false;
+    lastSounds.clear();
+    lastHeartbeat = -10;
+    xpPitch = 0;
   }
   return {
     unlock,
-    resume,
     pause,
+    resume,
+    resetRun,
     sound,
-    setIntensity(value) {
-      intensity = value;
+    setIntensity(value, { health = 1 } = {}) {
+      const next = clamp(value, 0, 2),
+        hurt = health < 0.3;
+      if (next !== intensity || hurt !== lowHealth) {
+        intensity = next;
+        lowHealth = hurt;
+        setMix();
+      }
+      if (playing && hurt && ctx && ctx.currentTime - lastHeartbeat > 1.1) {
+        lastHeartbeat = ctx.currentTime;
+        play("hit", { gain: 0.18, rate: 0.58 });
+        play("hit", { gain: 0.1, rate: 0.65, delay: 0.17 });
+      }
     },
     configure(options) {
-      enabled = options.audio;
-      volume = options.volume;
-      apply();
-      if (!enabled && timer) {
-        clearInterval(timer);
-        timer = null;
-      } else if (enabled && playing && !timer)
-        timer = setInterval(schedule, 25);
+      const wasEnabled = enabled;
+      enabled = options.audio !== false;
+      volume = clamp(
+        Number.isFinite(options.volume) ? options.volume : 0.45,
+        0,
+        1,
+      );
+      musicVolume = clamp(options.musicVolume ?? 0.8, 0, 1);
+      effectsVolume = clamp(options.effectsVolume ?? 0.9, 0, 1);
+      setMix();
+      if (!enabled) stopTracks();
+      else if (!wasEnabled) {
+        startTracks();
+        if (ctx) loadTracks();
+      }
+    },
+    retry() {
+      return loadTracks();
     },
     dispose() {
+      disposed = true;
       pause();
+      for (const voice of [...voices]) voice.stop();
+      samples.clear();
+      buffers.length = 0;
       ctx?.close();
     },
   };

@@ -19,13 +19,19 @@ An illustrated jungle survival roguelite. Open `game.html` through an HTTP serve
 
 Entity limits are 220 monsters, 280 projectiles, 360 pickups and 65 area effects. A spatial grid limits collision searches. XP merges at the pickup cap. Later waves increase health, damage and pack size; enemy difficulty never scales with the player's XP level. Rendering honors reduced motion and battery saver, caps pixel density, and lowers quality under sustained slow frames. Input and the simulation freeze on pause, upgrade selection and tab loss.
 
-`audio.js` synthesizes the original **Overripe After Dark** soundtrack: 128 BPM syncopated jungle percussion, sub-bass, marimba-like call-and-response and shifting minor chords. Bosses and frenzy add layers. All sounds start after a user gesture, with volume/mute controls. Audio buffers are reused and synth voices disconnect after playback.
+`audio.js` now plays **Meatgrinder**, an original 144 BPM industrial survival score with distorted power-chord guitar riffs, sub-bass, heavy breakbeats, metallic percussion, dark interval beds, breakdowns and lead variations. Two synchronized 32-bar stems let champion and frenzy combat bring in extra guitars, drums and a counterline. The transport preserves musical position across pause and resets for a new run. Low health adds a heartbeat.
+
+The score is rendered by `scripts/render-banana-audio.py` using NumPy and ffmpeg; it contains no third-party samples. `meatgrinder.mp3` and `meatgrinder-surge.mp3` are decoded only after a user gesture. Music download failure leaves combat effects playable and offers retry. Music and combat effects have separate volume controls beneath the master volume.
+
+Combat effects are cached synthesized Foley: fleshy hit thuds, wet kill splashes, bone cracks, heavier large-monster deaths, punchy gunfire, blade whooshes, coconut throws, electrical crackle, bass-heavy explosions and distinct progression stingers. Hits are spatialized and rate-limited. A 40-voice cap and final compressor keep dense combat bounded.
+
+`gore.js` adds directional blood spray, bouncing flesh, exposed bone and curled tissue, plus blood pools and small landing stains. It uses its own RNG, runs entirely outside the gameplay simulation, and draws stains beneath danger warnings and pickups. Budgets: 280 flying droplets, 64 chunks, 140 stains, with lower limits in battery saver. The blood-and-gore preference defaults on; reduced effects lowers particle counts while keeping gore visible.
 
 `records.js` uses the site's existing Firebase project and a separate `leaderboard_banana_survivors_gpt6_astra_v1` collection, plus `stats_banana_survivors_gpt6_astra_v1`. Immutable run IDs and transactions make retries idempotent. Client-side leaderboards share the existing site's trust model; scores are not server-authoritatively simulated or suitable for prizes. Names are rendered as text, never HTML. Network failure retains local scores and exposes retry.
 
 ## Validation
 
-From the repository root: `node --test tests/banana_astra.test.mjs`.
+From the repository root: `node --test tests/banana_astra.test.mjs tests/banana_effects.test.mjs`.
 
 The suite covers movement, pause timing, touch plus independent dash, input cleanup, collision tunneling, damage grace, repeat enemy attacks, champion rewards, every weapon at ranks I/V, upgrade limits, XP overflow, pickup saturation, ranking validation, global retry idempotency, and a ten-minute entity stress simulation. The stress fixture deliberately grants invulnerability to keep every subsystem active; it is not used by the shipped game.
 
