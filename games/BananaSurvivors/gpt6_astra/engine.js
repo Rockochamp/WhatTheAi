@@ -1,5 +1,5 @@
 // All gameplay lives here, independent of pixels, audio, storage and wall time.
-export const RULESET = 2,
+export const RULESET = 3,
   WAVE_SECONDS = 50,
   MAX_ENEMIES = 220,
   MAX_SHOTS = 280,
@@ -136,6 +136,36 @@ export const PERKS = {
     max: 3,
     color: "#ffadb0",
     description: "+20 max health. Heal 20 immediately.",
+  },
+};
+// Masteries never add entities or shorten weapon timers: late builds stay inexpensive.
+export const MASTERIES = {
+  force: {
+    name: "Black seed mastery",
+    icon: "seed",
+    color: "#ffe096",
+    description:
+      "+8% weapon damage, added to your mastery bonus. No rank limit.",
+  },
+  hunter: {
+    name: "Kingslayer mastery",
+    icon: "star",
+    color: "#ffa477",
+    description:
+      "+12% damage against bosses, added to your boss bonus. No rank limit.",
+  },
+  vigor: {
+    name: "Last peel standing",
+    icon: "heart",
+    color: "#ffadb0",
+    description: "+8 maximum health. Recover 8 health now. No rank limit.",
+  },
+  resolve: {
+    name: "Combat medic",
+    icon: "dash",
+    color: "#79e0c4",
+    description:
+      "Every dash heals 2 more health. No rank limit. Keep moving to recover.",
   },
 };
 export const LOADOUTS = {
@@ -331,6 +361,11 @@ export function createRun(seed = 1, loadout = "classic") {
     wave: 1,
     waveTime: 0,
     bossId: null,
+    showdown: null,
+    stageHazardClock: 8,
+    ward: 0,
+    frost: 0,
+    mastery: {},
     bosses: 0,
     kills: 0,
     score: 0,
@@ -390,7 +425,8 @@ export function multiplier(s) {
 }
 export function stats(s) {
   return {
-    damage: 1 + (s.perks.power || 0) * 0.15,
+    damage:
+      (1 + (s.perks.power || 0) * 0.15) * (1 + (s.mastery.force || 0) * 0.08),
     haste: 1 + (s.perks.haste || 0) * 0.12 + (s.frenzy > 0 ? 0.65 : 0),
     speed: s.player.speed * (1 + (s.perks.boots || 0) * 0.08),
     area: 1 + (s.perks.area || 0) * 0.16,
@@ -401,6 +437,17 @@ export function stats(s) {
   };
 }
 export function upgradeInfo(s, id) {
+  if (id.startsWith("mastery_")) {
+    const key = id.slice(8);
+    if (MASTERIES[key])
+      return {
+        id,
+        ...MASTERIES[key],
+        kind: "ENDLESS MASTERY",
+        rank: (s.mastery[key] || 0) + 1,
+        max: Infinity,
+      };
+  }
   const weapon = WEAPONS[id],
     rank = (weapon ? s.weapons[id] : s.perks[id]) || 0;
   if (weapon)
@@ -436,7 +483,17 @@ export function offerUpgrades(s) {
     ),
     ...Object.keys(PERKS).filter((id) => (s.perks[id] || 0) < PERKS[id].max),
   ];
-  if (s.player.hp < s.player.maxHp * 0.85 || pool.length < 3) pool.push("heal");
+  if (
+    s.level >= 35 ||
+    Object.values(s.weapons).filter((rank) => rank === 5).length >= 4 ||
+    pool.length < 3
+  )
+    pool.push(...Object.keys(MASTERIES).map((id) => `mastery_${id}`));
+  if (
+    s.player.hp < s.player.maxHp * 0.55 &&
+    pool.some((id) => !id.startsWith("mastery_"))
+  )
+    pool.push("heal");
   const selected = [];
   const evolutions = pool.filter((id) => s.weapons[id] === 4);
   if (evolutions.length) {
@@ -473,6 +530,13 @@ export function chooseUpgrade(s, id) {
     if (id === "vitality") {
       s.player.maxHp += 20;
       s.player.hp = Math.min(s.player.maxHp, s.player.hp + 20);
+    }
+  } else if (id.startsWith("mastery_")) {
+    const key = id.slice(8);
+    s.mastery[key] = (s.mastery[key] || 0) + 1;
+    if (key === "vigor") {
+      s.player.maxHp += 8;
+      s.player.hp = Math.min(s.player.maxHp, s.player.hp + 8);
     }
   } else s.player.hp = Math.min(s.player.maxHp, s.player.hp + 40);
   s.pending = Math.max(0, s.pending - 1);
@@ -524,10 +588,7 @@ export function spawnEnemy(s, type = "meatball", position) {
       position?.x ?? clamp(s.player.x + Math.cos(a) * range, -ARENA, ARENA),
     y = position?.y ?? clamp(s.player.y + Math.sin(a) * range, -ARENA, ARENA);
   const pressure = hordePressure(s);
-  const hp =
-    type === "boss"
-      ? 600 + s.wave * 220 + s.wave * s.wave * 40 + s.time * 1.4
-      : def.hp * pressure.health;
+  const hp = type === "boss" ? bossHealth(s.wave) : def.hp * pressure.health;
   const e = {
     id: s.nextId++,
     type,
@@ -538,7 +599,22 @@ export function spawnEnemy(s, type = "meatball", position) {
     hp,
     maxHp: hp,
     speed: def.speed * pressure.speed,
-    sprite: type === "boss" && s.wave % 3 === 0 ? 12 : def.sprite,
+    sprite:
+      type === "boss"
+        ? s.wave % 3 === 0
+          ? 12
+          : s.wave % 3 === 2
+            ? 3
+            : 7
+        : def.sprite,
+    attackIndex: 0,
+    enraged: false,
+    recovery: 0,
+    elite:
+      type !== "boss" &&
+      type !== "meatling" &&
+      s.wave >= 4 &&
+      s.random() < Math.min(0.32, (s.wave - 2) * 0.025),
     born: 0.65,
     age: 0,
     hit: 0,
@@ -554,6 +630,15 @@ export function spawnEnemy(s, type = "meatball", position) {
     charge: 0,
     tick: 0,
   };
+  if (e.elite) {
+    e.hp *= 2;
+    e.maxHp = e.hp;
+    e.damage *= 1.25;
+    e.speed *= 1.08;
+    e.size *= 1.12;
+    e.xp *= 3;
+    e.score *= 3;
+  }
   s.enemies.push(e);
   if (type === "boss") {
     s.bossId = e.id;
@@ -561,17 +646,52 @@ export function spawnEnemy(s, type = "meatball", position) {
   }
   return e;
 }
-// Time keeps pressure climbing even when a player stalls a champion.
+// Stage growth wins over additive mastery, without ever increasing entity budgets.
+export function bossHealth(stage) {
+  const w = Math.max(0, stage - 1);
+  return 1200 * (1 + w * 0.7) * 1.09 ** Math.min(w, 150);
+}
+export function stageTrait(stage) {
+  if (stage < 4) return "Learn the hunt";
+  return ["Feral packs", "Blood rain", "Iron tide"][(stage - 4) % 3];
+}
 export function hordePressure(s) {
   const t = Math.max(0, s.time),
     w = Math.max(0, s.wave - 1);
   return {
-    interval: Math.max(0.18, 0.64 / (1 + t / 90 + w * 0.1)),
-    pack: Math.min(6, 1 + Math.floor(t / 32)),
-    health: 1 + w * 0.28 + t * 0.004 + Math.max(0, w - 3) ** 2 * 0.13,
-    damage: 1 + w * 0.065 + t * 0.0025,
-    speed: 1.22 + Math.min(0.75, t * 0.0018) + Math.min(0.35, w * 0.035),
+    interval: Math.max(0.18, 0.64 / (1 + t / 90 + w * 0.16)),
+    pack: Math.min(6, 1 + Math.floor(t / 32) + Math.floor(w / 5)),
+    health: (1 + w * 0.18 + t * 0.002) * 1.14 ** Math.min(w, 150),
+    damage: 1 + w * 0.06 + w * w * 0.006 + t * 0.0008,
+    speed: 1.22 + Math.min(0.68, t * 0.0018) + Math.min(0.35, w * 0.035),
   };
+}
+function beginShowdown(s) {
+  const p = s.player;
+  s.showdown = {
+    x: clamp(p.x, -850, 850),
+    y: clamp(p.y, -850, 850),
+    radius: 560,
+    time: 0,
+  };
+  const d = unit(p.x - s.showdown.x, p.y - s.showdown.y);
+  if (Math.hypot(p.x - s.showdown.x, p.y - s.showdown.y) > 490) {
+    p.x = s.showdown.x + d.x * 490;
+    p.y = s.showdown.y + d.y * 490;
+  }
+  // A deliberate duel: dismiss the hunt without XP, then admit bounded reinforcements.
+  s.enemies = [];
+  s.shots = s.shots.filter((b) => !b.hostile);
+  s.hazards = s.hazards.filter((h) => h.friendly);
+  const angle = Math.atan2(p.y - s.showdown.y, p.x - s.showdown.x) + Math.PI;
+  const boss = spawnEnemy(s, "boss", {
+    x: s.showdown.x + Math.cos(angle) * 330,
+    y: s.showdown.y + Math.sin(angle) * 330,
+  });
+  boss.born = 1.6;
+  boss.attack = 0.5;
+  p.invulnerable = Math.max(p.invulnerable, 1.6);
+  s.spawnClock = 3;
 }
 export const ENCOUNTERS = [
   {
@@ -620,6 +740,10 @@ export const ENCOUNTERS = [
 export function enemyForTime(s) {
   const t = s.time,
     r = s.random();
+  if (s.wave >= 4 && stageTrait(s.wave) === "Iron tide" && r < 0.25)
+    return "brute";
+  if (s.wave >= 4 && stageTrait(s.wave) === "Feral packs" && r < 0.25)
+    return "carver";
   if (t >= 125 && r > 0.95) return "broodmother";
   if (t >= 100 && r > 0.86) return "splitter";
   if (t >= 78 && r > 0.76) return "ribcannon";
@@ -693,7 +817,13 @@ function kill(s, e, weapon) {
   s.score += Math.round(e.score * multiplier(s));
   s.charge += e.type === "boss" ? 25 : 2;
   event(s, "kill", { x: e.x, y: e.y, size: e.size, sprite: e.sprite, weapon });
-  drop(s, e.x, e.y, "xp", e.xp);
+  drop(
+    s,
+    e.x,
+    e.y,
+    "xp",
+    e.xp * (1 + Math.min(4, Math.floor((s.wave - 1) / 4))),
+  );
   if (e.type === "splitter")
     for (let i = 0; i < 4; i++)
       spawnEnemy(s, "meatling", {
@@ -702,8 +832,13 @@ function kill(s, e, weapon) {
       });
   if (e.type === "boss") {
     s.bossId = null;
+    s.showdown = null;
     s.bosses++;
     s.transition = 3.5;
+    s.enemies.forEach((enemy) => {
+      if (enemy !== e) enemy.dead = true;
+    });
+    s.player.invulnerable = Math.max(s.player.invulnerable, 4);
     s.player.hp = Math.min(s.player.maxHp, s.player.hp + 25);
     s.rerolls = Math.min(3, s.rerolls + 1);
     s.hazards = [];
@@ -727,11 +862,16 @@ function kill(s, e, weapon) {
 function hit(s, e, damage, weapon, kx = 0, ky = 0) {
   if (e.dead || e.born > 0) return;
   const critical = s.random() < stats(s).crit,
-    amount = damage * (critical ? 1.8 : 1);
+    amount =
+      damage *
+      (critical ? 1.8 : 1) *
+      (e.type === "boss"
+        ? (1 + (s.mastery.hunter || 0) * 0.12) * (e.recovery > 0 ? 1.35 : 1)
+        : 1);
   e.hp -= amount;
   e.hit = 0.12;
-  e.kx += kx;
-  e.ky += ky;
+  e.kx += kx * (e.type === "boss" ? 0.08 : 1);
+  e.ky += ky * (e.type === "boss" ? 0.08 : 1);
   s.stats.damage += Math.min(e.hp + amount, amount);
   s.weaponDamage[weapon] =
     (s.weaponDamage[weapon] || 0) + Math.min(e.hp + amount, amount);
@@ -747,6 +887,12 @@ function hit(s, e, damage, weapon, kx = 0, ky = 0) {
 function hurt(s, amount, dx = 0, dy = 0) {
   const p = s.player;
   if (p.invulnerable > 0 || p.dash > 0 || s.phase === "dead") return;
+  if (s.ward > 0) {
+    s.ward = 0;
+    p.invulnerable = 0.8;
+    event(s, "pickup", { kind: "wardBreak" });
+    return;
+  }
   p.hp = Math.max(0, p.hp - amount * stats(s).armor);
   p.invulnerable = 0.68;
   p.hit = 0.25;
@@ -761,7 +907,16 @@ function hurt(s, amount, dx = 0, dy = 0) {
   }
 }
 function shoot(s, b) {
-  if (s.shots.length < MAX_SHOTS)
+  // Reserve room for threats; an evolved build must not silently erase boss attacks.
+  if (b.hostile && s.shots.length >= MAX_SHOTS) {
+    const i = s.shots.findIndex((shot) => !shot.hostile);
+    if (i >= 0) s.shots.splice(i, 1);
+  }
+  if (
+    s.shots.length < MAX_SHOTS &&
+    (b.hostile ||
+      s.shots.filter((shot) => !shot.hostile).length < MAX_SHOTS - 64)
+  )
     s.shots.push({
       id: s.nextId++,
       age: 0,
@@ -773,7 +928,14 @@ function shoot(s, b) {
     });
 }
 function hazard(s, h) {
-  if (s.hazards.length < 65)
+  if (!h.friendly && s.hazards.length >= 65) {
+    const i = s.hazards.findIndex((area) => area.friendly);
+    if (i >= 0) s.hazards.splice(i, 1);
+  }
+  if (
+    s.hazards.length < 65 &&
+    (!h.friendly || s.hazards.filter((area) => area.friendly).length < 57)
+  )
     s.hazards.push({ id: s.nextId++, age: 0, triggered: false, ...h });
 }
 function explode(s, x, y, r, damage, weapon) {
@@ -999,6 +1161,15 @@ function enemiesStep(s, dt) {
       my = d.y,
       speed = e.speed;
     e.attack -= dt;
+    e.recovery = Math.max(0, e.recovery - dt);
+    if (
+      e.type === "boss" &&
+      !e.enraged &&
+      (e.hp <= e.maxHp * 0.5 || (s.showdown?.time || 0) >= 45)
+    ) {
+      e.enraged = true;
+      event(s, "enrage");
+    }
     if (e.type === "carver" && distance > 85 && !e.windup && !e.charge) {
       const side = e.id % 2 ? 1 : -1;
       const flank =
@@ -1049,28 +1220,71 @@ function enemiesStep(s, dt) {
       e.ax = d.x;
       e.ay = d.y;
     } else if (e.type === "boss" && e.attack <= 0 && !e.windup && !e.charge) {
-      const pattern = (s.wave - 1) % 3;
-      e.windup = pattern === 0 ? 0.9 : 1.05;
-      e.action = pattern === 0 ? "charge" : pattern === 1 ? "slam" : "burst";
+      const sets = [
+        ["charge", "fan", "slam"],
+        ["slam", "burst", "fan"],
+        ["burst", "rain", "summon"],
+      ];
+      e.action = sets[(s.wave - 1) % 3][e.attackIndex++ % 3];
+      e.windup = e.action === "charge" ? 0.85 : 1.05;
       e.ax = d.x;
       e.ay = d.y;
-      if (e.action === "slam")
-        hazard(s, {
-          x: p.x,
-          y: p.y,
-          r: 115,
-          delay: 1.05,
-          life: 1.5,
-          friendly: false,
-          damage: e.damage * 1.12,
-        });
+      event(s, "bossAttack", { action: e.action });
+      if (["slam", "rain"].includes(e.action)) {
+        const count =
+          e.action === "rain" ? (e.enraged ? 5 : 3) : e.enraged ? 3 : 1;
+        for (let i = 0; i < count; i++) {
+          const a = (i * Math.PI * 2) / Math.max(1, count - 1) + e.age;
+          const offset = i === 0 ? 0 : 165;
+          hazard(s, {
+            x: clamp(p.x + Math.cos(a) * offset, -ARENA, ARENA),
+            y: clamp(p.y + Math.sin(a) * offset, -ARENA, ARENA),
+            r: e.action === "rain" ? 86 : 110,
+            delay: 1.05 + i * 0.18,
+            life: 1.5 + i * 0.18,
+            friendly: false,
+            damage: e.damage * 1.15,
+          });
+        }
+      }
     }
     if (e.windup > 0) {
       speed = 0;
       e.windup -= dt;
       if (e.windup <= 0) {
         e.windup = 0;
-        if (e.action === "charge") e.charge = e.type === "boss" ? 0.8 : 0.55;
+        if (e.action === "charge") e.charge = e.type === "boss" ? 0.78 : 0.55;
+        if (e.type === "boss" && e.action !== "charge") {
+          e.recovery = 1.1;
+          e.attack = e.enraged ? 1.75 : 2.8;
+          if (e.action === "fan") {
+            const count = e.enraged ? 9 : 5;
+            for (let i = 0; i < count; i++) {
+              const a = Math.atan2(e.ay, e.ax) + (i - (count - 1) / 2) * 0.19;
+              shoot(s, {
+                kind: "bone",
+                hostile: true,
+                x: e.x,
+                y: e.y,
+                vx: Math.cos(a) * 245,
+                vy: Math.sin(a) * 245,
+                life: 3.5,
+                r: 8,
+                damage: e.damage * 0.8,
+              });
+            }
+          }
+          if (e.action === "summon") {
+            const room = Math.max(0, 18 - s.enemies.length);
+            for (let i = 0; i < Math.min(e.enraged ? 6 : 3, room); i++) {
+              const a = (i * Math.PI * 2) / 6;
+              spawnEnemy(s, i % 2 ? "hound" : "carver", {
+                x: e.x + Math.cos(a) * 100,
+                y: e.y + Math.sin(a) * 100,
+              });
+            }
+          }
+        }
         if (e.action === "spit") {
           shoot(s, {
             kind: "acid",
@@ -1086,25 +1300,28 @@ function enemiesStep(s, dt) {
           e.attack = 2.7;
         }
         if (e.action === "burst") {
-          for (let i = 0; i < 12; i++) {
-            const a = (i * Math.PI) / 6 + s.time * 0.2;
+          const count = e.enraged ? 20 : 14;
+          // Two missing spokes make a readable safe gap, even in the enraged phase.
+          for (let i = 2; i < count; i++) {
+            const a =
+              (i * Math.PI * 2) / count + Math.atan2(e.ay, e.ax) - Math.PI / 2;
             shoot(s, {
               kind: "acid",
               hostile: true,
               x: e.x,
               y: e.y,
-              vx: Math.cos(a) * 160,
-              vy: Math.sin(a) * 160,
+              vx: Math.cos(a) * (e.enraged ? 210 : 175),
+              vy: Math.sin(a) * (e.enraged ? 210 : 175),
               life: 4,
               r: 9,
               damage: e.damage * 0.72,
             });
           }
-          e.attack = 3.7;
+          e.attack = e.enraged ? 1.75 : 2.8;
         }
         if (e.action === "slam") {
           event(s, "slam", { x: p.x, y: p.y });
-          e.attack = 3.2;
+          e.attack = e.enraged ? 1.75 : 2.8;
         }
         if (e.action === "bones") {
           const aim = Math.atan2(e.ay, e.ax);
@@ -1163,7 +1380,8 @@ function enemiesStep(s, dt) {
       speed = e.type === "boss" ? 430 : 340;
       if (e.charge <= 0) {
         e.charge = 0;
-        e.attack = e.type === "boss" ? 3.4 : 3.2;
+        e.attack = e.type === "boss" ? (e.enraged ? 1.75 : 2.8) : 3.2;
+        if (e.type === "boss") e.recovery = 1.2;
         e.action = "";
       }
     } else if (!e.windup) {
@@ -1187,7 +1405,17 @@ function enemiesStep(s, dt) {
         my /= norm;
       }
     }
-    if (e.slow > 0) speed *= 0.55;
+    if (e.slow > 0 || s.frost > 0) speed *= e.type === "boss" ? 0.85 : 0.55;
+    if (e.type === "boss" && e.recovery > 0) speed = 0;
+    if (s.showdown) {
+      const c = s.showdown,
+        distance = Math.hypot(e.x - c.x, e.y - c.y),
+        bound = c.radius - e.r;
+      if (distance > bound) {
+        e.x = c.x + ((e.x - c.x) / distance) * bound;
+        e.y = c.y + ((e.y - c.y) / distance) * bound;
+      }
+    }
     e.kx *= Math.exp(-dt * 8);
     e.ky *= Math.exp(-dt * 8);
     e.x = clamp(e.x + (mx * speed + e.kx) * dt, -ARENA - 70, ARENA + 70);
@@ -1232,8 +1460,21 @@ function dropsStep(s, dt) {
       } else if (d.kind === "frenzy") {
         s.frenzy = 9;
         event(s, "frenzy");
+      } else if (d.kind === "ward") {
+        s.ward = 16;
+        event(s, "pickup", { kind: "ward" });
+      } else if (d.kind === "frost") {
+        s.frost = 7;
+        event(s, "pickup", { kind: "frost" });
       } else if (d.kind === "nuke") {
-        explode(s, p.x, p.y, 760, 220 + s.wave * 30, "nuke");
+        explode(
+          s,
+          p.x,
+          p.y,
+          760,
+          (220 + s.wave * 30) * stats(s).damage,
+          "nuke",
+        );
         event(s, "pickup", { kind: d.kind });
       }
     } else if (d.age > 70 && d.kind !== "xp") d.remove = true;
@@ -1273,6 +1514,8 @@ export function update(s, dt, input = {}) {
     st = stats(s);
   s.time += dt;
   s.frenzy = Math.max(0, s.frenzy - dt);
+  s.ward = Math.max(0, s.ward - dt);
+  s.frost = Math.max(0, s.frost - dt);
   s.comboTime -= dt;
   if (s.comboTime <= 0) s.combo = 0;
   p.invulnerable = Math.max(0, p.invulnerable - dt);
@@ -1295,6 +1538,7 @@ export function update(s, dt, input = {}) {
     p.dashCd = st.dashCd;
     p.invulnerable = 0.28;
     s.stats.dashes++;
+    p.hp = Math.min(p.maxHp, p.hp + (s.mastery.resolve || 0) * 2);
     event(s, "dash", { x: p.x, y: p.y, dx: p.dx, dy: p.dy });
     if (s.weapons.peels === 5)
       hazard(s, {
@@ -1317,11 +1561,23 @@ export function update(s, dt, input = {}) {
   p.x = clamp(p.x + x * speed * dt, -ARENA, ARENA);
   p.y = clamp(p.y + y * speed * dt, -ARENA, ARENA);
   p.distance += Math.hypot(x, y) * speed * dt;
+  if (s.showdown) {
+    const c = s.showdown;
+    c.time += dt;
+    c.radius = Math.max(350, 560 - Math.max(0, c.time - 65) * 2);
+    const distance = Math.hypot(p.x - c.x, p.y - c.y),
+      bound = c.radius - p.r;
+    if (distance > bound) {
+      p.x = c.x + ((p.x - c.x) / distance) * bound;
+      p.y = c.y + ((p.y - c.y) / distance) * bound;
+    }
+  }
   if (s.transition > 0) {
     s.transition -= dt;
     if (s.transition <= 0) {
       s.wave++;
       s.waveTime = 0;
+      s.stageHazardClock = 8;
       s.spawnClock = 0.35;
       s.cache = {
         x: clamp(p.x + Math.cos(s.wave * 2.4) * 360, -ARENA + 80, ARENA - 80),
@@ -1332,11 +1588,11 @@ export function update(s, dt, input = {}) {
     }
   } else if (!s.bossId) {
     s.waveTime += dt;
-    if (s.waveTime >= WAVE_SECONDS) spawnEnemy(s, "boss");
+    if (s.waveTime >= WAVE_SECONDS) beginShowdown(s);
   }
   if (s.transition <= 0) {
     const next = ENCOUNTERS[s.encounter];
-    if (next && s.time >= next.at) {
+    if (next && s.time >= next.at && !s.bossId) {
       s.encounter++;
       spawnPackMember(s, next.type);
       event(s, "encounter", { name: next.name, tip: next.tip });
@@ -1344,9 +1600,30 @@ export function update(s, dt, input = {}) {
     s.spawnClock -= dt;
     if (s.spawnClock <= 0) {
       const pressure = hordePressure(s);
-      s.spawnClock = pressure.interval * (s.bossId ? 1.18 : 1);
-      for (let i = 0; i < pressure.pack; i++)
-        spawnPackMember(s, enemyForTime(s));
+      s.spawnClock = s.bossId
+        ? Math.max(1.25, 3 - s.wave * 0.07)
+        : pressure.interval;
+      const count = s.bossId
+        ? s.enemies.length < Math.min(42, 10 + s.wave * 2)
+          ? 1
+          : 0
+        : pressure.pack;
+      for (let i = 0; i < count; i++) spawnPackMember(s, enemyForTime(s));
+    }
+    if (!s.bossId && stageTrait(s.wave) === "Blood rain") {
+      s.stageHazardClock -= dt;
+      if (s.stageHazardClock <= 0) {
+        s.stageHazardClock = Math.max(3.5, 8 - s.wave * 0.15);
+        hazard(s, {
+          x: p.x,
+          y: p.y,
+          r: 95,
+          delay: 1.25,
+          life: 1.65,
+          friendly: false,
+          damage: 18 * hordePressure(s).damage,
+        });
+      }
     }
   }
   s.supplyClock -= dt;
@@ -1357,7 +1634,9 @@ export function update(s, dt, input = {}) {
       s,
       clamp(p.x + Math.cos(a) * 250, -ARENA, ARENA),
       clamp(p.y + Math.sin(a) * 250, -ARENA, ARENA),
-      p.hp < p.maxHp * 0.55 ? "heal" : s.random() < 0.5 ? "frenzy" : "magnet",
+      p.hp < p.maxHp * 0.55
+        ? "heal"
+        : ["frenzy", "magnet", "ward", "frost"][Math.floor(s.random() * 4)],
     );
   }
   if (!s.cache.claimed && Math.hypot(p.x - s.cache.x, p.y - s.cache.y) < 44) {
@@ -1401,5 +1680,6 @@ export function runSummary(s) {
     evolved: s.evolved.slice(),
     weapons: { ...s.weapons },
     loadout: s.loadout,
+    mastery: { ...s.mastery },
   };
 }

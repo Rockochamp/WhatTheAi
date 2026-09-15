@@ -39,3 +39,7 @@ Atlas source: `exec-fc6679ca-738f-4733-9dbe-a4037960b650.png`, based on `exec-37
 Cover source: `exec-ff6b6858-e2f0-4484-936a-0e0c29ff6dc4.png`. Built-in edit prompt: use the original cover as the edit target and new atlas as identity reference; replace the young banana with the exact rotten veteran in the same firing pose and scale, add the Carver and Bloat among the small background enemies, preserve the moonlit ruins, composition, dark left half, golden weapon trails and original boss, and add blood-streaked stone and torn flesh for a grittier horror-comedy mood. No text, UI, logos or watermark.
 
 The stronger gore remains animated Canvas artwork: arterial streaks, larger organ fragments, torn eye sockets with tissue strands, and broken ribs, within the original particle limits.
+
+## Stage pickup artwork · v5
+
+`pickups.js` paints faceted XP seeds and six illustrated supplies into cached 96-pixel canvases once at startup. These are original code-native icons; no external assets or fonts are needed. The updated homepage cover is documented in `../../../images/ASTRA-THUMBNAILS.md`.

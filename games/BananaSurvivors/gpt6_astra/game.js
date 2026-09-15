@@ -11,8 +11,11 @@ import {
   multiplier,
   bossName,
   RULESET,
-} from "./engine.js?v=3";
-import { createRenderer } from "./renderer.js?v=3";
+  WAVE_SECONDS,
+  stageTrait,
+  MASTERIES,
+} from "./engine.js?v=5";
+import { createRenderer } from "./renderer.js?v=5";
 import { createControls } from "./controls.js?v=3";
 import { createAudio } from "./audio.js?v=3";
 import {
@@ -24,7 +27,7 @@ import {
   isLiveSite,
   fetchGlobalRecords,
   saveGlobalRecord,
-} from "./records.js?v=3";
+} from "./records.js?v=5";
 const $ = (id) => document.getElementById(id),
   all = (selector) => [...document.querySelectorAll(selector)],
   format = (n) => Math.floor(n).toLocaleString(),
@@ -231,11 +234,33 @@ function paintHUD() {
   health.setAttribute("aria-valuemax", p.maxHp);
   health.setAttribute("aria-valuenow", hp);
   health.classList.toggle("danger", p.hp < p.maxHp * 0.3);
-  $("wave-text").textContent = `WAVE ${String(run.wave).padStart(2, "0")}`;
-  $("time-text").textContent = clock(run.time);
+  $("wave-text").textContent = `STAGE ${String(run.wave).padStart(2, "0")}`;
+  $("time-text").textContent =
+    run.transition > 0
+      ? "CLEAR"
+      : run.bossId
+        ? "BOSS"
+        : `${Math.max(0, Math.ceil(WAVE_SECONDS - run.waveTime))}s`;
+  $("stage-detail").textContent =
+    run.transition > 0
+      ? `Stage ${run.wave + 1} next`
+      : run.bossId
+        ? run.showdown?.time > 65
+          ? "ARENA CLOSING"
+          : "Defeat the boss"
+        : stageTrait(run.wave);
+  $("stage-progress").style.width =
+    `${run.bossId || run.transition > 0 ? 100 : (run.waveTime / WAVE_SECONDS) * 100}%`;
+  $("run-clock").textContent = clock(run.time);
+  $("buff-status").textContent = [
+    run.ward > 0 ? `WARD ${Math.ceil(run.ward)}s` : "",
+    run.frost > 0 ? `FROST ${Math.ceil(run.frost)}s` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   $("score-text").textContent = format(summary.score);
   $("kills-text").textContent = format(run.kills);
-  $("level-text").textContent = `LV ${run.level}`;
+  $("level-text").textContent = `XP LV ${run.level}`;
   $("xp-text").textContent = `${run.xp} / ${run.xpNext}`;
   $("xp-fill").style.width = `${(run.xp / run.xpNext) * 100}%`;
   $("xp-fill").parentElement.setAttribute(
@@ -248,6 +273,22 @@ function paintHUD() {
     $("boss-name").textContent = bossName(run.wave).toUpperCase();
     $("boss-hp").textContent =
       `${Math.ceil(boss.hp)} / ${Math.ceil(boss.maxHp)}`;
+    $("boss-tip").textContent =
+      boss.recovery > 0
+        ? "EXPOSED · +35% damage. Get your shots in."
+        : boss.windup > 0
+          ? {
+              charge: "CHARGE · Dash across the lane",
+              fan: "BONE FAN · Sidestep the aim",
+              slam: "SLAM · Leave the marked circles",
+              rain: "BLOOD RAIN · Keep moving",
+              burst: "SPORE RING · Find a gap or dash through",
+              summon: "SUMMON · Cut down the reinforcements",
+            }[boss.action] || "Watch the warning"
+          : boss.enraged
+            ? "ENRAGED · Faster combinations. Save your dash."
+            : "Bait the attack. Punish the recovery.";
+    $("boss-hud").classList.toggle("enraged", boss.enraged);
     $("boss-fill").style.width = `${Math.max(0, boss.hp / boss.maxHp) * 100}%`;
   }
   $("combo-text").textContent =
@@ -276,7 +317,7 @@ function paintHUD() {
 function renderChoices() {
   $("upgrade-level").textContent = run.level;
   $("upgrade-label").textContent =
-    run.transition > 0 ? "CHAMPION DEFEATED" : "LEVEL UP";
+    run.transition > 0 ? `STAGE ${run.wave} CLEARED` : "LEVEL UP";
   $("upgrade-title").textContent = run.choices.some(
     (id) => run.weapons[id] === 4,
   )
@@ -285,7 +326,9 @@ function renderChoices() {
   $("upgrade-subtitle").textContent =
     run.pending > 1
       ? `${run.pending} upgrades ready. Choose one at a time.`
-      : "Choose your edge. The jungle can wait.";
+      : run.choices.some((id) => id.startsWith("mastery_"))
+        ? "Your build is only the beginning. Masteries keep growing."
+        : "Choose your edge. The jungle can wait.";
   const cards = $("upgrade-cards");
   cards.replaceChildren();
   run.choices
@@ -308,7 +351,9 @@ function renderChoices() {
           "card-rank",
           choice.id === "heal"
             ? "RESTORE 40 HP"
-            : `RANK ${roman[choice.rank]} / ${roman[choice.max]}`,
+            : choice.max === Infinity
+              ? `MASTERY ${choice.rank} · NO LIMIT`
+              : `RANK ${roman[choice.rank]} / ${roman[choice.max]}`,
         ),
         node("span", "card-key", i + 1),
       );
@@ -332,14 +377,28 @@ function consumeEvents() {
       pan: Number.isFinite(e.x) ? (e.x - run.player.x) / 600 : 0,
     });
     if (e.type === "boss")
-      announce(e.name, "CHAMPION INCOMING · WATCH THE ATTACK WARNINGS", 3.6);
+      announce(e.name, "BOSS SHOWDOWN · DEFEAT IT TO CLEAR THE STAGE", 3.6);
+    if (e.type === "enrage")
+      announce(
+        "BOSS ENRAGED",
+        "Faster attacks. Watch for the recovery window.",
+        2.8,
+      );
+    if (e.type === "pickup" && e.kind === "ward")
+      announce("PEEL WARD", "Block one hit · 16 seconds", 1.8);
+    if (e.type === "pickup" && e.kind === "frost")
+      announce("FROST FRUIT", "The horde slows for 7 seconds.", 1.8);
     if (e.type === "encounter") announce(e.name + " INCOMING", e.tip, 3.3);
     if (e.type === "bossDefeated")
-      announce("CHAMPION DOWN", "+25 health · bonus upgrade · +1 reroll", 3.2);
+      announce(
+        `STAGE ${e.wave} CLEARED`,
+        "+25 health · bonus upgrade · +1 reroll",
+        3.2,
+      );
     if (e.type === "wave")
       announce(
-        `WAVE ${String(e.wave).padStart(2, "0")}`,
-        "Stay moving. The jungle is getting hungry.",
+        `STAGE ${String(e.wave).padStart(2, "0")}`,
+        `${stageTrait(e.wave)} · Survive 50 seconds, then defeat the boss.`,
         2.8,
       );
     if (e.type === "frenzy")
@@ -411,7 +470,7 @@ function start() {
   consumeEvents();
   announce(
     "STAY FRESH",
-    "Collect the golden XP. Your weapons do the shooting.",
+    "Survive the hunt. Defeat the boss. Keep the stage streak alive.",
     4,
   );
   paintHUD();
@@ -480,7 +539,7 @@ function finish(retired = false) {
       : `PERSONAL BEST ${format(deviceRecords[0]?.score || 0)}`;
   $("result-stats").replaceChildren();
   for (const [label, value] of [
-    ["WAVE", result.wave],
+    ["STAGE", result.wave],
     ["SURVIVED", clock(result.seconds)],
     ["KILLS", format(result.kills)],
     ["BEST STREAK", result.bestCombo],
@@ -500,6 +559,8 @@ function finish(retired = false) {
     chip.style.color = WEAPONS[id].color;
     build.append(chip);
   }
+  for (const [id, rank] of Object.entries(result.mastery || {}))
+    build.append(node("span", "build-chip", `${MASTERIES[id].name} ${rank}`));
   $("hud").hidden = true;
   openDialog("results-dialog");
   save(currentRecord);
@@ -558,7 +619,7 @@ async function showRanking() {
       node(
         "small",
         "",
-        `Wave ${record.wave} · ${clock(record.seconds)} · ${record.kills} kills${scope === "session" ? ` · run ${record.round}` : ""}`,
+        `Stage ${record.wave} · ${clock(record.seconds)} · ${record.kills} kills${scope === "session" ? ` · run ${record.round}` : ""}`,
       ),
     );
     score.append(

@@ -1,5 +1,5 @@
-export const SESSION_KEY = "banana_astra_session_v2",
-  DEVICE_KEY = "banana_astra_device_v2",
+export const SESSION_KEY = "banana_astra_session_v3",
+  DEVICE_KEY = "banana_astra_device_v3",
   LEGACY_SESSION_KEY = "banana_astra_session_v1",
   LEGACY_DEVICE_KEY = "banana_astra_device_v1";
 const integer = (n, max) => Number.isInteger(n) && n >= 0 && n <= max;
@@ -23,7 +23,7 @@ export function validRecord(r) {
     integer(r.round, 1e7) &&
     r.round > 0 &&
     Number.isFinite(r.createdAt) &&
-    [1, 2].includes(r.ruleset) &&
+    [1, 2, 3].includes(r.ruleset) &&
     ["classic", "ranger", "bruiser"].includes(r.loadout)
   );
 }
@@ -75,9 +75,9 @@ const firebaseConfig = {
   appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643",
 };
 const collectionFor = (ruleset) =>
-  `leaderboard_banana_survivors_gpt6_astra_v${ruleset === 1 ? 1 : 2}`;
+  `leaderboard_banana_survivors_gpt6_astra_v${[1, 2, 3].includes(ruleset) ? ruleset : 3}`;
 const statsFor = (ruleset) =>
-  `stats_banana_survivors_gpt6_astra_v${ruleset === 1 ? 1 : 2}`;
+  `stats_banana_survivors_gpt6_astra_v${[1, 2, 3].includes(ruleset) ? ruleset : 3}`;
 export const isLiveSite = () =>
   typeof location !== "undefined" &&
   ["whatthe.ai", "www.whatthe.ai"].includes(location.hostname);
@@ -148,7 +148,7 @@ function bounded(promise) {
     );
   });
 }
-export async function fetchGlobalRecords(ruleset = 2) {
+export async function fetchGlobalRecords(ruleset = 3) {
   const db = await database();
   const [snapshot, stats] = await bounded(
     Promise.all([

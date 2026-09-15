@@ -20,3 +20,12 @@ Hand-painted 2.5D jungle arcade. Warm banana gold, moonlit teal foliage, coral e
 ## Implementation constraints
 
 Pure fixed-step simulation; all run timers freeze during menus, blur and hidden tabs. Separate seeded presentation randomness. Spatial indexing for hits, strict effect/entity budgets, cached sprite silhouettes, pixel-density cap, reduced effects and motion options. Canvas 2D keeps the game playable without a WebGL dependency. Full page and modal scrolling remain available outside the play canvas. Test mobile portrait/landscape, pointer cancellation, choices, pause, death, replay/restart, storage failure and score retries.
+
+
+## Stage challenge follow-up · v5
+
+The reported XP-62 plateau exposed finite upgrade choices and pressure that eventually stopped demanding new decisions. The successor loop separates XP from stage progression: 50-second hunt → sealed boss showdown → healing, upgrade and reroll → next stage. No final stage. Stage 20 is an aspirational skill target, not a guaranteed win rate.
+
+Bosses alternate three attacks, enrage halfway through the fight, expose short damage windows and eventually tighten the arena. Their escorts stay bounded. Early readable counters remain valid late: cross charge lanes, leave circles, find projectile gaps, save the dash and move closer during recovery. Multiplicative enemy health and quadratic damage outgrow additive mastery bonuses without increasing render budgets. The four repeatable masteries trade general damage, boss specialization, durability and active dash recovery; no finished build falls back to healing alone.
+
+Illustrated pickups distinguish effects by shape as well as color, with larger silhouettes for supplies and value tiers for XP. A ward offers a single mistake buffer; frost buys room against the horde. UI explicitly says STAGE and XP LV, displays the stage objective and names boss attacks. The stage challenge gets a current-only ruleset-3 board so old endless-wave scores do not compete with its new rules; old data remains intact.

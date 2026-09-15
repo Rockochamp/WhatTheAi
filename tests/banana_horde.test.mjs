@@ -201,7 +201,7 @@ test("gore is stronger per kill while full and battery budgets remain fixed afte
   assert.deepEqual(GORE_LIMITS, { blood: 280, chunks: 64, stains: 140 });
 });
 test("harder rules use separate local boards without deleting legacy history", () => {
-  assert.equal(RULESET, 2);
+  assert.equal(RULESET, 3);
   assert.notEqual(SESSION_KEY, LEGACY_SESSION_KEY);
   assert.notEqual(DEVICE_KEY, LEGACY_DEVICE_KEY);
   const record = {
@@ -221,7 +221,8 @@ test("harder rules use separate local boards without deleting legacy history", (
   };
   assert.ok(validRecord(record));
   assert.ok(validRecord({ ...record, ruleset: 2 }));
-  assert.ok(!validRecord({ ...record, ruleset: 3 }));
+  assert.ok(validRecord({ ...record, ruleset: 3 }));
+  assert.ok(!validRecord({ ...record, ruleset: 4 }));
   const data = new Map([[LEGACY_DEVICE_KEY, JSON.stringify([record])]]);
   const storage = { getItem: (k) => data.get(k) };
   assert.equal(readRecords(storage, DEVICE_KEY).length, 0);

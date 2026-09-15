@@ -46,6 +46,15 @@
     const option = select.selectedOptions[0];
     if (!option) return;
     link.setAttribute("href", option.value);
+    const image = card.querySelector(".thumbnail img");
+    if (
+      image &&
+      option.dataset.thumbnail &&
+      image.getAttribute("src") !== option.dataset.thumbnail
+    ) {
+      image.hidden = false;
+      image.src = option.dataset.thumbnail;
+    }
     link.setAttribute(
       "aria-label",
       `Open ${card.querySelector(".game-title").textContent.trim()} — ${option.textContent.trim()}`,
@@ -65,7 +74,10 @@
     const fallback = () => {
       img.hidden = true;
     };
-    img.addEventListener("error", fallback, { once: true });
+    img.addEventListener("error", fallback);
+    img.addEventListener("load", () => {
+      img.hidden = false;
+    });
     if (img.complete && !img.naturalWidth) fallback();
   }
   document.getElementById("copyright-year").textContent = String(

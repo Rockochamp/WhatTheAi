@@ -130,13 +130,13 @@ test("rerolls cannot be free or consumed outside an upgrade", () => {
   assert.equal(reroll(s), false);
   assert.equal(s.rerolls, 0);
 });
-test("maxed builds still offer a valid recovery choice", () => {
+test("maxed builds offer permanent mastery choices", () => {
   const s = empty();
   s.weapons = { blaster: 5, boomerang: 5, coconut: 5, peels: 5 };
   for (const [id, p] of Object.entries(PERKS)) s.perks[id] = p.max;
   gainXP(s, 12);
-  assert.deepEqual(s.choices, ["heal"]);
-  assert.ok(chooseUpgrade(s, "heal"));
+  assert.equal(s.choices.length, 3);
+  assert.ok(chooseUpgrade(s, s.choices[0]));
   assert.equal(s.phase, "playing");
 });
 test("the champion spawns at 50 seconds, including a saturated arena", () => {
@@ -146,7 +146,7 @@ test("the champion spawns at 50 seconds, including a saturated arena", () => {
     spawnEnemy(s, "meatball", { x: 700 + i, y: 0 });
   update(s, 1 / 60);
   assert.ok(s.bossId);
-  assert.equal(s.enemies.length, MAX_ENEMIES);
+  assert.equal(s.enemies.length, 1);
   assert.equal(s.enemies.find((e) => e.id === s.bossId).type, "boss");
 });
 test("enemy special attacks repeat after each windup; all three boss patterns execute", () => {
@@ -513,12 +513,12 @@ test("Global score submission retries are idempotent, including the total count"
         key.includes("banana_survivors_gpt6_astra_v1"),
       ),
     );
-    const fresh = { ...record("horde-run", 250), ruleset: 2 };
+    const fresh = { ...record("horde-run", 250), ruleset: 3 };
     await saveGlobalRecord(fresh);
     await saveGlobalRecord(fresh);
     const current = await fetchGlobalRecords();
     assert.equal(current.records.length, 1);
-    assert.equal(current.records[0].ruleset, 2);
+    assert.equal(current.records[0].ruleset, 3);
     assert.equal(current.total, 1);
     assert.equal((await fetchGlobalRecords(1)).total, 2);
   } finally {

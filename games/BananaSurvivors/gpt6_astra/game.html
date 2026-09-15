@@ -19,7 +19,7 @@
     <meta property="og:title" content="Banana Survivors · GPT-6 Astra" />
     <meta
       property="og:description"
-      content="You are the snack. Make them regret it. A free jungle survival roguelite with evolving weapons and endless boss waves."
+      content="You are the snack. Make them regret it. A free jungle survival roguelite with evolving weapons and endless stages and multi-phase bosses."
     />
     <meta property="og:type" content="website" />
     <meta
@@ -33,7 +33,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
     <link rel="preload" as="image" href="cover-v3.webp" />
-    <link rel="stylesheet" href="game.css?v=4" />
+    <link rel="stylesheet" href="game.css?v=5" />
   </head>
   <body>
     <canvas
@@ -55,8 +55,8 @@
         </h1>
         <p class="tagline">You are the snack.<br />Make them regret it.</p>
         <p class="menu-description">
-          Outrun the horde. Build something ridiculous.<br />Survive one more
-          wave.
+          Outrun the horde. Build something ridiculous.<br />Conquer one more
+          stage.
         </p>
         <form id="start-form">
           <label for="nickname"
@@ -117,11 +117,12 @@
         </div>
         <div class="personal">
           <span>PERSONAL BEST <strong id="personal-best">—</strong></span
-          ><span>BEST WAVE <strong id="personal-wave">—</strong></span>
+          ><span>BEST STAGE <strong id="personal-wave">—</strong></span>
         </div>
       </div>
       <footer class="menu-foot">
-        <span>ENDLESS WAVES <i>·</i> EVOLVING WEAPONS <i>·</i> NO DOWNLOAD</span
+        <span
+          >ENDLESS STAGES <i>·</i> EVOLVING WEAPONS <i>·</i> NO DOWNLOAD</span
         ><span>Made with AI. Survived by you.</span>
       </footer>
     </main>
@@ -144,8 +145,10 @@
           </div>
         </div>
         <div class="wave-clock">
-          <strong id="wave-text">WAVE 01</strong
-          ><span id="time-text">00:00</span>
+          <strong id="wave-text">STAGE 01</strong
+          ><span id="time-text">50s</span>
+          <small id="stage-detail">Learn the hunt</small>
+          <div class="stage-track"><span id="stage-progress"></span></div>
         </div>
         <div class="score-group">
           <span class="hud-label">SCORE</span><strong id="score-text">0</strong
@@ -170,7 +173,7 @@
         </div>
       </header>
       <div class="xp-row">
-        <span id="level-text">LV 1</span>
+        <span id="level-text">XP LV 1</span>
         <div
           class="xp-track"
           role="progressbar"
@@ -188,6 +191,7 @@
           <span id="boss-name">THE CLEAVER KING</span><span id="boss-hp"></span>
         </div>
         <div class="boss-track"><span id="boss-fill"></span></div>
+        <p id="boss-tip"></p>
       </div>
       <div id="announcement" class="announcement" aria-live="polite">
         <strong></strong><span></span>
@@ -197,6 +201,8 @@
           <span id="combo-text">MAKE IT A STREAK</span>
           <div class="combo-track"><span id="combo-fill"></span></div>
           <small id="frenzy-text">Overripe charge 0%</small>
+          <small id="buff-status"></small>
+          <small class="run-timer">RUN <span id="run-clock">00:00</span></small>
         </div>
         <div
           id="weapon-rail"
@@ -235,7 +241,9 @@
       <div id="upgrade-cards" class="upgrade-cards"></div>
       <div class="upgrade-footer">
         <button id="reroll-button" class="secondary">Reroll · 2 left</button
-        ><span id="build-note">4 weapon slots · rank V evolves a weapon</span>
+        ><span id="build-note"
+          >4 weapon slots · rank V evolves · mastery has no limit</span
+        >
       </div>
     </dialog>
 
@@ -299,6 +307,9 @@
         ><button data-scope="device" aria-pressed="false">This device</button
         ><button data-scope="global" aria-pressed="false">Global</button>
       </div>
+      <p class="subtle">
+        Stage challenge rankings · fresh board for the new rules.
+      </p>
       <p id="rank-status" class="subtle" role="status"></p>
       <ol id="rank-list" class="rank-list"></ol>
       <button id="refresh-rank" class="secondary full" hidden>
@@ -409,7 +420,9 @@
       <p class="subtle">
         Equip up to four weapon families. Improve each to rank V to unlock its
         evolution. Perks apply to your whole build. You start with two rerolls;
-        each boss restores one.
+        each boss restores one. At XP level 35, or with four evolved weapons,
+        unlock endless masteries: damage, boss damage, max health and healing on
+        dash. Every level still offers a useful choice.
       </p>
       <div id="armory" class="armory"></div>
       <h3>Know your meat.</h3>
@@ -433,22 +446,30 @@
       </div>
       <p class="subtle">
         Mixed packs grow every 32 seconds. Hounds arrive at 0:08; spitters,
-        brutes and splitters join later. Champion fights keep the horde coming.
+        brutes and splitters join later. Stages add elite packs, iron tides and
+        telegraphed blood rain. Boss showdowns admit only a limited escort.
       </p>
       <h3>Read the jungle</h3>
       <p class="subtle">
         Amber lanes warn of charges. Orange circles mark incoming slams. Green
-        orbs hurt. Golden diamonds grant XP; glowing supplies heal, attract XP,
-        clear enemies, or trigger overripe frenzy. Follow the small gold arrow
-        to a supply cache.
+        orbs hurt. Faceted amber, jade and violet seeds grant increasing amounts
+        of XP. Medicine heals 25 HP; magnets collect all XP; fuel gives 9
+        seconds of frenzy; grenades blast the horde. A mint shield blocks one
+        hit within 16 seconds; a frost fruit slows enemies for 7 seconds. Follow
+        the small gold arrow to a supply cache.
       </p>
-      <h3>One more wave</h3>
+      <h3>One more stage</h3>
       <p class="subtle">
-        Every 50 seconds, a champion enters. Defeat it for healing and an
-        upgrade, then face the next wave. Kills build a streak multiplier and
-        charge seven seconds of overripe firepower. Waves continue endlessly.
-        Ranking score = combat score + 2 per second + 250 per defeated boss. All
-        loadouts play the same rules.
+        Survive a 50-second hunt, then defeat its boss to advance. The arena
+        closes around the showdown. Cleaver King combines charges, bone fans and
+        slams. Bonebreaker mixes slams, spore rings and fans. Marrow Witch
+        conjures rings, blood rain and reinforcements. At half health or after
+        45 seconds they enrage; after 65 seconds the arena gradually tightens.
+        Attack during recovery for 35% extra damage. Each victory clears the
+        horde, heals 25 HP, gives an upgrade and restores a reroll. Stages never
+        end; stage 20 is a serious survival challenge. Kills build a streak and
+        charge overripe firepower. Ranking score = combat score + 2 per second +
+        250 per defeated boss. All loadouts play the same rules.
       </p>
       <a class="legacy-link" href="../game.html"
         >Play the original Gemini 3 Pro version ↗</a
@@ -461,6 +482,6 @@
       </div></noscript
     >
     <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=4"></script>
+    <script type="module" src="game.js?v=5"></script>
   </body>
 </html>

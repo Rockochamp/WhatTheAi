@@ -1,5 +1,6 @@
-import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=3";
+import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=5";
 import { createGore } from "./gore.js?v=3";
+import { createPickupSprites, SUPPLIES } from "./pickups.js?v=5";
 const SPRITES = [
   [31, 35, 385, 382],
   [528, 162, 247, 250],
@@ -67,6 +68,7 @@ export async function createRenderer(canvas) {
   rad.addColorStop(1, "#ffffff00");
   sg.fillStyle = rad;
   sg.fillRect(0, 0, 128, 128);
+  const pickupSprites = createPickupSprites();
   const random = rng(93014);
   const gore = createGore(rng(77151));
   let width = 0,
@@ -204,7 +206,7 @@ export async function createRenderer(canvas) {
     ctx.scale(flip ? -1 : 1, squash);
     ctx.drawImage(image, -w * 0.5, -h * 0.68, w, h);
     if (flash) {
-      ctx.globalAlpha = alpha * 0.8;
+      ctx.globalAlpha = alpha * (typeof flash === "number" ? flash : 0.5);
       ctx.drawImage(flashes[sprite], -w * 0.5, -h * 0.68, w, h);
     }
     ctx.restore();
@@ -397,6 +399,25 @@ export async function createRenderer(canvas) {
     gore.update(dt);
     gore.ground(ctx, point, scale, visible);
     cache(s);
+    if (s.showdown) {
+      const arena = point(s.showdown.x, s.showdown.y),
+        radius = s.showdown.radius * scale;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, width, height);
+      ctx.arc(arena.x, arena.y, radius, 0, TAU, true);
+      ctx.fillStyle = "#5a15204a";
+      ctx.fill("evenodd");
+      ctx.restore();
+      ring(
+        arena.x,
+        arena.y,
+        radius,
+        s.showdown.time > 65 ? "#ff8063" : "#e5ae79",
+        0.85,
+      );
+      ring(arena.x, arena.y, radius - 8 * scale, "#ffbc7050", 0.5);
+    }
     const st = stats(s),
       p = s.player;
     for (const h of s.hazards) {
@@ -404,8 +425,8 @@ export async function createRenderer(canvas) {
       const q = point(h.x, h.y),
         r = h.r * scale;
       if (h.friendly) {
-        circle(q.x, q.y, r, "#f4b84b27");
-        ring(q.x, q.y, r, "#ffc971", 0.3);
+        circle(q.x, q.y, r, "#f4b84b12");
+        ring(q.x, q.y, r, "#ffc971", 0.18);
         if (!quiet)
           circle(
             q.x,
@@ -428,9 +449,30 @@ export async function createRenderer(canvas) {
     for (const e of s.enemies) {
       if (e.dead || !visible(e.x, e.y)) continue;
       const q = point(e.x, e.y);
+      if (e.elite) ring(q.x, q.y, (e.r + 9) * scale, "#f2ad6e", 0.8);
+      if (e.type === "boss" && e.recovery > 0)
+        ring(q.x, q.y, (e.r + 15) * scale, "#a2efd0", 0.9);
+      if (e.type === "boss" && e.enraged)
+        ring(q.x, q.y, (e.r + 8) * scale, "#ef635a", 0.8);
       if (e.born > 0) {
         ring(q.x, q.y, e.r * scale * 1.5, "#eec47e", 0.65);
         continue;
+      }
+      if (e.windup > 0 && e.action === "fan") {
+        ctx.save();
+        ctx.translate(q.x, q.y);
+        ctx.rotate(Math.atan2(e.ay, e.ax));
+        const spread = e.enraged ? 0.8 : 0.42;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 440 * scale, -spread, spread);
+        ctx.closePath();
+        ctx.fillStyle = "#9acfff28";
+        ctx.fill();
+        ctx.strokeStyle = "#dbecff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
       }
       if (e.windup > 0 && ["charge", "spit", "bones"].includes(e.action)) {
         ctx.save();
@@ -460,38 +502,39 @@ export async function createRenderer(canvas) {
       if (!visible(d.x, d.y, 20)) continue;
       const q = point(d.x, d.y),
         bob = quiet ? 0 : Math.sin(now * 3 + d.id) * 2 * scale;
-      if (d.kind === "xp") {
-        const size = (d.value >= 8 ? 6 : 4) * scale;
-        ctx.save();
-        ctx.translate(q.x, q.y + bob);
-        ctx.rotate(Math.PI / 4);
-        ctx.fillStyle = d.value >= 8 ? "#a9f3dd" : "#f1cb62";
-        ctx.fillRect(-size, -size, size * 2, size * 2);
-        ctx.fillStyle = "#fff5b7";
-        ctx.fillRect(-size, -size, size, size);
-        ctx.restore();
-      } else {
-        const colors = {
-            heal: "#fba7a5",
-            magnet: "#b6a0fc",
-            nuke: "#98d5ff",
-            frenzy: "#ffdf67",
-          },
-          c = colors[d.kind];
-        glow(q.x, q.y, 32 * scale, c, 0.35);
-        circle(q.x, q.y, 15 * scale, "#142d25");
-        ring(q.x, q.y, 15 * scale, c);
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = c;
-        ctx.font = `bold ${18 * scale}px system-ui`;
-        ctx.fillText(
-          { heal: "+", magnet: "U", nuke: "✦", frenzy: "ϟ" }[d.kind],
-          q.x,
-          q.y + bob,
-        );
+      const key =
+        d.kind === "xp"
+          ? d.value >= 30
+            ? "xp-rare"
+            : d.value >= 8
+              ? "xp-rich"
+              : "xp"
+          : d.kind;
+      const image = pickupSprites[key];
+      if (!image) continue;
+      const size =
+        (d.kind === "xp" ? (d.value >= 30 ? 27 : d.value >= 8 ? 22 : 17) : 58) *
+        scale;
+      if (d.kind !== "xp") {
+        circle(q.x, q.y + 11 * scale, 16 * scale, "#020d0a80");
+        ring(q.x, q.y + 11 * scale, 19 * scale, SUPPLIES[d.kind].color, 0.45);
+        if (!low && !quiet) {
+          ctx.fillStyle = SUPPLIES[d.kind].color + "24";
+          ctx.fillRect(
+            q.x - 1.5 * scale,
+            q.y - 44 * scale,
+            3 * scale,
+            40 * scale,
+          );
+        }
       }
+      ctx.drawImage(image, q.x - size / 2, q.y + bob - size / 2, size, size);
     }
+    if (s.ward > 0) {
+      const q = point(p.x, p.y);
+      ring(q.x, q.y - 20 * scale, 38 * scale, "#a2fbe0", 0.85);
+    }
+
     for (const g of ghosts) {
       g.life -= dt;
       actor(g.sprite, g.x, g.y, g.size, {
@@ -544,12 +587,15 @@ export async function createRenderer(canvas) {
               : quiet
                 ? 0
                 : Math.sin(now * 7 + e.id) * 0.035,
-          flash: e.hit > 0,
+          flash: e.hit > 0 ? (e.type === "boss" ? 0.25 : 0.5) : false,
           squash:
             e.action === "rupture" && e.windup > 0
               ? 1 + (1 - e.windup / 0.9) * 0.24
               : 1,
-          alpha: e.born > 0 ? 1 - e.born / 0.65 : 1,
+          alpha:
+            e.born > 0
+              ? Math.max(0, 1 - e.born / (e.type === "boss" ? 1.6 : 0.65))
+              : 1,
         });
         if (
           e.hp < e.maxHp &&
