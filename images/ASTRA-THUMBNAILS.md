@@ -14,3 +14,9 @@ Each homepage version option declares its matching thumbnail. Cosmic Dodge now d
 - In-game backdrop: `games/cosmic_dodge/grok_4_6/void-gold.webp` — gold-ringed planet, copper nebula, dark left half for UI overlay. No ships, asteroids, or text.
 
 Grok 4.6 is the default Cosmic Dodge destination. Selecting Astra / Gemini / o3-mini restores those thumbnails and routes.
+
+# Grok 4.6 Crazy Clicker cover · September 2026
+
+- `crazy-clicker-grok.webp`: text-to-image generation. Brief: molten cream-white solar core in a near-black ember void, collapsing cream timing ring, arterial orange corona. No text, no hands. Converted to 800×800 WebP.
+
+Grok 4.6 is the default Crazy Clicker destination. Selecting Gemini 2.5 Pro restores the original cartoon-hand thumbnail.

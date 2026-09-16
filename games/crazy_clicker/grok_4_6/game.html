@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#070605" />
+    <meta
+      name="description"
+      content="Two taps lock the beat. Hold it. Miss and it is over — unless Ember saves you. Grok 4.6 Crazy Clicker, free on mobile and desktop."
+    />
+    <title>Crazy Clicker | What the Ai</title>
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" href="game.css" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="game.js"></script>
+  </head>
+  <body>
+    <main class="arcade" id="arcade">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="What the Ai home"
+          ><svg viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16 2 19 12 30 16 19 20 16 30 12 20 2 16 12 12Z" /></svg
+          ><span>whatthe<span class="brand-ai">.ai</span></span></a
+        >
+        <span class="nav-divider"></span
+        ><span class="nav-title">CRAZY CLICKER</span>
+        <nav aria-label="Game options">
+          <button id="records-button" class="nav-button" type="button">
+            <span aria-hidden="true">♜</span> Rankings</button
+          ><button
+            id="help-button"
+            class="icon-button"
+            type="button"
+            aria-label="How to play"
+          >
+            ?</button
+          ><button
+            id="sound-button"
+            class="icon-button"
+            type="button"
+            aria-label="Turn sound on"
+            aria-pressed="false"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4ZM16 9l5 6m0-6-5 6" />
+            </svg>
+          </button>
+        </nav>
+      </header>
+      <section
+        class="stage"
+        id="stage"
+        data-state="ready"
+        aria-label="Crazy Clicker game"
+      >
+        <canvas
+          id="core"
+          tabindex="0"
+          aria-label="Crazy Clicker play area. Tap, click, or press Space to keep the beat."
+          >Canvas is required to play Crazy Clicker.</canvas
+        >
+        <div class="vignette" aria-hidden="true"></div>
+        <div class="hud" id="hud" hidden>
+          <div class="score-group">
+            <span class="eyebrow">STREAK</span><strong id="score">0</strong>
+            <span class="eyebrow" id="best-line">BEST 0</span>
+          </div>
+          <div class="tempo">
+            <span class="eyebrow">LOCKED</span>
+            <strong id="tempo">—</strong>
+            <div class="ember-chip off" id="ember-chip">EMBER EMPTY</div>
+          </div>
+        </div>
+        <p class="play-hint" id="play-hint"></p>
+        <div class="overlay" id="overlay">
+          <section
+            class="menu-content"
+            id="start-content"
+            aria-label="Start game"
+          >
+            <div class="menu-kicker">
+              <span class="orbit-symbol" aria-hidden="true">◎</span> LOCK THE
+              PULSE
+            </div>
+            <h1>CRAZY<br /><span>CLICKER</span></h1>
+            <p class="intro">
+              Two taps set the beat. Hold that rhythm.<br />
+              Miss the window and it is over — unless Ember holds you.
+            </p>
+            <form id="launch-form">
+              <div class="nickname-field">
+                <label for="pilot-name"
+                  >YOUR NICKNAME <span>on the leaderboard</span></label
+                >
+                <input
+                  id="pilot-name"
+                  maxlength="16"
+                  placeholder="Enter your nickname"
+                  autocomplete="nickname"
+                  spellcheck="false"
+                  aria-describedby="nickname-hint name-error"
+                />
+                <small id="nickname-hint"
+                  >Leave blank to play as Anonymous.</small
+                >
+              </div>
+              <p id="name-error" role="alert"></p>
+              <button class="primary-button" type="submit">
+                <span>LOCK IN</span
+                ><svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 5 7 7-7 7" />
+                </svg>
+              </button>
+            </form>
+            <p class="launch-hint desktop-hint">
+              <kbd>CLICK</kbd> or <kbd>SPACE</kbd> to keep the beat
+            </p>
+            <p class="launch-hint touch-hint">Tap anywhere to keep the beat</p>
+            <div class="ranking-links" aria-label="Rankings">
+              <button type="button" data-ranking="session">
+                Session ranking
+              </button>
+              <button type="button" data-ranking="global">
+                Global ranking <span aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <button class="personal-record" type="button" data-ranking="local">
+              PERSONAL BEST <strong id="personal-best">—</strong>
+              <span id="personal-best-caption"
+                >Your best runs on this device.</span
+              >
+            </button>
+          </section>
+          <div class="world-caption" id="world-caption" aria-hidden="true">
+            <span>GROK 4.6 / LIVE CORE</span><strong>The ring is the truth</strong
+            ><i></i><span>TAP WHEN IT KISSES THE CORE.</span>
+          </div>
+          <section
+            class="result-content overlay-card"
+            id="result-content"
+            hidden
+          >
+            <p class="eyebrow" id="result-kicker">MISSED THE BEAT</p>
+            <p class="round-summary" id="round-summary"></p>
+            <h2 id="result-title">The pulse is still out there.</h2>
+            <strong class="final-score" id="final-score">0</strong
+            ><span class="eyebrow">STREAK</span>
+            <div class="result-stats">
+              <div>
+                <strong id="final-tempo">—</strong><span>Locked beat</span>
+              </div>
+              <div>
+                <strong id="final-perfects">0</strong><span>Perfects</span>
+              </div>
+              <div>
+                <strong id="final-embers">0</strong><span>Ember saves</span>
+              </div>
+            </div>
+            <p class="save-status" id="save-status" role="status"></p>
+            <button class="primary-button" id="restart-button" type="button">
+              AGAIN <span aria-hidden="true">↗</span>
+            </button>
+            <div class="ranking-links" aria-label="Round rankings">
+              <button type="button" data-ranking="session">
+                Session ranking
+              </button>
+              <button type="button" data-ranking="global">
+                Global ranking <span aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <button class="text-button" id="menu-button" type="button">
+              Back to hangar
+            </button>
+          </section>
+          <section class="pause-content overlay-card" id="pause-content" hidden>
+            <div class="pause-glyph" aria-hidden="true">Ⅱ</div>
+            <p class="eyebrow">PULSE PAUSED</p>
+            <h2>The beat can wait.</h2>
+            <p>Pause is allowed. Missing the window isn’t.</p>
+            <button class="primary-button" id="resume-button" type="button">
+              KEEP THE BEAT <span aria-hidden="true">↗</span></button
+            ><button class="text-button" id="quit-button" type="button">
+              End run & return to hangar
+            </button>
+          </section>
+        </div>
+      </section>
+      <footer class="footer">
+        <span class="footer-instruction"
+          >TWO TAPS LOCK IT <span class="footer-dot">·</span> HOLD THE RING
+          <span class="footer-dot">·</span> FIVE PERFECTS CHARGE EMBER</span
+        ><span class="credit">MADE WITH GROK 4.6</span>
+      </footer>
+      <dialog id="records-dialog" aria-labelledby="records-title">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">MAKE YOUR MARK</p>
+            <h2 id="records-title">Rankings</h2>
+          </div>
+          <button
+            class="icon-button close-dialog"
+            type="button"
+            aria-label="Close rankings"
+          >
+            ×
+          </button>
+        </div>
+        <div class="tabs" role="group" aria-label="Leaderboard scope">
+          <button
+            id="session-tab"
+            class="active"
+            type="button"
+            aria-pressed="true"
+          >
+            Session
+          </button>
+          <button id="global-tab" type="button" aria-pressed="false">
+            Global
+          </button>
+          <button id="local-tab" type="button" aria-pressed="false">
+            Device bests
+          </button>
+        </div>
+        <h3 class="board-heading" id="board-heading">Session ranking</h3>
+        <ol id="leaderboard"></ol>
+        <p id="board-status" role="status"></p>
+      </dialog>
+      <dialog id="help-dialog" aria-labelledby="help-title">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">A LITTLE TRUTH</p>
+            <h2 id="help-title">Read the ring.</h2>
+          </div>
+          <button
+            class="icon-button close-dialog"
+            type="button"
+            aria-label="Close instructions"
+          >
+            ×
+          </button>
+        </div>
+        <div class="help-item">
+          <span>01</span>
+          <div>
+            <h3>Lock a beat.</h3>
+            <p>
+              Two taps set your takt. Anything faster than 70ms is ignored so
+              you cannot cheat the lock. The collapsing ring is the beat coming
+              home. Tap when it kisses the core.
+            </p>
+          </div>
+        </div>
+        <div class="help-item">
+          <span>02</span>
+          <div>
+            <h3>Hold it.</h3>
+            <p>
+              Stay inside ±50ms. Hits inside ±16ms are perfect. Perfects are
+              style; your streak is rank. Early, late, and perfect all count —
+              missing the window does not.
+            </p>
+          </div>
+        </div>
+        <div class="help-item">
+          <span>03</span>
+          <div>
+            <h3>Charge Ember.</h3>
+            <p>
+              Five perfects in a row lights Ember. Miss once with Ember charged
+              and the core holds you. Ember does not stack. Without it, one miss
+              ends the run.
+            </p>
+          </div>
+        </div>
+        <p class="help-note">
+          Tap, click, or press Space. Press P or Escape to pause.<br />Switching
+          tabs automatically pauses your run.
+        </p>
+        <div class="soundtrack-card">
+          <span class="eyebrow">ORIGINAL SOUNDTRACK</span>
+          <strong>Live Core</strong>
+          <p>The drone follows your fever. Ghost clicks mark the beat you locked.</p>
+          <label for="music-volume">Sound volume</label>
+          <input id="music-volume" type="range" min="0" max="100" value="70" />
+        </div>
+        <button
+          id="motion-button"
+          class="text-button"
+          type="button"
+          aria-pressed="false"
+        >
+          Reduce effects: off
+        </button>
+      </dialog>
+    </main>
+    <noscript>Enable JavaScript to play Crazy Clicker.</noscript>
+  </body>
+</html>
