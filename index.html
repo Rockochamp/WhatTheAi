@@ -32,73 +32,73 @@
       content="Free AI-built games and browser apps. Play, explore, and compare different models."
     />
     <script type="application/ld+json" id="site-structured-data">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://whatthe.ai/#website",
+      "name": "What the Ai",
+      "alternateName": "whatthe.ai",
+      "url": "https://whatthe.ai/",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://whatthe.ai/#catalog",
+      "url": "https://whatthe.ai/",
+      "name": "Free AI Games & Browser Apps",
+      "isPartOf": {
+        "@id": "https://whatthe.ai/#website"
+      },
+      "description": "Free browser games and apps built with different AI models. Play and compare their versions.",
+      "inLanguage": "en",
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": 6,
+        "itemListElement": [
           {
-            "@type": "WebSite",
-            "@id": "https://whatthe.ai/#website",
-            "name": "What the Ai",
-            "alternateName": "whatthe.ai",
-            "url": "https://whatthe.ai/",
-            "inLanguage": "en"
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Cosmic Dodge",
+            "url": "https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_grok_4_6.html"
           },
           {
-            "@type": "CollectionPage",
-            "@id": "https://whatthe.ai/#catalog",
-            "url": "https://whatthe.ai/",
-            "name": "Free AI Games & Browser Apps",
-            "isPartOf": {
-              "@id": "https://whatthe.ai/#website"
-            },
-            "description": "Free browser games and apps built with different AI models. Play and compare their versions.",
-            "inLanguage": "en",
-            "mainEntity": {
-              "@type": "ItemList",
-              "numberOfItems": 6,
-              "itemListElement": [
-                {
-                  "@type": "ListItem",
-                  "position": 1,
-                  "name": "Cosmic Dodge",
-                  "url": "https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html"
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 2,
-                  "name": "Steve Jobs - Hammurabi",
-                  "url": "https://whatthe.ai/games/steve_jobs_hammurabi/gpt6_astra/game.html"
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 3,
-                  "name": "Crazy Clicker",
-                  "url": "https://whatthe.ai/games/crazy_clicker/gemini_2_5_pro/game.html"
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 4,
-                  "name": "Yes! I Said It.",
-                  "url": "https://whatthe.ai/apps/yes_i_said_it/gemini_2_5_pro/game.html"
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 5,
-                  "name": "Banana Survivors",
-                  "url": "https://whatthe.ai/games/BananaSurvivors/gpt6_astra/game.html"
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 6,
-                  "name": "AGI Probability Barometer",
-                  "url": "https://whatthe.ai/apps/agi_barometer/gemini_3_5_flash/game.html"
-                }
-              ]
-            }
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Steve Jobs - Hammurabi",
+            "url": "https://whatthe.ai/games/steve_jobs_hammurabi/gpt6_astra/game.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Crazy Clicker",
+            "url": "https://whatthe.ai/games/crazy_clicker/gemini_2_5_pro/game.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Yes! I Said It.",
+            "url": "https://whatthe.ai/apps/yes_i_said_it/gemini_2_5_pro/game.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Banana Survivors",
+            "url": "https://whatthe.ai/games/BananaSurvivors/gpt6_astra/game.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "name": "AGI Probability Barometer",
+            "url": "https://whatthe.ai/apps/agi_barometer/gemini_3_5_flash/game.html"
           }
         ]
       }
-    </script>
+    }
+  ]
+}
+</script>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico?v=1.2" />
     <script>
       // Apply the saved theme before painting, without relying on storage access.
@@ -160,14 +160,14 @@
           <a
             class="game-link"
             id="game-link-1"
-            href="/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html?v=4"
-            aria-label="Open Cosmic Dodge — GPT-6 Astra"
+            href="/games/cosmic_dodge/cosmic_dodge_grok_4_6.html"
+            aria-label="Open Cosmic Dodge — Grok 4.6"
           >
             <div class="thumbnail">
               <span class="thumbnail-fallback" aria-hidden="true"
                 >Cosmic Dodge</span
               ><img
-                src="/images/cosmic-astra.webp"
+                src="/images/cosmic-grok.webp"
                 alt=""
                 width="400"
                 height="400"
@@ -183,10 +183,16 @@
             </div>
           </a>
           <div class="game-info">
-            <p class="model-name">GPT-6 Astra</p>
+            <p class="model-name">Grok 4.6</p>
             <label class="visually-hidden" for="version-select-1"
               >Choose a model for Cosmic Dodge</label
             ><select class="version-select" id="version-select-1" hidden>
+              <option
+                value="/games/cosmic_dodge/cosmic_dodge_grok_4_6.html"
+                data-thumbnail="/images/cosmic-grok.webp"
+              >
+                Grok 4.6
+              </option>
               <option
                 value="/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html?v=4"
                 data-thumbnail="/images/cosmic-astra.webp"
@@ -207,6 +213,11 @@
               </option></select
             ><noscript
               ><ul class="version-fallback">
+                <li>
+                  <a href="/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html"
+                    >GPT-6 Astra</a
+                  >
+                </li>
                 <li>
                   <a
                     href="/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html"
