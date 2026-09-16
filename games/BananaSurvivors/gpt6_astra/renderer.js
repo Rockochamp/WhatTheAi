@@ -1,4 +1,4 @@
-import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=5";
+import { ARENA, WEAPONS, stats, rng } from "./engine.js?v=6";
 import { createGore } from "./gore.js?v=3";
 import { createPickupSprites, SUPPLIES } from "./pickups.js?v=5";
 const SPRITES = [
@@ -559,14 +559,16 @@ export async function createRenderer(canvas) {
           hero: true,
           flip: Math.cos(p.angle) < 0,
           tilt:
-            p.dash > 0
-              ? p.dx * 0.15
-              : moving && !quiet
-                ? Math.sin(now * 15) * 0.045
-                : 0,
+            p.hp <= 0
+              ? 1.15
+              : p.dash > 0
+                ? p.dx * 0.15
+                : moving && !quiet
+                  ? Math.sin(now * 15) * 0.045
+                  : 0,
           bob,
           squash: p.dash > 0 ? 0.85 : 1,
-          flash: p.hit > 0,
+          flash: p.hp > 0 && p.hit > 0,
         });
         if (p.invulnerable > 0 || s.frenzy > 0) {
           const q = point(p.x, p.y);
@@ -769,7 +771,9 @@ export async function createRenderer(canvas) {
     }
     // Offscreen navigation guides are presentation only, never spawn rules.
     const boss = s.enemies.find((e) => e.id === s.bossId);
-    const objective = boss || (!s.cache.claimed ? s.cache : null);
+    const objective = input.replay
+      ? null
+      : boss || (!s.cache.claimed ? s.cache : null);
     if (objective && !visible(objective.x, objective.y, -35)) {
       const target = point(objective.x, objective.y),
         dx = target.x - width * 0.5,
@@ -790,6 +794,57 @@ export async function createRenderer(canvas) {
       ctx.lineTo(-5, -6);
       ctx.lineTo(-5, 6);
       ctx.fill();
+      ctx.restore();
+    }
+    if (input.replay?.cause) {
+      const c = input.replay.cause;
+      const collection =
+        c.kind === "enemy"
+          ? s.enemies
+          : c.kind === "shot"
+            ? s.shots
+            : s.hazards;
+      const threat =
+        collection.find((e) => e.id === c.id) ||
+        s.enemies.find((e) => e.id === c.enemyId) ||
+        c;
+      const q = point(threat.x, threat.y),
+        hero = point(p.x, p.y);
+      const radius = Math.max(13, (threat.r || c.r || 20) * scale + 7);
+      ctx.save();
+      ctx.strokeStyle = "#ff9a87";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(q.x, q.y);
+      ctx.lineTo(hero.x, hero.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ring(q.x, q.y, radius + 2, "#1c0b0b", 1);
+      ring(q.x, q.y, radius, "#ff9a87", 1);
+      const labelX = Math.max(65, Math.min(width - 65, q.x));
+      const labelY = Math.max(130, Math.min(height - 170, q.y - radius - 13));
+      ctx.font = "800 10px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#230f13e8";
+      ctx.fillRect(labelX - 53, labelY - 11, 106, 22);
+      ctx.fillStyle = "#ffb3a4";
+      ctx.fillText("FATAL ATTACK", labelX, labelY);
+      if (input.replay.phase !== "replay") {
+        const wash = ctx.createRadialGradient(
+          hero.x,
+          hero.y,
+          60,
+          hero.x,
+          hero.y,
+          Math.max(width, height) * 0.65,
+        );
+        wash.addColorStop(0, "#591f1900");
+        wash.addColorStop(1, "#6d161a66");
+        ctx.fillStyle = wash;
+        ctx.fillRect(0, 0, width, height);
+      }
       ctx.restore();
     }
     ctx.restore();

@@ -14,10 +14,11 @@ import {
   WAVE_SECONDS,
   stageTrait,
   MASTERIES,
-} from "./engine.js?v=5";
-import { createRenderer } from "./renderer.js?v=5";
+} from "./engine.js?v=6";
+import { createRenderer } from "./renderer.js?v=6";
+import { createHistory } from "./replay.js?v=6";
 import { createControls } from "./controls.js?v=3";
-import { createAudio } from "./audio.js?v=3";
+import { createAudio } from "./audio.js?v=6";
 import {
   SESSION_KEY,
   DEVICE_KEY,
@@ -92,6 +93,8 @@ let sessionRecords = readRecords(session),
   input = {},
   ready = false;
 let round = Math.max(0, ...sessionRecords.map((r) => r.round));
+const history = createHistory();
+let replay = null;
 const sound = createAudio({
   onStatus(status) {
     $("music-status").textContent = {
@@ -372,10 +375,11 @@ function consumeEvents() {
     quiet: options.quiet || motion.matches,
   });
   for (const e of run.events) {
-    sound.sound(e.type, {
-      ...e,
-      pan: Number.isFinite(e.x) ? (e.x - run.player.x) / 600 : 0,
-    });
+    if (e.type !== "death")
+      sound.sound(e.type, {
+        ...e,
+        pan: Number.isFinite(e.x) ? (e.x - run.player.x) / 600 : 0,
+      });
     if (e.type === "boss")
       announce(e.name, "BOSS SHOWDOWN · DEFEAT IT TO CLEAR THE STAGE", 3.6);
     if (e.type === "enrage")
@@ -448,6 +452,10 @@ function start() {
   closeDialogs();
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   run = createRun(seed, loadout);
+  replay = null;
+  history.clear();
+  history.capture(run, true);
+  $("death-replay").hidden = true;
   paused = false;
   finished = false;
   currentRecord = null;
@@ -502,12 +510,92 @@ async function save(record) {
     }
   }
 }
+function deathReplay() {
+  if (replay || finished) return;
+  replay = history.finish(run);
+  controls.reset();
+  accumulator = 0;
+  input = {};
+  sound.death();
+  $("hud").hidden = true;
+  $("arena").inert = true;
+  $("announcement").classList.remove("active");
+  closeDialogs();
+  if (!replay) return finish();
+  const c = replay.cause;
+  $("death-cause").textContent = c
+    ? `${c.name} · ${c.attack}`
+    : "The jungle got its snack.";
+  $("death-damage").textContent = c
+    ? `${Number(c.damage.toFixed(1))} damage · ${Number(c.healthBefore.toFixed(1))} HP before the hit`
+    : "Watch your final moments.";
+  $("death-tip").textContent =
+    c?.kind === "hazard"
+      ? "Leave the marked area before it erupts."
+      : c?.kind === "shot"
+        ? "Strafe across the attack. Dash through when the gap closes."
+        : "Keep an escape lane. Save your dash for the last gap.";
+  $("death-replay").hidden = false;
+  $("skip-replay").focus({ preventScroll: true });
+  $("live-message").textContent =
+    `You died. ${$("death-cause").textContent}. Slow-motion replay. Press Escape or Skip replay for results.`;
+}
+function drawReplay(elapsed) {
+  const view = replay.advance(document.hidden ? 0 : elapsed);
+  if (view.phase === "done") return finish();
+  if (view.switched && view.phase === "replay") {
+    renderer.reset();
+    sound.replay();
+  }
+  if (view.switched && view.phase === "impact") sound.replay(true);
+  const settings = { ...options, quiet: options.quiet || motion.matches };
+  renderer.emit(view.events, view.state, settings);
+  renderer.draw(view.state, view.dt, {
+    ...settings,
+    quiet: settings.quiet || view.phase !== "replay",
+    replay: view,
+    moving: view.state.moving,
+  });
+  $("death-replay").dataset.phase = view.phase;
+  $("replay-title").textContent =
+    view.phase === "freeze"
+      ? "PEEL DOWN."
+      : view.phase === "impact"
+        ? "THE FATAL HIT."
+        : "YOUR LAST MOMENTS.";
+  $("replay-time").textContent =
+    view.phase === "freeze"
+      ? "RUN ENDED"
+      : view.phase === "impact"
+        ? "IMPACT"
+        : `−${view.remaining.toFixed(1)}s · 0.3× SPEED`;
+  $("replay-progress").style.transform =
+    `scaleX(${view.phase === "freeze" ? 0 : view.progress})`;
+}
+$("skip-replay").addEventListener("click", () => {
+  if (replay) finish();
+});
+$("skip-replay").addEventListener("keydown", (event) => {
+  // Holding the dash key at death must not accidentally skip the replay.
+  if (event.repeat && (event.key === " " || event.key === "Enter"))
+    event.preventDefault();
+});
+document.addEventListener("keydown", (event) => {
+  if (replay && event.key === "Escape") {
+    event.preventDefault();
+    finish();
+  }
+});
 function finish(retired = false) {
   if (finished || !run) return;
   finished = true;
+  replay = null;
+  history.clear();
+  $("death-replay").hidden = true;
   paused = false;
   controls.reset();
   sound.pause();
+  sound.stopEffects();
   closeDialogs();
   const result = runSummary(run),
     oldBest = deviceRecords[0]?.score || 0;
@@ -533,6 +621,11 @@ function finish(retired = false) {
       ? `${result.bosses} champion${result.bosses === 1 ? "" : "s"} defeated. The jungle will remember that.`
       : "The jungle got its snack. Your next build could be the one.";
   $("result-score").textContent = format(result.score);
+  $("result-cause").hidden = retired || !run.deathCause;
+  $("result-cause").textContent =
+    !retired && run.deathCause
+      ? `Fatal hit: ${run.deathCause.name} · ${run.deathCause.attack}`
+      : "";
   $("result-best").textContent =
     result.score > oldBest
       ? "YOUR BEST RUN YET"
@@ -773,6 +866,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     if (run && run.phase === "playing" && !finished) pause();
     sound.pause();
+    if (replay) sound.stopEffects();
     controls?.reset();
   }
 });
@@ -827,16 +921,22 @@ function frame(timestamp) {
   const elapsed = Math.min(0.1, (timestamp - (last || timestamp)) / 1000);
   last = timestamp;
   if (run) {
+    if (replay) {
+      drawReplay(elapsed);
+      requestAnimationFrame(frame);
+      return;
+    }
     const playing = isPlaying();
     if (playing) {
       accumulator = Math.min(0.1, accumulator + elapsed);
       while (accumulator >= 1 / 60 && isPlaying()) {
         input = controls.sample(run.player);
         update(run, 1 / 60, input);
+        history.capture(run, run.phase === "dead", input);
         consumeEvents();
         accumulator -= 1 / 60;
         if (run.phase === "upgrade") renderChoices();
-        if (run.phase === "dead") finish();
+        if (run.phase === "dead") deathReplay();
       }
       announcementTime -= elapsed;
       if (announcementTime <= 0) $("announcement").classList.remove("active");
@@ -844,12 +944,14 @@ function frame(timestamp) {
         health: run.player.hp / run.player.maxHp,
       });
     } else accumulator = 0;
-    renderer.draw(run, playing ? elapsed : 0, {
-      ...input,
-      gore: options.gore,
-      quiet: options.quiet || motion.matches,
-      low: options.low,
-    });
+    if (replay) drawReplay(0);
+    else
+      renderer.draw(run, playing ? elapsed : 0, {
+        ...input,
+        gore: options.gore,
+        quiet: options.quiet || motion.matches,
+        low: options.low,
+      });
     hudClock += elapsed;
     if (hudClock > 0.08) {
       paintHUD();

@@ -18,7 +18,9 @@ const lengths = {
   upgrade: 0.45,
   evolution: 1.6,
   boss: 1.8,
-  death: 1.4,
+  death: 2.4,
+  replay: 6.3,
+  replayImpact: 0.9,
   pickup: 0.42,
   cache: 0.72,
   frenzy: 1.05,
@@ -106,10 +108,36 @@ export function makeEffect(kind, sampleRate = 44100, seed = 734) {
         0.22 *
         Math.sin(Math.PI * u);
     } else if (kind === "death") {
-      frequency = 95 * Math.exp(-t * 2.2) + 23;
-      decay = 2.8;
-      low += 0.15 * (noise - low);
-      value = low * Math.exp(-t * 8) * 0.7;
+      // Terminal impact, sub drop, then a falling dissonant metal tail.
+      frequency = 31 + 125 * Math.exp(-t * 15);
+      decay = 2.2;
+      low += 0.11 * (noise - low);
+      value = low * Math.exp(-t * 10) * 2.8 + noise * Math.exp(-t * 95) * 0.5;
+      for (const hz of [146.83, 155.56, 207.65])
+        value +=
+          Math.sin(2 * Math.PI * hz * (t - 0.065 * t * t)) *
+          Math.exp(-t * 2.4) *
+          (0.7 + 0.3 * Math.sin(t * 17)) *
+          0.18;
+      value += Math.sin(2 * Math.PI * 39 * t) * Math.exp(-t * 1.9) * 0.3;
+    } else if (kind === "replay") {
+      frequency = 34 + 3 * Math.sin(t * 0.8);
+      decay = 0.4;
+      low += 0.013 * (noise - low);
+      const pulse = t % 1.15;
+      const beat =
+        Math.exp(-pulse * 28) +
+        (pulse > 0.19 ? Math.exp(-(pulse - 0.19) * 34) * 0.5 : 0);
+      value =
+        Math.sin(2 * Math.PI * 57 * t) * beat * 0.52 +
+        low * 0.65 +
+        Math.sin(t * 2 * Math.PI * 73.4) * 0.06;
+      value *= Math.min(1, t / 0.3) * Math.min(1, (duration - t) / 0.6);
+    } else if (kind === "replayImpact") {
+      frequency = 29 + 70 * Math.exp(-t * 20);
+      decay = 6;
+      low += 0.09 * (noise - low);
+      value = low * Math.exp(-t * 10) * 1.3;
     } else if (chime) {
       const root =
         kind === "xp"
@@ -433,6 +461,9 @@ export function createAudio({ onStatus = () => {} } = {}) {
     stopTracks();
     setMix();
   }
+  function stopEffects() {
+    for (const voice of [...voices]) voice.stop();
+  }
   function resume() {
     playing = true;
     setMix();
@@ -441,6 +472,7 @@ export function createAudio({ onStatus = () => {} } = {}) {
   }
   function resetRun() {
     stopTracks();
+    stopEffects();
     offset = 0;
     intensity = 0;
     lowHealth = false;
@@ -453,6 +485,19 @@ export function createAudio({ onStatus = () => {} } = {}) {
     pause,
     resume,
     resetRun,
+    stopEffects,
+    death() {
+      pause();
+      stopEffects();
+      play("death", { gain: 0.95, priority: true });
+    },
+    replay(impact = false) {
+      if (impact) stopEffects();
+      play(impact ? "replayImpact" : "replay", {
+        gain: impact ? 0.64 : 0.3,
+        priority: true,
+      });
+    },
     sound,
     setIntensity(value, { health = 1 } = {}) {
       const next = clamp(value, 0, 2),

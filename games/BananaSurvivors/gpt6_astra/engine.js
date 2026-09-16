@@ -884,7 +884,30 @@ function hit(s, e, damage, weapon, kx = 0, ky = 0) {
   });
   if (e.hp <= 0) kill(s, e, weapon);
 }
-function hurt(s, amount, dx = 0, dy = 0) {
+function enemySource(s, e, attack = "Contact") {
+  const names = {
+    meatball: "Meatball",
+    hound: "Bloodhound",
+    brute: "Brute",
+    spitter: "Spitter",
+    splitter: "Splitter",
+    meatling: "Meatling",
+    carver: "Carver",
+    bloat: "Bloat",
+    ribcannon: "Ribcannon",
+    broodmother: "Broodmother",
+  };
+  return {
+    name:
+      e.type === "boss" ? bossName(s.wave) : names[e.type] || "Meat monster",
+    enemyId: e.id,
+    enemyType: e.type,
+    attack,
+    originX: e.x,
+    originY: e.y,
+  };
+}
+function hurt(s, amount, dx = 0, dy = 0, source = {}) {
   const p = s.player;
   if (p.invulnerable > 0 || p.dash > 0 || s.phase === "dead") return;
   if (s.ward > 0) {
@@ -893,7 +916,10 @@ function hurt(s, amount, dx = 0, dy = 0) {
     event(s, "pickup", { kind: "wardBreak" });
     return;
   }
-  p.hp = Math.max(0, p.hp - amount * stats(s).armor);
+  const healthBefore = p.hp,
+    damage = amount * stats(s).armor;
+  const impact = { playerX: p.x, playerY: p.y };
+  p.hp = Math.max(0, p.hp - damage);
   p.invulnerable = 0.68;
   p.hit = 0.25;
   p.x = clamp(p.x + dx * 12, -ARENA, ARENA);
@@ -903,7 +929,8 @@ function hurt(s, amount, dx = 0, dy = 0) {
   event(s, "hurt", { amount });
   if (p.hp <= 0) {
     s.phase = "dead";
-    event(s, "death");
+    s.deathCause = { ...source, ...impact, damage, healthBefore, time: s.time };
+    event(s, "death", { cause: s.deathCause });
   }
 }
 function shoot(s, b) {
@@ -1112,8 +1139,18 @@ function updateShots(s, dt) {
       if (
         segmentHit(ox, oy, b.x, b.y, s.player.x, s.player.y, b.r + s.player.r)
       ) {
-        hurt(s, b.damage);
+        hurt(s, b.damage, 0, 0, {
+          name: "Hostile projectile",
+          attack: b.kind === "bone" ? "Bone volley" : "Acid spit",
+          ...b.source,
+          kind: "shot",
+          id: b.id,
+          x: b.x,
+          y: b.y,
+          r: b.r,
+        });
         b.remove = true;
+        if (s.phase === "dead") return;
       }
       continue;
     }
@@ -1243,6 +1280,11 @@ function enemiesStep(s, dt) {
             delay: 1.05 + i * 0.18,
             life: 1.5 + i * 0.18,
             friendly: false,
+            source: enemySource(
+              s,
+              e,
+              e.action === "rain" ? "Blood rain" : "Ground slam",
+            ),
             damage: e.damage * 1.15,
           });
         }
@@ -1264,6 +1306,7 @@ function enemiesStep(s, dt) {
               shoot(s, {
                 kind: "bone",
                 hostile: true,
+                source: enemySource(s, e, "Bone fan"),
                 x: e.x,
                 y: e.y,
                 vx: Math.cos(a) * 245,
@@ -1289,6 +1332,7 @@ function enemiesStep(s, dt) {
           shoot(s, {
             kind: "acid",
             hostile: true,
+            source: enemySource(s, e, "Acid spit"),
             x: e.x,
             y: e.y,
             vx: e.ax * 195,
@@ -1308,6 +1352,7 @@ function enemiesStep(s, dt) {
             shoot(s, {
               kind: "acid",
               hostile: true,
+              source: enemySource(s, e, "Spore ring"),
               x: e.x,
               y: e.y,
               vx: Math.cos(a) * (e.enraged ? 210 : 175),
@@ -1330,6 +1375,7 @@ function enemiesStep(s, dt) {
             shoot(s, {
               kind: "bone",
               hostile: true,
+              source: enemySource(s, e, "Bone volley"),
               x: e.x,
               y: e.y,
               vx: Math.cos(a) * 245,
@@ -1366,6 +1412,7 @@ function enemiesStep(s, dt) {
             delay: 0,
             life: 0.3,
             friendly: false,
+            source: enemySource(s, e, "Rupture"),
             damage: e.damage * 1.25,
           });
           kill(s, e, "rupture");
@@ -1420,8 +1467,17 @@ function enemiesStep(s, dt) {
     e.ky *= Math.exp(-dt * 8);
     e.x = clamp(e.x + (mx * speed + e.kx) * dt, -ARENA - 70, ARENA + 70);
     e.y = clamp(e.y + (my * speed + e.ky) * dt, -ARENA - 70, ARENA + 70);
-    if (Math.hypot(e.x - p.x, e.y - p.y) < e.r + p.r)
-      hurt(s, e.damage, -d.x, -d.y);
+    if (Math.hypot(e.x - p.x, e.y - p.y) < e.r + p.r) {
+      hurt(s, e.damage, -d.x, -d.y, {
+        ...enemySource(s, e, e.charge > 0 ? "Charge" : "Contact"),
+        kind: "enemy",
+        id: e.id,
+        x: e.x,
+        y: e.y,
+        r: e.r,
+      });
+      if (s.phase === "dead") return;
+    }
     // Recycle far-away mobs instead of accumulating unreachable objects.
     if (distance > 1050 && e.type !== "boss") {
       const a = s.random() * Math.PI * 2;
@@ -1500,8 +1556,19 @@ function hazardsStep(s, dt) {
     } else if (!h.triggered) {
       h.triggered = true;
       event(s, "explode", { x: h.x, y: h.y, r: h.r, color: "#ff8063" });
-      if (Math.hypot(s.player.x - h.x, s.player.y - h.y) < h.r + s.player.r)
-        hurt(s, h.damage);
+      if (Math.hypot(s.player.x - h.x, s.player.y - h.y) < h.r + s.player.r) {
+        hurt(s, h.damage, 0, 0, {
+          name: "The jungle",
+          attack: "Blast",
+          ...h.source,
+          kind: "hazard",
+          id: h.id,
+          x: h.x,
+          y: h.y,
+          r: h.r,
+        });
+        if (s.phase === "dead") return;
+      }
     }
   }
   s.hazards = s.hazards.filter((h) => h.age < h.life);
@@ -1621,6 +1688,7 @@ export function update(s, dt, input = {}) {
           delay: 1.25,
           life: 1.65,
           friendly: false,
+          source: { name: "The jungle", attack: "Blood rain" },
           damage: 18 * hordePressure(s).damage,
         });
       }
@@ -1652,6 +1720,7 @@ export function update(s, dt, input = {}) {
   s.grid.rebuild(s.enemies);
   fireWeapons(s, dt);
   updateShots(s, dt);
+  if (s.phase === "dead") return;
   hazardsStep(s, dt);
   if (s.phase === "dead") return;
   s.enemies = s.enemies.filter((e) => !e.dead);

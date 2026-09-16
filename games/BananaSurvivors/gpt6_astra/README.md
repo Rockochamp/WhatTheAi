@@ -2,6 +2,18 @@
 
 An illustrated jungle survival roguelite. Open `game.html` through an HTTP server; no install or build step is needed. The Gemini 3 Pro original remains at `../game.html` and in the homepage selector.
 
+## Death replay · v6
+
+Real deaths now cut the combat score and effects for an original terminal-impact stinger: a sub drop, metallic dissonance and a falling tail. After a half-second freeze, the last 1.8 simulation seconds replay automatically at 0.3× speed over a quiet heartbeat bed, followed by a final-impact hold and the existing results/rankings. Touch/click **Skip replay**, or press Escape, to go directly to results. Retirement still opens results immediately. The replay and sound respect mute, gore and reduced-effects preferences; hiding the tab freezes the replay and stops its audio.
+
+The fatal enemy, projectile or area attack is highlighted and named, with post-armor damage and health before impact. Projectile and hazard ownership survive their creator's death. The engine stops processing combat as soon as the fatal hit lands, preventing later projectiles, hazards or pickups from altering the final result.
+
+`replay.js` stores render-only snapshots at 20 Hz (maximum 38 frames) and interpolates positions. It never re-simulates combat, consumes gameplay RNG, stores a video, changes scores or submits records. Effects are bounded to 48 per snapshot; simulation grids and projectile hit sets are excluded. A new run/results clear the buffer. Gameplay balance, ruleset 3 and its existing leaderboard remain unchanged.
+
+The saturated recording probe (220 enemies, 280 shots, 360 pickups, 65 hazards) retained about 6.4 MB on the development PC; recording averaged 0.17 ms per simulation step (0.52 ms p95), and replay interpolation was 0.83 ms p95. These are local CPU measurements, not phone FPS guarantees.
+
+All 55 tests passed, including fatal-source attribution, immediate combat termination, replay isolation/timing, bounded history, silence when muted and audio cleanup. Local browser checks covered desktop, 390 × 844 and 320 × 568 portrait, and 812 × 375 landscape. Projectile, contact and area deaths replayed; automatic results, click/Escape skipping, retry, one ranking entry per completed round and immediate retirement results were checked without browser errors. Temporary fixture controls are excluded from the release.
+
 ## Play
 
 - Move with WASD, arrows, held mouse steering, or a floating touch joystick.
@@ -51,7 +63,7 @@ Combat effects are cached synthesized Foley: fleshy hit thuds, wet kill splashes
 
 ## Validation
 
-From the repository root: `node --test tests/banana_astra.test.mjs tests/banana_effects.test.mjs tests/banana_horde.test.mjs tests/banana_stages.test.mjs`.
+From the repository root: `node --test tests/banana_astra.test.mjs tests/banana_effects.test.mjs tests/banana_horde.test.mjs tests/banana_stages.test.mjs tests/banana_replay.test.mjs`.
 
 The 38-test suite covers movement, pause timing, touch plus independent dash, input cleanup, collision tunneling, damage grace, repeat enemy attacks, champion rewards, every weapon at ranks I/V, upgrade limits, XP overflow, pickup saturation, ranking validation, global retry idempotency across both eras, progressive enemy unlocks, bloater interruption, bone volleys, summon caps, gore budgets and a ten-minute entity stress simulation. The stress fixture replenishes invulnerability every step (dash replaces the grace timer); it is not used by the shipped game.
 

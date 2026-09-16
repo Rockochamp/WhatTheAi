@@ -71,6 +71,8 @@ test("all combat sounds are finite, non-silent and end without a hard discontinu
     "evolution",
     "boss",
     "death",
+    "replay",
+    "replayImpact",
     "pickup",
     "cache",
     "frenzy",
@@ -222,6 +224,23 @@ test("music stems stay synchronized, pause preserves position, and combat voices
     audio.resetRun();
     audio.resume();
     assert.equal(starts.filter((s) => s.n.loop).at(-1).offset, 0);
+    audio.sound("kill");
+    audio.death();
+    assert.equal(active.size, 1, "death cuts all music and combat tails");
+    assert.equal([...active][0].buffer.duration, 2.4);
+    audio.replay();
+    assert.equal(active.size, 2);
+    audio.replay(true);
+    assert.equal(active.size, 1, "final impact replaces the replay bed");
+    audio.stopEffects();
+    assert.equal(active.size, 0);
+    audio.death();
+    audio.resetRun();
+    assert.equal(active.size, 0, "retry cannot inherit the death tail");
+    audio.configure({ audio: false });
+    audio.death();
+    audio.replay();
+    assert.equal(active.size, 0, "muted deaths and replays remain silent");
   } finally {
     audio.dispose();
     assert.equal(active.size, 0);

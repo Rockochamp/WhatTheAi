@@ -33,7 +33,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
     <link rel="preload" as="image" href="cover-v3.webp" />
-    <link rel="stylesheet" href="game.css?v=5" />
+    <link rel="stylesheet" href="game.css?v=6" />
   </head>
   <body>
     <canvas
@@ -222,6 +222,34 @@
       </div>
     </div>
     <div id="live-message" class="sr-only" aria-live="polite"></div>
+    <section
+      id="death-replay"
+      class="death-replay"
+      aria-label="Death replay"
+      hidden
+    >
+      <div class="replay-heading">
+        <p class="replay-kicker">BANANA SURVIVORS <span>DEATH REPLAY</span></p>
+        <h2 id="replay-title">PEEL DOWN.</h2>
+        <p id="replay-time">RUN ENDED</p>
+      </div>
+      <div class="replay-footer">
+        <div class="replay-track" aria-hidden="true">
+          <i id="replay-progress"></i>
+        </div>
+        <div class="replay-details">
+          <div class="replay-cause">
+            <span class="replay-kicker">KILLED BY · HIGHLIGHTED IN RED</span>
+            <strong id="death-cause"></strong>
+            <p id="death-damage"></p>
+            <p id="death-tip"></p>
+          </div>
+          <button id="skip-replay" class="quiet-button">
+            Skip replay <span>→</span>
+          </button>
+        </div>
+      </div>
+    </section>
 
     <dialog
       id="upgrade-dialog"
@@ -276,6 +304,7 @@
       <p class="eyebrow" id="result-label">A PEEL WELL FOUGHT</p>
       <h2 id="results-title">That was bananas.</h2>
       <p class="subtle" id="result-message"></p>
+      <p class="result-cause" id="result-cause" hidden></p>
       <div class="result-score">
         <span>FINAL SCORE</span><strong id="result-score">0</strong
         ><small id="result-best"></small>
@@ -482,6 +511,6 @@
       </div></noscript
     >
     <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=5"></script>
+    <script type="module" src="game.js?v=6"></script>
   </body>
 </html>
