@@ -1,9 +1,11 @@
-export const SESSION_KEY = "banana_survivors_grok_4_6_session_v1",
-  DEVICE_KEY = "banana_survivors_grok_4_6_device_v1",
-  COLLECTION = "leaderboard_banana_survivors_grok_4_6_v1",
-  STATS_DOC = "stats_banana_survivors_grok_4_6_v1",
-  VERSION = "grok_4_6_v1";
+export const SESSION_KEY = "banana_survivors_grok_4_6_session_v3";
+export const DEVICE_KEY = "banana_survivors_grok_4_6_device_v3";
+export const RULESET = 2;
+const COLLECTION = "leaderboard_banana_survivors_grok_4_6_v3";
+const STATS_DOC = "stats_banana_survivors_grok_4_6_v3";
+
 const integer = (n, max) => Number.isInteger(n) && n >= 0 && n <= max;
+
 export function validRecord(r) {
   return (
     !!r &&
@@ -16,18 +18,17 @@ export function validRecord(r) {
     integer(r.kills, 1e7) &&
     integer(r.wave, 100000) &&
     r.wave > 0 &&
-    integer(r.bosses, r.wave) &&
     integer(r.seconds, 86400) &&
     integer(r.level, 100000) &&
     r.level > 0 &&
-    integer(r.bestCombo, r.kills) &&
     integer(r.round, 1e7) &&
     r.round > 0 &&
     Number.isFinite(r.createdAt) &&
-    r.ruleset === 1 &&
-    ["classic", "ranger", "bruiser"].includes(r.loadout)
+    r.ruleset === RULESET &&
+    ["crescent", "splitter", "ripe"].includes(r.loadout)
   );
 }
+
 export function rankRecords(records, limit = 100) {
   return records
     .filter(validRecord)
@@ -42,6 +43,7 @@ export function rankRecords(records, limit = 100) {
     )
     .slice(0, limit);
 }
+
 export function readRecords(storage, key = SESSION_KEY) {
   try {
     const list = JSON.parse(storage.getItem(key) || "[]");
@@ -52,6 +54,7 @@ export function readRecords(storage, key = SESSION_KEY) {
     return [];
   }
 }
+
 export function addRecord(records, record, storage, key = SESSION_KEY) {
   const ranked = rankRecords(
     [...records.filter((r) => r.id !== record.id), record],
@@ -60,10 +63,11 @@ export function addRecord(records, record, storage, key = SESSION_KEY) {
   try {
     storage.setItem(key, JSON.stringify(ranked));
   } catch {
-    /* Keep the current session usable when storage is blocked. */
+    /* Keep the run in memory if storage is blocked. */
   }
   return ranked;
 }
+
 const firebaseConfig = {
   apiKey: "AIzaSyBop7YMrZIO05yknhCm_mqjbtXP_Gl58sE",
   authDomain: "cosmicdodge-5ae20.firebaseapp.com",
@@ -72,9 +76,11 @@ const firebaseConfig = {
   messagingSenderId: "940230809594",
   appId: "1:940230809594:web:0b3b1dabe1e5c2f5f47643",
 };
+
 export const isLiveSite = () =>
   typeof location !== "undefined" &&
   ["whatthe.ai", "www.whatthe.ai"].includes(location.hostname);
+
 let databasePromise;
 const scriptLoads = new Map();
 function loadScript(src) {
@@ -103,6 +109,7 @@ function loadScript(src) {
   scriptLoads.set(src, promise);
   return promise;
 }
+
 async function database() {
   if (!isLiveSite()) throw Error("Local preview");
   if (!databasePromise)
@@ -124,12 +131,10 @@ async function database() {
     });
   return databasePromise;
 }
+
 function bounded(promise) {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(Error("Connection timed out")),
-      10000,
-    );
+    const timer = setTimeout(() => reject(Error("Connection timed out")), 10000);
     promise.then(
       (value) => {
         clearTimeout(timer);
@@ -142,6 +147,7 @@ function bounded(promise) {
     );
   });
 }
+
 export async function fetchGlobalRecords() {
   const db = await database();
   const [snapshot, stats] = await bounded(
@@ -159,6 +165,7 @@ export async function fetchGlobalRecords() {
       : 0,
   };
 }
+
 export async function saveGlobalRecord(record) {
   if (!validRecord(record)) throw Error("Invalid run");
   const db = await database(),
@@ -169,14 +176,14 @@ export async function saveGlobalRecord(record) {
       if ((await transaction.get(reference)).exists) return;
       transaction.set(reference, {
         ...record,
-        version: VERSION,
+        version: "grok_4_6_v3",
         timestamp: window.firebase.firestore.FieldValue.serverTimestamp(),
       });
       transaction.set(
         stats,
         {
           gameTitle: "banana_survivors",
-          version: VERSION,
+          version: "grok_4_6_v3",
           totalGamesPlayed: window.firebase.firestore.FieldValue.increment(1),
         },
         { merge: true },

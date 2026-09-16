@@ -21,8 +21,8 @@ Grok 4.6 is the default Cosmic Dodge destination. Selecting Astra / Gemini / o3-
 
 # Grok 4.6 Banana Survivors cover · September 2026
 
-- `banana-grok.webp`: text-to-image generation. Brief: scarred rotten banana veteran with torn teal headband and brass seed gun, crowned meat boss and meat-storm in moonlit jungle ruins, arterial cartoon gore. No text. Converted to 800×800 WebP.
-- In-game hangar: `games/BananaSurvivors/grok_4_6/cover-grok.webp` — veteran on the right, dark left half for UI overlay, meat storm and bone-crowned boss. No text.
+- `banana-grok.webp`: split-banana still life. Golden fruit opened like a wound, arterial drip on black iron, one peel curling as a scythe. No jungle, no veteran with a seed gun, no text. 800×800 WebP.
+- In-game hangar: `games/BananaSurvivors/grok_4_6/cover-grok.webp` — 16:9 meat locker, crescent banana in blood, dark left for UI.
+- Floor tile: `games/BananaSurvivors/grok_4_6/locker.webp`.
 
-Grok 4.6 is the default Banana Survivors destination. Selecting Astra / Gemini restores those thumbnails and routes.
-
+Grok 4.6 is **SPLIT**, written from scratch — no guns, orbiting peels, split-dash. Astra / Gemini stay selectable with their own art.

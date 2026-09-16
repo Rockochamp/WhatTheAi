@@ -1,175 +1,123 @@
-export function createControls(
-  canvas,
-  stick,
-  dashButton,
-  { onPause, onChoice, onReroll, onActivity, isPlaying, screenToWorld },
-) {
+// Top-down on-foot: A left (−x), D right (+x), W up (−y), S down (+y).
+// Split is edge-triggered. No twin-stick aim — you are the blade.
+export function createControls(canvas, splitButton) {
   const keys = new Set();
   let pointer = null,
-    target = null,
-    mouse = false,
-    queuedDash = false,
-    origin = null,
-    vector = { x: 0, y: 0 };
-  function reset() {
-    keys.clear();
-    pointer = null;
-    mouse = false;
-    target = null;
-    origin = null;
-    vector = { x: 0, y: 0 };
-    queuedDash = false;
-    stick.hidden = true;
-    dashButton.classList.remove("pressed");
+    stick = null,
+    splitQueued = false,
+    splitHeld = false,
+    forced = null;
+
+  function axis() {
+    if (forced) return forced;
+    let x =
+      (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0) -
+      (keys.has("KeyA") || keys.has("ArrowLeft") ? 1 : 0);
+    let y =
+      (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0) -
+      (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0);
+    if (stick) {
+      x = stick.x;
+      y = stick.y;
+    } else if (pointer && !stick) {
+      x = pointer.x;
+      y = pointer.y;
+    }
+    const len = Math.hypot(x, y);
+    if (len > 1) {
+      x /= len;
+      y /= len;
+    }
+    return { x, y, moving: len > 0.05 };
   }
-  const editable = (el) => el?.matches("input,select,textarea");
-  function keydown(e) {
-    if (editable(e.target)) return;
-    if (
-      ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
-        e.code,
-      ) &&
-      isPlaying()
-    )
+
+  function down(code) {
+    keys.add(code);
+    if (code === "Space" || code === "ShiftLeft" || code === "ShiftRight")
+      splitQueued = true;
+  }
+  function up(code) {
+    keys.delete(code);
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code))
       e.preventDefault();
-    if (e.repeat) return;
-    if (["Escape", "KeyP"].includes(e.code)) {
-      e.preventDefault();
-      onPause();
-      return;
-    }
-    if (/^Digit[123]$/.test(e.code)) {
-      onChoice(Number(e.code.slice(-1)) - 1);
-      return;
-    }
-    if (e.code === "KeyR" && !isPlaying()) {
-      onReroll();
-      return;
-    }
-    if (!isPlaying()) return;
-    if (
-      e.code === "Space" ||
-      e.code === "ShiftLeft" ||
-      e.code === "ShiftRight"
-    ) {
-      queuedDash = true;
-      onActivity();
-    } else keys.add(e.code);
-  }
-  function keyup(e) {
-    keys.delete(e.code);
-  }
-  function down(e) {
-    if (!isPlaying()) return;
-    if (e.pointerType === "mouse" && e.button === 2) {
-      queuedDash = true;
-      e.preventDefault();
-      return;
-    }
-    if (e.button > 0 || pointer !== null) return;
-    onActivity();
-    pointer = e.pointerId;
-    canvas.setPointerCapture(pointer);
-    const r = canvas.getBoundingClientRect(),
-      x = e.clientX - r.left,
-      y = e.clientY - r.top;
-    if (e.pointerType === "mouse") {
-      mouse = true;
-      target = { x, y };
-    } else {
-      mouse = false;
-      origin = { x, y };
-      vector = { x: 0, y: 0 };
-      stick.hidden = false;
-      stick.style.left = `${x}px`;
-      stick.style.top = `${y}px`;
-      stick.firstElementChild.style.transform = "translate(-50%,-50%)";
-    }
-    e.preventDefault();
-  }
-  function move(e) {
-    if (e.pointerId !== pointer) return;
-    const r = canvas.getBoundingClientRect(),
-      x = e.clientX - r.left,
-      y = e.clientY - r.top;
-    if (mouse) {
-      target = { x, y };
-      return;
-    }
-    const dx = x - origin.x,
-      dy = y - origin.y,
-      d = Math.hypot(dx, dy),
-      clamp = d > 48 ? 48 / d : 1;
-    vector = { x: (dx * clamp) / 48, y: (dy * clamp) / 48 };
-    stick.firstElementChild.style.transform = `translate(calc(-50% + ${dx * clamp}px),calc(-50% + ${dy * clamp}px))`;
-  }
-  function up(e) {
-    if (e.pointerId !== pointer) return;
-    pointer = null;
-    origin = null;
-    target = null;
-    mouse = false;
-    vector = { x: 0, y: 0 };
-    stick.hidden = true;
-  }
-  const dashDown = (e) => {
-    if (!isPlaying()) return;
-    e.preventDefault();
-    e.stopPropagation();
-    queuedDash = true;
-    dashButton.classList.add("pressed");
-    onActivity();
-  };
-  const dashUp = () => dashButton.classList.remove("pressed");
-  window.addEventListener("keydown", keydown);
-  window.addEventListener("keyup", keyup);
-  window.addEventListener("blur", reset);
-  canvas.addEventListener("pointerdown", down);
-  canvas.addEventListener("pointermove", move);
-  canvas.addEventListener("pointerup", up);
-  canvas.addEventListener("pointercancel", up);
-  canvas.addEventListener("lostpointercapture", up);
-  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-  dashButton.addEventListener("pointerdown", dashDown);
-  dashButton.addEventListener("pointerup", dashUp);
-  dashButton.addEventListener("pointercancel", dashUp);
-  // Keyboard activation of the visible dash button also works.
-  dashButton.addEventListener("click", (e) => {
-    if (e.detail === 0 && isPlaying()) queuedDash = true;
+    down(e.code);
   });
-  function sample(player) {
-    let x = 0,
-      y = 0;
-    for (const key of keys) {
-      if (key === "KeyW" || key === "ArrowUp") y--;
-      if (key === "KeyS" || key === "ArrowDown") y++;
-      if (key === "KeyA" || key === "ArrowLeft") x--;
-      if (key === "KeyD" || key === "ArrowRight") x++;
+  window.addEventListener("keyup", (e) => up(e.code));
+  window.addEventListener("blur", () => keys.clear());
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) keys.clear();
+  });
+
+  canvas.addEventListener("pointerdown", (e) => {
+    if (e.button === 2) {
+      splitQueued = true;
+      return;
     }
-    let worldTarget = null;
-    if (!x && !y) {
-      if (mouse && target) {
-        worldTarget = screenToWorld(target.x, target.y);
-        const dx = worldTarget.x - player.x,
-          dy = worldTarget.y - player.y,
-          d = Math.hypot(dx, dy);
-        if (d > 18) {
-          x = dx / d;
-          y = dy / d;
-        }
-      } else {
-        x = vector.x;
-        y = vector.y;
-      }
-    }
-    const magnitude = Math.hypot(x, y);
-    if (magnitude > 1) {
-      x /= magnitude;
-      y /= magnitude;
-    }
-    const dash = queuedDash;
-    queuedDash = false;
-    return { x, y, dash, moving: magnitude > 0.05, target: worldTarget, mouse };
+    canvas.setPointerCapture(e.pointerId);
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    pointer = {
+      x: (e.clientX - cx) / (rect.width * 0.28),
+      y: (e.clientY - cy) / (rect.height * 0.28),
+    };
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!pointer) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    pointer = {
+      x: (e.clientX - cx) / (rect.width * 0.28),
+      y: (e.clientY - cy) / (rect.height * 0.28),
+    };
+  });
+  const endPointer = () => {
+    pointer = null;
+  };
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  if (splitButton) {
+    const press = (e) => {
+      e.preventDefault();
+      splitHeld = true;
+      splitQueued = true;
+    };
+    const release = () => {
+      splitHeld = false;
+    };
+    splitButton.addEventListener("pointerdown", press);
+    splitButton.addEventListener("pointerup", release);
+    splitButton.addEventListener("pointercancel", release);
   }
-  return { sample, reset };
+
+  return {
+    sample() {
+      const a = axis();
+      const dash = splitQueued || splitHeld;
+      splitQueued = false;
+      return { ...a, dash };
+    },
+    setStick(value) {
+      stick = value;
+    },
+    reset() {
+      keys.clear();
+      pointer = null;
+      stick = null;
+      splitQueued = false;
+      splitHeld = false;
+      forced = null;
+    },
+    setKeys(codes) {
+      keys.clear();
+      forced = null;
+      for (const code of codes) keys.add(code);
+    },
+  };
 }

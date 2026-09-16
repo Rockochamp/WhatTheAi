@@ -1,16 +1,16 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#1a0c0e" />
+    <meta name="theme-color" content="#0a0808" />
     <title>Banana Survivors · Grok 4.6 | What the Ai</title>
     <meta
       name="description"
-      content="One banana. Endless meat. Play the free Grok 4.6 Banana Survivors: executions, cleaving overkill, corpse-crush dashes, evolving weapons, and isolated global rankings."
+      content="SPLIT. Grok 4.6 Banana Survivors — no guns. A peel that orbits, a dash that splits you in two, a locker that fills with blood."
     />
     <link
       rel="canonical"
@@ -19,7 +19,7 @@
     <meta property="og:title" content="Banana Survivors · Grok 4.6" />
     <meta
       property="og:description"
-      content="You are the snack. Finish them. A brutal jungle survival roguelite with executions, bloodlust, evolving weapons and endless stages."
+      content="Walk into them. Come apart. Grok 4.6 Banana Survivors: a close-quarters blood ballet. No guns."
     />
     <meta property="og:type" content="website" />
     <meta
@@ -33,495 +33,264 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/images/favicon.ico?v=1.2" />
     <link rel="preload" as="image" href="cover-grok.webp" />
-    <link rel="stylesheet" href="game.css?v=1" />
+    <link rel="stylesheet" href="game.css" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="game.js"></script>
   </head>
   <body>
-    <canvas
-      id="arena"
-      tabindex="0"
-      aria-label="Banana Survivors arena. Move with WASD, arrow keys, mouse drag, or touch. Space or the dash button dodges attacks."
-    ></canvas>
-    <main id="menu" class="menu">
-      <nav class="menu-nav">
-        <a href="/">← What the Ai</a><span class="edition">GROK 4.6</span
-        ><button class="quiet-button" data-open="help">
-          How to play <span>↗</span>
-        </button>
-      </nav>
-      <div class="menu-content">
-        <p class="eyebrow">ONE BANANA. NO MERCY.</p>
-        <h1>
-          <span>BANANA</span><br />SURVIVORS<span class="title-period">.</span>
-        </h1>
-        <p class="tagline">You are the snack.<br />Finish them.</p>
-        <p class="menu-description">
-          Execute the dying. Cleave through the rest.<br />Dash through corpses
-          and take the stage.
-        </p>
-        <form id="start-form">
-          <label for="nickname"
-            >YOUR NAME <span>for the hall of survivors</span></label
-          >
-          <input
-            id="nickname"
-            name="nickname"
-            maxlength="10"
-            placeholder="Banana"
-            autocomplete="nickname"
-            spellcheck="false"
-            aria-describedby="name-error"
-          />
-          <p id="name-error" class="form-error" role="alert"></p>
-          <fieldset class="loadouts">
-            <legend>PICK YOUR PEEL</legend>
-            <label class="loadout"
-              ><input
-                type="radio"
-                name="loadout"
-                value="classic"
-                checked
-              /><span
-                ><strong>The original</strong
-                ><small>Blaster II · focused</small></span
-              ></label
-            >
-            <label class="loadout"
-              ><input type="radio" name="loadout" value="ranger" /><span
-                ><strong>The ranger</strong
-                ><small>Blaster + rang · swift</small></span
-              ></label
-            >
-            <label class="loadout"
-              ><input type="radio" name="loadout" value="bruiser" /><span
-                ><strong>The bruiser</strong
-                ><small>Blaster + peels · tough</small></span
-              ></label
-            >
-          </fieldset>
-          <button
-            id="start-button"
-            class="primary start"
-            type="submit"
-            disabled
-          >
-            <span>Bringing the jungle to life…</span
-            ><span aria-hidden="true">→</span>
+    <main class="arcade" id="arcade">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="What the Ai home"
+          ><svg viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16 2 19 12 30 16 19 20 16 30 12 20 2 16 12 12Z" /></svg
+          ><span>whatthe<span class="brand-ai">.ai</span></span></a
+        >
+        <span class="nav-divider"></span>
+        <span class="nav-title">BANANA SURVIVORS</span>
+        <span class="edition">GROK 4.6</span>
+        <nav aria-label="Game options">
+          <button id="records-button" class="nav-button" type="button">
+            Rankings
           </button>
-          <p id="load-status" role="status">
-            Loading the artwork. Your first run is almost ready.
-          </p>
-        </form>
-        <div class="menu-actions">
-          <button data-open="rank">Hall of survivors ↗</button
-          ><button data-open="settings">Sound & settings</button>
-        </div>
-        <div class="personal">
-          <span>PERSONAL BEST <strong id="personal-best">—</strong></span
-          ><span>BEST STAGE <strong id="personal-wave">—</strong></span>
-        </div>
-      </div>
-      <footer class="menu-foot">
-        <span
-          >ENDLESS STAGES <i>·</i> EXECUTIONS <i>·</i> NO DOWNLOAD</span
-        ><span>Made with AI. Survived by you.</span>
-      </footer>
-    </main>
-
-    <div id="hud" class="hud" hidden>
-      <header class="hud-top">
-        <div class="health-group">
-          <div class="hud-label">
-            <span>STAY FRESH</span><span id="hp-text">100 / 100</span>
-          </div>
-          <div
-            class="health-track"
-            role="progressbar"
-            aria-label="Health"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="100"
+          <button
+            id="help-button"
+            class="icon-button"
+            type="button"
+            aria-label="How to play"
           >
-            <span id="hp-fill"></span>
-          </div>
-        </div>
-        <div class="wave-clock">
-          <strong id="wave-text">STAGE 01</strong
-          ><span id="time-text">50s</span>
-          <small id="stage-detail">Learn the hunt</small>
-          <div class="stage-track"><span id="stage-progress"></span></div>
-        </div>
-        <div class="score-group">
-          <span class="hud-label">SCORE</span><strong id="score-text">0</strong
-          ><small><span id="kills-text">0</span> kills</small>
-        </div>
-        <div class="hud-actions">
+            ?
+          </button>
           <button
             id="sound-button"
             class="icon-button"
-            aria-label="Mute sound"
-            title="Sound on"
+            type="button"
+            aria-label="Turn sound on"
+            aria-pressed="false"
           >
-            ♫</button
-          ><button
-            id="pause-button"
-            class="icon-button"
-            aria-label="Pause game"
-            title="Pause (P / Esc)"
-          >
-            Ⅱ
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4ZM16 9l5 6m0-6-5 6" />
+            </svg>
           </button>
-        </div>
+        </nav>
       </header>
-      <div class="xp-row">
-        <span id="level-text">XP LV 1</span>
-        <div
-          class="xp-track"
-          role="progressbar"
-          aria-label="Experience to next level"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="0"
+      <section class="stage" id="stage" data-state="ready" aria-label="SPLIT">
+        <canvas
+          id="arena"
+          tabindex="0"
+          aria-label="SPLIT play area. WASD to walk. Space to split. You are the blade."
+          >Canvas is required to play Banana Survivors.</canvas
         >
-          <span id="xp-fill"></span>
-        </div>
-        <span id="xp-text">0 / 12</span>
-      </div>
-      <div id="boss-hud" class="boss-hud" hidden>
-        <div>
-          <span id="boss-name">THE CLEAVER KING</span><span id="boss-hp"></span>
-        </div>
-        <div class="boss-track"><span id="boss-fill"></span></div>
-        <p id="boss-tip"></p>
-      </div>
-      <div id="announcement" class="announcement" aria-live="polite">
-        <strong></strong><span></span>
-      </div>
-      <div class="bottom-hud">
-        <div class="combo-group">
-          <span id="combo-text">MAKE IT A STREAK</span>
-          <div class="combo-track"><span id="combo-fill"></span></div>
-          <small id="frenzy-text">Overripe charge 0%</small>
-          <small id="buff-status"></small>
-          <small class="run-timer">RUN <span id="run-clock">00:00</span></small>
-        </div>
-        <div
-          id="weapon-rail"
-          class="weapon-rail"
-          aria-label="Equipped weapons"
-        ></div>
-      </div>
-      <p id="control-hint" class="control-hint">
-        WASD / ARROWS · HOLD MOUSE TO STEER · SPACE TO DASH
-      </p>
-      <button id="dash-button" class="dash-button" aria-label="Dash">
-        <span class="dash-symbol">↗</span><strong>DASH</strong
-        ><small id="dash-time">READY</small>
-      </button>
-      <div id="touch-stick" class="touch-stick" hidden aria-hidden="true">
-        <span></span>
-      </div>
-    </div>
-    <div id="live-message" class="sr-only" aria-live="polite"></div>
-    <section
-      id="death-replay"
-      class="death-replay"
-      aria-label="Death replay"
-      hidden
-    >
-      <div class="replay-heading">
-        <p class="replay-kicker">BANANA SURVIVORS <span>DEATH REPLAY</span></p>
-        <h2 id="replay-title">PEEL DOWN.</h2>
-        <p id="replay-time">RUN ENDED</p>
-      </div>
-      <div class="replay-footer">
-        <div class="replay-track" aria-hidden="true">
-          <i id="replay-progress"></i>
-        </div>
-        <div class="replay-details">
-          <div class="replay-cause">
-            <span class="replay-kicker">KILLED BY · HIGHLIGHTED IN RED</span>
-            <strong id="death-cause"></strong>
-            <p id="death-damage"></p>
-            <p id="death-tip"></p>
+        <div class="vignette" aria-hidden="true"></div>
+        <div class="hud" id="hud" hidden>
+          <div class="hud-block">
+            <span class="eyebrow">RIND</span>
+            <strong id="hp-text">100</strong>
+            <div class="track"><i id="hp-fill"></i></div>
           </div>
-          <button id="skip-replay" class="quiet-button">
-            Skip replay <span>→</span>
-          </button>
+          <div class="hud-block center">
+            <span class="eyebrow" id="hook-label">HOOK</span>
+            <strong id="hook-text">48</strong>
+            <small id="hook-detail">The Rail is lowering</small>
+            <div class="track"><i id="hook-fill"></i></div>
+          </div>
+          <div class="hud-block right">
+            <span class="eyebrow">PULP</span>
+            <strong id="score-text">0</strong>
+            <small id="combo-text">WALK INTO THEM</small>
+          </div>
         </div>
-      </div>
-    </section>
-
-    <dialog
-      id="upgrade-dialog"
-      class="upgrade-dialog"
-      aria-labelledby="upgrade-title"
-    >
-      <div class="modal-header">
-        <div>
-          <p class="eyebrow" id="upgrade-label">LEVEL UP</p>
-          <h2 id="upgrade-title">Make it riper.</h2>
+        <div class="ripe-hud" id="ripe-hud" hidden>
+          <span>RIPENESS</span>
+          <div class="ripe-track"><i id="ripe-fill"></i></div>
+          <em id="split-status">SPLIT READY</em>
         </div>
-        <span class="level-seal" id="upgrade-level">2</span>
-      </div>
-      <p class="subtle" id="upgrade-subtitle">
-        Choose your edge. The jungle can wait.
-      </p>
-      <div id="upgrade-cards" class="upgrade-cards"></div>
-      <div class="upgrade-footer">
-        <button id="reroll-button" class="secondary">Reroll · 2 left</button
-        ><span id="build-note"
-          >4 weapon slots · rank V evolves · mastery has no limit</span
+        <div class="prize-hud" id="prize-hud" hidden>
+          <span id="prize-name">THE RAIL</span>
+          <div class="track"><i id="prize-fill"></i></div>
+        </div>
+        <div class="overlay" id="overlay">
+          <section class="menu-content" id="start-content">
+            <p class="menu-kicker">SPLIT · OPEN FRUIT</p>
+            <h1>BANANA<br /><span>SURVIVORS</span></h1>
+            <p class="intro">
+              No guns. A peel that orbits you like a knife.<br />
+              Dash and you come apart. The locker fills with blood.
+            </p>
+            <form id="launch-form">
+              <div class="nickname-field">
+                <label for="pilot-name"
+                  >YOUR NAME <span>on the hall</span></label
+                >
+                <input
+                  id="pilot-name"
+                  maxlength="10"
+                  placeholder="Banana"
+                  autocomplete="nickname"
+                  spellcheck="false"
+                  aria-describedby="name-error"
+                />
+              </div>
+              <p id="name-error" role="alert"></p>
+              <fieldset class="loadouts">
+                <legend>HOW YOU WALK IN</legend>
+                <label class="loadout"
+                  ><input type="radio" name="loadout" value="crescent" checked />
+                  <span
+                    ><strong>Crescent</strong
+                    ><small>Two peels. Walk into them.</small></span
+                  ></label
+                >
+                <label class="loadout"
+                  ><input type="radio" name="loadout" value="splitter" />
+                  <span
+                    ><strong>Splitter</strong
+                    ><small>One peel. You are the cut.</small></span
+                  ></label
+                >
+                <label class="loadout"
+                  ><input type="radio" name="loadout" value="ripe" />
+                  <span
+                    ><strong>Overripe</strong
+                    ><small>Already splitting. Burst bigger.</small></span
+                  ></label
+                >
+              </fieldset>
+              <button class="primary-button" type="submit">
+                <span>SPLIT OPEN</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 5 7 7-7 7" />
+                </svg>
+              </button>
+            </form>
+            <p class="launch-hint desktop-hint">
+              <kbd>WASD</kbd> walk · <kbd>SPACE</kbd> split · you are the blade
+            </p>
+            <p class="launch-hint touch-hint">Stick to walk. SPLIT to come apart.</p>
+            <div class="ranking-links">
+              <button type="button" data-ranking="session">Session</button>
+              <button type="button" data-ranking="global">Global hall</button>
+              <button type="button" id="settings-button">Sound & gore</button>
+            </div>
+            <button class="personal-record" type="button" data-ranking="local">
+              PERSONAL BEST <strong id="personal-best">—</strong>
+            </button>
+          </section>
+          <div class="world-caption" aria-hidden="true">
+            <span>GROK 4.6 / OPEN FRUIT</span>
+            <strong>Walk into them. Come apart.</strong>
+            <i></i>
+            <span>NO GUNS. THE LOCKER FILLS.</span>
+          </div>
+          <section class="overlay-card" id="result-content" hidden>
+            <p class="eyebrow" id="result-kicker">THE LOCKER WINS</p>
+            <h2 id="result-title">They ate the snack.</h2>
+            <strong class="final-score" id="final-score">0</strong>
+            <span class="eyebrow">PULP</span>
+            <div class="result-stats" id="result-stats"></div>
+            <p class="save-status" id="save-status" role="status"></p>
+            <button class="primary-button" id="retry-save" type="button" hidden>
+              Retry save
+            </button>
+            <button class="primary-button" id="restart-button" type="button">
+              SPLIT AGAIN
+            </button>
+            <button class="text-button" id="menu-button" type="button">
+              Back to hangar
+            </button>
+          </section>
+          <section class="overlay-card" id="pause-content" hidden>
+            <p class="eyebrow">PAUSED</p>
+            <h2>The locker can wait.</h2>
+            <button class="primary-button" id="resume-button" type="button">
+              KEEP CUTTING
+            </button>
+            <button class="text-button" id="quit-button" type="button">
+              End run
+            </button>
+          </section>
+          <section class="overlay-card cuts" id="upgrade-content" hidden>
+            <p class="eyebrow" id="upgrade-title">PICK A CUT</p>
+            <h2>The carcass offers three.</h2>
+            <div class="cut-row" id="upgrade-cards"></div>
+            <button class="text-button" id="reroll-button" type="button">
+              Reroll
+            </button>
+          </section>
+        </div>
+        <p class="announce" id="announcement">
+          <strong></strong><span></span>
+        </p>
+        <div class="touch" id="touch" hidden>
+          <div class="stick" id="stick" aria-hidden="true"><i id="knob"></i></div>
+          <button id="split-button" type="button">SPLIT</button>
+        </div>
+      </section>
+      <footer class="footer">
+        <span
+          >WALK IN <span class="dot">·</span> SPLIT <span class="dot">·</span>
+          BURST WHEN YOU’RE RIPE</span
         >
-      </div>
-    </dialog>
+      </footer>
+    </main>
 
-    <dialog id="pause-dialog" aria-labelledby="pause-title">
-      <div class="modal-header">
-        <div>
-          <p class="eyebrow">TAKE A BREATHER</p>
-          <h2 id="pause-title">Still fresh.</h2>
+    <dialog id="rank-dialog">
+      <form method="dialog">
+        <h2>Hall of survivors</h2>
+        <p>Grok 4.6 SPLIT board. Isolated from Gemini and Astra.</p>
+        <div class="ranking-links">
+          <button type="button" data-scope="session">Session</button>
+          <button type="button" data-scope="local">Device</button>
+          <button type="button" data-scope="global">Global</button>
         </div>
-        <span class="modal-mark">Ⅱ</span>
-      </div>
-      <p class="subtle">The jungle is waiting for you.</p>
-      <button id="resume-button" class="primary full">
-        Back to the mayhem →
-      </button>
-      <div class="pause-grid">
-        <button data-open="settings" class="secondary">Sound & settings</button
-        ><button data-open="help" class="secondary">Controls & armory</button>
-      </div>
-      <button id="retire-button" class="text-button">
-        End this run & keep my score
-      </button>
-    </dialog>
-
-    <dialog
-      id="results-dialog"
-      class="results-dialog"
-      aria-labelledby="results-title"
-    >
-      <p class="eyebrow" id="result-label">A PEEL WELL FOUGHT</p>
-      <h2 id="results-title">That was bananas.</h2>
-      <p class="subtle" id="result-message"></p>
-      <p class="result-cause" id="result-cause" hidden></p>
-      <div class="result-score">
-        <span>FINAL SCORE</span><strong id="result-score">0</strong
-        ><small id="result-best"></small>
-      </div>
-      <div class="result-grid" id="result-stats"></div>
-      <div id="result-build" class="result-build"></div>
-      <p id="save-status" role="status" class="subtle"></p>
-      <button id="retry-save" class="text-button" hidden>
-        Retry global save</button
-      ><button id="again-button" class="primary full">One more run →</button>
-      <div class="pause-grid">
-        <button id="result-rank" class="secondary">See rankings</button
-        ><button id="menu-button" class="secondary">Change your peel</button>
-      </div>
-    </dialog>
-
-    <dialog id="rank-dialog" aria-labelledby="rank-title">
-      <div class="modal-header">
-        <div>
-          <p class="eyebrow">BANANA SURVIVORS · GROK 4.6</p>
-          <h2 id="rank-title">Hall of survivors.</h2>
-        </div>
-        <button data-close class="close-button" aria-label="Close rankings">
-          ×
+        <p id="rank-status"></p>
+        <ol id="rank-list"></ol>
+        <button class="text-button" id="refresh-rank" type="button" hidden>
+          Refresh
         </button>
-      </div>
-      <div class="rank-tabs" role="group" aria-label="Ranking scope">
-        <button data-scope="session" aria-pressed="true">This session</button
-        ><button data-scope="device" aria-pressed="false">This device</button
-        ><button data-scope="global" aria-pressed="false">Global</button>
-      </div>
-      <p class="subtle">
-        Grok 4.6 rankings · isolated from Astra and Gemini boards.
-      </p>
-      <p id="rank-status" class="subtle" role="status"></p>
-      <ol id="rank-list" class="rank-list"></ol>
-      <button id="refresh-rank" class="secondary full" hidden>
-        Refresh global ranking
-      </button>
+        <button class="primary-button" value="close" type="submit">Close</button>
+      </form>
     </dialog>
-
-    <dialog id="settings-dialog" aria-labelledby="settings-title">
-      <div class="modal-header">
-        <div>
-          <p class="eyebrow">MAKE YOURSELF AT HOME</p>
-          <h2 id="settings-title">Your kind of chaos.</h2>
-        </div>
-        <button data-close class="close-button" aria-label="Close settings">
-          ×
-        </button>
-      </div>
-      <label class="setting"
-        ><span
-          ><strong>Music & effects</strong
-          ><small
-            >Heavy guitars, industrial drums & visceral impacts</small
-          ></span
-        ><input id="audio-enabled" type="checkbox" checked /></label
-      ><label class="volume-label" for="volume">Volume</label
-      ><input id="volume" type="range" min="0" max="1" step=".05" value=".45" />
-      <label class="volume-label" for="music-volume">Soundtrack</label
-      ><input
-        id="music-volume"
-        type="range"
-        min="0"
-        max="1"
-        step=".05"
-        value=".8"
-      />
-      <label class="volume-label" for="effects-volume">Combat effects</label
-      ><input
-        id="effects-volume"
-        type="range"
-        min="0"
-        max="1"
-        step=".05"
-        value=".9"
-      />
-      <p id="music-status" class="subtle" role="status">
-        MEATGRINDER · original industrial survival soundtrack
-      </p>
-      <button id="retry-audio" class="secondary" hidden>
-        Retry soundtrack
-      </button>
-      <label class="setting"
-        ><span
-          ><strong>Blood & gore</strong
-          ><small
-            >Arterial sprays, executions, crushed corpses and lingering stains</small
-          ></span
-        ><input id="gore-enabled" type="checkbox" checked
-      /></label>
-      <label class="setting"
-        ><span
-          ><strong>Reduced effects</strong
-          ><small>Fewer particles; no screen shake</small></span
-        ><input id="reduced-effects" type="checkbox" /></label
-      ><label class="setting"
-        ><span
-          ><strong>Battery saver</strong
-          ><small>Lower pixel density and fewer effects</small></span
-        ><input id="battery-saver" type="checkbox" /></label
-      ><button id="fullscreen-button" class="secondary full">
-        Toggle fullscreen ↗
-      </button>
-      <p class="subtle">
-        The game pauses when you leave the tab. Device reduced-motion
-        preferences are respected.
-      </p>
+    <dialog id="help-dialog">
+      <form method="dialog">
+        <h2>How SPLIT works</h2>
+        <p>
+          This is Grok 4.6’s Banana Survivors. It is not a shooter. Peel-blades
+          orbit you. Walk into the meat. Space / Shift / the SPLIT button tears
+          you in two and you carve a corridor. Blood on the floor feeds
+          <strong>ripeness</strong>. Full ripe = you burst.
+        </p>
+        <p>
+          A hanging prize lowers on the hook. When it drops, butcher it. Pulp
+          levels you up. Pick a cut from the carcass.
+        </p>
+        <p>
+          WASD or drag to walk. P or Escape pauses. One rind. Isolated
+          leaderboards from the jungle versions.
+        </p>
+        <p>
+          Other takes live on What the Ai:
+          <a href="/games/BananaSurvivors/gpt6_astra/game.html">Astra’s jungle</a>
+          and
+          <a href="/games/BananaSurvivors/game.html">Gemini’s original</a>.
+        </p>
+        <button class="primary-button" value="close">Close</button>
+      </form>
     </dialog>
-
-    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
-      <div class="modal-header">
-        <div>
-          <p class="eyebrow">THE SURVIVOR'S FIELD GUIDE</p>
-          <h2 id="help-title">Small fruit. Big plans.</h2>
-        </div>
-        <button data-close class="close-button" aria-label="Close help">
-          ×
-        </button>
-      </div>
-      <div class="help-controls">
-        <p>
-          <strong>Move</strong> WASD, arrow keys, or hold and drag your mouse.
-          On touchscreens, drag anywhere in the arena to create a joystick.
-        </p>
-        <p>
-          <strong>Dash</strong> Space, Shift, right-click, or the DASH button.
-          You are invulnerable during the dash. Aim with your movement; the last
-          direction is remembered.
-        </p>
-        <p>
-          <strong>Shoot</strong> Automatic. Your weapons target nearby enemies.
-          Concentrate on movement and collecting the golden XP.
-        </p>
-        <p>
-          <strong>Pause</strong> P or Escape. Select upgrades with 1 / 2 / 3; R
-          rerolls. You can use every menu with the keyboard.
-        </p>
-      </div>
-      <h3>Build something ridiculous</h3>
-      <p class="subtle">
-        Equip up to four weapon families. Improve each to rank V to unlock its
-        evolution. Perks apply to your whole build. You start with two rerolls;
-        each boss restores one. At XP level 35, or with four evolved weapons,
-        unlock endless masteries: damage, boss damage, max health and healing on
-        dash. Every level still offers a useful choice.
-      </p>
-      <div id="armory" class="armory"></div>
-      <h3>Know your meat.</h3>
-      <div class="bestiary">
-        <p>
-          <strong>Carver · 0:20</strong> Hooked flankers circle around you. Keep
-          moving through open ground.
-        </p>
-        <p>
-          <strong>Bloat · 0:34</strong> Its swelling belly marks a blast radius.
-          Kill it before detonation or dash clear.
-        </p>
-        <p>
-          <strong>Ribcannon · 1:18</strong> A marked aim line precedes a
-          three-shot bone volley. Move sideways.
-        </p>
-        <p>
-          <strong>Broodmother · 2:05</strong> Breeds fast meatlings. Prioritize
-          the mother before the pack grows.
-        </p>
-      </div>
-      <p class="subtle">
-        Mixed packs grow every 32 seconds. Hounds arrive at 0:08; spitters,
-        brutes and splitters join later. Stages add elite packs, iron tides and
-        telegraphed blood rain. Boss showdowns admit only a limited escort.
-      </p>
-      <h3>Read the jungle</h3>
-      <p class="subtle">
-        Amber lanes warn of charges. Orange circles mark incoming slams. Green
-        orbs hurt. Faceted amber, jade and violet seeds grant increasing amounts
-        of XP. Medicine heals 25 HP; magnets collect all XP; fuel gives 9
-        seconds of frenzy; grenades blast the horde. A mint shield blocks one
-        hit within 16 seconds; a frost fruit slows enemies for 7 seconds. Follow
-        the small gold arrow to a supply cache.
-      </p>
-      <h3>Make it brutal</h3>
-      <p class="subtle">
-        Strike a monster at 18% health or less to <strong>execute</strong> it —
-        an instant kill, bonus score, and Bloodlust. Overkill that dwarfs the
-        remaining health <strong>cleaves</strong> nearby meat. Corpses linger
-        for a couple of seconds; dash through them to <strong>crush</strong> a
-        radius of viscera. Bloodlust lasts up to 4.5 seconds and makes you
-        faster and meaner. None of this changes the stage loop, weapons, or
-        loadouts.
-      </p>
-      <h3>One more stage</h3>
-      <p class="subtle">
-        Survive a 50-second hunt, then defeat its boss to advance. The arena
-        closes around the showdown. Cleaver King combines charges, bone fans and
-        slams. Bonebreaker mixes slams, spore rings and fans. Marrow Witch
-        conjures rings, blood rain and reinforcements. At half health or after
-        45 seconds they enrage; after 65 seconds the arena gradually tightens.
-        Attack during recovery for 35% extra damage. Each victory clears the
-        horde, heals 25 HP, gives an upgrade and restores a reroll. Stages never
-        end; stage 20 is a serious survival challenge. Kills build a streak and
-        charge overripe firepower. Ranking score = combat score + 2 per second +
-        250 per defeated boss. Executions add bonus combat score. All loadouts
-        play the same rules.
-      </p>
-      <a class="legacy-link" href="../gpt6_astra/game.html"
-        >Play the GPT-6 Astra version ↗</a
-      >
+    <dialog id="settings-dialog">
+      <form method="dialog">
+        <h2>Sound & gore</h2>
+        <label class="check"
+          ><input id="opt-audio" type="checkbox" checked /> Live soundtrack
+          OPEN FRUIT</label
+        >
+        <label class="check"
+          ><input id="opt-gore" type="checkbox" checked /> Full viscera</label
+        >
+        <label class="check"
+          ><input id="opt-quiet" type="checkbox" /> Reduced effects</label
+        >
+        <button class="primary-button" value="close">Done</button>
+      </form>
     </dialog>
-    <noscript
-      ><div class="no-script">
-        Banana Survivors needs JavaScript to run.
-        <a href="/">Return to What the Ai</a>
-      </div></noscript
-    >
-    <script src="/js/common/blocklist.js"></script>
-    <script type="module" src="game.js?v=1"></script>
   </body>
 </html>

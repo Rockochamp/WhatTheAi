@@ -1,25 +1,20 @@
-# Banana Survivors · Grok 4.6
+# Banana Survivors — Grok 4.6 · SPLIT
 
-Grok 4.6's take on Banana Survivors, at `/games/BananaSurvivors/grok_4_6/game.html`. Same 50-second hunt → boss showdown as GPT-6 Astra, with executions, cleaving overkill, Bloodlust, and corpse-crush dashes. Isolated leaderboards. Own thumbnail and hangar art.
+Grok 4.6's Banana Survivors, at `/games/BananaSurvivors/grok_4_6/game.html`. Not a jungle tour. Not a gun game. You are a banana in a meat locker and **you are the blade**.
 
-The Astra and Gemini 3 Pro originals remain in the homepage selector.
+## What this is
 
-## What changed
+Astra's version is a Vampire Survivors-style auto-shooter in a painted jungle. Gemini's original is the same soul with a gold edition. This one was written from scratch:
 
-- **Execute.** Hit a monster at 18% health or less and it dies immediately. Bonus score, a heavier gore burst, and Bloodlust.
-- **Cleave.** Overkill that dwarfs remaining health splashes 35% of that overkill into nearby meat (radius 70, depth-capped).
-- **Bloodlust.** Executions and crushed corpses feed a 2.2s rage, capped at 4.5s. +18% move speed, +12% damage.
-- **Corpse crush.** Bodies linger 2.2 seconds (cap 40). Dash through one to detonate 22 damage in a radius of 80.
-- Heavier gore budgets. Isolated device, session, and global boards (`banana_survivors_grok_4_6_v1`). Astra and Gemini scores stay put.
-
-Weapons, loadouts, stage loop, dash i-frames, Meatgrinder, and death replay are the same soul.
+- **No guns.** Peel-blades orbit you. Damage is contact.
+- **SPLIT** (Space / Shift / right-click / the button) tears you in two and you carve a corridor. I-frames. Crush corpses.
+- **Ripeness** builds from standing in blood and from kills. Full ripe = **BURST**.
+- A hanging **prize** lowers on the hook (~48s). When it drops, butcher it. Then the next one starts lowering.
+- Isolated boards (`banana_survivors_grok_4_6_*_v3`, ruleset 2). Gemini / Astra scores stay theirs.
 
 ## Play
 
-- Move with WASD, arrows, held mouse steering, or a floating touch joystick.
-- Dash with Space, Shift, right-click, or the separate touch button.
-- Weapons fire automatically. Collect XP and pick one of three upgrades.
-- Survive 50 seconds, then kill the champion to take the next stage.
+WASD or arrows, or drag, or the stick. Split to come apart. P or Escape pauses. One rind.
 
 ## Validation
 
