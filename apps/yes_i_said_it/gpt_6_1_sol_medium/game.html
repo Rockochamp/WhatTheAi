@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Yes! I Said It. — Anonymous Opinions & Live Debate | What the Ai</title>
+  <meta name="description" content="Post an anonymous opinion, agree or disagree, and follow the conversation. Try Yes! I Said It., a free discussion app built with GPT-6.1 Sol Medium." />
+  <link rel="canonical" href="https://whatthe.ai/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="What the Ai" />
+  <meta property="og:title" content="Yes! I Said It. — Say it. Let it land." />
+  <meta property="og:description" content="An open board for big opinions. Post anonymously, pick a side, and follow the debate." />
+  <meta property="og:url" content="https://whatthe.ai/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html" />
+  <meta property="og:image" content="https://whatthe.ai/images/YesISaidIt.webp" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/images/favicon.ico" />
+  <link rel="stylesheet" href="game.css?v=1" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Yes! I Said It. — GPT-6.1 Sol Medium","url":"https://whatthe.ai/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html","description":"A free anonymous opinion board with voting and branching conversations.","applicationCategory":"SocialNetworkingApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and an internet connection","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+  <script>try{if(localStorage.getItem('yes-sol-theme')==='dark')document.documentElement.dataset.theme='dark'}catch{}</script>
+  <script type="module" src="game.js?v=1"></script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+</head>
+<body>
+  <a class="skip" href="#board">Skip to the board</a>
+  <header class="masthead">
+    <a class="parent-brand" href="/">whatthe<span>.ai</span><span class="back-arrow" aria-hidden="true">↗</span></a>
+    <nav aria-label="App controls">
+      <details class="version-menu"><summary>GPT-6.1 Sol Medium <span aria-hidden="true">⌄</span></summary><div><span class="active-version">GPT-6.1 Sol Medium <span aria-hidden="true">✓</span></span><a href="../gemini_2_5_pro/game.html">Gemini 2.5 Pro ↗</a></div></details>
+      <button class="icon-button" id="music" aria-label="Turn music on" aria-pressed="false" title="Music off">♪</button>
+      <button class="icon-button" id="theme" aria-label="Switch to dark theme" aria-pressed="false" title="Change theme">◐</button>
+    </nav>
+  </header>
+  <main class="shell">
+    <section class="hero" aria-labelledby="app-title">
+      <div class="eyebrow"><span class="orange-dot" aria-hidden="true"></span> THE INTERNET HAS OPINIONS.</div>
+      <h1 id="app-title">Yes! <span>I Said It.</span><span class="title-star" aria-hidden="true">✳</span></h1>
+      <div class="hero-bottom"><p>Say it. Let it land.<br /><span>No profiles. Just perspectives.</span></p><a class="hero-link" href="#statement">Put yours out there <span aria-hidden="true">↗</span></a></div>
+    </section>
+    <div class="workspace">
+      <aside class="sidebar">
+        <section class="note-card"><div class="eyebrow">01 / THE IDEA</div><h2>A thought.<br />A ripple.</h2><p>Drop an opinion. Agree or disagree with someone else. Reply, and see where the conversation goes.</p><div class="note-mark" aria-hidden="true">“</div><p class="small-note">Anonymous doesn’t mean consequence-free. No threats, hate, spam, or personal information.</p></section>
+        <section class="spark-card"><div class="eyebrow">NEED A FIRST LINE?</div><h2 id="spark-text">AI makes us more creative, not less.</h2><div class="spark-actions"><button id="use-spark">Start with this ↗</button><button class="icon-button" id="next-spark" aria-label="Show another conversation starter">↻</button></div><p class="small-note">A conversation starter, not a published post.</p></section>
+        <div class="sidebar-footer"><span class="eyebrow">BUILT WITH GPT-6.1 SOL MEDIUM</span><a href="../gemini_2_5_pro/game.html">Try the Gemini version ↗</a><p>Same public board. A different perspective.</p></div>
+      </aside>
+      <div class="main-column">
+        <section class="composer" aria-labelledby="composer-title">
+          <div class="composer-heading"><h2 id="composer-title">Your turn.</h2><span class="anonymous"><span aria-hidden="true">◉</span> ANONYMOUS</span></div>
+          <form id="post-form"><label class="sr-only" for="statement">Your opinion</label><textarea id="statement" name="statement" rows="3" maxlength="840" placeholder="That thing you’ve been thinking? Say it." required></textarea><div class="composer-footer"><span id="draft-state" class="small-note">Keep it human. Make it yours.</span><span class="counter" id="post-count">0 / 420</span><button class="primary" id="post-submit" type="submit" disabled>I said it <span aria-hidden="true">↗</span></button></div></form>
+          <p class="form-message" id="post-message" role="status"></p>
+        </section>
+        <section id="board" aria-labelledby="board-title">
+          <div class="board-heading"><h2 id="board-title">The board<span class="orange-dot" aria-hidden="true"></span></h2><span class="connection" id="connection" role="status">Connecting…</span></div>
+          <div class="feed-toolbar"><div class="filters" role="group" aria-label="Sort statements"><button data-sort="recent" aria-pressed="true">Latest</button><button data-sort="love" aria-pressed="false">Loved</button><button data-sort="hate" aria-pressed="false">Hated</button><button data-sort="debate" aria-pressed="false">Divisive</button></div><button class="icon-button" id="refresh" aria-label="Refresh the board" title="Refresh">↻</button></div>
+          <label class="search-field"><span aria-hidden="true">⌕</span><span class="sr-only">Search loaded statements</span><input id="search" type="search" placeholder="Search loaded statements…" maxlength="100" /></label>
+          <div class="feed-caption"><span id="feed-caption">Recent voices, in real time.</span><button class="text-button" id="restore-hidden" hidden>Restore hidden posts</button></div>
+          <div id="feed" class="feed" aria-busy="true"><div class="loading-state"><span class="loading-line"></span><span class="loading-line"></span><span class="loading-line"></span><p>Finding the conversation…</p></div></div>
+          <button class="load-more" id="load-more" hidden>More voices ↓</button>
+        </section>
+      </div>
+    </div>
+    <section class="about"><h2>Anonymous opinions. Real conversations.</h2><p>Yes! I Said It. is a free browser discussion app on What the Ai. Share a short statement, vote up to agree or down to disagree, and explore branching replies. Latest shows new posts; Loved and Hated rank by net votes. Divisive highlights disagreement among the recent posts you’ve loaded.</p><p>The GPT-6.1 Sol Medium and <a href="../gemini_2_5_pro/game.html">Gemini 2.5 Pro versions</a> share the same board. Posts and votes are public; drafts and hidden posts stay on your device when browser storage is available. Don’t post anything private.</p></section>
+  </main>
+  <footer class="site-footer"><a href="/">← More things made with AI</a><span>WHAT THE AI / YES! I SAID IT.</span><a href="#app-title">Back to top ↑</a></footer>
+  <dialog id="thread-dialog" aria-labelledby="thread-title"><div class="thread-shell"><header class="thread-header"><div><span class="eyebrow">FOLLOW THE RIPPLE</span><h2 id="thread-title">The conversation.</h2></div><button class="icon-button" id="close-thread" aria-label="Close conversation">✕</button></header><div class="thread-scroll"><nav id="ancestors" class="ancestors" aria-label="Earlier statements"></nav><div id="focused-post"></div><div class="reply-heading"><h3>Replies</h3><span id="reply-count"></span></div><div id="replies" class="replies"></div></div><form id="reply-form" class="reply-composer"><label for="reply">Add your perspective</label><textarea id="reply" rows="2" maxlength="840" placeholder="Keep the conversation going…" required></textarea><div class="composer-footer"><span class="counter" id="reply-chars">0 / 420</span><button class="primary" id="reply-submit" type="submit" disabled>Reply ↗</button></div><p class="form-message" id="reply-message" role="status"></p></form></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <audio id="soundtrack" src="/music/YesISaidIt.m4a" preload="none" loop></audio>
+  <noscript><div class="no-script">JavaScript is required to load the public board, post, and vote. You can still <a href="/">explore What the Ai</a>.</div></noscript>
+</body>
+</html>
