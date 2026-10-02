@@ -112,7 +112,7 @@ select:focus-visible {
   height: 23px;
   flex-shrink: 0;
 }
-.brand h1 {
+.brand .brand-title {
   font-size: 19px;
   line-height: 1.35;
   letter-spacing: -0.3px;
@@ -380,7 +380,7 @@ select:focus-visible {
     min-height: 58px;
     gap: 12px;
   }
-  .brand h1 {
+  .brand .brand-title {
     font-size: 18px;
   }
   .grid {
@@ -448,3 +448,6 @@ select:focus-visible {
     display: none;
   }
 }
+
+/* Static discovery content keeps the existing play links and selectors intact. */
+.catalog-intro{padding:8px 0 28px;max-width:760px}.catalog-kicker{text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:750;color:var(--muted);margin:0 0 12px}.catalog-intro h1{font-size:clamp(27px,4vw,43px);line-height:1.13;letter-spacing:-.04em;margin:0 0 16px}.catalog-intro p:not(.catalog-kicker){font-size:16px;line-height:1.65;color:var(--muted);margin:0 0 12px}.catalog-intro a,.guide-links a,.about-section a{color:inherit;text-underline-offset:3px}.catalog-intro a{font-size:13px}.game-description{padding:0 12px;margin:2px 0 12px;color:var(--muted);font-size:12px;line-height:1.5}.guide-links{padding:0 12px 14px;font-size:11px;line-height:1.6}.guide-link{display:block;font-weight:650;margin-bottom:8px}.guide-links summary{cursor:pointer;color:var(--muted);padding:5px 0}.guide-links ul{padding-left:17px;margin:6px 0 0}.guide-links li+li{margin-top:7px}.guide-links a:focus-visible{outline:2px solid currentColor;outline-offset:3px}.guide-links a{display:inline-block;padding:3px 0}

@@ -1,0 +1,212 @@
+[
+  {
+    "id": 1,
+    "name": "Cosmic Dodge",
+    "hub": "/games/cosmic_dodge/index.html",
+    "category": "Arcade game",
+    "summary": "Dodge asteroids, survive rising levels, and compare four takes on a space arcade game.",
+    "intro": "Cosmic Dodge is a free browser arcade game about keeping your ship alive in a falling asteroid field. The four versions share that starting idea, but add different hazards, weapons and scoring rules. Try the direct survival challenge first, then see how each model changes the experience.",
+    "controls": [
+      "In the Astra and Grok editions, move with WASD or arrow keys, or drag with a mouse or finger.",
+      "Press Space or the Burst button for brief protection. P or Escape pauses the run.",
+      "Ten cleared asteroids advance a level in Astra and Grok. Style points are tracked separately from level progression."
+    ],
+    "tips": [
+      "Leave room to escape instead of hugging a corner. Save Burst for crowded passages.",
+      "Astra and Grok have separate records. Different mechanics mean a score in one version is not an equivalent result in another."
+    ],
+    "versions": [
+      {
+        "model": "GPT-6 Astra",
+        "path": "/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html",
+        "detail": "One life, shields, a rechargeable Burst, warned comets and level-based rankings. Includes the Terminal Velocity soundtrack.",
+        "description": "Play Cosmic Dodge by GPT-6 Astra: dodge asteroids, use shields and Burst, and climb endless levels in this free browser arcade game."
+      },
+      {
+        "model": "Grok 4.6",
+        "path": "/games/cosmic_dodge/cosmic_dodge_grok_4_6.html",
+        "detail": "Adds gravity wells, slingshots, cluster rocks and solar shears. Close calls refund Burst recharge time.",
+        "description": "Dodge asteroids and gravity wells in Cosmic Dodge by Grok 4.6. Use Burst, chase close calls and climb a separate browser-game leaderboard."
+      },
+      {
+        "model": "Gemini 3.5 Flash (High)",
+        "path": "/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html",
+        "detail": "A shooting-and-dodging edition with comets, giant meteors, weapon pickups and shields.",
+        "description": "Play the Gemini 3.5 Flash edition of Cosmic Dodge: dodge and shoot meteors, collect weapons and shields, and chase a high score online."
+      },
+      {
+        "model": "ChatGPT o3-mini-high",
+        "path": "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html",
+        "detail": "The simpler asteroid-dodging challenge: one collision ends a run and every ten dodges advances the level.",
+        "description": "Try the ChatGPT o3-mini-high Cosmic Dodge: a free asteroid-dodging browser game with one-life runs, rising levels and high scores."
+      }
+    ],
+    "image": "/images/cosmic-astra.webp"
+  },
+  {
+    "id": 2,
+    "name": "Steve Jobs – Hammurabi",
+    "hub": "/games/steve_jobs_hammurabi/index.html",
+    "category": "Strategy game",
+    "summary": "Manage food, land and population through a ten-year reign.",
+    "intro": "Steve Jobs – Hammurabi is a free turn-based resource management game. Each year, choose how much land to buy or sell, how many acres to plant, and how well to feed your population. Your aim is to finish a ten-year reign with as many people as possible while surviving shortages and random events.",
+    "controls": [
+      "Enter a ruler name if you want, then start a reign.",
+      "Set annual land, planting and feeding decisions. Buying and selling land cannot happen in the same year.",
+      "Confirm the year and read the report before making the next decisions. A reign ends after ten years or when population reaches zero."
+    ],
+    "tips": [
+      "One person can farm ten acres; planting also costs food for seed. Keep enough food to feed people before expanding.",
+      "Harvests and events vary. The Astra budget and feeding-risk preview help you check decisions, but cannot guarantee the next harvest."
+    ],
+    "versions": [
+      {
+        "model": "GPT-6 Astra",
+        "path": "/games/steve_jobs_hammurabi/gpt6_astra/game.html",
+        "detail": "A responsive budget, annual reports, chronicle and a living 3D kingdom. A panorama fallback keeps the strategy interface available without WebGL.",
+        "description": "Rule a kingdom for ten years in Hammurabi by GPT-6 Astra. Balance food, land and population with budget previews and a living 3D settlement."
+      },
+      {
+        "model": "Grok 3 Reasoning",
+        "path": "/games/steve_jobs_hammurabi/grok3_reasoning/game.html",
+        "detail": "The original form-based strategy version, with annual decisions, resource totals, help and local/global rankings.",
+        "description": "Play the original Grok 3 Reasoning Hammurabi game. Buy land, plant crops and feed your people to grow a kingdom across ten challenging years."
+      }
+    ],
+    "image": "/images/hammurabi-astra.webp"
+  },
+  {
+    "id": 3,
+    "name": "Crazy Clicker",
+    "hub": "/games/crazy_clicker/index.html",
+    "category": "Rhythm game",
+    "summary": "Set a beat with two taps, then keep your timing steady.",
+    "intro": "Crazy Clicker is a timing game rather than an idle clicker. Your first two taps establish a rhythm; keep matching that interval to build a streak. The challenge is consistency, not clicking as fast as possible. Both editions run in the browser and offer a different way to feel the beat.",
+    "controls": [
+      "In the Grok edition, tap, click or press Space. Two taps lock the beat, with a minimum interval of 70 milliseconds.",
+      "Stay within the timing window to keep the streak alive. Grok uses a ±50 millisecond hit window and a tighter perfect window.",
+      "P or Escape pauses Grok. Check each edition’s on-screen instructions before starting."
+    ],
+    "tips": [
+      "Choose a comfortable pace you can repeat. Watch the collapsing rings in Grok to anticipate the next beat.",
+      "Grok rewards five consecutive perfect hits with Ember, a one-hit save. Leaderboards are separate between editions."
+    ],
+    "versions": [
+      {
+        "model": "Grok 4.6",
+        "path": "/games/crazy_clicker/grok_4_6/game.html",
+        "detail": "Visible beat rings, a ±16 millisecond perfect window, the Ember save and a reactive soundtrack.",
+        "description": "Play Crazy Clicker by Grok 4.6: lock a rhythm with two taps, follow the beat rings and charge Ember to protect your streak."
+      },
+      {
+        "model": "Gemini 2.5 Pro",
+        "path": "/games/crazy_clicker/gemini_2_5_pro/game.html",
+        "detail": "The original two-tap rhythm challenge, focused on repeating your chosen interval and extending a streak.",
+        "description": "Test your timing in Crazy Clicker by Gemini 2.5 Pro. Set the rhythm with two taps and keep a steady streak in this free browser game."
+      }
+    ],
+    "image": "/images/crazy-clicker-grok.webp"
+  },
+  {
+    "id": 4,
+    "name": "Yes! I Said It.",
+    "hub": "/apps/yes_i_said_it/index.html",
+    "category": "Discussion app",
+    "summary": "Post an opinion, agree or disagree, and follow the conversation.",
+    "intro": "Yes! I Said It. is an anonymous opinion board. Share a short statement, vote on other opinions and reply to the conversation. GPT-6.1 Sol Medium is the default edition, and Gemini 2.5 Pro remains available. Both versions connect to the same public discussion board.",
+    "controls": [
+      "Write an opinion, then use the publish button. Sol accepts up to 420 characters and keeps a local draft.",
+      "Open a statement to read and add replies. Agree or disagree using the voting controls.",
+      "In Sol, switch between Latest, Loved, Hated and Divisive; load more posts or search the statements already loaded."
+    ],
+    "tips": [
+      "Posts are public. Avoid personal information, threats, hate and spam. No account is required, but anonymous posting is not a guarantee of privacy.",
+      "Sol can hide posts on your device and restore them later. This does not remove them from the shared board. An internet connection is needed for the live discussion."
+    ],
+    "versions": [
+      {
+        "model": "GPT-6.1 Sol Medium",
+        "path": "/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html",
+        "detail": "A responsive opinion board with conversation starters, saved drafts, loaded-post search, thread links and optional music.",
+        "description": "Post anonymous opinions with Yes! I Said It. by GPT-6.1 Sol Medium. Vote, reply, search loaded statements and explore a shared public discussion board."
+      },
+      {
+        "model": "Gemini 2.5 Pro",
+        "path": "/apps/yes_i_said_it/gemini_2_5_pro/game.html",
+        "detail": "The existing opinion-board interface, kept as an alternative for posting, voting and reading the same public conversations.",
+        "description": "Try Yes! I Said It. by Gemini 2.5 Pro: share an anonymous opinion, vote and reply on the public board, or compare the new Sol interface."
+      }
+    ],
+    "image": "/images/YesISaidIt.webp"
+  },
+  {
+    "id": 5,
+    "name": "Banana Survivors",
+    "hub": "/games/BananaSurvivors/index.html",
+    "category": "Survival game",
+    "summary": "Survive monster hordes, collect upgrades and face escalating bosses.",
+    "intro": "Banana Survivors turns a banana into the hero of a horde-survival game. Keep moving, gather experience and choose upgrades while enemies close in. The three editions offer noticeably different combat: an illustrated jungle auto-shooter, a close-contact blade game, and the original German-language Gold Edition. The newer editions include blood and gore.",
+    "controls": [
+      "Astra and Grok support WASD, arrow keys, mouse steering and touch controls.",
+      "In Astra, weapons fire automatically. Use Space, Shift, right-click or the touch button to dash, then collect XP and choose upgrades.",
+      "In Grok, the same action triggers Split. Orbiting peel-blades deal contact damage, so positioning is central to combat."
+    ],
+    "tips": [
+      "In Astra, a 50-second hunt leads to a boss showdown. Read the attack warnings and keep an escape route open.",
+      "In Grok, kills and standing in blood build ripeness toward Burst. These rules differ from Astra, and the editions keep separate scoreboards."
+    ],
+    "versions": [
+      {
+        "model": "GPT-6 Astra",
+        "path": "/games/BananaSurvivors/gpt6_astra/game.html",
+        "detail": "An illustrated jungle, automatic weapons, evolutions, stage bosses, a dash and a short death replay.",
+        "description": "Play Banana Survivors by GPT-6 Astra: evolve automatic weapons, dodge monster hordes and defeat stage bosses in a free jungle survival browser game."
+      },
+      {
+        "model": "Grok 4.6",
+        "path": "/games/BananaSurvivors/grok_4_6/game.html",
+        "detail": "SPLIT puts you in a meat locker with orbiting peel-blades, a splitting dash, ripeness and hanging boss prizes.",
+        "description": "Survive the meat locker in Banana Survivors SPLIT by Grok 4.6. Carve through enemies with peel-blades, Split and ripeness-powered Burst."
+      },
+      {
+        "model": "Gemini 3 Pro",
+        "path": "/games/BananaSurvivors/game.html",
+        "detail": "The German-language Gold Edition: a voxel banana, automatic combat, XP upgrades and endless boss waves.",
+        "description": "Spiele Banana Survivors Gold Edition von Gemini 3 Pro kostenlos im Browser. Sammle XP, wähle Upgrades und überlebe Monsterhorden und Boss-Wellen."
+      }
+    ],
+    "image": "/images/banana-astra.webp"
+  },
+  {
+    "id": 6,
+    "name": "AGI Probability Barometer",
+    "hub": "/apps/agi_barometer/index.html",
+    "category": "Experimental dashboard",
+    "summary": "Explore a hiring-based indicator and the assumptions behind it.",
+    "intro": "The AGI Probability Barometer is an experimental visualization of a hiring-based formula. Its name is historical: the displayed percentages are not validated probabilities of artificial general intelligence. The app uses fixed numbers stored in its source code, rather than a live job-listings feed.",
+    "controls": [
+      "Open either edition to inspect the lab gauges and the stored quarterly inputs.",
+      "The Flash edition adds a combined gauge, a trend chart and interactive lab details.",
+      "Read the methodology below before interpreting any percentage. The two editions use different time windows and formulas."
+    ],
+    "tips": [
+      "A fall in job listings could reflect budgets, recruiting cycles, restructuring or many other causes. It does not demonstrate AGI.",
+      "No original data-source citations or collection method accompany the stored figures. Treat them as unverified example inputs, not current hiring statistics."
+    ],
+    "versions": [
+      {
+        "model": "Gemini 3.5 Flash (High)",
+        "path": "/apps/agi_barometer/gemini_3_5_flash/game.html",
+        "detail": "Three stored quarterly inputs per lab, a combined indicator, trend chart and interactive formula details.",
+        "description": "Explore the Gemini 3.5 Flash AGI Barometer: an experimental hiring-based indicator with fixed inputs, lab comparisons and transparent methodology limits."
+      },
+      {
+        "model": "Gemini 3.1 Pro (High)",
+        "path": "/apps/agi_barometer/gemini_3_1_pro/game.html",
+        "detail": "The earlier two-quarter dashboard, with one gauge per lab and a simpler decline-based formula.",
+        "description": "Inspect the Gemini 3.1 Pro AGI Barometer, a two-quarter hiring visualization. Learn why its fixed-input indicator is not a validated AGI probability."
+      }
+    ],
+    "image": "/images/AgiBarometer.webp"
+  }
+]
