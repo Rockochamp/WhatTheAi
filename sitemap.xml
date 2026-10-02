@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://whatthe.ai/</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-10-02</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/apps/agi_barometer/gemini_3_1_pro/game.html</loc>
@@ -15,6 +15,10 @@
   <url>
     <loc>https://whatthe.ai/apps/yes_i_said_it/gemini_2_5_pro/game.html</loc>
     <lastmod>2026-09-16</lastmod>
+  </url>
+  <url>
+    <loc>https://whatthe.ai/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html</loc>
+    <lastmod>2026-10-02</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/games/BananaSurvivors/game.html</loc>

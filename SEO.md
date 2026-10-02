@@ -2,7 +2,7 @@
 
 The public homepage stays at `https://whatthe.ai/`. Its canonical tag consolidates `/index.html` and cache-busting query variants under that URL. The site title, description and social text now describe the actual free browser games and apps. JSON-LD identifies the WebSite name and the six-card collection, without invented reviews, ratings or rich-result claims.
 
-`sitemap.xml` contains the homepage and all ten game/app model destinations linked from its catalog, including Astra Hammurabi. It uses canonical URLs without cache-busting queries and actual content commit dates. Unlisted apps, images, scripts and test files are excluded. The existing `robots.txt` already permits crawling and points to this sitemap; it remains valid and unchanged.
+`sitemap.xml` contains the homepage and all fifteen game/app model destinations linked from its catalog, including Astra Hammurabi. It uses canonical URLs without cache-busting queries and actual content commit dates. Unlisted apps, images, scripts and test files are excluded. The existing `robots.txt` already permits crawling and points to this sitemap; it remains valid and unchanged.
 
 The AGI Barometer thumbnail is now served as a visually equivalent 177,850-byte WebP instead of the 907,420-byte PNG (80.4% smaller). The original PNG remains in the repo. The homepage keeps fixed image dimensions, deferred JavaScript, lazy loading below the first cards, and a static HTML catalog.
 
@@ -15,3 +15,5 @@ After adding or changing a catalog entry, run `python scripts/update-seo.py`. It
 The sitemap is advertised through robots.txt for crawler discovery. It has not been submitted through an authenticated Google Search Console account in this task. Search Console can show indexing status, search impressions, clicks, and Core Web Vitals after Google processes the site. Rankings and indexing are not guaranteed by metadata or a sitemap.
 
 References: [Google's sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [site-name structured data](https://developers.google.com/search/docs/appearance/site-names), [page experience](https://developers.google.com/search/docs/appearance/page-experience).
+
+The October 2026 Yes! I Said It. release adds GPT-6.1 Sol Medium as the default card version, while retaining the Gemini 2.5 Pro route and selector option. Its own canonical, metadata, and static explanatory content describe the discussion app; public post text is rendered safely after connection.
