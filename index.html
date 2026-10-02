@@ -21,6 +21,8 @@
       content="Play free AI-built games and browser apps. Try Cosmic Dodge, Hammurabi and more, and compare versions made by different AI models."
     />
     <meta property="og:url" content="https://whatthe.ai/" />
+    <meta property="og:image" content="https://whatthe.ai/images/cosmic-astra.webp" />
+    <meta name="twitter:image" content="https://whatthe.ai/images/cosmic-astra.webp" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary" />
     <meta
@@ -61,37 +63,37 @@
             "@type": "ListItem",
             "position": 1,
             "name": "Cosmic Dodge",
-            "url": "https://whatthe.ai/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html"
+            "url": "https://whatthe.ai/games/cosmic_dodge/index.html"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Steve Jobs - Hammurabi",
-            "url": "https://whatthe.ai/games/steve_jobs_hammurabi/gpt6_astra/game.html"
+            "url": "https://whatthe.ai/games/steve_jobs_hammurabi/index.html"
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": "Crazy Clicker",
-            "url": "https://whatthe.ai/games/crazy_clicker/grok_4_6/game.html"
+            "url": "https://whatthe.ai/games/crazy_clicker/index.html"
           },
           {
             "@type": "ListItem",
             "position": 4,
             "name": "Yes! I Said It.",
-            "url": "https://whatthe.ai/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html"
+            "url": "https://whatthe.ai/apps/yes_i_said_it/index.html"
           },
           {
             "@type": "ListItem",
             "position": 5,
             "name": "Banana Survivors",
-            "url": "https://whatthe.ai/games/BananaSurvivors/gpt6_astra/game.html"
+            "url": "https://whatthe.ai/games/BananaSurvivors/index.html"
           },
           {
             "@type": "ListItem",
             "position": 6,
             "name": "AGI Probability Barometer",
-            "url": "https://whatthe.ai/apps/agi_barometer/gemini_3_5_flash/game.html"
+            "url": "https://whatthe.ai/apps/agi_barometer/index.html"
           }
         ]
       }
@@ -114,7 +116,7 @@
         document.documentElement.classList.toggle("dark-mode", dark);
       })();
     </script>
-    <link rel="stylesheet" href="/css/home.css?v=1" />
+    <link rel="stylesheet" href="/css/home.css?v=seo-1" />
     <script defer src="/js/home.js?v=2"></script>
   </head>
   <body>
@@ -129,10 +131,10 @@
             width="23"
             height="23"
           />
-          <h1>
+          <p class="brand-title">
             <span class="visually-hidden">What the Ai</span
             ><span id="dynamic-title" aria-hidden="true">What the Ai</span>
-          </h1>
+          </p>
         </a>
         <button
           class="dark-mode-toggle"
@@ -155,6 +157,12 @@
       </div>
     </header>
     <main class="container" id="main-content" tabindex="-1">
+      <section class="catalog-intro" aria-labelledby="catalog-title">
+        <p class="catalog-kicker">Play. Explore. Compare.</p>
+        <h1 id="catalog-title">Free AI-built browser games &amp; apps</h1>
+        <p>Six experiences. Fifteen model versions. Dodge asteroids, rule a kingdom, survive monster hordes or join a conversation. Play instantly, with no download or account.</p>
+        <a href="/about.html">About the project &amp; how to compare versions <span aria-hidden="true">↗</span></a>
+      </section>
       <section class="grid" id="game-grid" aria-label="Games and apps">
         <article class="game-item" data-game-id="1" style="--order: 0">
           <a
@@ -167,7 +175,7 @@
               <span class="thumbnail-fallback" aria-hidden="true"
                 >Cosmic Dodge</span
               ><img
-                src="/images/cosmic-astra.webp"
+                src="/images/thumbs/cosmic-astra.webp"
                 alt=""
                 width="400"
                 height="400"
@@ -182,6 +190,7 @@
               </svg>
             </div>
           </a>
+          <p class="game-description">Dodge asteroids, survive rising levels, and compare four takes on a space arcade game.</p>
           <div class="game-info">
             <p class="model-name">GPT-6 Astra</p>
             <label class="visually-hidden" for="version-select-1"
@@ -189,50 +198,31 @@
             ><select class="version-select" id="version-select-1" hidden>
               <option
                 value="/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html?v=4"
-                data-thumbnail="/images/cosmic-astra.webp"
+                data-thumbnail="/images/thumbs/cosmic-astra.webp"
               >
                 GPT-6 Astra
               </option>
               <option
                 value="/games/cosmic_dodge/cosmic_dodge_grok_4_6.html"
-                data-thumbnail="/images/cosmic-grok.webp"
+                data-thumbnail="/images/thumbs/cosmic-grok.webp"
               >
                 Grok 4.6
               </option>
               <option
                 value="/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html"
-                data-thumbnail="/images/CosmicDodge.webp"
+                data-thumbnail="/images/thumbs/CosmicDodge.webp"
               >
                 Gemini 3.5 Flash (High)
               </option>
               <option
                 value="/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html"
-                data-thumbnail="/images/CosmicDodge.webp"
+                data-thumbnail="/images/thumbs/CosmicDodge.webp"
               >
                 ChatGPT o3-mini-high
               </option></select
-            ><noscript
-              ><ul class="version-fallback">
-                <li>
-                  <a href="/games/cosmic_dodge/cosmic_dodge_grok_4_6.html"
-                    >Grok 4.6</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html"
-                    >Gemini 3.5 Flash (High)</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html"
-                    >ChatGPT o3-mini-high</a
-                  >
-                </li>
-              </ul></noscript
             >
           </div>
+          <div class="guide-links"><a class="guide-link" href="/games/cosmic_dodge/index.html">Guide &amp; version comparison ↗</a><details><summary>All versions (4)</summary><ul><li><a href="/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html">GPT-6 Astra</a></li><li><a href="/games/cosmic_dodge/cosmic_dodge_grok_4_6.html">Grok 4.6</a></li><li><a href="/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html">Gemini 3.5 Flash (High)</a></li><li><a href="/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html">ChatGPT o3-mini-high</a></li></ul></details></div>
         </article>
         <article class="game-item" data-game-id="2" style="--order: 1">
           <a
@@ -245,7 +235,7 @@
               <span class="thumbnail-fallback" aria-hidden="true"
                 >Steve Jobs - Hammurabi</span
               ><img
-                src="/images/hammurabi-astra.webp"
+                src="/images/thumbs/hammurabi-astra.webp"
                 alt=""
                 width="400"
                 height="400"
@@ -260,6 +250,7 @@
               </svg>
             </div>
           </a>
+          <p class="game-description">Manage food, land and population through a ten-year reign.</p>
           <div class="game-info">
             <p class="model-name">GPT-6 Astra</p>
             <label class="visually-hidden" for="version-select-2"
@@ -268,28 +259,20 @@
             <select class="version-select" id="version-select-2" hidden>
               <option
                 value="/games/steve_jobs_hammurabi/gpt6_astra/game.html?v=2"
-                data-thumbnail="/images/hammurabi-astra.webp"
+                data-thumbnail="/images/thumbs/hammurabi-astra.webp"
               >
                 GPT-6 Astra
               </option>
               <option
                 value="/games/steve_jobs_hammurabi/grok3_reasoning/game.html"
-                data-thumbnail="/images/Hammurabi.webp"
+                data-thumbnail="/images/thumbs/Hammurabi.webp"
               >
                 Grok 3 Reasoning
               </option>
             </select>
-            <noscript
-              ><ul class="version-fallback">
-                <li>
-                  <a
-                    href="/games/steve_jobs_hammurabi/grok3_reasoning/game.html"
-                    >Grok 3 Reasoning</a
-                  >
-                </li>
-              </ul></noscript
-            >
+
           </div>
+          <div class="guide-links"><a class="guide-link" href="/games/steve_jobs_hammurabi/index.html">Guide &amp; version comparison ↗</a><details><summary>All versions (2)</summary><ul><li><a href="/games/steve_jobs_hammurabi/gpt6_astra/game.html">GPT-6 Astra</a></li><li><a href="/games/steve_jobs_hammurabi/grok3_reasoning/game.html">Grok 3 Reasoning</a></li></ul></details></div>
         </article>
         <article class="game-item" data-game-id="3" style="--order: 2">
           <a
@@ -302,7 +285,7 @@
               <span class="thumbnail-fallback" aria-hidden="true"
                 >Crazy Clicker</span
               ><img
-                src="/images/crazy-clicker-grok.webp"
+                src="/images/thumbs/crazy-clicker-grok.webp"
                 alt=""
                 width="400"
                 height="400"
@@ -317,6 +300,7 @@
               </svg>
             </div>
           </a>
+          <p class="game-description">Set a beat with two taps, then keep your timing steady.</p>
           <div class="game-info">
             <p class="model-name">Grok 4.6</p>
             <label class="visually-hidden" for="version-select-3"
@@ -324,26 +308,19 @@
             ><select class="version-select" id="version-select-3" hidden>
               <option
                 value="/games/crazy_clicker/grok_4_6/game.html"
-                data-thumbnail="/images/crazy-clicker-grok.webp"
+                data-thumbnail="/images/thumbs/crazy-clicker-grok.webp"
               >
                 Grok 4.6
               </option>
               <option
                 value="/games/crazy_clicker/gemini_2_5_pro/game.html"
-                data-thumbnail="/images/CrazyClicker.webp"
+                data-thumbnail="/images/thumbs/CrazyClicker.webp"
               >
                 Gemini 2.5 Pro
               </option></select
-            ><noscript
-              ><ul class="version-fallback">
-                <li>
-                  <a href="/games/crazy_clicker/gemini_2_5_pro/game.html"
-                    >Gemini 2.5 Pro</a
-                  >
-                </li>
-              </ul></noscript
             >
           </div>
+          <div class="guide-links"><a class="guide-link" href="/games/crazy_clicker/index.html">Guide &amp; version comparison ↗</a><details><summary>All versions (2)</summary><ul><li><a href="/games/crazy_clicker/grok_4_6/game.html">Grok 4.6</a></li><li><a href="/games/crazy_clicker/gemini_2_5_pro/game.html">Gemini 2.5 Pro</a></li></ul></details></div>
         </article>
         <article class="game-item" data-game-id="4" style="--order: 3">
           <a
@@ -371,15 +348,17 @@
               </svg>
             </div>
           </a>
+          <p class="game-description">Post an opinion, agree or disagree, and follow the conversation.</p>
           <div class="game-info">
             <p class="model-name">GPT-6.1 Sol Medium</p>
             <label class="visually-hidden" for="version-select-4">Choose a model for Yes! I Said It.</label>
             <select class="version-select" id="version-select-4" hidden>
               <option value="/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html" data-thumbnail="/images/yes-sol.svg">GPT-6.1 Sol Medium</option>
-              <option value="/apps/yes_i_said_it/gemini_2_5_pro/game.html" data-thumbnail="/images/YesISaidIt.webp">Gemini 2.5 Pro</option>
+              <option value="/apps/yes_i_said_it/gemini_2_5_pro/game.html" data-thumbnail="/images/thumbs/YesISaidIt.webp">Gemini 2.5 Pro</option>
             </select>
-            <noscript><ul class="version-fallback"><li><a href="/apps/yes_i_said_it/gemini_2_5_pro/game.html">Gemini 2.5 Pro</a></li></ul></noscript>
+
           </div>
+          <div class="guide-links"><a class="guide-link" href="/apps/yes_i_said_it/index.html">Guide &amp; version comparison ↗</a><details><summary>All versions (2)</summary><ul><li><a href="/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html">GPT-6.1 Sol Medium</a></li><li><a href="/apps/yes_i_said_it/gemini_2_5_pro/game.html">Gemini 2.5 Pro</a></li></ul></details></div>
         </article>
         <article class="game-item" data-game-id="5" style="--order: 4">
           <a
@@ -392,7 +371,7 @@
               <span class="thumbnail-fallback" aria-hidden="true"
                 >Banana Survivors</span
               ><img
-                src="/images/banana-astra.webp"
+                src="/images/thumbs/banana-astra.webp"
                 alt=""
                 width="400"
                 height="400"
@@ -407,6 +386,7 @@
               </svg>
             </div>
           </a>
+          <p class="game-description">Survive monster hordes, collect upgrades and face escalating bosses.</p>
           <div class="game-info">
             <p class="model-name">GPT-6 Astra</p>
             <label class="visually-hidden" for="version-select-5"
@@ -415,36 +395,26 @@
             <select class="version-select" id="version-select-5" hidden>
               <option
                 value="/games/BananaSurvivors/gpt6_astra/game.html?v=6"
-                data-thumbnail="/images/banana-astra.webp"
+                data-thumbnail="/images/thumbs/banana-astra.webp"
               >
                 GPT-6 Astra
               </option>
               <option
                 value="/games/BananaSurvivors/grok_4_6/game.html"
-                data-thumbnail="/images/banana-grok.webp"
+                data-thumbnail="/images/thumbs/banana-grok.webp"
               >
                 Grok 4.6
               </option>
               <option
                 value="/games/BananaSurvivors/game.html"
-                data-thumbnail="/images/BananaSurvivors.webp"
+                data-thumbnail="/images/thumbs/BananaSurvivors.webp"
               >
                 Gemini 3 Pro
               </option>
             </select>
-            <noscript
-              ><ul class="version-fallback">
-                <li>
-                  <a href="/games/BananaSurvivors/grok_4_6/game.html"
-                    >Grok 4.6</a
-                  >
-                </li>
-                <li>
-                  <a href="/games/BananaSurvivors/game.html">Gemini 3 Pro</a>
-                </li>
-              </ul></noscript
-            >
+
           </div>
+          <div class="guide-links"><a class="guide-link" href="/games/BananaSurvivors/index.html">Guide &amp; version comparison ↗</a><details><summary>All versions (3)</summary><ul><li><a href="/games/BananaSurvivors/gpt6_astra/game.html">GPT-6 Astra</a></li><li><a href="/games/BananaSurvivors/grok_4_6/game.html">Grok 4.6</a></li><li><a href="/games/BananaSurvivors/game.html">Gemini 3 Pro</a></li></ul></details></div>
         </article>
         <article class="game-item" data-game-id="6" style="--order: 5">
           <a
@@ -457,7 +427,7 @@
               <span class="thumbnail-fallback" aria-hidden="true"
                 >AGI Probability Barometer</span
               ><img
-                src="/images/AgiBarometer.webp"
+                src="/images/thumbs/AgiBarometer.webp"
                 alt=""
                 width="400"
                 height="400"
@@ -472,6 +442,7 @@
               </svg>
             </div>
           </a>
+          <p class="game-description">Explore a hiring-based indicator and the assumptions behind it.</p>
           <div class="game-info">
             <p class="model-name">Gemini 3.5 Flash (High)</p>
             <label class="visually-hidden" for="version-select-6"
@@ -483,16 +454,9 @@
               <option value="/apps/agi_barometer/gemini_3_1_pro/game.html">
                 Gemini 3.1 Pro (High)
               </option></select
-            ><noscript
-              ><ul class="version-fallback">
-                <li>
-                  <a href="/apps/agi_barometer/gemini_3_1_pro/game.html"
-                    >Gemini 3.1 Pro (High)</a
-                  >
-                </li>
-              </ul></noscript
             >
           </div>
+          <div class="guide-links"><a class="guide-link" href="/apps/agi_barometer/index.html">Guide &amp; version comparison ↗</a><details><summary>All versions (2)</summary><ul><li><a href="/apps/agi_barometer/gemini_3_5_flash/game.html">Gemini 3.5 Flash (High)</a></li><li><a href="/apps/agi_barometer/gemini_3_1_pro/game.html">Gemini 3.1 Pro (High)</a></li></ul></details></div>
         </article>
       </section>
       <section class="about-section" aria-labelledby="about-title">
@@ -505,7 +469,7 @@
         </p>
         <p>
           The artwork and music are AI-generated too. Everything runs right in
-          your browser.
+          your browser. <a href="/about.html">Meet the project, read about data use and explore the source</a>.
         </p>
       </section>
     </main>

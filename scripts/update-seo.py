@@ -28,10 +28,12 @@ class Catalog(HTMLParser):
         if tag == 'article' and 'data-game-id' in a:
             self.card = {'name': '', 'url': ''}
             self.cards.append(self.card)
+        if tag == 'a' and a.get('href') == '/about.html':
+            self.routes.add('/about.html')
         if self.card is not None:
             if tag == 'h2' and a.get('class') == 'game-title':
                 self.in_title = True
-            if tag == 'a' and a.get('class') == 'game-link':
+            if tag == 'a' and a.get('class') in ('game-link', 'guide-link'):
                 self.card['url'] = ORIGIN + urlsplit(a['href']).path
             link = a.get('value') if tag == 'option' else a.get('href', '')
             if link and link.startswith(('/games/', '/apps/')):
