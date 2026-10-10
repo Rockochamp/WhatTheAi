@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #030712;
+            --container-bg: rgba(17, 24, 39, 0.7);
+            --card-bg: rgba(31, 41, 55, 0.4);
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: rgba(75, 85, 99, 0.3);
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --header-grad-start: #f8fafc;
+            --header-grad-end: #a78bfa;
+            
+            /* Lab Colors */
+            --color-openai: #10b981;
+            --color-anthropic: #f97316;
+            --color-deepmind: #3b82f6;
+            --color-xai: #8b5cf6;
+        }
+
+        /* Light Mode Overrides (if matched with parent main site style) */
+        body.light-mode {
+            --bg-color: #f3f4f6;
+            --container-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: rgba(243, 244, 246, 0.75);
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --border-color: rgba(209, 213, 219, 0.8);
+            --accent: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.2);
+            --header-grad-start: #0f172a;
+            --header-grad-end: #6d28d9;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.004) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.004) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dashboard {
+            max-width: 1280px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Top Bar Controls */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 8px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease, transform 0.2s ease;
+            background: var(--card-bg);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+            transform: translateX(-4px);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Header Section */
+        .main-header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .main-header h1 {
+            font-family: monospace;
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0;
+            background: linear-gradient(to right, var(--header-grad-start), var(--accent), var(--header-grad-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.2));
+        }
+
+        .main-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin: 0;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        /* Cutoff Date Badge */
+        .cutoff-badge {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.1);
+            animation: pulse-border 2s infinite alternate;
+        }
+
+        body.light-mode .cutoff-badge {
+            background: rgba(220, 38, 38, 0.08);
+            border-color: rgba(220, 38, 38, 0.25);
+            color: #b91c1c;
+        }
+
+        @keyframes pulse-border {
+            from { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 8px rgba(239, 68, 68, 0.05); }
+            to { border-color: rgba(239, 68, 68, 0.6); box-shadow: 0 0 16px rgba(239, 68, 68, 0.2); }
+        }
+
+        /* Hero Split Panel */
+        .hero-split {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .hero-split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card base style */
+        .panel-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.7;
+        }
+
+        .panel-card h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .panel-card h2 i {
+            color: var(--accent);
+        }
+
+        /* Hero Gauge Specifics */
+        .hero-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 10px 0;
+        }
+
+        .hero-svg-wrapper {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 16/10;
+        }
+
+        .status-badge {
+            margin-top: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge.stable {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .status-badge.warning {
+            background-color: rgba(249, 115, 22, 0.1);
+            border-color: rgba(249, 115, 22, 0.3);
+            color: #fb923c;
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--accent);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .legend-item:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        .legend-item.dimmed {
+            opacity: 0.3;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Grid of Lab Cards */
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            .labs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .labs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lab-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .lab-card.active-card {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .lab-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .lab-card.openai::before { background-color: var(--color-openai); }
+        .lab-card.anthropic::before { background-color: var(--color-anthropic); }
+        .lab-card.deepmind::before { background-color: var(--color-deepmind); }
+        .lab-card.xai::before { background-color: var(--color-xai); }
+
+        .lab-card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .lab-gauge-wrapper {
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 16/11;
+            margin-bottom: 8px;
+        }
+
+        /* Stats Tables inside Cards */
+        .stats-table {
+            width: 100%;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stat-row.header {
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(75, 85, 99, 0.15);
+        }
+
+        .stat-row .val {
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .stat-row.trend {
+            margin-top: 4px;
+            border-top: 1px solid rgba(75, 85, 99, 0.15);
+            padding-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            text-align: center;
+            margin-top: 12px;
+            border-top: 1px solid rgba(75, 85, 99, 0.1);
+            padding-top: 10px;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Formula Explanation & Logic Panel */
+        .explanation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .explanation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .explanation-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .explanation-card h2 {
+            margin-top: 0;
+            font-size: 1.15rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-card p {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .highlight-red { color: #ef4444; font-weight: 600; }
+        .highlight-green { color: #10b981; font-weight: 600; }
+        .highlight-blue { color: #38bdf8; font-weight: 600; }
+
+        /* Formula display */
+        .math-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: monospace;
+            margin: 8px 0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .formula-main {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            text-align: center;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        .formula-interactive {
+            width: 100%;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .formula-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .formula-row span.lab-name {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(12px);
+            animation: build-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes build-in {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        /* ---- Grokbot Edition overrides: neutral blue/violet scale ---- */
+        :root{--color-openai:#60a5fa;--color-anthropic:#a78bfa;--color-deepmind:#94a3b8;--color-xai:#2dd4bf;--g0:#93c5fd;--g1:#8b5cf6}
+        body.light-mode{--color-openai:#2563eb;--color-anthropic:#7c3aed;--color-deepmind:#64748b;--color-xai:#0f766e;--g0:#3b82f6;--g1:#6d28d9}
+        .hypothesis{border:1px solid var(--border-color);background:var(--card-bg);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;margin:12px 0 0;text-align:left}
+        .headline-line{font-size:16px;font-weight:600;margin:12px 0 0;color:var(--accent)}
+        .date-badge{display:inline-block;margin-top:10px;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--border-color);color:var(--text-muted)}
+        .date-badge.stale{color:#d97706;border-color:#d97706}
+        .caveat{font-size:12px;color:var(--text-muted);border-left:3px solid var(--color-anthropic);padding-left:8px;margin-top:8px}
+        .nodata .stat-row .val,.nodata .lab-gauge-wrapper{opacity:.45}
+        .nodata-label{font-size:22px;font-weight:700;color:var(--text-muted);text-align:center;padding:18px 0}
+        .src-line{font-size:12px;color:var(--text-muted);margin-top:8px;word-break:break-word}
+        .src-line a,.footnote a{color:var(--accent)}
+        .footnote{font-size:13px;color:var(--text-muted);margin-top:24px;line-height:1.6}
+        .skel{height:120px;border-radius:12px;background:var(--card-bg);animation:sk 1.2s ease-in-out infinite alternate}
+        @keyframes sk{to{opacity:.4}}
+        .error-box{border:1px solid #d97706;border-radius:12px;padding:12px;margin-top:12px;font-size:14px}
+        .stat-row.old span:first-child::after{content:" *";color:var(--text-muted)}
+        @media (min-width:768px) and (max-width:1200px){.labs-grid{grid-template-columns:repeat(2,1fr)}}
+        @media (max-width:767px){.labs-grid{grid-template-columns:1fr}}
+        @media (max-width:420px){body{padding:16px 10px}.panel-card,.lab-card,.explanation-card{padding:14px}.main-header h1{font-size:22px;letter-spacing:1px}.chart-legend{gap:6px}.legend-item{font-size:12px}.formula-row{flex-direction:column;align-items:flex-start;font-size:12px}.math-box{overflow-x:auto}}
+        .math-box{background:var(--card-bg)!important;color:var(--text-main)!important}.math-box *{color:var(--text-main)!important}.formula-row .lab-name{color:var(--accent)!important}.status-badge.stable,.status-badge.warning{background:var(--card-bg)!important;color:var(--accent)!important;border-color:var(--accent)!important}
+        @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fade-in{opacity:1!important;transform:none!important}}
+    </style>
+<title>AGI Probability Barometer — Grokbot Edition | What the Ai</title>
+<meta name="description" content="Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability." />
+<link rel="canonical" href="https://whatthe.ai/apps/agi_barometer/grokbot/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="AGI Probability Barometer — Grokbot Edition | What the Ai" />
+<meta property="og:description" content="Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability." />
+<meta property="og:url" content="https://whatthe.ai/apps/agi_barometer/grokbot/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="AGI Probability Barometer — Grokbot Edition | What the Ai" />
+<meta name="twitter:description" content="Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability." />
+<meta property="og:image" content="https://whatthe.ai/images/AgiBarometer.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/AgiBarometer.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "name": "AGI Probability Barometer — Grokbot Edition", "url": "https://whatthe.ai/apps/agi_barometer/grokbot/game.html", "description": "Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "AGI Probability Barometer", "item": "https://whatthe.ai/apps/agi_barometer/index.html"}, {"@type": "ListItem", "position": 3, "name": "Grokbot Edition", "item": "https://whatthe.ai/apps/agi_barometer/grokbot/game.html"}]}]}</script>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="top-nav ">
+            <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Portal</a>
+            <button class="theme-toggle" id="darkModeToggle" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
+        </div>
+        <header class="main-header ">
+            <h1>AGI BAROMETER · GROKBOT EDITION</h1>
+            <p class="hypothesis"><strong>RC's hiring-based hypothesis:</strong> fewer frontier-lab job listings might hint at automation. Not a forecast or a real probability.</p>
+            <p class="headline-line" id="headline-line"></p>
+            <div class="date-badge" id="date-badge">Loading data…</div>
+            <div id="msg"></div>
+        </header>
+        <div class="hero-split ">
+            <div class="panel-card">
+                <h2><i class="fas fa-tachometer-alt"></i> Combined hiring-drop index <span id="lab-count" style="font-weight:400;font-size:13px"></span></h2>
+                <div class="hero-gauge-container">
+                    <div class="hero-svg-wrapper">
+                        <svg viewBox="0 0 300 170" width="100%" height="100%" role="img" aria-labelledby="hero-desc">
+                            <desc id="hero-desc">Gauge from 0% (listings at their peak) to 100% (no listings left)</desc>
+                            <defs><linearGradient id="gaugeGradHero" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--g0)"/><stop offset="100%" stop-color="var(--g1)"/></linearGradient></defs>
+                            <path d="M 40 140 A 110 110 0 0 1 260 140" fill="none" stroke="var(--border-color)" stroke-width="22" stroke-linecap="round"/>
+                            <path id="gauge-fill-hero" d="M 40 140 A 110 110 0 0 1 260 140" fill="none" stroke="url(#gaugeGradHero)" stroke-width="22" stroke-linecap="round" stroke-dasharray="345.6" stroke-dashoffset="345.6"/>
+                            <text x="40" y="165" font-family="monospace" font-size="11" fill="var(--text-muted)" text-anchor="middle">0% peak</text>
+                            <text x="260" y="165" font-family="monospace" font-size="11" fill="var(--text-muted)" text-anchor="middle">100% none</text>
+                            <path id="needle-hero" d="M 150 140 L 48 140 L 150 135 Z" fill="var(--g1)" transform="rotate(0, 150, 140)"/>
+                            <circle cx="150" cy="140" r="10" fill="var(--text-main)"/>
+                            <text id="counter-hero" x="150" y="85" font-family="monospace" font-size="38" font-weight="bold" fill="var(--accent)" text-anchor="middle">–</text>
+                            <text x="150" y="105" font-family="monospace" font-size="10" fill="var(--text-muted)" text-anchor="middle" letter-spacing="1.5">HIRING-DROP INDEX</text>
+                        </svg>
+                    </div>
+                    <div id="status-badge" class="status-badge stable">LOADING…</div>
+                </div>
+            </div>
+            <div class="panel-card">
+                <h2><i class="fas fa-chart-line"></i> Job listing trajectories</h2>
+                <div class="chart-container">
+                    <div class="chart-tooltip" id="chartTooltip"></div>
+                    <svg viewBox="0 0 500 230" width="100%" height="100%" id="trendChart" role="img" aria-label="Job listings per lab over time"><g id="axes"></g><g id="chartLines"></g><g id="chartNodes"></g></svg>
+                    <div class="chart-legend" id="legend"></div>
+                    <p class="src-line">Solid dots and dashed segment: live count on the latest date. Hollow points: earlier repo values, unverified, method unknown.</p>
+                </div>
+            </div>
+        </div>
+        <div id="labsGrid" class="labs-grid "><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+        <div class="explanation-grid ">
+            <div class="explanation-card">
+                <h2><i class="fas fa-calculator"></i> How this works</h2>
+                <p>The <strong>hiring-drop index</strong> measures how far a lab's latest listing count sits below its highest count so far. 0% means listings are at their peak; 100% would mean no listings left. It is not a probability of AGI.</p>
+                <div class="math-box">
+                    <div class="formula-main">index = max( 0, 1 − latest / peak )</div>
+                    <div class="formula-interactive" id="formulaDetail"></div>
+                </div>
+                <p style="font-size:13px">If a lab's peak is 0 or its latest count is missing, no index is computed (shown as "no data"). The combined index applies the same formula to the summed counts of labs with a fresh count.</p>
+            </div>
+            <div class="explanation-card">
+                <h2><i class="fas fa-info-circle"></i> Reading it</h2>
+                <p id="analysis">…</p>
+                <p>Listings can change for many reasons: budgets, recruiting cycles, new offices or restructuring. A drop would not prove automation, and a rise does not rule it out.</p>
+            </div>
+        </div>
+        <p class="footnote" id="footnote"></p>
+        <p class="footnote">Other editions: <a href="/apps/agi_barometer/gemini_3_5_flash/game.html">Gemini 3.5 Flash</a> · <a href="/apps/agi_barometer/gemini_3_1_pro/game.html">Gemini 3.1 Pro</a> · <a href="/apps/agi_barometer/index.html">Guide &amp; comparison</a></p>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+const DATA='/apps/agi_barometer/grokbot/data/listings.json',CACHE='agiGrokbotListings',$=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safe=u=>/^https:\/\//.test(u||'')?u:'#';
+const COLORS={openai:'var(--color-openai)',anthropic:'var(--color-anthropic)',deepmind:'var(--color-deepmind)',xai:'var(--color-xai)'};
+const num=v=>typeof v==='number'&&isFinite(v)&&v>=0;
+// One formula everywhere. Zero-guard BEFORE division.
+function index(latest,series){if(!num(latest))return null;const vals=series.filter(num).concat(latest);const peak=Math.max(...vals);if(!(peak>0))return null;return Math.max(0,1-latest/peak);}
+const pct=x=>x==null?'no data':(x*100).toFixed(1)+'%';
+function render(D,cached){
+ const P=D.periods,keys=P.map(p=>p.key);
+ const labs=D.labs.map(l=>{const s=keys.slice(0,-1).map(k=>l.history?.[k]);const idx=index(l.latest,s);const all=s.concat(l.latest).filter(num);return{...l,series:s,idx,peak:all.length?Math.max(...all):null,color:COLORS[l.id]||'var(--accent)'}});
+ const fresh=labs.filter(l=>l.idx!=null);
+ const sums=keys.map((k,i)=>fresh.reduce((a,l)=>a+(i<keys.length-1?(l.series[i]||0):l.latest),0));
+ const comb=fresh.length?index(sums[sums.length-1],sums.slice(0,-1)):null;
+ $('lab-count').textContent=`(${fresh.length} labs)`;
+ const age=(Date.now()-Date.parse(D.latest_date))/864e5;
+ $('date-badge').textContent=`Latest data: ${D.latest_label}`+(age>30?' · may be outdated':'');$('date-badge').classList.toggle('stale',age>30);
+ const atPeak=fresh.filter(l=>l.idx===0),below=fresh.filter(l=>l.idx>0);
+ $('headline-line').textContent=fresh.length&&below.length&&atPeak.length?`${atPeak.length} of ${fresh.length} labs are hiring at record levels (0%)${below.map(l=>`; ${l.name} is slightly below its earlier peak (${pct(l.idx)})`).join('')}. Overall, the hiring signal shows no sign of AGI right now.`:comb===0?'Labs are hiring more than ever, so the hiring signal shows no sign of AGI right now.':comb==null?'Not enough fresh data for a combined reading.':`Combined listings are ${pct(comb)} below their peak.`;
+ if(cached)$('msg').innerHTML=`<div class="error-box" role="status">Couldn't load the latest data; showing your last saved copy (${esc(D.latest_label)}).</div>`;
+ // status
+ $('status-badge').textContent=comb==null?'NO DATA':comb===0?'AT PEAK · NO HIRING DROP':`${pct(comb)} BELOW PEAK`;
+ // chart, axes scaled to data
+ const allV=labs.flatMap(l=>l.series.concat(l.latest)).filter(num);const maxV=Math.max(1,...allV);
+ const step=Math.pow(10,Math.floor(Math.log10(maxV)));const top=Math.ceil(maxV/ (step/2))*(step/2);
+ const X0=48,X1=480,Y0=190,Y1=20,xs=keys.map((_,i)=>X0+i*(X1-X0)/(keys.length-1)),y=v=>Y0-(v/top)*(Y0-Y1);
+ let ax='';[0,top/2,top].forEach(t=>{ax+=`<line x1="${X0}" x2="${X1}" y1="${y(t)}" y2="${y(t)}" stroke="var(--border-color)"/><text x="${X0-6}" y="${y(t)+3}" font-size="10" font-family="monospace" fill="var(--text-muted)" text-anchor="end">${Math.round(t)}</text>`});
+ P.forEach((p,i)=>{const lab=p.sourced?['Oct 10, 2026','(live count)']:[p.label,''];ax+=`<text x="${xs[i]}" y="206" font-size="10" font-family="monospace" fill="var(--text-muted)" text-anchor="${i===0?'start':i===P.length-1?'end':'middle'}">${esc(lab[0])}</text><text x="${xs[i]}" y="219" font-size="9" font-family="monospace" fill="var(--text-muted)" text-anchor="${i===P.length-1?'end':'middle'}">${esc(lab[1])}</text>`});
+ $('axes').innerHTML=ax;let lines='',nodes='';
+ labs.forEach(l=>{const pts=l.series.map((v,i)=>num(v)?[xs[i],y(v),v,P[i].label]:null);const solid=pts.filter(Boolean);
+  lines+=`<path id="line-${l.id}" d="${solid.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ')}" fill="none" stroke="${l.color}" stroke-width="3" opacity="${l.idx==null?0.4:1}"/>`;
+  solid.forEach(p=>nodes+=`<circle class="node-${l.id}" cx="${p[0]}" cy="${p[1]}" r="5" fill="var(--bg-color)" stroke="${l.color}" stroke-width="2.5" data-tip="${esc(l.name+' '+p[3]+': '+p[2]+' (earlier repo value, unverified)')}"/>`);
+  if(num(l.latest)){const last=solid[solid.length-1],lx=xs[xs.length-1],ly=y(l.latest);if(last)lines+=`<path id="dash-${l.id}" d="M${last[0]} ${last[1]} L${lx} ${ly}" stroke="${l.color}" stroke-width="2.5" stroke-dasharray="6 5" fill="none"/>`;nodes+=`<circle class="node-${l.id}" cx="${lx}" cy="${ly}" r="7" fill="${l.color}" data-tip="${esc(l.name+' '+D.latest_label+': '+l.latest+' listings')}"/>`;}});
+ $('chartLines').innerHTML=lines;$('chartNodes').innerHTML=nodes;
+ const tip=$('chartTooltip');$('chartNodes').querySelectorAll('circle').forEach(c=>{c.style.cursor='pointer';c.addEventListener('mouseenter',e=>{const r=$('trendChart').getBoundingClientRect();tip.style.left=(e.clientX-r.left+12)+'px';tip.style.top=(e.clientY-r.top-12)+'px';tip.textContent=c.dataset.tip;tip.style.opacity=1});c.addEventListener('mouseleave',()=>tip.style.opacity=0)});
+ // legend
+ $('legend').innerHTML=labs.map(l=>`<button type="button" class="legend-item" data-lab="${esc(l.id)}" style="background:none;border:0;color:inherit;cursor:pointer;min-height:32px"><span class="legend-color" style="background-color:${l.color}"></span> ${esc(l.name)}</button>`).join('');
+ let active=null;$('legend').querySelectorAll('.legend-item').forEach(b=>b.onclick=()=>{active=active===b.dataset.lab?null:b.dataset.lab;labs.forEach(l=>{const o=!active||l.id===active?1:.15;[`line-${l.id}`,`dash-${l.id}`].forEach(id=>{const e=document.getElementById(id);if(e)e.style.opacity=o});$('chartNodes').querySelectorAll('.node-'+l.id).forEach(n=>n.style.opacity=o);const card=$('card-'+l.id);if(card)card.classList.toggle('active-card',l.id===active)});$('legend').querySelectorAll('.legend-item').forEach(x=>x.classList.toggle('dimmed',!!active&&x.dataset.lab!==active));$('formulaDetail').querySelectorAll('.formula-row').forEach(r=>r.style.background=r.dataset.lab===active?'rgba(129,140,248,.15)':'none')});
+ // cards (sorted by index, no-data last)
+ const sorted=[...labs].sort((a,b)=>(b.idx??-1)-(a.idx??-1));
+ $('labsGrid').innerHTML=sorted.map(l=>{const nd=l.idx==null;const rows=P.map((p,i)=>{const v=i<P.length-1?l.series[i]:l.latest;return `<div class="stat-row${p.sourced?'':' old'}"><span>${esc(p.sourced?'Oct 10, 2026 (live)':p.label)}</span><span class="val">${num(v)?v:'no data'}</span></div>`}).join('');
+  return `<div class="lab-card ${esc(l.id)}${nd?' nodata':''}" id="card-${esc(l.id)}"><h3>${esc(l.name)}</h3>${nd?`<div class="nodata-label">no fresh data</div>`:`<div class="lab-gauge-wrapper"><svg viewBox="0 0 200 130" width="100%" height="100%" aria-hidden="true"><path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="var(--border-color)" stroke-width="12" stroke-linecap="round"/><path class="lab-fill" data-p="${l.idx}" d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="${l.color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220"/><text class="lab-counter" data-p="${l.idx}" x="100" y="78" font-family="monospace" font-size="24" font-weight="bold" fill="var(--text-main)" text-anchor="middle">0.0%</text><text x="100" y="96" font-family="monospace" font-size="8" fill="var(--text-muted)" text-anchor="middle" letter-spacing="1">HIRING-DROP INDEX</text></svg></div>`}
+  <div class="stats-table"><div class="stat-row header"><span>Period</span><span>Listings</span></div>${rows}</div>
+  ${!nd&&l.peak<150?'<div class="caveat">Small numbers swing a lot: a few postings move this index a lot.</div>':''}
+  <div class="src-line">${l.note?esc(l.note)+' ':''}Source: <a href="${safe(l.source)}" target="_blank" rel="noopener">${esc(l.source_name)}</a>${l.retrieved_at?' · retrieved '+esc(new Date(l.retrieved_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Zurich'}))+' CEST':''}</div>
+  <div class="src-line">* earlier repo values, unverified, method unknown</div></div>`}).join('');
+ // formula
+ $('formulaDetail').innerHTML=labs.map(l=>`<div class="formula-row" data-lab="${esc(l.id)}"><span class="lab-name">${esc(l.name)}:</span><span>${l.idx==null?'no fresh count → no index':`max(0, 1 − ${l.latest} / ${l.peak}) = <strong>${pct(l.idx)}</strong>`}</span></div>`).join('')+(comb!=null?`<div class="formula-row"><span class="lab-name">Combined (${fresh.length} labs):</span><span>max(0, 1 − ${sums[sums.length-1]} / ${Math.max(...sums)}) = <strong>${pct(comb)}</strong></span></div>`:'');
+ $('analysis').innerHTML=`With live counts from ${D.latest_label.replace(' (live count)','')}, ${atPeak.length} ${atPeak.length===1?'lab is':'labs are'} at their highest listing count in this dataset; combined, the index reads ${pct(comb)}. ${labs.filter(l=>l.idx==null).map(l=>esc(l.name)).join(', ')||'Every lab'} ${labs.some(l=>l.idx==null)?'has no fresh count and is left out of the combined index.':'has a fresh count and is included.'}`;
+ $('footnote').innerHTML=`${esc(D.counting_note.replace(/;/,', ').replace(/^Counted/,'Counted'))} Sources: ${labs.filter(l=>num(l.latest)).map(l=>`<a href="${safe(l.source)}" target="_blank" rel="noopener">${esc(l.name)}</a>`).join(' · ')}. ${esc(D.history_note)}`;
+ // animate
+ const T=reduce?0:1600,t0=performance.now();
+ const step2=now=>{const k=T?Math.min(1,(now-t0)/T):1,e=1-Math.pow(1-k,3);
+  if(comb!=null){const hp=comb*e;$('counter-hero').textContent=(hp*100).toFixed(1)+'%';$('needle-hero').setAttribute('transform',`rotate(${hp*180},150,140)`);$('gauge-fill-hero').setAttribute('stroke-dashoffset',345.6*(1-hp));}
+  document.querySelectorAll('.lab-counter').forEach(t=>t.textContent=(t.dataset.p*e*100).toFixed(1)+'%');document.querySelectorAll('.lab-fill').forEach(t=>t.setAttribute('stroke-dashoffset',220*(1-t.dataset.p*e)));
+  if(k<1)requestAnimationFrame(step2)};step2(t0);if(T)setTimeout(()=>step2(t0+T),T+100);
+}
+function fail(){let c=null;try{c=JSON.parse(localStorage.getItem(CACHE))}catch(e){}if(c&&c.labs)render(c,true);else{$('labsGrid').innerHTML='';$('date-badge').textContent='Data unavailable';$('msg').innerHTML='<div class="error-box" role="alert">Sorry, the listing data didn\'t load. Please check your connection and try again.</div>';$('status-badge').textContent='NO DATA';}}
+fetch(DATA,{cache:'no-cache'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{if(!d||!Array.isArray(d.labs))throw 0;try{localStorage.setItem(CACHE,JSON.stringify(d))}catch(e){}render(d,false)}).catch(fail);
+// theme (shared with Flash edition key)
+const tg=$('darkModeToggle'),sys=matchMedia('(prefers-color-scheme: dark)');let st=null;try{st=localStorage.getItem('darkMode')}catch(e){}
+const dark=st==='true'||(st===null&&sys.matches);document.body.classList.toggle('light-mode',!dark);tg.querySelector('i').className=dark?'fas fa-sun':'fas fa-moon';
+tg.addEventListener('click',()=>{const l=document.body.classList.toggle('light-mode');try{localStorage.setItem('darkMode',!l)}catch(e){}tg.querySelector('i').className=l?'fas fa-moon':'fas fa-sun'});
+});
+</script>
+</body>
+</html>

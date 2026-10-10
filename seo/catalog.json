@@ -195,6 +195,12 @@
     ],
     "versions": [
       {
+        "model": "Grokbot Edition",
+        "path": "/apps/agi_barometer/grokbot/game.html",
+        "detail": "Live job-listing counts with source links and dates, one hiring-drop index formula, a dashed live-count segment on the chart and a no-data state for labs without a verified count.",
+        "description": "Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability."
+      },
+      {
         "model": "Gemini 3.5 Flash (High)",
         "path": "/apps/agi_barometer/gemini_3_5_flash/game.html",
         "detail": "Three stored quarterly inputs per lab, a combined indicator, trend chart and interactive formula details.",
