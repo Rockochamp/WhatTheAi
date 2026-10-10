@@ -26,3 +26,7 @@ GPT-6 Astra is the default Cosmic Dodge destination. Selecting Grok / Gemini / o
 - Floor tile: `games/BananaSurvivors/grok_4_6/locker.webp`.
 
 Grok 4.6 is **SPLIT**, written from scratch — no guns, orbiting peels, split-dash. Astra is the default Banana Survivors destination; Grok / Gemini stay selectable with their own art.
+
+# AGI Barometer Grokbot Edition cover · October 2026
+
+- `thumbs/agi-grokbot.webp` (480×480 WebP): drawn procedurally with Pillow, because no image-generation tool was available. Brief: neon barometer gauge in blue → violet → teal with its needle resting at 0, faint rising teal line chart behind it, dark navy grid. No text, people or logos. The Gemini editions keep `AgiBarometer.webp`.
