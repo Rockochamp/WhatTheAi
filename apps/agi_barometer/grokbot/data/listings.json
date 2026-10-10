@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "latest_label": "Oct 10, 2026 (live count)",
+  "latest_date": "2026-10-10",
+  "counting_note": "Counted all listings returned by each public job-board API, no filters; a multi-location job counts once per location.",
+  "history_note": "Q1-Q3 are earlier repo values from the v1 Gemini editions: unverified, method unknown.",
+  "periods": [
+    {
+      "key": "q1",
+      "label": "Q1 2026",
+      "sourced": false
+    },
+    {
+      "key": "q2",
+      "label": "Q2 2026",
+      "sourced": false
+    },
+    {
+      "key": "q3",
+      "label": "Q3 2026",
+      "sourced": false
+    },
+    {
+      "key": "q4",
+      "label": "Oct 10, 2026 (live count)",
+      "sourced": true
+    }
+  ],
+  "labs": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "history": {
+        "q1": 452,
+        "q2": 660,
+        "q3": 712
+      },
+      "latest": 815,
+      "source": "https://api.ashbyhq.com/posting-api/job-board/openai",
+      "source_name": "OpenAI Ashby job board API",
+      "retrieved_at": "2026-10-10T14:16:00+02:00"
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "history": {
+        "q1": 309,
+        "q2": 431,
+        "q3": 374
+      },
+      "latest": 645,
+      "source": "https://boards-api.greenhouse.io/v1/boards/anthropic/jobs",
+      "source_name": "Anthropic Greenhouse job board API",
+      "retrieved_at": "2026-10-10T14:16:00+02:00"
+    },
+    {
+      "id": "deepmind",
+      "name": "Google DeepMind",
+      "history": {
+        "q1": 102,
+        "q2": 92,
+        "q3": 25
+      },
+      "latest": 94,
+      "source": "https://www.google.com/about/careers/applications/jobs/results?company=DeepMind",
+      "source_name": "Google Careers, company=DeepMind ('94 jobs matched')",
+      "retrieved_at": "2026-10-10T14:18:00+02:00",
+      "note": "The earlier Q3 value of 25 looks like an outlier against the other points."
+    },
+    {
+      "id": "xai",
+      "name": "xAI",
+      "history": {
+        "q1": 285,
+        "q2": 247,
+        "q3": 211
+      },
+      "latest": 305,
+      "source": "https://boards-api.greenhouse.io/v1/boards/xai/jobs",
+      "source_name": "xAI Greenhouse job board API",
+      "retrieved_at": "2026-10-10T14:16:00+02:00"
+    }
+  ]
+}

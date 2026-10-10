@@ -59,6 +59,7 @@ def build():
         methodology=''
         if g['id']==6:
             methodology='''<section id="methodology"><h2>Methodology and limitations</h2>
+<p>The Grokbot Edition uses one formula for every lab and for the combined total: <code>max(0, 1 − latest / peak)</code>, called the hiring-drop index. It loads live listing counts from <a href="/apps/agi_barometer/grokbot/data/listings.json">listings.json</a>, each with a source URL and retrieval time. Labs without a verified latest count show “no data” and are left out of the combined index. Earlier Q1–Q3 points come from the older editions and remain unverified.</p>
 <p>The Gemini 3.1 Pro edition calculates <code>max(0, 100 × (1 − Q2 / Q1))</code> for each lab. The Flash edition uses <code>max(0, 100 × (1 − Q3 / max(Q1, Q2, Q3)))</code>. Its combined gauge applies the same decline-from-peak idea to the quarterly totals.</p>
 <p>These formulas express a percentage decline in the stored inputs. They are not calibrated against AGI outcomes, do not establish causation and do not estimate a reliable arrival date.</p>
 <p>The Flash screen originally labelled a June 22, 2026 cutoff while including Q3 2026 values. That timing is inconsistent with a completed Q3 observation. The values remain unchanged for reproducibility; their provenance and timing are unverified.</p>
