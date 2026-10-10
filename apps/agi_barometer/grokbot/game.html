@@ -567,8 +567,8 @@
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
         /* ---- Grokbot Edition overrides: neutral blue/violet scale ---- */
-        :root{--color-openai:#60a5fa;--color-anthropic:#a78bfa;--color-deepmind:#94a3b8;--color-xai:#818cf8;--g0:#93c5fd;--g1:#8b5cf6}
-        body.light-mode{--color-openai:#2563eb;--color-anthropic:#7c3aed;--color-deepmind:#64748b;--color-xai:#4f46e5;--g0:#3b82f6;--g1:#6d28d9}
+        :root{--color-openai:#60a5fa;--color-anthropic:#a78bfa;--color-deepmind:#94a3b8;--color-xai:#2dd4bf;--g0:#93c5fd;--g1:#8b5cf6}
+        body.light-mode{--color-openai:#2563eb;--color-anthropic:#7c3aed;--color-deepmind:#64748b;--color-xai:#0f766e;--g0:#3b82f6;--g1:#6d28d9}
         .hypothesis{border:1px solid var(--border-color);background:var(--card-bg);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;margin:12px 0 0;text-align:left}
         .headline-line{font-size:16px;font-weight:600;margin:12px 0 0;color:var(--accent)}
         .date-badge{display:inline-block;margin-top:10px;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--border-color);color:var(--text-muted)}
@@ -720,7 +720,7 @@ function render(D,cached){
   <div class="src-line">* earlier repo values, unverified, method unknown</div></div>`}).join('');
  // formula
  $('formulaDetail').innerHTML=labs.map(l=>`<div class="formula-row" data-lab="${esc(l.id)}"><span class="lab-name">${esc(l.name)}:</span><span>${l.idx==null?'no fresh count → no index':`max(0, 1 − ${l.latest} / ${l.peak}) = <strong>${pct(l.idx)}</strong>`}</span></div>`).join('')+(comb!=null?`<div class="formula-row"><span class="lab-name">Combined (${fresh.length} labs):</span><span>max(0, 1 − ${sums[sums.length-1]} / ${Math.max(...sums)}) = <strong>${pct(comb)}</strong></span></div>`:'');
- $('analysis').innerHTML=`With live counts from ${D.latest_label.replace(' (live count)','')}, ${atPeak.length} lab(s) are at their highest listing count in this dataset; combined, the index reads ${pct(comb)}. ${labs.filter(l=>l.idx==null).map(l=>esc(l.name)).join(', ')||'Every lab'} ${labs.some(l=>l.idx==null)?'has no fresh count and is left out of the combined index.':'has a fresh count and is included.'}`;
+ $('analysis').innerHTML=`With live counts from ${D.latest_label.replace(' (live count)','')}, ${atPeak.length} ${atPeak.length===1?'lab is':'labs are'} at their highest listing count in this dataset; combined, the index reads ${pct(comb)}. ${labs.filter(l=>l.idx==null).map(l=>esc(l.name)).join(', ')||'Every lab'} ${labs.some(l=>l.idx==null)?'has no fresh count and is left out of the combined index.':'has a fresh count and is included.'}`;
  $('footnote').innerHTML=`${esc(D.counting_note.replace(/;/,', ').replace(/^Counted/,'Counted'))} Sources: ${labs.filter(l=>num(l.latest)).map(l=>`<a href="${safe(l.source)}" target="_blank" rel="noopener">${esc(l.name)}</a>`).join(' · ')}. ${esc(D.history_note)}`;
  // animate
  const T=reduce?0:1600,t0=performance.now();
