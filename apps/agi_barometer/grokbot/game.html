@@ -386,6 +386,7 @@
         .lab-card.anthropic::before { background-color: var(--color-anthropic); }
         .lab-card.deepmind::before { background-color: var(--color-deepmind); }
         .lab-card.xai::before { background-color: var(--color-xai); }
+        .lab-card.meta::before { background-color: var(--color-meta); }
 
         .lab-card h3 {
             margin-top: 0;
@@ -567,8 +568,8 @@
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
         /* ---- Grokbot Edition overrides: neutral blue/violet scale ---- */
-        :root{--color-openai:#60a5fa;--color-anthropic:#a78bfa;--color-deepmind:#94a3b8;--color-xai:#2dd4bf;--g0:#93c5fd;--g1:#8b5cf6}
-        body.light-mode{--color-openai:#2563eb;--color-anthropic:#7c3aed;--color-deepmind:#64748b;--color-xai:#0f766e;--g0:#3b82f6;--g1:#6d28d9}
+        :root{--color-openai:#60a5fa;--color-anthropic:#a78bfa;--color-deepmind:#94a3b8;--color-xai:#2dd4bf;--color-meta:#818cf8;--g0:#93c5fd;--g1:#8b5cf6}
+        body.light-mode{--color-openai:#2563eb;--color-anthropic:#7c3aed;--color-deepmind:#64748b;--color-xai:#0f766e;--color-meta:#4338ca;--g0:#3b82f6;--g1:#6d28d9}
         .hypothesis{border:1px solid var(--border-color);background:var(--card-bg);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;margin:12px 0 0;text-align:left}
         .headline-line{font-size:16px;font-weight:600;margin:12px 0 0;color:var(--accent)}
         .date-badge{display:inline-block;margin-top:10px;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--border-color);color:var(--text-muted)}
@@ -583,6 +584,7 @@
         @keyframes sk{to{opacity:.4}}
         .error-box{border:1px solid #d97706;border-radius:12px;padding:12px;margin-top:12px;font-size:14px}
         .stat-row.old span:first-child::after{content:" *";color:var(--text-muted)}
+        @media (min-width:1201px){.labs-grid{grid-template-columns:repeat(5,1fr)}}
         @media (min-width:768px) and (max-width:1200px){.labs-grid{grid-template-columns:repeat(2,1fr)}}
         @media (max-width:767px){.labs-grid{grid-template-columns:1fr}}
         @media (max-width:420px){body{padding:16px 10px}.panel-card,.lab-card,.explanation-card{padding:14px}.main-header h1{font-size:22px;letter-spacing:1px}.chart-legend{gap:6px}.legend-item{font-size:12px}.formula-row{flex-direction:column;align-items:flex-start;font-size:12px}.math-box{overflow-x:auto}}
@@ -659,6 +661,7 @@
                     <div class="formula-interactive" id="formulaDetail"></div>
                 </div>
                 <p style="font-size:13px">If a lab's peak is 0 or its latest count is missing, no index is computed (shown as "no data"). The combined index applies the same formula to the summed counts of labs with a fresh count.</p>
+                <p style="font-size:13px"><strong>What is counted:</strong> every lab, Meta included, counts all of its listings with no filters. The hypothesis is that AGI would reduce hiring across all kinds of roles, not just AI roles.</p>
             </div>
             <div class="explanation-card">
                 <h2><i class="fas fa-info-circle"></i> Reading it</h2>
@@ -675,7 +678,7 @@ const DATA='/apps/agi_barometer/grokbot/data/listings.json',CACHE='agiGrokbotLis
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safe=u=>/^https:\/\//.test(u||'')?u:'#';
-const COLORS={openai:'var(--color-openai)',anthropic:'var(--color-anthropic)',deepmind:'var(--color-deepmind)',xai:'var(--color-xai)'};
+const COLORS={openai:'var(--color-openai)',anthropic:'var(--color-anthropic)',deepmind:'var(--color-deepmind)',xai:'var(--color-xai)',meta:'var(--color-meta)'};
 const num=v=>typeof v==='number'&&isFinite(v)&&v>=0;
 // One formula everywhere. Zero-guard BEFORE division.
 function index(latest,series){if(!num(latest))return null;const vals=series.filter(num).concat(latest);const peak=Math.max(...vals);if(!(peak>0))return null;return Math.max(0,1-latest/peak);}
@@ -690,7 +693,7 @@ function render(D,cached){
  const age=(Date.now()-Date.parse(D.latest_date))/864e5;
  $('date-badge').textContent=`Latest data: ${D.latest_label}`+(age>30?' · may be outdated':'');$('date-badge').classList.toggle('stale',age>30);
  const atPeak=fresh.filter(l=>l.idx===0),below=fresh.filter(l=>l.idx>0);
- $('headline-line').textContent=fresh.length&&below.length&&atPeak.length?`${atPeak.length} of ${fresh.length} labs are hiring at record levels (0%)${below.map(l=>`; ${l.name} is slightly below its earlier peak (${pct(l.idx)})`).join('')}. Overall, the hiring signal shows no sign of AGI right now.`:comb===0?'Labs are hiring more than ever, so the hiring signal shows no sign of AGI right now.':comb==null?'Not enough fresh data for a combined reading.':`Combined listings are ${pct(comb)} below their peak.`;
+ $('headline-line').textContent=fresh.length&&below.length&&atPeak.length?`${atPeak.length} of ${fresh.length} labs are at their highest listing count so far (0%)${atPeak.some(l=>l.series.every(v=>!num(v)))?', including '+atPeak.filter(l=>l.series.every(v=>!num(v))).map(l=>l.name+"'s first live count").join(', '):''}${below.map(l=>`; ${l.name} is slightly below its earlier peak (${pct(l.idx)})`).join('')}. Overall, the hiring signal shows no sign of AGI right now.`:comb===0?'Labs are hiring more than ever, so the hiring signal shows no sign of AGI right now.':comb==null?'Not enough fresh data for a combined reading.':`Combined listings are ${pct(comb)} below their peak.`;
  if(cached)$('msg').innerHTML=`<div class="error-box" role="status">Couldn't load the latest data; showing your last saved copy (${esc(D.latest_label)}).</div>`;
  // status
  $('status-badge').textContent=comb==null?'NO DATA':comb===0?'AT PEAK · NO HIRING DROP':`${pct(comb)} BELOW PEAK`;
@@ -699,10 +702,10 @@ function render(D,cached){
  const step=Math.pow(10,Math.floor(Math.log10(maxV)));const top=Math.ceil(maxV/ (step/2))*(step/2);
  const X0=48,X1=480,Y0=190,Y1=20,xs=keys.map((_,i)=>X0+i*(X1-X0)/(keys.length-1)),y=v=>Y0-(v/top)*(Y0-Y1);
  let ax='';[0,top/2,top].forEach(t=>{ax+=`<line x1="${X0}" x2="${X1}" y1="${y(t)}" y2="${y(t)}" stroke="var(--border-color)"/><text x="${X0-6}" y="${y(t)+3}" font-size="10" font-family="monospace" fill="var(--text-muted)" text-anchor="end">${Math.round(t)}</text>`});
- P.forEach((p,i)=>{const lab=p.sourced?['Oct 10, 2026','(live count)']:[p.label,''];ax+=`<text x="${xs[i]}" y="206" font-size="10" font-family="monospace" fill="var(--text-muted)" text-anchor="${i===0?'start':i===P.length-1?'end':'middle'}">${esc(lab[0])}</text><text x="${xs[i]}" y="219" font-size="9" font-family="monospace" fill="var(--text-muted)" text-anchor="${i===P.length-1?'end':'middle'}">${esc(lab[1])}</text>`});
+ P.forEach((p,i)=>{const lab=p.sourced?[p.label.replace(/ \(.*\)$/,''),'(live counts)']:[p.label,''];ax+=`<text x="${xs[i]}" y="206" font-size="10" font-family="monospace" fill="var(--text-muted)" text-anchor="${i===0?'start':i===P.length-1?'end':'middle'}">${esc(lab[0])}</text><text x="${xs[i]}" y="219" font-size="9" font-family="monospace" fill="var(--text-muted)" text-anchor="${i===P.length-1?'end':'middle'}">${esc(lab[1])}</text>`});
  $('axes').innerHTML=ax;let lines='',nodes='';
  labs.forEach(l=>{const pts=l.series.map((v,i)=>num(v)?[xs[i],y(v),v,P[i].label]:null);const solid=pts.filter(Boolean);
-  lines+=`<path id="line-${l.id}" d="${solid.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ')}" fill="none" stroke="${l.color}" stroke-width="3" opacity="${l.idx==null?0.4:1}"/>`;
+  if(solid.length)lines+=`<path id="line-${l.id}" d="${solid.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ')}" fill="none" stroke="${l.color}" stroke-width="3" opacity="${l.idx==null?0.4:1}"/>`;
   solid.forEach(p=>nodes+=`<circle class="node-${l.id}" cx="${p[0]}" cy="${p[1]}" r="5" fill="var(--bg-color)" stroke="${l.color}" stroke-width="2.5" data-tip="${esc(l.name+' '+p[3]+': '+p[2]+' (earlier repo value, unverified)')}"/>`);
   if(num(l.latest)){const last=solid[solid.length-1],lx=xs[xs.length-1],ly=y(l.latest);if(last)lines+=`<path id="dash-${l.id}" d="M${last[0]} ${last[1]} L${lx} ${ly}" stroke="${l.color}" stroke-width="2.5" stroke-dasharray="6 5" fill="none"/>`;nodes+=`<circle class="node-${l.id}" cx="${lx}" cy="${ly}" r="7" fill="${l.color}" data-tip="${esc(l.name+' '+D.latest_label+': '+l.latest+' listings')}"/>`;}});
  $('chartLines').innerHTML=lines;$('chartNodes').innerHTML=nodes;
@@ -712,16 +715,16 @@ function render(D,cached){
  let active=null;$('legend').querySelectorAll('.legend-item').forEach(b=>b.onclick=()=>{active=active===b.dataset.lab?null:b.dataset.lab;labs.forEach(l=>{const o=!active||l.id===active?1:.15;[`line-${l.id}`,`dash-${l.id}`].forEach(id=>{const e=document.getElementById(id);if(e)e.style.opacity=o});$('chartNodes').querySelectorAll('.node-'+l.id).forEach(n=>n.style.opacity=o);const card=$('card-'+l.id);if(card)card.classList.toggle('active-card',l.id===active)});$('legend').querySelectorAll('.legend-item').forEach(x=>x.classList.toggle('dimmed',!!active&&x.dataset.lab!==active));$('formulaDetail').querySelectorAll('.formula-row').forEach(r=>r.style.background=r.dataset.lab===active?'rgba(129,140,248,.15)':'none')});
  // cards (sorted by index, no-data last)
  const sorted=[...labs].sort((a,b)=>(b.idx??-1)-(a.idx??-1));
- $('labsGrid').innerHTML=sorted.map(l=>{const nd=l.idx==null;const rows=P.map((p,i)=>{const v=i<P.length-1?l.series[i]:l.latest;return `<div class="stat-row${p.sourced?'':' old'}"><span>${esc(p.sourced?'Oct 10, 2026 (live)':p.label)}</span><span class="val">${num(v)?v:'no data'}</span></div>`}).join('');
-  return `<div class="lab-card ${esc(l.id)}${nd?' nodata':''}" id="card-${esc(l.id)}"><h3>${esc(l.name)}</h3>${nd?`<div class="nodata-label">no fresh data</div>`:`<div class="lab-gauge-wrapper"><svg viewBox="0 0 200 130" width="100%" height="100%" aria-hidden="true"><path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="var(--border-color)" stroke-width="12" stroke-linecap="round"/><path class="lab-fill" data-p="${l.idx}" d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="${l.color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220"/><text class="lab-counter" data-p="${l.idx}" x="100" y="78" font-family="monospace" font-size="24" font-weight="bold" fill="var(--text-main)" text-anchor="middle">0.0%</text><text x="100" y="96" font-family="monospace" font-size="8" fill="var(--text-muted)" text-anchor="middle" letter-spacing="1">HIRING-DROP INDEX</text></svg></div>`}
+ $('labsGrid').innerHTML=sorted.map(l=>{const nd=l.idx==null;const rows=P.map((p,i)=>{const v=i<P.length-1?l.series[i]:l.latest;return `<div class="stat-row${p.sourced?'':' old'}"><span>${esc(p.sourced?(l.retrieved_at?new Date(l.retrieved_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'Europe/Zurich'}):'Latest')+' (live)':p.label)}</span><span class="val">${num(v)?v:'no data'}</span></div>`}).join('');
+  return `<div class="lab-card ${esc(l.id)}${nd?' nodata':''}" id="card-${esc(l.id)}"><h3>${esc(l.name)}</h3>${l.method?`<div class="src-line" style="text-align:center;margin-top:0">Method: <strong>${esc(l.method)}</strong></div>`:''}${nd?`<div class="nodata-label">no fresh data</div>`:`<div class="lab-gauge-wrapper"><svg viewBox="0 0 200 130" width="100%" height="100%" aria-hidden="true"><path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="var(--border-color)" stroke-width="12" stroke-linecap="round"/><path class="lab-fill" data-p="${l.idx}" d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="${l.color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220"/><text class="lab-counter" data-p="${l.idx}" x="100" y="78" font-family="monospace" font-size="24" font-weight="bold" fill="var(--text-main)" text-anchor="middle">0.0%</text><text x="100" y="96" font-family="monospace" font-size="8" fill="var(--text-muted)" text-anchor="middle" letter-spacing="1">HIRING-DROP INDEX</text></svg></div>`}
   <div class="stats-table"><div class="stat-row header"><span>Period</span><span>Listings</span></div>${rows}</div>
   ${!nd&&l.peak<150?'<div class="caveat">Small numbers swing a lot: a few postings move this index a lot.</div>':''}
   <div class="src-line">${l.note?esc(l.note)+' ':''}Source: <a href="${safe(l.source)}" target="_blank" rel="noopener">${esc(l.source_name)}</a>${l.retrieved_at?' · retrieved '+esc(new Date(l.retrieved_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Zurich'}))+' CEST':''}</div>
-  <div class="src-line">* earlier repo values, unverified, method unknown</div></div>`}).join('');
+  ${l.series.some(num)?'<div class="src-line">* earlier repo values, unverified, method unknown</div>':''}</div>`}).join('');
  // formula
  $('formulaDetail').innerHTML=labs.map(l=>`<div class="formula-row" data-lab="${esc(l.id)}"><span class="lab-name">${esc(l.name)}:</span><span>${l.idx==null?'no fresh count → no index':`max(0, 1 − ${l.latest} / ${l.peak}) = <strong>${pct(l.idx)}</strong>`}</span></div>`).join('')+(comb!=null?`<div class="formula-row"><span class="lab-name">Combined (${fresh.length} labs):</span><span>max(0, 1 − ${sums[sums.length-1]} / ${Math.max(...sums)}) = <strong>${pct(comb)}</strong></span></div>`:'');
- $('analysis').innerHTML=`With live counts from ${D.latest_label.replace(' (live count)','')}, ${atPeak.length} ${atPeak.length===1?'lab is':'labs are'} at their highest listing count in this dataset; combined, the index reads ${pct(comb)}. ${labs.filter(l=>l.idx==null).map(l=>esc(l.name)).join(', ')||'Every lab'} ${labs.some(l=>l.idx==null)?'has no fresh count and is left out of the combined index.':'has a fresh count and is included.'}`;
- $('footnote').innerHTML=`${esc(D.counting_note.replace(/;/,', ').replace(/^Counted/,'Counted'))} Sources: ${labs.filter(l=>num(l.latest)).map(l=>`<a href="${safe(l.source)}" target="_blank" rel="noopener">${esc(l.name)}</a>`).join(' · ')}. ${esc(D.history_note)}`;
+ $('analysis').innerHTML=`With live counts from ${D.latest_label.replace(/ \(.*\)$/,'')}, ${atPeak.length} ${atPeak.length===1?'lab is':'labs are'} at their highest listing count in this dataset; combined, the index reads ${pct(comb)}. ${labs.filter(l=>l.idx==null).map(l=>esc(l.name)).join(', ')||'Every lab'} ${labs.some(l=>l.idx==null)?'has no fresh count and is left out of the combined index.':'has a fresh count and is included.'}`;
+ $('footnote').innerHTML=`${esc(D.counting_note)} Sources: ${labs.filter(l=>num(l.latest)).map(l=>`<a href="${safe(l.source)}" target="_blank" rel="noopener">${esc(l.name)}</a>`).join(' · ')}. ${esc(D.history_note)}`;
  // animate
  const T=reduce?0:1600,t0=performance.now();
  const step2=now=>{const k=T?Math.min(1,(now-t0)/T):1,e=1-Math.pow(1-k,3);

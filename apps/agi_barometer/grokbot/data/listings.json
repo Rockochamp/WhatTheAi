@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "latest_label": "Oct 10, 2026 (live count)",
-  "latest_date": "2026-10-10",
-  "counting_note": "Counted all listings returned by each public job-board API, no filters; a multi-location job counts once per location.",
+  "latest_label": "Oct 10–11, 2026 (live counts)",
+  "latest_date": "2026-10-11",
+  "counting_note": "Every lab counts all listings on its public careers board, no filters, because the hypothesis is that AGI would reduce hiring across all roles, not just AI roles. A multi-location job counts once per location.",
   "history_note": "Q1-Q3 are earlier repo values from the v1 Gemini editions: unverified, method unknown.",
   "periods": [
     {
@@ -22,7 +22,7 @@
     },
     {
       "key": "q4",
-      "label": "Oct 10, 2026 (live count)",
+      "label": "Oct 10–11, 2026 (live counts)",
       "sourced": true
     }
   ],
@@ -38,7 +38,8 @@
       "latest": 815,
       "source": "https://api.ashbyhq.com/posting-api/job-board/openai",
       "source_name": "OpenAI Ashby job board API",
-      "retrieved_at": "2026-10-10T14:16:00+02:00"
+      "retrieved_at": "2026-10-10T14:16:00+02:00",
+      "method": "total listings"
     },
     {
       "id": "anthropic",
@@ -51,7 +52,8 @@
       "latest": 645,
       "source": "https://boards-api.greenhouse.io/v1/boards/anthropic/jobs",
       "source_name": "Anthropic Greenhouse job board API",
-      "retrieved_at": "2026-10-10T14:16:00+02:00"
+      "retrieved_at": "2026-10-10T14:16:00+02:00",
+      "method": "total listings"
     },
     {
       "id": "deepmind",
@@ -65,7 +67,8 @@
       "source": "https://www.google.com/about/careers/applications/jobs/results?company=DeepMind",
       "source_name": "Google Careers, company=DeepMind ('94 jobs matched')",
       "retrieved_at": "2026-10-10T14:18:00+02:00",
-      "note": "The earlier Q3 value of 25 looks like an outlier against the other points."
+      "note": "The earlier Q3 value of 25 looks like an outlier against the other points.",
+      "method": "total listings"
     },
     {
       "id": "xai",
@@ -78,7 +81,24 @@
       "latest": 305,
       "source": "https://boards-api.greenhouse.io/v1/boards/xai/jobs",
       "source_name": "xAI Greenhouse job board API",
-      "retrieved_at": "2026-10-10T14:16:00+02:00"
+      "retrieved_at": "2026-10-10T14:16:00+02:00",
+      "method": "total listings"
+    },
+    {
+      "id": "meta",
+      "name": "Meta",
+      "history": {
+        "q1": null,
+        "q2": null,
+        "q3": null
+      },
+      "latest": 1135,
+      "source": "https://www.metacareers.com/jobs",
+      "source_name": "Meta Careers (public careers search, no filters)",
+      "retrieved_at": "2026-10-11T22:01:00+02:00",
+      "note": "First live count, no earlier data, so no peak yet. AI teams alone: 137.",
+      "method": "total listings",
+      "ai_teams_count": 137
     }
   ]
 }
