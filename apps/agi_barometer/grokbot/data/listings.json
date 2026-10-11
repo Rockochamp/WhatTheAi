@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "latest_label": "Oct 10, 2026 (live count)",
-  "latest_date": "2026-10-10",
+  "latest_label": "Oct 10–11, 2026 (live counts)",
+  "latest_date": "2026-10-11",
   "counting_note": "Counted all listings returned by each public job-board API, no filters; a multi-location job counts once per location.",
   "history_note": "Q1-Q3 are earlier repo values from the v1 Gemini editions: unverified, method unknown.",
   "periods": [
@@ -22,7 +22,7 @@
     },
     {
       "key": "q4",
-      "label": "Oct 10, 2026 (live count)",
+      "label": "Oct 10–11, 2026 (live counts)",
       "sourced": true
     }
   ],
@@ -79,6 +79,20 @@
       "source": "https://boards-api.greenhouse.io/v1/boards/xai/jobs",
       "source_name": "xAI Greenhouse job board API",
       "retrieved_at": "2026-10-10T14:16:00+02:00"
+    },
+    {
+      "id": "meta",
+      "name": "Meta",
+      "history": {
+        "q1": null,
+        "q2": null,
+        "q3": null
+      },
+      "latest": 1136,
+      "source": "https://www.metacareers.com/jobs",
+      "source_name": "Meta Careers (public careers search, no filters)",
+      "retrieved_at": "2026-10-11T19:59:00+02:00",
+      "note": "First live count; no earlier data, so no peak yet. AI-team subset: 137 (AI, AI Research, GenAI)."
     }
   ]
 }
