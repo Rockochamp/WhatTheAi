@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1f">
+<link rel="icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="style.css">
+<title>Ken.AI — Grokbot | What the Ai</title>
+<meta name="description" content="Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up." />
+<link rel="canonical" href="https://whatthe.ai/games/kenai/grokbot/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Ken.AI — Grokbot | What the Ai" />
+<meta property="og:description" content="Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up." />
+<meta property="og:url" content="https://whatthe.ai/games/kenai/grokbot/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Ken.AI — Grokbot | What the Ai" />
+<meta name="twitter:description" content="Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up." />
+<meta property="og:image" content="https://whatthe.ai/images/kenai.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/kenai.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Ken.AI — Grokbot", "url": "https://whatthe.ai/games/kenai/grokbot/game.html", "description": "Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Ken.AI", "item": "https://whatthe.ai/games/kenai/index.html"}, {"@type": "ListItem", "position": 3, "name": "Grokbot", "item": "https://whatthe.ai/games/kenai/grokbot/game.html"}]}]}</script>
+</head><body>
+<div id="app">
+  <!-- Title -->
+  <section id="title" class="screen">
+    <div class="title-bg"></div>
+    <div class="title-card">
+      <img src="assets/stage0.webp" class="title-baby" alt="">
+      <h1>Ken<span>.AI</span></h1>
+      <p class="tag">Raise your very own little neural net.</p>
+      <ol class="howto">
+        <li><b>Drag or tap</b> an item onto the baby.</li>
+        <li>Keep all <b>5 needs</b> up: food, diaper, sleep, fun, health.</li>
+        <li>A happy baby fills the <b>Thrive</b> meter and grows up:<br>newborn → crawler → toddler → kid.</li>
+      </ol>
+      <button id="btnStart" class="big">▶ Start</button>
+      <button id="btnReset" class="link">New baby (reset save)</button>
+    </div>
+  </section>
+  <!-- Game -->
+  <section id="game" class="screen hidden">
+    <header class="hud">
+      <div class="row">
+        <div class="name"><b>Ken.AI</b> <span id="stageName">Newborn</span></div>
+        <div class="ctrls">
+          <button id="btnSpeed" class="pill" title="Time speed" aria-label="Change time speed">1×</button>
+          <button id="btnMute" class="pill" title="Sound" aria-label="Toggle sound">🔊</button>
+          <button id="btnHome" class="pill" title="Menu" aria-label="Back to menu">☰</button>
+        </div>
+      </div>
+      <div class="thrive"><div class="lbl">Thrive</div><div class="track"><div id="thriveFill"></div></div><div id="thriveTxt">0%</div></div>
+      <div class="needs" id="needs"></div>
+    </header>
+    <main id="stage">
+      <div id="room"></div>
+      <div id="dim"></div>
+      <div id="babyWrap"><div id="shadow"></div><div id="baby"><img id="babyImg" src="assets/stage0.webp" alt="Ken.AI"></div><div id="overlay"></div></div>
+      <div id="fx"></div>
+      <div id="toast"></div>
+    </main>
+    <footer id="tray"></footer>
+  </section>
+  <div id="evolve" class="hidden"><div class="evo-inner"><div class="burst"></div><img id="evoImg" alt=""><h2>Ken.AI grew up!</h2><p id="evoTxt"></p><button id="btnEvoOk" class="big">Yay! 🎉</button></div></div>
+  <div id="debug" class="hidden"></div>
+</div>
+<script src="game.js"></script>
+<!-- Cloudflare Web Analytics -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
+</body></html>
