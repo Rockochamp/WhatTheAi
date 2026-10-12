@@ -214,5 +214,31 @@
       }
     ],
     "image": "/images/AgiBarometer.webp"
+  },
+  {
+    "id": 7,
+    "name": "Ken.AI",
+    "hub": "/games/kenai/index.html",
+    "category": "Virtual pet game",
+    "summary": "Raise a baby neural net: feed, change, rock and play with Ken.AI until it grows up.",
+    "intro": "Ken.AI is a Tamagotchi-style care game. Your baby has five needs, food, diaper, sleep, fun and health, that slowly drop over time. Drag or tap items onto the baby to keep every need up. A happy baby fills the Thrive meter and grows from newborn to crawler, toddler and kid. Progress is saved in your browser, so you can come back later.",
+    "controls": [
+      "Press Start, then drag an item from the tray onto the baby, or tap the item.",
+      "Watch the five need bars at the top and the Thrive meter that fills while Ken.AI is happy.",
+      "Tap the bed item to put Ken.AI to sleep and tap it again to wake. Use the speed button to run time faster and the menu button to return to the title screen."
+    ],
+    "tips": [
+      "Keep every need above the halfway mark; one neglected need is enough to stall growth.",
+      "Items unlock as Ken.AI grows, such as porridge for toddlers. Use New baby on the title screen to reset your save."
+    ],
+    "versions": [
+      {
+        "model": "Grokbot",
+        "path": "/games/kenai/grokbot/game.html",
+        "detail": "Five needs, four growth stages, drag-and-drop care items, sound effects and a browser save.",
+        "description": "Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up."
+      }
+    ],
+    "image": "/images/kenai.webp"
   }
 ]
