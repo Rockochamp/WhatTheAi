@@ -223,21 +223,25 @@ const BADGES=['bandage','arm_cast_sling'];
 /* SPEC: worn injuries exist only for the adult as full replacement sprites (gown = hospital stay, bandage = head injury, sling = broken arm) */
 function injuryAlt(st,ills){if(!S.alive||!ASSETS['char.'+st.id+'.gown'])return null;if(S.hospital>0)return 'gown';const ov=ills.map(id=>D.ILLS[id].ov);if(ov.includes('arm_cast_sling'))return 'sling';if(ov.includes('bandage'))return 'bandage';return null;}
 function badgeOv(id){const o=D.ILLS[id].ov;if(!BADGES.includes(o))return '';if(S&&ASSETS['char.'+stage().id+'.gown'])return '';return ART.overlay(o);}
-/* Per-stage sprite scale: height of the stage's neutral sprite as a fraction of the scene, so Ken fits his room
-   (adult ~2/3 of the scene next to sofas and desks; baby and toddler smaller but readable). All moods of a stage,
-   including the lying pose, share that stage's scale. NEUTRAL_H = natural px height of <stage>_neutral.webp (manifest). */
-const STAGE_SCALE={baby:.30,toddler:.40,child:.50,teen:.60,youngadult:.65,adult:.66,middle:.65,senior:.63,elder:.60};
+/* Scene rule (Muse, round 3): Ken always stands in the FOREGROUND, feet at FOOT_AT of the scene height, in front of the
+   furniture, with a contact shadow. Adult height = ADULT_H of the scene; other ages keep their ratios to the adult and
+   baby/toddler get an extra 1.3x so they stay readable. Rooms are pulled-back portraits shown cover, bottom-aligned.
+   NEUTRAL_H = natural px height of <stage>_neutral.webp (manifest). */
+const FOOT_AT=.93, ADULT_H=.52;
+const STAGE_RATIO={baby:.455*1.3,toddler:.606*1.3,child:.758,teen:.909,youngadult:.985,adult:1,middle:.985,senior:.955,elder:.909};
 const NEUTRAL_H={baby:200,toddler:282,child:374,teen:487,youngadult:528,adult:528,middle:523,senior:502,elder:477};
-function spriteK(){const id=S?stage().id:'adult';return ($('#stage').clientHeight||400)*(STAGE_SCALE[id]||.66)/(NEUTRAL_H[id]||SPRITE_REF);}
-/* Feet on the floor: crop the portrait bg (object-fit:cover) so its floor line (manifest floorY) lands at ~90% of the scene, then stand Ken on it */
-const FOOT_AT=.90, BED_Y=.70;
+const BED_Y={hospital:.52};
+function spriteK(){const id=S?stage().id:'adult';return ($('#stage').clientHeight||400)*ADULT_H*(STAGE_RATIO[id]||1)/(NEUTRAL_H[id]||SPRITE_REF);}
 function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
-  const room=$('#bg').dataset.room||stage().room;const fy=(ART.FLOOR&&ART.FLOOR[room])||.9;
-  const im=$('#bg img');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;const s=Math.max(W/iw,H/ih),ihs=ih*s;
-  const off=clamp(FOOT_AT*H-fy*ihs,H-ihs,0);
-  for(const i of document.querySelectorAll('#bg img,#bgOld img'))i.style.objectPosition=`50% ${off}px`;
-  const w=$('#charWrap');const inbed=w.classList.contains('inbed');
-  const foot=H-(off+(inbed?BED_Y:fy)*ihs);sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
+  const room=$('#bg').dataset.room||stage().room;const w=$('#charWrap');const inbed=w.classList.contains('inbed');
+  const c=$('#bg img.contain');
+  if(c){ // nursery: old art shown nearly whole (much less zoom), blurred copy fills the sides
+    const iw=c.naturalWidth||1280,ih=c.naturalHeight||720;let ihs=H*.75,iws=ihs*iw/ih;if(iws<W){iws=W;ihs=W*ih/iw;}
+    c.style.cssText=`width:${iws}px;height:${ihs}px;left:${clamp(W/2-.38*iws,W-iws,0)}px;top:${H-ihs}px`;}
+  let foot=(1-FOOT_AT)*H;
+  if(inbed&&BED_Y[room]){const im=$('#bg img.bgimg');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;const ihs=ih*Math.max(W/iw,H/ih);foot=(1-BED_Y[room])*ihs;}
+  else if(inbed)foot=.30*H;
+  sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
 addEventListener('resize',()=>placeScene());
 function trayEnd(){const t=$('#tray');t.classList.toggle('end',t.scrollLeft+t.clientWidth>=t.scrollWidth-4);}
 $('#tray').addEventListener('scroll',trayEnd,{passive:true});

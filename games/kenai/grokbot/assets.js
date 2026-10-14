@@ -18,7 +18,7 @@
 const ART_BASE='art/';
 const MUSE_FILES=["char/baby_neutral.webp", "char/baby_happy.webp", "char/baby_sad.webp", "char/baby_sick.webp", "char/baby_sleeping.webp", "char/baby_fussy.webp", "char/toddler_neutral.webp", "char/toddler_happy.webp", "char/toddler_sad.webp", "char/toddler_sick.webp", "char/toddler_sleeping.webp", "char/toddler_tantrum.webp", "char/child_neutral.webp", "char/child_happy.webp", "char/child_sad.webp", "char/child_sick.webp", "char/child_sleeping.webp", "char/child_stressed.webp", "char/teen_neutral.webp", "char/teen_happy.webp", "char/teen_sad.webp", "char/teen_sick.webp", "char/teen_sleeping.webp", "char/teen_stressed.webp", "char/young_adult_neutral.webp", "char/young_adult_happy.webp", "char/young_adult_sad.webp", "char/young_adult_sick.webp", "char/young_adult_sleeping.webp", "char/young_adult_stressed.webp", "char/adult_neutral.webp", "char/adult_happy.webp", "char/adult_sad.webp", "char/adult_sick.webp", "char/adult_sleeping.webp", "char/adult_stressed.webp", "char/middle_age_neutral.webp", "char/middle_age_happy.webp", "char/middle_age_sad.webp", "char/middle_age_sick.webp", "char/middle_age_sleeping.webp", "char/middle_age_stressed.webp", "char/senior_neutral.webp", "char/senior_happy.webp", "char/senior_sad.webp", "char/senior_sick.webp", "char/senior_sleeping.webp", "char/senior_pain.webp", "char/elder_neutral.webp", "char/elder_happy.webp", "char/elder_sad.webp", "char/elder_sick.webp", "char/elder_sleeping.webp", "char/elder_pain.webp", "icon/bottle.webp", "icon/diaper.webp", "icon/crib.webp", "icon/teddy.webp", "icon/medicine.webp", "icon/food_bowl.webp", "icon/bath.webp", "icon/nap_pillow.webp", "icon/blocks.webp", "icon/bandaid.webp", "icon/lunchbox.webp", "icon/school_bag.webp", "icon/ball.webp", "icon/homework.webp", "icon/stethoscope.webp", "icon/snack.webp", "icon/ar_glasses.webp", "icon/study_books.webp", "icon/rose.webp", "icon/party_cup.webp", "icon/coffee.webp", "icon/briefcase.webp", "icon/ai_companion.webp", "icon/piggy_bank.webp", "icon/gym.webp", "icon/meal.webp", "icon/holo_laptop.webp", "icon/family_house.webp", "icon/digital_wallet.webp", "icon/yoga_mat.webp", "icon/salad.webp", "icon/helper_robot.webp", "icon/health_band.webp", "icon/pills.webp", "icon/vacation.webp", "icon/tea.webp", "icon/exoskeleton.webp", "icon/holo_call.webp", "icon/physio_band.webp", "icon/garden.webp", "icon/soup.webp", "icon/armchair.webp", "icon/photo_album.webp", "icon/pill_organizer.webp", "icon/hospital_bed.webp", "icon/memory_chip.webp", "icon/gene_therapy.webp", "icon/digital_twin.webp", "icon/ai_plush_new.webp", "char/ai_plush_new.webp", "icon/ai_plush_worn.webp", "char/ai_plush_worn.webp", "icon/ai_nanny.webp", "icon/vr_headset.webp", "icon/ai_wingman.webp", "icon/agent_team.webp", "icon/robotaxi.webp", "icon/smartwatch.webp", "overlay/smartwatch.webp", "icon/exo_knee_brace.webp", "overlay/exo_knee_brace.webp", "icon/memory_archive.webp", "icon/tutor_tablet.webp", "icon/home_robot.webp", "death/tombstone.webp", "overlay/bandage.webp", "overlay/arm_cast_sling.webp", "overlay/cane.webp", "overlay/wheelchair.webp", "overlay/ar_glasses.webp", "bg/nursery_portrait.webp", "bg/nursery_wide.webp", "bg/kids_room_portrait.webp", "bg/kids_room_wide.webp", "bg/teen_room_portrait.webp", "bg/teen_room_wide.webp", "bg/apartment_portrait.webp", "bg/apartment_wide.webp", "bg/office_portrait.webp", "bg/office_wide.webp", "bg/family_home_portrait.webp", "bg/family_home_wide.webp", "bg/senior_living_portrait.webp", "bg/senior_living_wide.webp", "bg/hospital_portrait.webp", "bg/hospital_wide.webp", "death/death_candle_portrait.webp", "death/death_candle_wide.webp", "char/adult_gown.webp", "char/adult_bandage.webp", "char/adult_sling.webp"];
 /* floor line (fraction of the PORTRAIT bg height) where Ken's feet go; from manifest.json "floorY", checked visually per bg */
-const MUSE_FLOOR={"nursery": 0.9, "kids_room": 0.89, "teen_room": 0.9, "apartment": 0.9, "office": 0.88, "family_home": 0.91, "senior_living": 0.9, "hospital": 0.92};
+/* floor lines no longer used: Ken stands in the foreground at a fixed scene fraction (game.js FOOT_AT) */
 const STAGES=['baby','toddler','child','teen','youngadult','adult','middle','senior','elder'];
 const MOODS=['neutral','happy','sad','sick','sleeping','stressed'];
 const FILE_STAGE={youngadult:'young_adult',middle:'middle_age'};
@@ -34,10 +34,11 @@ A['scene.tombstone']=has('death/tombstone.webp');A['scene.avatar']=null;
 for(const k of ['neutral','good','bad','health'])A[`frame.event.${k}`]=has(`ui/card_${k}.webp`);
 for(const k of ['gown','bandage','sling'])A[`char.adult.${k}`]=has(`char/adult_${k}.webp`); // full replacement injury sprites (adult only)
 /* era props placed as separate sprites on the phone layout (SPEC round 2): room -> [icon, css class] */
-const ROOM_PROPS={nursery:['ai_nanny','rp-dresser'],family_home:['home_robot','rp-floor'],apartment:['robotaxi','rp-drone'],hospital:['helper_robot','rp-edge']};
-for(const r in ROOM_PROPS)A[`prop.${r}`]=A[`icon.${ROOM_PROPS[r][0]}`]||null;
+const ROOM_PROPS={apartment:['robotaxi','rp-drone']}; // round 3: only the robotaxi drone (the new rooms already contain their robots)
 const ICONS=MUSE_FILES.filter(f=>f.startsWith('icon/')).map(f=>f.slice(5,-5));
 for(const i of ICONS)A[`icon.${i}`]=ART_BASE+`icon/${i}.webp`;
+/* after the icon keys exist (was before them, so no room prop ever showed) */
+for(const r in ROOM_PROPS)A[`prop.${r}`]=A[`icon.${ROOM_PROPS[r][0]}`]||null;
 const OVERLAYS=['bandage','arm_cast_sling','cane','wheelchair','ar_glasses','smartwatch','exo_knee_brace'];
 for(const o of OVERLAYS)A[`overlay.${o}`]=has(`overlay/${o}.webp`);
 A['overlay.ai_plush_new']=A['char.plush.new'];A['overlay.ai_plush_worn']=A['char.plush.worn'];A['overlay.pale']=null;A['overlay.gown']=null;
@@ -73,7 +74,8 @@ function img(path,cls){return `<img src="${path}" alt="" class="${cls||''}" drag
 window.KEN_ART={
   char(stage,mood){const k=`char.${stage}.${mood}`;return A[k]?img(A[k],'sprite'):charSVG(stage,mood);},
   overlay(name){const k=`overlay.${name}`;return A[k]?img(A[k],'ov ov-'+name):`<svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">${OV[name]||''}</svg>`;},
-  bg(room){const k=`bg.${room}.${orient()}`;return A[k]?img(A[k],'bgimg'):bgSVG(room);},
+  bg(room){if(room==='nursery'&&A['bg.nursery.wide']){const u=A['bg.nursery.wide'];return img(u,'bgblur')+img(u,'bgimg contain');}
+    const k=`bg.${room}.${orient()}`;return A[k]?img(A[k],'bgimg'):bgSVG(room);},
   icon(name,emoji){const k=`icon.${name}`;return A[k]?img(A[k],'icon'):iconTxt(emoji);},
   tombstone(){return A['scene.tombstone']?img(A['scene.tombstone'],'tombimg'):tomb();},
   deathBg(){const k='scene.death.'+(orient());return A[k]?`url(${A[k]})`:'';},
@@ -81,6 +83,6 @@ window.KEN_ART={
   eventFrame(kind){const u=A['frame.event.'+(kind==='normal'?'neutral':kind)];return u?`url(${u})`:'';},
   roomProp(room){const p=ROOM_PROPS[room];return p&&A['prop.'+room]&&orient()==='portrait'?`<img src="${A['prop.'+room]}" alt="" class="roomprop ${p[1]}">`:'';},
   charAlt(stage,alt){const k=`char.${stage}.${alt}`;return A[k]?img(A[k],'sprite'):null;},
-  STAGES,MOODS,OVERLAYS,ROOMS,ICONS,MUSE_FILES,FLOOR:MUSE_FLOOR
+  STAGES,MOODS,OVERLAYS,ROOMS,ICONS,MUSE_FILES
 };
 })();

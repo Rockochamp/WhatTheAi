@@ -887,7 +887,7 @@
   "stage": "kids_room",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 41226,
+  "bytes": 53002,
   "floorY": 0.89
  },
  {
@@ -895,14 +895,14 @@
   "stage": "kids_room",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 65322
+  "bytes": 62340
  },
  {
   "file": "bg/teen_room_portrait.webp",
   "stage": "teen_room",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 50794,
+  "bytes": 47750,
   "floorY": 0.9
  },
  {
@@ -910,14 +910,14 @@
   "stage": "teen_room",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 63270
+  "bytes": 53936
  },
  {
   "file": "bg/apartment_portrait.webp",
   "stage": "apartment",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 41418,
+  "bytes": 59948,
   "floorY": 0.9
  },
  {
@@ -925,14 +925,14 @@
   "stage": "apartment",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 57688
+  "bytes": 75466
  },
  {
   "file": "bg/office_portrait.webp",
   "stage": "office",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 48326,
+  "bytes": 52042,
   "floorY": 0.88
  },
  {
@@ -940,14 +940,14 @@
   "stage": "office",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 61472
+  "bytes": 61278
  },
  {
   "file": "bg/family_home_portrait.webp",
   "stage": "family_home",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 54844,
+  "bytes": 77242,
   "floorY": 0.91
  },
  {
@@ -955,14 +955,14 @@
   "stage": "family_home",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 66658
+  "bytes": 97692
  },
  {
   "file": "bg/senior_living_portrait.webp",
   "stage": "senior_living",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 60972,
+  "bytes": 70830,
   "floorY": 0.9
  },
  {
@@ -970,14 +970,14 @@
   "stage": "senior_living",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 76826
+  "bytes": 86380
  },
  {
   "file": "bg/hospital_portrait.webp",
   "stage": "hospital",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 35752,
+  "bytes": 53638,
   "floorY": 0.92
  },
  {
@@ -985,7 +985,7 @@
   "stage": "hospital",
   "use": "background 16:9 desktop",
   "size_px": "1280x720",
-  "bytes": 47242
+  "bytes": 60858
  },
  {
   "file": "death/death_candle_portrait.webp",
