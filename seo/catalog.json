@@ -221,21 +221,22 @@
     "hub": "/games/kenai/index.html",
     "category": "Life simulation game",
     "summary": "Live a whole life as Ken.AI, born in 2026: care for him from baby to elder while technology changes around him.",
-    "intro": "Ken.AI is a life simulation in nine stages, from baby to elder. Ken is born in 2026 and each stage is a technology era, from AI baby monitors and talking toys to agent teams, longevity therapy and a digital legacy. Keep his needs up with action cards, answer life and tech events, treat illnesses and see how far he gets. When he dies, an epitaph sums up his life, his tech style and his life score. Progress is saved in your browser.",
+    "intro": "Ken.AI is a life simulation in nine stages, from baby to elder. Before Ken is born you pick a life ambition, such as Family first, Career legend or Analog soul. Ken is born in 2026 and each stage is a technology era, from AI baby monitors and talking toys to agent teams, longevity therapy and a digital legacy. Every stage has goals and ends with a report card, big life forks decide where he goes next, and event cards show what each choice changed. When he dies, an epitaph sums up his life, his ambition, his grades and his life score. Progress is saved in your browser.",
     "controls": [
-      "Press Begin a new life, then tap the action cards at the bottom to care for Ken. Swipe the strip to see more actions.",
-      "Watch the need bars under the top bar. Low bars hurt health, and health at zero ends the life.",
-      "Answer the event cards when they appear. Use the speed button to run time faster and the menu button to return to the title screen."
+      "Pick one of three life ambitions on the title screen, then press Begin a new life. Tap the action cards at the bottom to care for Ken and swipe the strip to see more.",
+      "Watch the need bars and the 🎯 goal chips under the top bar. Low bars hurt health, and health at zero ends the life.",
+      "Answer event cards and life forks when they appear; the card then shows what changed. Use the speed button to run time faster and the menu button to return to the title screen."
     ],
     "tips": [
-      "Real relationships give more happiness than AI companions, but leaning on AI makes daily needs cheaper. A balance works well.",
-      "Treat illnesses quickly with the actions listed on the status chip, and keep some savings for old age."
+      "Mix up your action cards: repeating the same card works less well, while variety builds a combo with bonus stars.",
+      "Keep every bar above half to grow the 🔥 Thriving streak, and finish stage goals for a good report card. Good grades carry into the next stage.",
+      "Real relationships give more happiness than AI companions, but leaning on AI makes daily needs cheaper. Treat illnesses quickly and keep some savings for old age."
     ],
     "versions": [
       {
         "model": "Grokbot",
         "path": "/games/kenai/grokbot/game.html",
-        "detail": "Nine life stages with tech eras, needs, events, illnesses, death and replay, hand-drawn art and a browser save.",
+        "detail": "Nine life stages with tech eras, stage goals and report cards, life forks, a life ambition, streaks, illnesses, death and replay, hand-drawn art and a browser save.",
         "description": "Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score."
       }
     ],

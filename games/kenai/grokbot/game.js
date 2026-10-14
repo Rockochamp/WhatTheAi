@@ -17,11 +17,12 @@ const pick=a=>a[Math.floor(rnd()*a.length)];
 const ALL_NEEDS=Object.keys(D.NEEDS);
 
 /* ---------------- state ---------------- */
-function freshLife(name){
+function freshLife(name,amb){
   const needs={};for(const k of ALL_NEEDS) needs[k]=D.NEEDS[k].inv?15:80;
   return {schema:SCHEMA,name:(name||'Ken').trim().slice(0,16)||'Ken',age:0,needs,health:100,base:100,money:0,happy:60,happySum:0,happyN:0,
-    rel:10,partner:false,kids:0,careerPeak:0,traits:{},ills:{},achs:[],cds:{},nextEvent:yearsToSec(.4+rnd()*.4),hospital:0,
-    lastSleep:-99,tech:50,techSum:0,techN:0,moments:[],legacy:0,plush:0,exo:0,tutorRun:0,warnT:-99,alive:true,cause:'',stageIdx:0,seenStage:0,t:0,events:0};
+    rel:10,partner:false,kids:0,careerPeak:0,traits:{},ills:{},achs:[],cds:{},nextEvent:yearsToSec(.3+rnd()*.3),hospital:0,
+    lastSleep:-99,tech:50,techSum:0,techN:0,moments:[],legacy:0,plush:0,exo:0,tutorRun:0,warnT:-99,alive:true,cause:'',stageIdx:0,seenStage:0,t:0,events:0,
+    amb:amb||null,goals:{},gdone:[],cnt:{},streak:0,bestStreak:0,bonus:0,lastActs:[],combo:0,stageGood:0,stageN:0,grades:[],report:null,fork:null};
 }
 function yearsToSec(y){return y*D.YEAR_SECONDS;}
 let S=null, settings={speed:1,muted:false};
@@ -44,12 +45,12 @@ function goodness(k){const v=needVal(k);return D.NEEDS[k].inv?100-v:v;}
 function isBad(k){return goodness(k)<15;}
 function addAch(a){ if(!S.achs.includes(a)){S.achs.push(a);toast('🏆 '+a);play('fanfare');} }
 function addTrait(t){ if(!S.traits[t]){S.traits[t]=1;const T=D.TRAITS[t];toast('Trait: '+T.l);if(T.base)S.base=clamp(S.base+T.base,10,100);} }
-function addIll(id){ if(S.ills[id]) return; S.ills[id]={tx:0}; toast('🤒 '+D.ILLS[id].l); play('nope'); renderConds(); }
+function addIll(id){ if(S.ills[id]) return; S.ills[id]={tx:0}; toast('🤒 '+D.ILLS[id].l+' — treat with '+D.ILLS[id].tx.map(t=>(D.ACTIONS.find(a=>a.id===t)||{l:t}).l).join(' / ')); play('nope'); shake(); renderConds(); }
 function techMod(){return S.tech>=65?'high':S.tech<=35?'low':'mid';}
 function relGain(v){return v>0?v*(S.tech>=65?.6:S.tech<=35?1.3:1):v;}
 function addMoment(m){if(m&&!S.moments.includes(m)){S.moments.push(m);toast('✨ Tech moment: '+m);}}
 function setTech(d){S.tech=clamp(S.tech+d,0,100);if(S.tech<=20&&!S.traits.selfmade&&rnd()<.3)addTrait('selfmade');}
-function score(){const avgH=S.happyN?S.happySum/S.happyN:S.happy;return Math.round(S.age*10+avgH*3+S.rel*2+S.careerPeak*50+S.achs.length*40+Math.min(500,Math.max(0,S.money)/200)+Math.min(300,S.legacy*2));}
+function score(){const avgH=S.happyN?S.happySum/S.happyN:S.happy;return Math.round((S.bonus||0)+S.age*10+avgH*3+S.rel*2+S.careerPeak*50+S.achs.length*40+Math.min(500,Math.max(0,S.money)/200)+Math.min(300,S.legacy*2));}
 
 /* ---------------- simulation ---------------- */
 let paused=false, acc=0, curEv=null;
@@ -79,10 +80,16 @@ function step(sdt){
   if((goodness('food')<20||(st.needs.hygiene&&goodness('hygiene')<20)||S.health<35)&&p(.012)) addIll('flu');
   if(S.age>=12&&S.happy<25&&p(.01)) addIll('depression');
   if(st.needs.stress&&S.needs.stress>85&&p(.02)) addIll('burnout');
-  if(S.age>=45&&p(.0012*(S.age-44)/10*(st.needs.fitness&&S.needs.fitness<30?2:1))) addIll('back_pain');
-  if(S.age>=50&&p(.0008*(S.age-49)/10*(S.traits.smoker?2.5:1)*(S.traits.athletic?.6:1))) addIll('heart');
-  if(S.age>=65&&p(.0015*(S.age-64)/10)) addIll('arthritis');
-  if(S.age>=82&&p(.001*(S.age-80)/5)) addIll('frailty');
+  if(S.age>=45&&p(2*.0012*(S.age-44)/10*(st.needs.fitness&&S.needs.fitness<30?2:1))) addIll('back_pain');
+  if(S.age>=50&&p(2*.0008*(S.age-49)/10*(S.traits.smoker?2.5:1)*(S.traits.athletic?.6:1))) addIll('heart');
+  if(S.age>=65&&p(2*.0015*(S.age-64)/10)) addIll('arthritis');
+  if(S.age>=82&&p(2*.001*(S.age-80)/5)) addIll('frailty');
+  // FUN: stage goals, thriving streak, stage report tracking
+  S.stageGood+=(sum/n)*sdt;S.stageN+=sdt;
+  tickGoals(sdt);
+  const thriving=bad===0&&Object.keys(st.needs).every(k=>k==='health'||k==='money'||goodness(k)>=50)&&!Object.keys(S.ills).length;
+  if(thriving){const lv0=streakMult();S.streak+=sdt;S.bonus+=streakMult()*.12*sdt;S.bestStreak=Math.max(S.bestStreak,S.streak);const lv=streakMult();if(lv>lv0){toast('🔥 Thriving ×'+lv+' — score flows faster');tone(520+lv*110,.18,'triangle',.07);popScore('×'+lv);}}
+  else if(S.streak>0){if(S.streak>=STREAK_STEP){toast('💔 Streak lost — keep every bar above half');play('nope');}S.streak=0;}
   // milestones
   if(prevAge<80&&S.age>=80) addAch('Reached 80');
   if(prevAge<100&&S.age>=100) addAch('Centenarian');
@@ -90,9 +97,9 @@ function step(sdt){
   if(Math.floor(S.age)>Math.floor(prevAge)&&S.age>80){const h=.035*Math.pow(S.age-79,1.35)*(1+(100-S.health)/100);if(rnd()<h) return die('Old age');}
   if(S.health<=0){const il=Object.keys(S.ills);return die(il.length?'Untreated '+D.ILLS[il[0]].l.toLowerCase():'Neglect');}
   // stage change
-  const si=stageIdxForAge(S.age);if(si!==S.stageIdx){S.stageIdx=si;for(const k in D.STAGES[si].needs){if(k!=='health'&&k!=='money')S.needs[k]=D.NEEDS[k].inv?20:75;}if(si===4&&S.money<300)S.money=300;stageUp();return;}
+  const si=stageIdxForAge(S.age);if(si!==S.stageIdx){makeReport(S.stageIdx,si);S.stageIdx=si;for(const k in D.STAGES[si].needs){if(k!=='health'&&k!=='money')S.needs[k]=D.NEEDS[k].inv?20:75;}if(si===4&&S.money<300)S.money=300;if(si===4&&META.inherit>0){S.money+=META.inherit;S.report.lines.push('💌 Inheritance from your previous life: +'+META.inherit);META.inherit=0;saveMeta();}stageUp();return;}
   // events
-  S.nextEvent-=sdt;if(S.nextEvent<=0){S.nextEvent=yearsToSec(1+rnd());fireEvent();}
+  S.nextEvent-=sdt;if(S.nextEvent<=0){S.nextEvent=yearsToSec(.55+rnd()*.5);fireEvent();}
 }
 
 /* ---------------- events ---------------- */
@@ -103,7 +110,8 @@ function fireEvent(ev){
   const js=JSON.stringify(ev.c);const kind=/"(ill|hospital|death)"/.test(js)?'health':/"ach"|"careerPeak"/.test(js)?'good':/"ill"|money":-/.test(js)&&!/"ach"/.test(js)?'bad':'normal';
   $('.event-card').dataset.kind=kind;$('#evKind').textContent=ev.tech?'Tech moment':{health:'Health',good:'Milestone',bad:'Setback',normal:'Life event'}[kind];$('#evText').textContent=ev.x;
   const box=$('#evChoices');box.innerHTML='';
-  for(const c of ev.c){const b=document.createElement('button');b.className='choice';b.textContent=c.l;b.onclick=()=>{$('#eventModal').classList.add('hidden');paused=false;applyEff(c.e);if(c.msg)toast(c.msg);render(true);save();};box.appendChild(b);}
+  if(ev.fork)$('#evKind').textContent='Life fork';
+  for(const c of ev.c){const b=document.createElement('button');b.className='choice';b.innerHTML=esc(c.l)+(c.e&&c.e.chance?` <small class="odds">🎲 gamble</small>`:'');b.onclick=()=>{const before=snap();applyEff(c.e);if(!S.alive){$('#eventModal').classList.add('hidden');return;}showOutcome(before,c);render(true);save();};box.appendChild(b);}
   $('#eventModal').classList.remove('hidden');play('chime');
   const KI={normal:['photo_album','📰'],good:['party_cup','⭐'],bad:['bandaid','⚡'],health:['stethoscope','✚']}[$('.event-card').dataset.kind];$('#evIcon').innerHTML=ART.icon(ev.tech?'holo_laptop':KI[0],KI[1]);
   setTimeout(()=>box.firstChild&&box.firstChild.focus(),50);
@@ -148,7 +156,12 @@ function doAction(a,el){
   if(a.cost) S.money-=a.cost;
   const em=(1+S.careerPeak*.15)*(S.tech>=65?1.1:1);if(a.earn) S.money+=a.earn*em;
   const parts=[];
-  for(const [k,v] of Object.entries(a.eff)){ if(!v) continue; if(k==='health'){S.health=clamp(S.health+v,0,S.base);} else if(k in S.needs){S.needs[k]=clamp(S.needs[k]+v,0,100);} if(k in st.needs&&Math.abs(v)>=5) parts.push((v>0?'+':'')+v+' '+D.NEEDS[k].l); }
+  // FUN: repeating the same card loses punch; varied care builds a combo
+  const la=S.lastActs;const rep=la[0]===a.id?(la[1]===a.id?.35:.7):1;
+  if(!la.slice(0,3).includes(a.id)){S.combo++;if(S.combo>=3){tone(440+Math.min(8,S.combo)*60,.1,'triangle',.06);if(S.combo%5===0){const b=10;S.bonus+=b;S.happy=clamp(S.happy+2,0,100);popScore('Variety ×'+S.combo+' +'+b+' ★');}}}else S.combo=0;
+  la.unshift(a.id);la.length=Math.min(la.length,4);S.cnt[a.id]=(S.cnt[a.id]||0)+1;
+  if(rep<1)parts.push(rep<.5?'😴 boring ×.35':'repeat ×.7');
+  for(let [k,v] of Object.entries(a.eff)){ if(!v) continue; if(v>0&&k!=='stress'&&k!=='pain')v=Math.round(v*rep); if(k==='health'){S.health=clamp(S.health+v,0,S.base);} else if(k in S.needs){S.needs[k]=clamp(S.needs[k]+v,0,100);} if(k in st.needs&&Math.abs(v)>=5) parts.push((v>0?'+':'')+v+' '+D.NEEDS[k].l); }
   if(a.earn) parts.push('+'+Math.round(a.earn*em)+' 💰');
   if(a.happy) S.happy=clamp(S.happy+a.happy*2,0,100);
   if(a.rel) S.rel=clamp(S.rel+relGain(a.rel),0,100);
@@ -175,7 +188,7 @@ function doAction(a,el){
 
 /* ---------------- death ---------------- */
 function die(cause){
-  if(!S.alive) return;S.alive=false;S.cause=cause;paused=true;save();
+  if(!S.alive) return;S.alive=false;S.cause=cause;paused=true;settleAmbition();save();
   const sc=score();const list=bests();list.push({name:S.name,age:Math.floor(S.age),score:sc,cause,when:new Date().toISOString().slice(0,10)});list.sort((a,b)=>b.score-a.score);
   try{localStorage.setItem(BEST_KEY,JSON.stringify(list.slice(0,5)));localStorage.removeItem(SAVE_KEY);}catch(e){}
   heartbeatOut(()=>{ showEpitaph(sc,list[0]); });
@@ -188,6 +201,8 @@ function showEpitaph(sc,best){
   const avgH=Math.round(S.happyN?S.happySum/S.happyN:S.happy);
   const careers=['None','Entry level','Senior','Manager','Director','Executive'];
   const items=[`Life satisfaction: ${avgH}/100`,`Relationships: ${Math.round(S.rel)}/100${S.partner?' · had a partner':''}${S.kids?` · ${S.kids} child${S.kids>1?'ren':''}`:''}`,`Career peak: ${careers[Math.min(careers.length-1,S.careerPeak+(S.achs.includes('First job')?1:0))]}`,`Savings: ${Math.round(S.money)}`,`Traits: ${Object.keys(S.traits).map(t=>D.TRAITS[t].l).join(', ')||'none'}`,`Achievements: ${S.achs.join(', ')||'none'}`];
+  if(S.amb){const A=AMBS[S.amb];items.unshift(S.ambOk?`Ambition ${A.i} ${A.l}: fulfilled ✓ (+${AMB_PTS})`:`Ambition ${A.i} ${A.l}: not fulfilled (${A.d})`);}
+  items.splice(1,0,`Stage grades: ${S.grades.join(' ')||'–'} · Goals hit: ${S.gdone.length} · Best streak: ${Math.round(S.bestStreak)}s`);
   const ta=S.techN?S.techSum/S.techN:S.tech;const style=ta>=65?'Early adopter':ta<=35?'Analog soul':'Balanced';const path=ta>=65?'Embraced AI':ta<=35?'Stayed human':'Balanced';
   items.push(`Tech style: ${style}`,`Tech path: ${path} (reliance ${Math.round(ta)}/100)`,`Tech moments: ${S.moments.join(' · ')||'none'}`);if(S.legacy)items.push(`Digital legacy: ${Math.round(S.legacy)} (adds ${Math.min(300,Math.round(S.legacy*2))} to score)`);
   $('#epSummary').innerHTML=items.map((t,i)=>`<li style="animation-delay:${.15*i}s">${esc(t)}</li>`).join('');lastShare=`${S.name} (${YEAR0}–${YEAR0+Math.floor(S.age)}) lived to ${Math.floor(S.age)} in Ken.AI. Life score ${sc}. ${items.find(x=>x.startsWith('Tech path'))}.`;
@@ -275,7 +290,7 @@ function render(force){
   $('#hudName').textContent=S.name;$('#hudStage').textContent=st.name;$('#hudEra').textContent=EP[st.id]?EP[st.id].era:'';
   ageDigits(Math.floor(S.age));$('#hudYear').textContent=YEAR0+Math.floor(S.age);
   $('#hudMoney').textContent=Math.round(S.money);$('#hudHappy').textContent=Math.round(S.happy);$('#hudBase').textContent=Math.round(S.base);$('#hudScore').textContent=score();
-  for(const el of document.querySelectorAll('#needs .need')){const k=el.dataset.k;const v=needVal(k);const g=goodness(k);const b=el.querySelector('.bar');b.firstChild.style.width=v+'%';b.setAttribute('aria-valuenow',Math.round(v));el.querySelector('.val').textContent=Math.round(v);el.classList.toggle('low',g<40);el.classList.toggle('crit',g<20);}
+  for(const el of document.querySelectorAll('#needs .need')){const k=el.dataset.k;const v=needVal(k);const g=goodness(k);const pv=+el.dataset.pv;if(!isNaN(pv)&&el.dataset.pv!==''){const dg=(D.NEEDS[k].inv?pv-v:v-pv);if(dg>=4){el.classList.remove('up','down');void el.offsetWidth;el.classList.add('up');}else if(dg<=-8){el.classList.remove('up','down');void el.offsetWidth;el.classList.add('down');}}el.dataset.pv=v;const b=el.querySelector('.bar');b.firstChild.style.width=v+'%';b.setAttribute('aria-valuenow',Math.round(v));el.querySelector('.val').textContent=Math.round(v);el.classList.toggle('low',g<40);el.classList.toggle('crit',g<20);}
   for(const c of document.querySelectorAll('#tray .card')){const a=D.ACTIONS.find(x=>x.id===c.dataset.id);const left=(S.cds[a.id]||0)-S.t;const tot=a.cd||1.2;c.querySelector('.cdbar').style.width=(left>0?left/tot*100:0)+'%';c.classList.toggle('cant',!!(a.cost&&S.money<a.cost)||(a.req==='kids'&&!S.kids));}
   if(!S.alive&&force!==1&&force!==2){if(DEBUG)renderDebug();return;}
   const room=S.hospital>0?'hospital':st.room;const mood=S.alive?moodNow():'sleeping';
@@ -306,6 +321,8 @@ function render(force){
     ['m-neutral','m-happy','m-sad','m-sick','m-sleeping','m-stressed'].forEach(c=>w.classList.remove(c));w.classList.add('m-'+mood);
     fitSprite();placeScene();{const bi=$('#bg img');if(bi&&!bi.complete)bi.addEventListener('load',placeScene,{once:true});}
   }
+  renderGoals();
+  const sc=score();if(lastScore!==null&&sc-lastScore>=25)popScore('+'+(sc-lastScore)+' ★');lastScore=sc;
   $('#btnSpeed').textContent=settings.speed+'×';$('#btnMute').textContent=settings.muted?'🔇':'🔊';
   document.body.classList.toggle('danger',S.health<25&&S.alive);
   if(DEBUG) renderDebug();
@@ -317,9 +334,9 @@ function stageUp(){
   setTimeout(()=>{$('#hudAge').dataset.v='';render();const c=$('#hudStage');c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');},200);
   setTimeout(()=>{buildStageUI();render(1);const ch=$('#char');ch.classList.remove('xfade');void ch.offsetWidth;ch.classList.add('xfade');},300);
   setTimeout(()=>{toast(`${S.name} is now ${/^[aeiou]/i.test(st.name)?'an':'a'} ${st.name}${EP[st.id]?' · '+EP[st.id].era:''}`);if(st.id!=='baby')confetti();},900);
-  setTimeout(()=>{paused=false;save();},1500);
+  setTimeout(()=>{save();if(S.report)showReport();else paused=false;},1500);
 }
-$('#btnSuOk').onclick=()=>{$('#stageUp').classList.add('hidden');paused=false;};
+$('#btnSuOk').onclick=()=>{$('#stageUp').classList.add('hidden');S.report=null;const f=S.fork;S.fork=null;if(f&&FORKS[f]){fireEvent(Object.assign({fork:1},FORKS[f]));}else paused=false;save();};
 
 /* ---------------- juice ---------------- */
 let toastT;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200);}
@@ -368,15 +385,16 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save();last
 
 /* ---------------- screens ---------------- */
 function showTitle(){
+  renderAmbPick();renderMeta();
   $('#game').classList.add('hidden');$('#death').classList.add('hidden');$('#title').classList.remove('hidden');
   const s=load();$('#btnContinue').classList.toggle('hidden',!s);if(s)$('#btnContinue').textContent=`▶ Continue ${s.name} (age ${Math.floor(s.age)})`;
   const b=bests();$('#bestBox').innerHTML=b.length?'<h3>Best lives</h3><ol>'+b.map(x=>`<li><b>${esc(x.name)}</b>, ${x.age} y · ${esc(x.cause)} · <b>${x.score}</b></li>`).join('')+'</ol>':'';
   $('#titleArt').innerHTML=ART.char('youngadult','happy');
 }
-function startGame(s){S=s;paused=false;deathDone=null;deathTimers.forEach(clearTimeout);document.body.classList.remove('dying','dying2','blue','danger');$('#charWrap').className='';$('#flat').classList.remove('go');$('#skipHint').classList.add('hidden');$('#bg').dataset.room='';lastBadges='';$('#title').classList.add('hidden');$('#death').classList.add('hidden');$('#game').classList.remove('hidden');lastStageRendered=-1;buildStageUI();render(2);save();ac();}
-$('#btnNew').onclick=()=>{ if(load()&&!confirm('Start a new life? The current life will be lost.')) return; startGame(freshLife($('#nameInput').value)); play('chime'); };
+function startGame(s){S=s;paused=false;deathDone=null;deathTimers.forEach(clearTimeout);document.body.classList.remove('dying','dying2','blue','danger');$('#charWrap').className='';$('#flat').classList.remove('go');$('#skipHint').classList.add('hidden');$('#bg').dataset.room='';lastBadges='';lastScore=null;$('#title').classList.add('hidden');$('#death').classList.add('hidden');$('#game').classList.remove('hidden');lastStageRendered=-1;buildStageUI();render(2);save();ac();}
+$('#btnNew').onclick=()=>{ if(load()&&!confirm('Start a new life? The current life will be lost.')) return; startGame(freshLife($('#nameInput').value,pickedAmb)); play('chime'); };
 $('#btnContinue').onclick=()=>{const s=load();if(s)startGame(s);};
-$('#btnAgain').onclick=()=>{const n=S?S.name:'Ken';startGame(freshLife(n));play('chime');};
+$('#btnAgain').onclick=()=>{const n=S?S.name:'Ken';$('#nameInput').value=n;showTitle();};
 $('#btnMenu').onclick=()=>{save();showTitle();};
 $('#btnSpeed').onclick=()=>{const all=DEBUG?SPEEDS.concat([16,64]):SPEEDS;settings.speed=all[(all.indexOf(settings.speed)+1)%all.length]||1;toast('Time speed '+settings.speed+'×');render();save();};
 $('#btnMute').onclick=()=>{settings.muted=!settings.muted;render();save();};
@@ -416,7 +434,7 @@ function setupDebug(){
 let autoPolicy='first';
 function choiceTech(c){let t=0;const w=e=>{if(!e)return;if(e.tech)t+=e.tech;if(e.chance){w(e.chance[1]);}};w(c.e);return t;}
 function autoAct(){ if(!autopilot||!S||!S.alive) return;
-    if(!$('#eventModal').classList.contains('hidden')){const bs=[...$('#evChoices').children];if(!bs.length)return;let i=0;
+    if(!$('#eventModal').classList.contains('hidden')){const bs=[...$('#evChoices').querySelectorAll('button.choice')];if(!bs.length)return;let i=0;
       if(autoPolicy==='random')i=Math.floor(rnd()*bs.length);
       else if(autoPolicy==='human'&&curEv){const ts=curEv.c.map(choiceTech);i=ts.indexOf(Math.min(...ts));if(Math.min(...ts)===0&&Math.max(...ts)===0)i=Math.floor(rnd()*bs.length);}
       bs[i].click();return;}
@@ -433,6 +451,95 @@ function autoAct(){ if(!autopilot||!S||!S.alive) return;
     if(st.needs.health!==undefined&&S.health<S.base*.7){const d=acts.find(x=>x.eff.health>0);if(d){doAction(d);return;}}
 }
 window.KEN={get S(){return S},step,die,fireEvent,addIll,D,ASSETS,score,setAutopilot:(v,p)=>{autopilot=v;if(p)autoPolicy=p;}};
+
+/* ---------------- FUN layer: goals, streaks, reports, forks, ambitions, meta ---------------- */
+const STREAK_STEP=8, AMB_PTS=600;
+function streakMult(){return 1+Math.min(4,Math.floor(S.streak/STREAK_STEP));}
+let lastScore=null;
+/* per-stage goals: hold = keep a need in range for N sim-seconds; all = every bar >= min; act = use cards; money; ach; age */
+const GOALS={
+ baby:[{id:'b1',l:'Content baby',t:'all',min:50,secs:10,pts:80},{id:'b2',l:'Bonding: cuddle ×5',t:'act',ids:['cuddle'],n:5,pts:60}],
+ toddler:[{id:'t1',l:'Curious mind: play ×10',t:'act',ids:['toys','story_plush','story_human'],n:10,pts:100},{id:'t2',l:'Happy home: all bars ≥45 for 25s',t:'all',min:45,secs:25,pts:120}],
+ child:[{id:'c1',l:'Honour roll: School ≥70 for 30s',t:'hold',k:'school',min:70,secs:30,pts:140},{id:'c2',l:'Best friends: play outside ×8',t:'act',ids:['playout'],n:8,pts:120}],
+ teen:[{id:'e1',l:'First love',t:'ach',a:'First love',pts:150},{id:'e2',l:'Graduate: School ≥60 for 40s',t:'hold',k:'school',min:60,secs:40,pts:160}],
+ youngadult:[{id:'y1',l:'Land a job',t:'ach',a:'First job',pts:120},{id:'y2',l:'Nest egg: save 3,000',t:'money',v:3000,pts:180},{id:'y3',l:'Find a partner',t:'ach',a:'Found a partner',pts:160}],
+ adult:[{id:'a1',l:'Get promoted',t:'ach',a:'Promoted',pts:200},{id:'a2',l:'Present parent: Family ≥60 for 60s',t:'hold',k:'family',min:60,secs:60,pts:180},{id:'a3',l:'Wealth: save 15,000',t:'money',v:15000,pts:200}],
+ middle:[{id:'m1',l:'Stay fit: Fitness ≥60 for 60s',t:'hold',k:'fitness',min:60,secs:60,pts:200},{id:'m2',l:'Keep calm: Stress ≤40 for 60s',t:'hold',k:'stress',max:40,secs:60,pts:180}],
+ senior:[{id:'s1',l:'Stay close: call / visit ×8',t:'act',ids:['callfam','visit','vrcall','friends'],n:8,pts:180},{id:'s2',l:'Pain managed: Pain ≤40 for 60s',t:'hold',k:'pain',max:40,secs:60,pts:200}],
+ elder:[{id:'l1',l:'Tell your story: album ×5',t:'act',ids:['memories','record'],n:5,pts:200},{id:'l2',l:'Reach 90',t:'age',v:90,pts:400}]
+};
+function goalProg(g){const st=stage();switch(g.t){
+  case 'all':case 'hold':return Math.min(1,(S.goals[g.id]||0)/g.secs);
+  case 'act':return Math.min(1,g.ids.reduce((s,i)=>s+(S.cnt[i]||0),0)/g.n);
+  case 'money':return clamp(S.money/g.v,0,1);
+  case 'ach':return S.achs.includes(g.a)?1:0;
+  case 'age':return clamp((S.age-st.from)/(g.v-st.from),0,1);}return 0;}
+function tickGoals(sdt){const gs=GOALS[stage().id]||[];const st=stage();
+  for(const g of gs){if(S.gdone.includes(g.id))continue;
+    if(g.t==='all'&&Object.keys(st.needs).every(k=>k==='health'||k==='money'||goodness(k)>=g.min))S.goals[g.id]=(S.goals[g.id]||0)+sdt;
+    if(g.t==='hold'){const v=needVal(g.k);if(g.max!==undefined?v<=g.max:v>=g.min)S.goals[g.id]=(S.goals[g.id]||0)+sdt;}
+    if(goalProg(g)>=1){S.gdone.push(g.id);S.bonus+=g.pts;S.happy=clamp(S.happy+6,0,100);toast('🎯 Goal reached: '+g.l+' (+'+g.pts+' ★)');play('fanfare');confetti();popScore('🎯 +'+g.pts);}}}
+let goalsKey='';
+function renderGoals(){const el=$('#goals');if(!el||!S)return;const gs=GOALS[stage().id]||[];
+  const amb=S.amb?`<span class="gchip amb" title="Life ambition: ${esc(AMBS[S.amb].d)}">${AMBS[S.amb].i} ${esc(AMBS[S.amb].l)}</span>`:'';
+  const stk=S.streak>0?`<span class="gchip streak${streakMult()>1?' hot':''}">🔥 ×${streakMult()} <i style="width:${(S.streak%STREAK_STEP)/STREAK_STEP*100}%"></i></span>`:`<span class="gchip streak off" title="Keep every bar above half, no illness">🔥 —</span>`;
+  const html=stk+amb+gs.map(g=>{const d=S.gdone.includes(g.id);const pr=d?1:goalProg(g);return `<span class="gchip goal${d?' done':''}">${d?'✅':'🎯'} ${esc(g.l)}<i style="width:${pr*100}%"></i></span>`}).join('');
+  if(html!==goalsKey){el.innerHTML=html;goalsKey=html;}}
+/* stage report: grade from goals hit + average bar level; it carries into the next stage */
+const STAGE_NOUN={baby:'Babyhood',toddler:'Toddler years',child:'Childhood',teen:'Teen years',youngadult:'Your twenties',adult:'Adulthood',middle:'Middle age',senior:'Retirement',elder:'Old age'};
+function makeReport(oi,ni){const os=D.STAGES[oi],gs=GOALS[os.id]||[];const done=gs.filter(g=>S.gdone.includes(g.id)).length;const avg=S.stageN?S.stageGood/S.stageN:50;
+  const pts=(gs.length?done/gs.length:0)*55+avg*.45;const gr=pts>=78?'A':pts>=62?'B':pts>=46?'C':pts>=32?'D':'F';S.grades.push(gr);
+  const lines=[`Goals hit: ${done}/${gs.length}`,`Average wellbeing: ${Math.round(avg)}/100`];
+  const ns=D.STAGES[ni].id;
+  if(gr==='A'){S.bonus+=150;S.base=clamp(S.base+3,5,100);S.happy=clamp(S.happy+10,0,100);lines.push('Great start into the next chapter: +150 ★, +3 health baseline');if(ns==='youngadult'||ns==='adult'||ns==='middle'){S.money+=600;lines.push('Head start: +600 💰');}}
+  else if(gr==='B'){S.bonus+=70;lines.push('Solid: +70 ★');}
+  else if(gr==='D'||gr==='F'){S.base=clamp(S.base-(gr==='F'?6:3),5,100);S.happy=clamp(S.happy-8,0,100);lines.push(`It leaves a mark: −${gr==='F'?6:3} health baseline`);}
+  S.report={title:`${STAGE_NOUN[os.id]}: ${gr}`,grade:gr,lines,next:D.STAGES[ni]};S.fork=FORKS[ns]?ns:null;S.goals={};S.cnt={};S.stageGood=0;S.stageN=0;}
+function showReport(){const r=S.report;$('#suYear').textContent=r.grade;$('#suYear').dataset.g=r.grade;$('#suTitle').textContent=r.title;
+  const nx=r.next;const ng=(GOALS[nx.id]||[]).map(g=>'🎯 '+g.l);
+  $('#suText').innerHTML=r.lines.map(l=>`<span class="rl">${esc(l)}</span>`).join('')+`<span class="rl nx"><b>Next: ${esc(nx.name)}${EP[nx.id]?' · '+esc(EP[nx.id].era):''}</b></span>`+ng.map(l=>`<span class="rl g">${esc(l)}</span>`).join('');
+  $('#btnSuOk').textContent=S.fork?'Continue → a life fork':'Continue';$('#stageUp').classList.remove('hidden');play(r.grade<'C'?'fanfare':'chime');}
+/* life forks: one big branching choice at the start of some stages */
+const FORKS={
+ teen:{t:'Find your scene',x:'High school starts. Where does Ken spend his afternoons?',c:[{l:'Sports team',e:{trait:'athletic',social:20,energy:-10}},{l:'Coding club',e:{trait:'bookworm',school:25,tech:6}},{l:'Garage band',e:{mood:30,social:20,happy:3,rel:3}}]},
+ youngadult:{t:'After school',x:'Eighteen. The whole world is open. What now?',c:[{l:'University (big career head start)',e:{career:45,money:-250,trait:'bookworm'}},{l:'Start working right away',e:{money:1500,career:15,ach:'First job'}},{l:'Gap year abroad',e:{social:45,happy:8,rel:5,money:-150}}]},
+ adult:{t:'Thirty',x:'A headhunter calls with a big-city offer, the same week your partner talks about settling down.',c:[{l:'Take the big-city job',e:{career:40,money:3000,stress:20,trait:'workaholic'}},{l:'Settle down',e:{family:35,rel:10,partner:1,stress:-15}},{l:'Go freelance',e:{chance:[.5,{money:5000,happy:6},{money:-1500,stress:25}]}}]},
+ middle:{t:'Fifty',x:'The doctor is blunt: change something now or pay for it later.',c:[{l:'Full lifestyle reset',e:{fitness:35,base:4,money:-1500}},{l:'Work harder, retire earlier',e:{money:5000,stress:25,career:20}},{l:'Ignore it',e:{chance:[.5,{},{ill:'heart'}]}}]},
+ senior:{t:'Retirement plans',x:'The last workday is behind you. How do you want to spend the next years?',c:[{l:'Travel the world',e:{money:-4000,happy:10,social:35}},{l:'Move close to family',e:{social:30,rel:8,company:20}},{l:'Keep consulting',e:{money:4000,pain:15}}]}
+};
+/* life ambition: picked before birth, judged at death, big score bonus; fulfilled ambitions are kept across lives */
+const AMBS={
+ family:{i:'👪',l:'Family first',d:'have a partner, kids and become a grandparent',ok:()=>S.partner&&S.kids>0&&S.achs.includes('Grandparent')},
+ career:{i:'💼',l:'Career legend',d:'reach Manager level or higher (2 promotions)',ok:()=>S.careerPeak>=2},
+ long:{i:'🕯️',l:'Long life',d:'live to 90',ok:()=>S.age>=90},
+ joy:{i:'😊',l:'A happy life',d:'average life satisfaction 60+',ok:()=>(S.happyN?S.happySum/S.happyN:S.happy)>=60},
+ pioneer:{i:'🤖',l:'Tech pioneer',d:'average tech reliance 60+ and a digital legacy',ok:()=>(S.techN?S.techSum/S.techN:S.tech)>=60&&S.legacy>0},
+ analog:{i:'🌿',l:'Analog soul',d:'average tech reliance 40 or less and live to 75',ok:()=>(S.techN?S.techSum/S.techN:S.tech)<=40&&S.age>=75}
+};
+const META_KEY='kenai.v2.meta';let META={lives:0,amb:{},inherit:0};try{Object.assign(META,JSON.parse(localStorage.getItem(META_KEY)||'{}'));}catch(e){}
+function saveMeta(){try{localStorage.setItem(META_KEY,JSON.stringify(META));}catch(e){}}
+function settleAmbition(){S.ambOk=!!(S.amb&&AMBS[S.amb].ok());if(S.ambOk){S.bonus+=AMB_PTS;META.amb[S.amb]=1;}META.lives++;META.inherit=Math.max(0,Math.min(3000,Math.round(S.money*.1)));saveMeta();}
+let pickedAmb=null,ambOffer=null;
+function renderAmbPick(){const el=$('#ambPick');if(!el)return;if(!ambOffer){const ids=Object.keys(AMBS).sort(()=>rnd()-.5);ambOffer=ids.slice(0,3);pickedAmb=ambOffer[0];}
+  el.innerHTML='<p class="amblbl">Choose a life ambition (+'+AMB_PTS+' ★ if fulfilled)</p>'+ambOffer.map(id=>{const A=AMBS[id];return `<button class="ambbtn${id===pickedAmb?' on':''}${META.amb[id]?' got':''}" data-id="${id}"><b>${A.i} ${A.l}</b><small>${A.d}</small></button>`}).join('');
+  el.querySelectorAll('.ambbtn').forEach(b=>b.onclick=()=>{pickedAmb=b.dataset.id;renderAmbPick();});}
+function renderMeta(){const el=$('#metaBox');if(!el)return;const got=Object.keys(AMBS).map(id=>`<span class="${META.amb[id]?'got':''}" title="${AMBS[id].l}">${AMBS[id].i}</span>`).join('');
+  el.innerHTML=META.lives?`Lives lived: <b>${META.lives}</b> · Ambitions fulfilled: <b>${Object.keys(META.amb).length}/6</b> <span class="ambset">${got}</span>${META.inherit?`<br>💌 Next life inherits <b>${META.inherit}</b> at 18`:''}`:'';}
+/* outcome reveal after an event choice */
+function snap(){return {n:Object.assign({},S.needs),money:S.money,happy:S.happy,base:S.base,rel:S.rel,health:S.health,ach:S.achs.slice(),ill:Object.keys(S.ills),tr:Object.keys(S.traits)};}
+function showOutcome(b,c){const st=stage();const ch=[];const add=(t,good)=>ch.push(`<span class="oc ${good?'g':'b'}">${esc(t)}</span>`);
+  for(const k in st.needs){if(k==='health'||k==='money')continue;const d=Math.round(S.needs[k]-b.n[k]);if(Math.abs(d)>=1)add(`${d>0?'+':''}${d} ${D.NEEDS[k].l}`,D.NEEDS[k].inv?d<0:d>0);}
+  const dm=Math.round(S.money-b.money);if(dm)add(`${dm>0?'+':''}${dm} 💰`,dm>0);
+  const dh=Math.round(S.happy-b.happy);if(dh)add(`${dh>0?'+':''}${dh} 😊`,dh>0);
+  const db=Math.round(S.base-b.base);if(db)add(`${db>0?'+':''}${db} health baseline`,db>0);
+  const dr=Math.round(S.rel-b.rel);if(dr)add(`${dr>0?'+':''}${dr} relationships`,dr>0);
+  S.achs.filter(a=>!b.ach.includes(a)).forEach(a=>add('🏆 '+a,1));Object.keys(S.ills).filter(i=>!b.ill.includes(i)).forEach(i=>add('🤒 '+D.ILLS[i].l,0));Object.keys(S.traits).filter(t=>!b.tr.includes(t)).forEach(t=>add('Trait: '+D.TRAITS[t].l,1));
+  const good=ch.filter(x=>x.includes('oc g')).length,badn=ch.length-good;
+  const box=$('#evChoices');box.innerHTML=`<div class="outcome"><p class="ochosen">${esc(c.l)}${c.e&&c.e.chance?(good>=badn?' — <b class="lucky">it worked out!</b>':' — <b class="unlucky">it backfired.</b>'):''}</p><div class="ocs">${ch.join('')||'<span class="oc">Nothing much changed.</span>'}</div>${c.msg?`<p class="omsg">${esc(c.msg)}</p>`:''}</div>`;
+  const ok=document.createElement('button');ok.className='choice ok';ok.textContent='OK';ok.onclick=()=>{$('#eventModal').classList.add('hidden');paused=false;};box.appendChild(ok);setTimeout(()=>ok.focus(),30);
+  if(badn>good){shake();play('nope');}else play('coin');}
+function popScore(t){const f=document.createElement('div');f.className='scorepop';f.textContent=t;$('#fx').appendChild(f);setTimeout(()=>f.remove(),1300);}
+function shake(){const s=$('#stage');s.classList.remove('shk');void s.offsetWidth;s.classList.add('shk');try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}}
 
 /* ---------------- boot ---------------- */
 showTitle();if(DEBUG)setupDebug();requestAnimationFrame(frame);

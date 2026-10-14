@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#12152a">
 <link rel="icon" href="/images/favicon.ico">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 <title>Ken.AI — Grokbot | What the Ai</title>
 <meta name="description" content="Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score." />
 <link rel="canonical" href="https://whatthe.ai/games/kenai/grokbot/game.html" />
@@ -32,10 +32,13 @@
       <ol class="howto">
         <li><b>Tap an action card</b> to care for Ken.AI. Actions cost energy, time or money.</li>
         <li>Keep the bars up. Neglect hurts <b>health</b>; health at 0 means death.</li>
-        <li>Life events ask you to choose. Choices shape traits, illnesses and your <b>life score</b>.</li>
+        <li>Every stage has <b>🎯 goals</b> and ends with a <b>report card</b>. Good grades carry into the next stage.</li>
+        <li>Keep every bar above half for a <b>🔥 Thriving streak</b>. Mix up your cards: repeats get boring.</li>
       </ol>
       <button id="btnContinue" class="big hidden">▶ Continue life</button>
+      <div id="ambPick" class="ambpick"></div>
       <button id="btnNew" class="big">✦ Begin a new life</button>
+      <div id="metaBox" class="meta"></div>
       <div id="bestBox" class="best"></div>
     </div>
   </section>
@@ -52,6 +55,7 @@
       </div>
       <div class="needs" id="needs"></div>
       <div id="conditions" class="conds"></div>
+      <div id="goals" class="goals"></div>
     </header>
     <main id="stage">
       <div id="bg"></div><div id="bgOld"></div><div id="vignette"></div>
@@ -69,7 +73,7 @@
   <div id="debug" class="hidden"></div>
 </div>
 <script src="assets.js?v=5"></script>
-<script src="data.js?v=2"></script>
+<script src="data.js?v=3"></script>
 <script src="epochs.js?v=2"></script>
-<script src="game.js?v=4"></script>
+<script src="game.js?v=5"></script>
 </body></html>
