@@ -23,7 +23,8 @@ const STAGES=['baby','toddler','child','teen','youngadult','adult','middle','sen
 const MOODS=['neutral','happy','sad','sick','sleeping','stressed'];
 const FILE_STAGE={youngadult:'young_adult',middle:'middle_age'};
 const SIXTH={baby:'fussy',toddler:'tantrum',senior:'pain',elder:'pain'};
-const has=f=>MUSE_FILES.includes(f)?ART_BASE+f:null;
+const ART_V='?v=4'; // cache-bust for the CDN (art is cached 30 days); bump when art files change in place
+const has=f=>MUSE_FILES.includes(f)?ART_BASE+f+ART_V:null;
 const A={};
 for(const s of STAGES)for(const m of MOODS){const fs=FILE_STAGE[s]||s,fm=m==='stressed'?(SIXTH[s]||'stressed'):m;A[`char.${s}.${m}`]=has(`char/${fs}_${fm}.webp`);}
 A['char.plush.new']=has('char/ai_plush_new.webp');A['char.plush.worn']=has('char/ai_plush_worn.webp');
@@ -36,7 +37,7 @@ for(const k of ['gown','bandage','sling'])A[`char.adult.${k}`]=has(`char/adult_$
 /* era props placed as separate sprites on the phone layout (SPEC round 2): room -> [icon, css class] */
 const ROOM_PROPS={apartment:['robotaxi','rp-drone']}; // round 3: only the robotaxi drone (the new rooms already contain their robots)
 const ICONS=MUSE_FILES.filter(f=>f.startsWith('icon/')).map(f=>f.slice(5,-5));
-for(const i of ICONS)A[`icon.${i}`]=ART_BASE+`icon/${i}.webp`;
+for(const i of ICONS)A[`icon.${i}`]=ART_BASE+`icon/${i}.webp`+ART_V;
 /* after the icon keys exist (was before them, so no room prop ever showed) */
 for(const r in ROOM_PROPS)A[`prop.${r}`]=A[`icon.${ROOM_PROPS[r][0]}`]||null;
 const OVERLAYS=['bandage','arm_cast_sling','cane','wheelchair','ar_glasses','smartwatch','exo_knee_brace'];
