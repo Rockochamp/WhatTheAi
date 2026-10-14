@@ -223,7 +223,12 @@ const BADGES=['bandage','arm_cast_sling'];
 /* SPEC: worn injuries exist only for the adult as full replacement sprites (gown = hospital stay, bandage = head injury, sling = broken arm) */
 function injuryAlt(st,ills){if(!S.alive||!ASSETS['char.'+st.id+'.gown'])return null;if(S.hospital>0)return 'gown';const ov=ills.map(id=>D.ILLS[id].ov);if(ov.includes('arm_cast_sling'))return 'sling';if(ov.includes('bandage'))return 'bandage';return null;}
 function badgeOv(id){const o=D.ILLS[id].ov;if(!BADGES.includes(o))return '';if(S&&ASSETS['char.'+stage().id+'.gown'])return '';return ART.overlay(o);}
-function spriteK(){return ($('#stage').clientHeight||400)*.42/SPRITE_REF;} // adult = 42% of scene height; other stages keep the manifest's age ratios
+/* Per-stage sprite scale: height of the stage's neutral sprite as a fraction of the scene, so Ken fits his room
+   (adult ~2/3 of the scene next to sofas and desks; baby and toddler smaller but readable). All moods of a stage,
+   including the lying pose, share that stage's scale. NEUTRAL_H = natural px height of <stage>_neutral.webp (manifest). */
+const STAGE_SCALE={baby:.30,toddler:.40,child:.50,teen:.60,youngadult:.65,adult:.66,middle:.65,senior:.63,elder:.60};
+const NEUTRAL_H={baby:200,toddler:282,child:374,teen:487,youngadult:528,adult:528,middle:523,senior:502,elder:477};
+function spriteK(){const id=S?stage().id:'adult';return ($('#stage').clientHeight||400)*(STAGE_SCALE[id]||.66)/(NEUTRAL_H[id]||SPRITE_REF);}
 /* Feet on the floor: crop the portrait bg (object-fit:cover) so its floor line (manifest floorY) lands at ~90% of the scene, then stand Ken on it */
 const FOOT_AT=.90, BED_Y=.70;
 function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
@@ -239,7 +244,7 @@ $('#tray').addEventListener('scroll',trayEnd,{passive:true});
 function fitSprite(){const k=spriteK();const w=$('#charWrap');w.style.setProperty('--k',k);
   const im=$('#char img');if(im){const set=()=>{w.style.setProperty('--sh',(im.naturalHeight*k)+'px');};if(im.complete&&im.naturalHeight)set();else im.onload=set;w.style.setProperty('--mask',`url("${im.getAttribute('src')}")`);}
   else w.style.setProperty('--sh',($('#stage').clientHeight*.5)+'px');
-  const pr=$('#props img');if(pr){const s=()=>$('#props').style.setProperty('--ph',(pr.naturalHeight*k*.55)+'px');if(pr.complete&&pr.naturalHeight)s();else pr.onload=s;}}
+  const pr=$('#props img');if(pr){const s=()=>$('#props').style.setProperty('--ph',(pr.naturalHeight*k*.35)+'px');if(pr.complete&&pr.naturalHeight)s();else pr.onload=s;}}
 addEventListener('resize',()=>{if(S){fitSprite();lastMoodKey='';}});
 function setWideBg(room){const wb=$('#wideBg');if(!wb)return;const u=ASSETS[`bg.${room}.wide`];wb.style.backgroundImage=u?`url(${u})`:'';}
 function ageDigits(n){const el=$('#hudAge');const s=String(n);if(el.dataset.v===s)return;const old=el.dataset.v||'';el.dataset.v=s;
