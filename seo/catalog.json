@@ -219,24 +219,24 @@
     "id": 7,
     "name": "Ken.AI",
     "hub": "/games/kenai/index.html",
-    "category": "Virtual pet game",
-    "summary": "Raise a baby neural net: feed, change, rock and play with Ken.AI until it grows up.",
-    "intro": "Ken.AI is a Tamagotchi-style care game. Your baby has five needs, food, diaper, sleep, fun and health, that slowly drop over time. Drag or tap items onto the baby to keep every need up. A happy baby fills the Thrive meter and grows from newborn to crawler, toddler and kid. Progress is saved in your browser, so you can come back later.",
+    "category": "Life simulation game",
+    "summary": "Live a whole life as Ken.AI, born in 2026: care for him from baby to elder while technology changes around him.",
+    "intro": "Ken.AI is a life simulation in nine stages, from baby to elder. Ken is born in 2026 and each stage is a technology era, from AI baby monitors and talking toys to agent teams, longevity therapy and a digital legacy. Keep his needs up with action cards, answer life and tech events, treat illnesses and see how far he gets. When he dies, an epitaph sums up his life, his tech style and his life score. Progress is saved in your browser.",
     "controls": [
-      "Press Start, then drag an item from the tray onto the baby, or tap the item.",
-      "Watch the five need bars at the top and the Thrive meter that fills while Ken.AI is happy.",
-      "Tap the bed item to put Ken.AI to sleep and tap it again to wake. Use the speed button to run time faster and the menu button to return to the title screen."
+      "Press Begin a new life, then tap the action cards at the bottom to care for Ken. Swipe the strip to see more actions.",
+      "Watch the need bars under the top bar. Low bars hurt health, and health at zero ends the life.",
+      "Answer the event cards when they appear. Use the speed button to run time faster and the menu button to return to the title screen."
     ],
     "tips": [
-      "Keep every need above the halfway mark; one neglected need is enough to stall growth.",
-      "Items unlock as Ken.AI grows, such as porridge for toddlers. Use New baby on the title screen to reset your save."
+      "Real relationships give more happiness than AI companions, but leaning on AI makes daily needs cheaper. A balance works well.",
+      "Treat illnesses quickly with the actions listed on the status chip, and keep some savings for old age."
     ],
     "versions": [
       {
         "model": "Grokbot",
         "path": "/games/kenai/grokbot/game.html",
-        "detail": "Five needs, four growth stages, drag-and-drop care items, sound effects and a browser save.",
-        "description": "Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up."
+        "detail": "Nine life stages with tech eras, needs, events, illnesses, death and replay, hand-drawn art and a browser save.",
+        "description": "Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score."
       }
     ],
     "image": "/images/kenai.webp"
