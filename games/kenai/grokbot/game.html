@@ -1,71 +1,75 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0a0f1f">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12152a">
 <link rel="icon" href="/images/favicon.ico">
 <link rel="stylesheet" href="style.css">
 <title>Ken.AI — Grokbot | What the Ai</title>
-<meta name="description" content="Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up." />
+<meta name="description" content="Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score." />
 <link rel="canonical" href="https://whatthe.ai/games/kenai/grokbot/game.html" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="What the Ai" />
 <meta property="og:title" content="Ken.AI — Grokbot | What the Ai" />
-<meta property="og:description" content="Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up." />
+<meta property="og:description" content="Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score." />
 <meta property="og:url" content="https://whatthe.ai/games/kenai/grokbot/game.html" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Ken.AI — Grokbot | What the Ai" />
-<meta name="twitter:description" content="Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up." />
+<meta name="twitter:description" content="Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score." />
 <meta property="og:image" content="https://whatthe.ai/images/kenai.webp" />
 <meta name="twitter:image" content="https://whatthe.ai/images/kenai.webp" />
-<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Ken.AI — Grokbot", "url": "https://whatthe.ai/games/kenai/grokbot/game.html", "description": "Play Ken.AI by Grokbot: a Tamagotchi-style game where you feed, clean, rock and play with a baby neural net until it grows up.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Ken.AI", "item": "https://whatthe.ai/games/kenai/index.html"}, {"@type": "ListItem", "position": 3, "name": "Grokbot", "item": "https://whatthe.ai/games/kenai/grokbot/game.html"}]}]}</script>
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Ken.AI — Grokbot", "url": "https://whatthe.ai/games/kenai/grokbot/game.html", "description": "Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Ken.AI", "item": "https://whatthe.ai/games/kenai/index.html"}, {"@type": "ListItem", "position": 3, "name": "Grokbot", "item": "https://whatthe.ai/games/kenai/grokbot/game.html"}]}]}</script>
 </head><body>
+<div id="wideBg"></div>
 <div id="app">
-  <!-- Title -->
   <section id="title" class="screen">
-    <div class="title-bg"></div>
     <div class="title-card">
-      <img src="assets/stage0.webp" class="title-baby" alt="">
+      <div id="titleArt" class="title-art"></div>
       <h1>Ken<span>.AI</span></h1>
-      <p class="tag">Raise your very own little neural net.</p>
+      <p class="tag">A Life. From first breath to last, one choice at a time.</p>
+      <label class="namefield">Name <input id="nameInput" maxlength="16" value="Ken" autocomplete="off"></label>
       <ol class="howto">
-        <li><b>Drag or tap</b> an item onto the baby.</li>
-        <li>Keep all <b>5 needs</b> up: food, diaper, sleep, fun, health.</li>
-        <li>A happy baby fills the <b>Thrive</b> meter and grows up:<br>newborn → crawler → toddler → kid.</li>
+        <li><b>Tap an action card</b> to care for Ken.AI. Actions cost energy, time or money.</li>
+        <li>Keep the bars up. Neglect hurts <b>health</b>; health at 0 means death.</li>
+        <li>Life events ask you to choose. Choices shape traits, illnesses and your <b>life score</b>.</li>
       </ol>
-      <button id="btnStart" class="big">▶ Start</button>
-      <button id="btnReset" class="link">New baby (reset save)</button>
+      <button id="btnContinue" class="big hidden">▶ Continue life</button>
+      <button id="btnNew" class="big">✦ Begin a new life</button>
+      <div id="bestBox" class="best"></div>
     </div>
   </section>
-  <!-- Game -->
   <section id="game" class="screen hidden">
     <header class="hud">
-      <div class="row">
-        <div class="name"><b>Ken.AI</b> <span id="stageName">Newborn</span></div>
-        <div class="ctrls">
-          <button id="btnSpeed" class="pill" title="Time speed" aria-label="Change time speed">1×</button>
-          <button id="btnMute" class="pill" title="Sound" aria-label="Toggle sound">🔊</button>
-          <button id="btnHome" class="pill" title="Menu" aria-label="Back to menu">☰</button>
-        </div>
+      <div class="topbar">
+        <div class="who"><b id="hudName">Ken</b><span id="hudStage" class="chip">Baby</span><small id="hudEra" class="era"></small></div>
+        <div class="agebox"><div id="hudAge" class="age odo">0</div><small id="hudYear" class="yr">2026</small></div>
+        <div class="money"><span class="m">💰 <b id="hudMoney">0</b></span><span class="sc">★ <b id="hudScore">0</b></span></div>
       </div>
-      <div class="thrive"><div class="lbl">Thrive</div><div class="track"><div id="thriveFill"></div></div><div id="thriveTxt">0%</div></div>
+      <div class="row2">
+        <span class="mini">😊 <b id="hudHappy">50</b></span><span class="mini">❤️‍🩹 <b id="hudBase">100</b></span>
+        <span class="ctrls"><button id="btnSpeed" class="pill" aria-label="Change time speed">1×</button><button id="btnMute" class="pill" aria-label="Toggle sound">🔊</button><button id="btnMenu" class="pill" aria-label="Back to menu">☰</button></span>
+      </div>
       <div class="needs" id="needs"></div>
+      <div id="conditions" class="conds"></div>
     </header>
     <main id="stage">
-      <div id="room"></div>
-      <div id="dim"></div>
-      <div id="babyWrap"><div id="shadow"></div><div id="baby"><img id="babyImg" src="assets/stage0.webp" alt="Ken.AI"></div><div id="overlay"></div></div>
+      <div id="bg"></div><div id="bgOld"></div><div id="vignette"></div>
+      <div id="charWrap"><div id="under"></div><div id="char"></div><div id="tint"></div><div id="overlay"></div><div id="techBadge"></div></div>
+      <div id="roomProp"></div><div id="props"></div><div id="hospTint"></div>
+      <div id="flash"></div><div id="flat"></div><div id="skipHint" class="hidden">Tap to skip</div>
       <div id="fx"></div>
       <div id="toast"></div>
     </main>
     <footer id="tray"></footer>
   </section>
-  <div id="evolve" class="hidden"><div class="evo-inner"><div class="burst"></div><img id="evoImg" alt=""><h2>Ken.AI grew up!</h2><p id="evoTxt"></p><button id="btnEvoOk" class="big">Yay! 🎉</button></div></div>
+  <div id="eventModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="evTitle"><div class="card event-card"><div class="evband"></div><div class="evhead"><div id="evIcon" class="evicon"></div><div id="evKind" class="kind"></div></div><h2 id="evTitle"></h2><p id="evText"></p><div id="evChoices" class="choices"></div></div></div>
+  <div id="stageUp" class="modal hidden"><div class="card stageup"><div class="year" id="suYear">0</div><h2 id="suTitle"></h2><p id="suText"></p><button id="btnSuOk" class="big">Continue</button></div></div>
+  <div id="death" class="hidden"><div class="death-inner"><div id="tomb"></div><h2 id="epName"></h2><p id="epLine" class="epline"></p><ul id="epSummary"></ul><p class="lifescore">Life score <b id="epScore">0</b> <span id="epBest"></span></p><div class="dbtns"><button id="btnAgain" class="big">✦ Live again</button><button id="btnShare" class="big ghost">Share</button></div></div></div>
   <div id="debug" class="hidden"></div>
 </div>
+<script src="assets.js"></script>
+<script src="data.js"></script>
+<script src="epochs.js"></script>
 <script src="game.js"></script>
-<!-- Cloudflare Web Analytics -->
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon='{"token":"7e23bb1be08e4d83bb66013aab939d1e"}'></script>
 </body></html>

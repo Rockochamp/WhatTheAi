@@ -1,281 +1,425 @@
-(() => {
+/* Ken.AI v2 — "A Life". Static, no dependencies. Data in data.js, art in assets.js (KEN_ASSETS). */
+(function(){
 'use strict';
-const $ = s => document.querySelector(s);
-const Q = new URLSearchParams(location.search);
-const DEBUG = Q.has('debug');
-const SAVE_KEY = 'kenai.save.v1';
+const D=window.KEN_DATA, ART=window.KEN_ART, ASSETS=window.KEN_ASSETS;
+/* tech epochs (epochs.js): merge era actions and tech events into the data tables */
+const EP={};for(const e of (window.KEN_EPOCHS||[])){EP[e.stage]=e;for(const a of e.actions)if(!D.ACTIONS.some(x=>x.id===a.id))D.ACTIONS.push(a);D.EVENTS[e.stage]=(D.EVENTS[e.stage]||[]).concat(e.events.map(v=>Object.assign({tech:1},v)));}
+D.EVENTS.any.push({t:'Outage day',x:'A global cloud outage. Ken\'s assistants, agents and smart home all go silent.',minTech:65,tech:1,c:[{l:'Enjoy a quiet analog day',e:{happy:3,tech:-5,moment:'Survived an outage day'}},{l:'Panic and wait for the fix',e:{happy:-4,money:-200,moment:'Survived an outage day'}}]});
+D.TRAITS.selfmade=D.TRAITS.selfmade||{l:'Self-made',mod:{energy:.95}};
+const YEAR0=2026;
+const SAVE_KEY='kenai.v2.save', BEST_KEY='kenai.v2.best', SCHEMA=2;
+const DEBUG=/[?&]debug=1\b/.test(location.search);
+const SPEEDS=[1,2,4];
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=Math.random;
+const pick=a=>a[Math.floor(rnd()*a.length)];
+const ALL_NEEDS=Object.keys(D.NEEDS);
 
-const STAGES = [
-  {name:'Newborn', img:'assets/stage0.webp', h:.55, xpNeed:100, feed:'bottle', play:'duck',  txt:'Ken.AI is a crawler now! Watch out, cables…'},
-  {name:'Crawler', img:'assets/stage1.webp', h:.62, xpNeed:140, feed:'bottle', play:'duck',  txt:'First steps! Ken.AI is a toddler and wants porridge.'},
-  {name:'Toddler', img:'assets/stage2.webp', h:.82, xpNeed:180, feed:'porridge', play:'robot', txt:'Ken.AI is a big kid with a robot backpack. AGI achieved (almost).'},
-  {name:'Kid',     img:'assets/stage3.webp', h:.92, xpNeed:Infinity, feed:'porridge', play:'robot'},
-];
-const MOOD_IMG = {happy:'assets/mood_happy.webp',neutral:'assets/mood_neutral.webp',crying:'assets/mood_crying.webp',sleeping:'assets/mood_sleeping.webp',hungry:'assets/mood_hungry.webp',dirty:'assets/mood_dirty.webp'};
-const NEEDS = [
-  {k:'hunger', ic:'🍼', lbl:'Food',   decay:1.0},
-  {k:'hygiene',ic:'🧷', lbl:'Diaper', decay:0.7},
-  {k:'energy', ic:'🌙', lbl:'Sleep',  decay:0.55},
-  {k:'fun',    ic:'🦆', lbl:'Fun',    decay:0.85},
-  {k:'health', ic:'❤️', lbl:'Health', decay:0},
-];
-// item: effects, fx type, sound
-const ITEMS = {
-  bottle:  {lbl:'Bottle',  img:'assets/bottle.webp',  eff:{hunger:35, fun:3}, fx:'hearts', snd:'slurp', need:'hunger', minStage:0, maxStage:1},
-  porridge:{lbl:'Porridge',img:'assets/porridge.webp',eff:{hunger:40, energy:4}, fx:'hearts', snd:'slurp', need:'hunger', minStage:2, maxStage:3},
-  diaper:  {lbl:'Diaper',  img:'assets/diaper.webp',  eff:{hygiene:60, fun:4}, fx:'sparkle', snd:'chime', need:'hygiene'},
-  blanket: {lbl:'Sleep',   img:'assets/blanket.webp', eff:{}, fx:'stars', snd:'lullaby', special:'sleep'},
-  duck:    {lbl:'Duck',    img:'assets/duck.webp',    eff:{fun:30, energy:-5}, fx:'notes', snd:'squeak', need:'fun'},
-  robot:   {lbl:'Robo',    img:'assets/robot.webp',   eff:{fun:34, energy:-6}, fx:'notes', snd:'beep', need:'fun', minStage:1},
-  sponge:  {lbl:'Bath',    img:'assets/sponge.webp',  eff:{hygiene:30, health:6, fun:8}, fx:'bubbles', snd:'bubble', need:'hygiene'},
-  medicine:{lbl:'Care',    img:'assets/medicine.webp',eff:{health:35, fun:-2}, fx:'hearts', snd:'chime', need:'health'},
-};
-const ORDER = ['bottle','porridge','diaper','blanket','duck','robot','sponge','medicine'];
-
-let S; // state
-function fresh(){ return {stage:0, xp:0, needs:{hunger:80,hygiene:85,energy:80,fun:75,health:100}, sleeping:false, speed:1, muted:false, t:Date.now(), age:0, started:false}; }
+/* ---------------- state ---------------- */
+function freshLife(name){
+  const needs={};for(const k of ALL_NEEDS) needs[k]=D.NEEDS[k].inv?15:80;
+  return {schema:SCHEMA,name:(name||'Ken').trim().slice(0,16)||'Ken',age:0,needs,health:100,base:100,money:0,happy:60,happySum:0,happyN:0,
+    rel:10,partner:false,kids:0,careerPeak:0,traits:{},ills:{},achs:[],cds:{},nextEvent:yearsToSec(.4+rnd()*.4),hospital:0,
+    lastSleep:-99,tech:50,techSum:0,techN:0,moments:[],legacy:0,plush:0,exo:0,tutorRun:0,warnT:-99,alive:true,cause:'',stageIdx:0,seenStage:0,t:0,events:0};
+}
+function yearsToSec(y){return y*D.YEAR_SECONDS;}
+let S=null, settings={speed:1,muted:false};
 function load(){
-  try{ const s=JSON.parse(localStorage.getItem(SAVE_KEY)); if(s&&s.needs) return Object.assign(fresh(),s); }catch(e){}
-  return fresh();
+  try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s&&s.schema===SCHEMA&&s.alive)return Object.assign(freshLife(s.name),s);
+    if(s&&s.schema!==SCHEMA) return migrate(s);}catch(e){}
+  return null;
 }
-function save(){ S.t=Date.now(); try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){} }
-S = load();
-if(Q.has('reset')) S=fresh();
-if(Q.has('stage')) S.stage=Math.max(0,Math.min(3,+Q.get('stage')|0));
+function migrate(s){ /* only schema 2 exists; older or unknown saves are discarded safely */ return null; }
+function save(){ try{ if(S) localStorage.setItem(SAVE_KEY,JSON.stringify(S)); localStorage.setItem('kenai.v2.settings',JSON.stringify(settings)); }catch(e){} }
+try{Object.assign(settings,JSON.parse(localStorage.getItem('kenai.v2.settings')||'{}'));}catch(e){}
+function bests(){try{return JSON.parse(localStorage.getItem(BEST_KEY)||'[]')}catch(e){return []}}
 
-// gentle offline decay: 1/20 real rate, max 3h, never below 20
-(function away(){
-  const dt=Math.min((Date.now()-S.t)/1000,3*3600);
-  if(dt>5 && S.started){
-    for(const n of NEEDS){ if(!n.decay) continue; const d=n.decay*dt/20*(S.sleeping&&n.k==='energy'?-3:1); S.needs[n.k]=clamp(S.needs[n.k]-d, Math.min(S.needs[n.k],20),100); }
-    if(S.sleeping && S.needs.energy>=100) S.sleeping=false;
-    awayMsg = dt>60 ? `Welcome back! You were gone ${fmt(dt)}.` : null;
-  }
-})();
-var awayMsg;
-function fmt(s){ return s<3600? Math.round(s/60)+' min' : (s/3600).toFixed(1)+' h'; }
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+/* ---------------- helpers ---------------- */
+const stage=()=>D.STAGES[S.stageIdx];
+function stageIdxForAge(a){let i=0;D.STAGES.forEach((s,j)=>{if(a>=s.from)i=j});return i;}
+function traitMod(k){let m=1;for(const t in S.traits){const T=D.TRAITS[t];if(T&&T.mod[k])m*=T.mod[k];}return m;}
+function needVal(k){ if(k==='health') return S.health; if(k==='money'){const st=stage();return clamp(S.money/(st.moneyTarget||1000)*100,0,100);} return S.needs[k]; }
+function goodness(k){const v=needVal(k);return D.NEEDS[k].inv?100-v:v;}
+function isBad(k){return goodness(k)<15;}
+function addAch(a){ if(!S.achs.includes(a)){S.achs.push(a);toast('🏆 '+a);play('fanfare');} }
+function addTrait(t){ if(!S.traits[t]){S.traits[t]=1;const T=D.TRAITS[t];toast('Trait: '+T.l);if(T.base)S.base=clamp(S.base+T.base,10,100);} }
+function addIll(id){ if(S.ills[id]) return; S.ills[id]={tx:0}; toast('🤒 '+D.ILLS[id].l); play('nope'); renderConds(); }
+function techMod(){return S.tech>=65?'high':S.tech<=35?'low':'mid';}
+function relGain(v){return v>0?v*(S.tech>=65?.6:S.tech<=35?1.3:1):v;}
+function addMoment(m){if(m&&!S.moments.includes(m)){S.moments.push(m);toast('✨ Tech moment: '+m);}}
+function setTech(d){S.tech=clamp(S.tech+d,0,100);if(S.tech<=20&&!S.traits.selfmade&&rnd()<.3)addTrait('selfmade');}
+function score(){const avgH=S.happyN?S.happySum/S.happyN:S.happy;return Math.round(S.age*10+avgH*3+S.rel*2+S.careerPeak*50+S.achs.length*40+Math.min(500,Math.max(0,S.money)/200)+Math.min(300,S.legacy*2));}
 
-/* ---------- audio ---------- */
-let AC=null;
-function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended')AC.resume(); return AC; }
-function tone(f,dur,type='sine',vol=.15,when=0,slide=0){
-  if(S.muted) return; const a=ac(); if(!a) return;
-  const t=a.currentTime+when, o=a.createOscillator(), g=a.createGain();
-  o.type=type; o.frequency.setValueAtTime(f,t); if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t+dur);
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.015); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+.05);
-}
-const SND = {
-  giggle(){ [0,.09,.18,.27].forEach((w,i)=>tone(700+i*90+Math.random()*60,.08,'triangle',.12,w,1.3)); },
-  chime(){ [880,1175,1568].forEach((f,i)=>tone(f,.45,'sine',.12,i*.07)); },
-  slurp(){ for(let i=0;i<3;i++) tone(300+i*40,.12,'sine',.12,i*.13,2.2); setTimeout(SND.giggle,450); },
-  squeak(){ tone(1400,.12,'square',.06,0,.6); tone(1500,.12,'square',.06,.16,.6); setTimeout(SND.giggle,350); },
-  beep(){ [660,990,780,1320].forEach((f,i)=>tone(f,.09,'square',.06,i*.09)); setTimeout(SND.giggle,420); },
-  bubble(){ for(let i=0;i<6;i++) tone(400+Math.random()*600,.07,'sine',.1,i*.06,2.5); },
-  lullaby(){ [523,659,784,659,523].forEach((f,i)=>tone(f,.5,'sine',.09,i*.28)); },
-  wake(){ [523,784,1046].forEach((f,i)=>tone(f,.25,'triangle',.1,i*.1)); },
-  cry(){ tone(620,.7,'sawtooth',.05,0,.7); tone(640,.6,'sawtooth',.04,.75,.65); },
-  nope(){ tone(220,.15,'square',.06); tone(180,.2,'square',.06,.15); },
-  fanfare(){ [523,659,784,1046,784,1046,1318].forEach((f,i)=>tone(f,.3,'triangle',.12,i*.12)); },
-  tap(){ tone(1000,.04,'sine',.06); },
-};
-function play(n){ (SND[n]||(()=>{}))(); }
-
-/* ---------- UI build ---------- */
-const needsEl=$('#needs'), trayEl=$('#tray'), babyImg=$('#babyImg'), baby=$('#baby'), wrap=$('#babyWrap'), stageEl=$('#stage'), fx=$('#fx'), ov=$('#overlay');
-const bars={};
-for(const n of NEEDS){ const d=document.createElement('div'); d.className='need'; d.innerHTML=`<div class="ic">${n.ic}</div>${n.lbl}<div class="bar"><i></i></div>`; needsEl.appendChild(d); bars[n.k]={el:d,i:d.querySelector('i')}; }
-const itemEls={};
-function buildTray(){
-  trayEl.innerHTML='';
-  const st=S.stage;
-  const show=ORDER.filter(k=>{const it=ITEMS[k]; return st>=(it.minStage||0) && st<=(it.maxStage??3);});
-  for(const k of show){ const it=ITEMS[k]; const b=document.createElement('button'); b.className='item'; b.dataset.k=k; b.innerHTML=`<img src="${it.img}" alt=""><span>${it.lbl}</span>`; trayEl.appendChild(b); itemEls[k]=b; bindDrag(b,k); }
-  trayEl.style.gridTemplateColumns=`repeat(${Math.min(4,show.length)},1fr)`;
-}
-
-/* ---------- drag / tap ---------- */
-let ghost=null, dragK=null, moved=false, sx=0, sy=0;
-function overBaby(x,y){ const r=babyImg.getBoundingClientRect(); const pad=30; return x>r.left-pad&&x<r.right+pad&&y>r.top-pad&&y<r.bottom+pad; }
-function bindDrag(el,k){
-  el.addEventListener('pointerdown',e=>{ ac(); dragK=k; moved=false; sx=e.clientX; sy=e.clientY; el.setPointerCapture(e.pointerId); el.classList.add('sel'); });
-  el.addEventListener('pointermove',e=>{
-    if(dragK!==k) return;
-    if(!moved && Math.hypot(e.clientX-sx,e.clientY-sy)>10){ moved=true; ghost=document.createElement('img'); ghost.id='ghost'; ghost.src=ITEMS[k].img; document.body.appendChild(ghost); }
-    if(moved){ ghost.style.left=e.clientX+'px'; ghost.style.top=e.clientY+'px'; wrap.classList.toggle('target',overBaby(e.clientX,e.clientY)); }
-  });
-  const end=e=>{
-    if(dragK!==k) return; el.classList.remove('sel'); wrap.classList.remove('target');
-    if(moved){ if(ghost){ghost.remove();ghost=null;} if(e.type==='pointerup'&&overBaby(e.clientX,e.clientY)) use(k); }
-    else if(e.type==='pointerup') use(k); // tap = use
-    dragK=null;
-  };
-  el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
-}
-// tapping baby = tickle
-wrap.style.pointerEvents='auto';
-babyImg.style.pointerEvents='auto';
-babyImg.addEventListener('pointerdown',()=>{ ac(); if(S.sleeping){ toast('Shhh… Ken.AI is sleeping 😴'); return;} bounce(); S.needs.fun=clamp(S.needs.fun+3,0,100); play('giggle'); burst('hearts',4); floatTxt('+3 Fun'); });
-
-/* ---------- actions ---------- */
-function use(k){
-  const it=ITEMS[k]; const N=S.needs;
-  if(it.special==='sleep'){
-    S.sleeping=!S.sleeping;
-    if(S.sleeping){ play('lullaby'); burst('stars',10); toast('Good night, Ken.AI 🌙'); }
-    else { play('wake'); toast('Rise and shine! ☀️'); bounce(); }
-    render(); save(); return;
-  }
-  if(S.sleeping){ nope(); toast('Let him sleep! Tap 🛏 again to wake.'); return; }
-  if(it.need && N[it.need]>=95){ nope(); toast(it.need==='hunger'?'Too full! 🙅':it.need==='fun'?'Needs a break…':'Already perfect ✨'); return; }
-  const parts=[];
-  for(const [n,v] of Object.entries(it.eff)){ N[n]=clamp(N[n]+v,0,100); if(v>0) parts.push(`+${v} ${NEEDS.find(x=>x.k===n).lbl}`); }
-  if(it.need==='hunger') N.hygiene=clamp(N.hygiene-8,0,100); // what goes in…
-  S.xp+=2*(STAGES[S.stage].xpNeed===Infinity?0:1);
-  play(it.snd); bounce(); burst(it.fx,14); parts.forEach((p,i)=>setTimeout(()=>floatTxt(p),i*220));
-  render(); save();
-}
-function nope(){ baby.classList.remove('nope','bounce'); void baby.offsetWidth; baby.classList.add('nope'); play('nope'); setTimeout(()=>baby.classList.remove('nope'),500); }
-function bounce(){ baby.classList.remove('bounce','nope'); void baby.offsetWidth; baby.classList.add('bounce'); setTimeout(()=>baby.classList.remove('bounce'),600); }
-
-/* ---------- particles ---------- */
-const FX={hearts:['💖','💕','💗'],sparkle:['✨','⭐','💫'],stars:['⭐','🌟','✨','🌙'],notes:['🎵','🎶','✨'],bubbles:['🫧','○','◯']};
-function center(){ const r=babyImg.getBoundingClientRect(), s=stageEl.getBoundingClientRect(); return {x:r.left-s.left+r.width/2, y:r.top-s.top+r.height*.4, w:r.width}; }
-function burst(type,n){
-  const c=center(); const set=FX[type]||FX.hearts;
-  for(let i=0;i<n;i++){
-    const p=document.createElement('div'); p.className='p'; let ch=set[i%set.length];
-    if(type==='bubbles'){ p.style.cssText+=`width:${10+Math.random()*24}px;height:${0}px;`; const s=10+Math.random()*26; p.style.width=p.style.height=s+'px'; p.style.borderRadius='50%'; p.style.background='radial-gradient(circle at 30% 30%,#fff,rgba(160,230,255,.5) 40%,rgba(120,200,255,.15) 70%)'; p.style.border='1px solid rgba(255,255,255,.7)'; ch=''; }
-    p.textContent=ch; p.style.fontSize=(18+Math.random()*18)+'px'; p.style.left=c.x+'px'; p.style.top=c.y+'px';
-    fx.appendChild(p);
-    const a=Math.random()*Math.PI*2, d=60+Math.random()*c.w*.7, dx=Math.cos(a)*d, dy=Math.sin(a)*d*.7-60-Math.random()*60;
-    p.animate([{transform:'translate(-50%,-50%) scale(.3)',opacity:0},{transform:`translate(calc(-50% + ${dx*.4}px),calc(-50% + ${dy*.4}px)) scale(1.2)`,opacity:1,offset:.25},{transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.8) rotate(${(Math.random()-.5)*90}deg)`,opacity:0}],{duration:1100+Math.random()*700,easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish=()=>p.remove();
-  }
-}
-function floatTxt(t){ const c=center(); const d=document.createElement('div'); d.className='float'; d.textContent=t; d.style.left=(c.x+(Math.random()-.5)*60)+'px'; d.style.top=(c.y-40)+'px'; fx.appendChild(d); setTimeout(()=>d.remove(),1400); }
-let toastT; function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('show'),2200); }
-
-/* ---------- mood & render ---------- */
-function mood(){
-  const N=S.needs; if(S.sleeping) return 'sleeping';
-  const min=Math.min(N.hunger,N.hygiene,N.energy,N.fun,N.health);
-  if(min<15) return 'crying';
-  if(N.hygiene<35) return 'dirty';
-  if(N.hunger<35) return 'hungry';
-  if(N.energy<25) return 'tired';
-  if(N.health<40) return 'sick';
-  if(N.fun<35) return 'bored';
-  const avg=(N.hunger+N.hygiene+N.energy+N.fun+N.health)/5;
-  return avg>68 ? 'happy':'neutral';
-}
-let lastMood='', lastStage=-1, cryT=0;
-function render(){
-  const N=S.needs;
-  for(const n of NEEDS){ const v=N[n.k]; const b=bars[n.k]; b.i.style.width=v+'%'; b.i.style.background= v<25?'linear-gradient(90deg,#ff3b6b,#ff7a59)': v<50?'linear-gradient(90deg,#ffb84f,#ffe066)':'linear-gradient(90deg,#00c2d9,#2ff3ff)'; b.el.classList.toggle('low',v<25); }
-  const st=STAGES[S.stage];
-  const frac= st.xpNeed===Infinity?1:S.xp/st.xpNeed;
-  $('#thriveFill').style.width=(frac*100)+'%'; $('#thriveTxt').textContent= st.xpNeed===Infinity?'MAX':Math.floor(frac*100)+'%';
-  $('#stageName').textContent=st.name;
-  $('#btnSpeed').textContent=S.speed+'×'; $('#btnMute').textContent=S.muted?'🔇':'🔊';
-  const m=mood();
-  if(m!==lastMood||S.stage!==lastStage){
-    lastMood=m;
-    if(S.stage!==lastStage){ lastStage=S.stage; buildTray(); wrap.style.height=(st.h*68)+'%'; }
-    // toddler stage uses the dedicated mood sheet
-    const moodSheet = S.stage===2 && MOOD_IMG[m];
-    babyImg.src = moodSheet ? MOOD_IMG[m] : (S.stage===2 ? MOOD_IMG.neutral : st.img);
-    stageEl.className=''; stageEl.classList.add(m==='crying'?'crying':m==='happy'?'happy':m==='sleeping'?'sleeping':'m-'+m);
-    drawOverlay(m, !!moodSheet);
-  }
-  // hint which item is needed
-  const want={hungry:STAGES[S.stage].feed,dirty:'diaper',tired:'blanket',sick:'medicine',bored:STAGES[S.stage].play}[m];
-  let cryNeed=null; if(m==='crying'){ const k=NEEDS.reduce((a,b)=>N[a.k]<N[b.k]?a:b).k; cryNeed={hunger:STAGES[S.stage].feed,hygiene:'diaper',energy:'blanket',fun:STAGES[S.stage].play,health:'medicine'}[k]; }
-  for(const [k,el] of Object.entries(itemEls)) if(el.isConnected) el.classList.toggle('hint',k===(want||cryNeed));
-}
-function drawOverlay(m, sheet){
-  ov.innerHTML='';
-  const add=(cls,html,css)=>{const d=document.createElement('div'); d.className='ov '+cls; d.innerHTML=html||''; d.style.cssText+=css; ov.appendChild(d); return d;};
-  if(m==='sleeping'){ for(let i=0;i<3;i++){ const z=add('zzz','Z',`right:${2+i*3}%;top:${8+i*4}%;animation-delay:${i*.8}s`);} }
-  if(sheet && m!=='sleeping') return; // toddler mood sprite already shows it
-  if(m==='crying'){ const eyeY=S.stage===0?'30%':'22%'; for(let i=0;i<4;i++) add('tear','',`left:${i%2?58:36}%;top:${eyeY};animation-delay:${i*.25}s`); add('emote','😭','left:68%;top:-4%'); }
-  if(m==='dirty'){ for(let i=0;i<4;i++) add('stink','',`left:${[5,72,12,80][i]}%;top:${[45,40,70,68][i]}%;animation-delay:${i*.6}s`); add('emote','💩','left:68%;top:-4%'); }
-  if(m==='hungry') add('emote','🍼','left:68%;top:-4%');
-  if(m==='tired') add('emote','🥱','left:68%;top:-4%');
-  if(m==='sick')  add('emote','🤒','left:68%;top:-4%');
-  if(m==='bored') add('emote','🧸?','left:66%;top:-4%');
-  if(m==='happy' && S.stage!==2) add('emote','😊','left:70%;top:-2%;font-size:1.8rem');
+/* ---------------- simulation ---------------- */
+let paused=false, acc=0, curEv=null;
+function step(sdt){
+  if(!S.alive) return;
+  const st=stage();const yrs=sdt/D.YEAR_SECONDS;const prevAge=S.age;S.age+=yrs;S.t+=sdt;
+  const diff=(1+S.age/110)*(S.tech>=65?.9:S.tech<=35?1.06:1);S.techSum+=S.tech*sdt;S.techN+=sdt;S.tech+=(50-S.tech)*.003*sdt;
+  for(const k in st.needs){ if(k==='health'||k==='money') continue; const r=st.needs[k]*diff*traitMod(k)*((k==='fun'||k==='social')&&S.tutorRun>=3?1.5:1)*sdt; S.needs[k]=clamp(S.needs[k]+(D.NEEDS[k].inv?r:-r),0,100); }
+  if(st.living) S.money-=st.living*sdt;
+  if(S.age<18) S.money+=0.4*sdt; // pocket money
+  if(S.age>=65) S.money+=(6+2*S.careerPeak)*sdt; // pension: scales with career peak
+  // era mechanic: AI baby monitor warns early about the most urgent need
+  if(EP[st.id]&&EP[st.id].mechanic==='monitor'&&S.tech>=30&&S.t-S.warnT>6){const w=Object.keys(st.needs).filter(k=>k!=='health').sort((a,b)=>goodness(a)-goodness(b))[0];if(goodness(w)<35){S.warnT=S.t;toast('📟 AI monitor: Ken will cry soon ('+D.NEEDS[w].l+')');}}
+  // health
+  let bad=0,sum=0,n=0;for(const k in st.needs){if(k==='health')continue;const g=goodness(k);sum+=g;n++;if(g<15)bad++;}
+  if(S.money<0&&st.living){bad+=0.5;}
+  let dh=-0.8*bad;for(const id in S.ills) dh-=D.ILLS[id].drain*(S.hospital>0?.4:1);
+  if(bad===0&&sum/n>45&&!Object.keys(S.ills).length) dh+=0.5;
+  S.health=clamp(S.health+dh*sdt,0,S.base);
+  // baseline erodes with age
+  const er=S.age<50?0:S.age<70?.25:S.age<80?.6:1.1;S.base=clamp(S.base-er*yrs*(S.traits.athletic?.8:1),5,100);
+  // happiness
+  const target=clamp(sum/n-(Object.keys(S.ills).length*8),0,100);S.happy+=(target-S.happy)*Math.min(1,.05*sdt);S.happySum+=S.happy*sdt;S.happyN+=sdt;
+  if(S.hospital>0) S.hospital=Math.max(0,S.hospital-yrs);
+  // illnesses by condition (rolled per sim second)
+  const p=x=>rnd()<x*sdt;
+  if((goodness('food')<20||(st.needs.hygiene&&goodness('hygiene')<20)||S.health<35)&&p(.012)) addIll('flu');
+  if(S.age>=12&&S.happy<25&&p(.01)) addIll('depression');
+  if(st.needs.stress&&S.needs.stress>85&&p(.02)) addIll('burnout');
+  if(S.age>=45&&p(.0012*(S.age-44)/10*(st.needs.fitness&&S.needs.fitness<30?2:1))) addIll('back_pain');
+  if(S.age>=50&&p(.0008*(S.age-49)/10*(S.traits.smoker?2.5:1)*(S.traits.athletic?.6:1))) addIll('heart');
+  if(S.age>=65&&p(.0015*(S.age-64)/10)) addIll('arthritis');
+  if(S.age>=82&&p(.001*(S.age-80)/5)) addIll('frailty');
+  // milestones
+  if(prevAge<80&&S.age>=80) addAch('Reached 80');
+  if(prevAge<100&&S.age>=100) addAch('Centenarian');
+  // old age: hazard per year after 80
+  if(Math.floor(S.age)>Math.floor(prevAge)&&S.age>80){const h=.035*Math.pow(S.age-79,1.35)*(1+(100-S.health)/100);if(rnd()<h) return die('Old age');}
+  if(S.health<=0){const il=Object.keys(S.ills);return die(il.length?'Untreated '+D.ILLS[il[0]].l.toLowerCase():'Neglect');}
+  // stage change
+  const si=stageIdxForAge(S.age);if(si!==S.stageIdx){S.stageIdx=si;for(const k in D.STAGES[si].needs){if(k!=='health'&&k!=='money')S.needs[k]=D.NEEDS[k].inv?20:75;}if(si===4&&S.money<300)S.money=300;stageUp();return;}
+  // events
+  S.nextEvent-=sdt;if(S.nextEvent<=0){S.nextEvent=yearsToSec(1+rnd());fireEvent();}
 }
 
-/* ---------- loop ---------- */
-let last=performance.now(), saveAcc=0, running=false, evolving=false;
-function tick(now){
-  const dt=Math.min(.25,(now-last)/1000)*S.speed; last=now;
-  if(running && !evolving){
-    const N=S.needs, sl=S.sleeping;
-    const stageMul=1+S.stage*.12; // older kids need a bit more
-    N.hunger -=1.0*dt*stageMul*(sl?.4:1);
-    N.hygiene-=0.7*dt*(sl?.5:1);
-    N.energy += sl? 4.5*dt : -0.55*dt*stageMul;
-    N.fun    -= sl? 0 : 0.85*dt*stageMul;
-    const low=[N.hunger,N.hygiene,N.energy,N.fun].filter(v=>v<20).length;
-    N.health += low? -0.5*low*dt : (Math.min(N.hunger,N.hygiene,N.energy,N.fun)>50?0.25*dt:0);
-    for(const k in N) N[k]=clamp(N[k],0,100);
-    if(sl && N.energy>=100){ S.sleeping=false; play('wake'); toast('Ken.AI woke up refreshed! ☀️'); }
-    const avg=(N.hunger+N.hygiene+N.energy+N.fun+N.health)/5;
-    const st=STAGES[S.stage];
-    if(st.xpNeed!==Infinity){
-      if(avg>=60) S.xp+= dt*(avg>=80?1.6:1);
-      else if(avg<35) S.xp=Math.max(0,S.xp-dt*.5);
-      if(S.xp>=st.xpNeed) evolve();
+/* ---------------- events ---------------- */
+function eventPool(){const st=stage();return (D.EVENTS[st.id]||[]).concat(D.EVENTS.any.filter(e=>S.age>=(e.min||0))).filter(e=>(!e.need||S.achs.includes(e.need))&&(!e.minTech||S.tech>=e.minTech)&&(!e.plush||S.plush)&&(!e.req||(e.req==='partner'?S.partner:e.req==='kids'?S.kids>0:true)));}
+function fireEvent(ev){
+  ev=ev||pick(eventPool());if(!ev) return;S.events++;
+  paused=true;$('#evTitle').textContent=ev.t;curEv=ev;
+  const js=JSON.stringify(ev.c);const kind=/"(ill|hospital|death)"/.test(js)?'health':/"ach"|"careerPeak"/.test(js)?'good':/"ill"|money":-/.test(js)&&!/"ach"/.test(js)?'bad':'normal';
+  $('.event-card').dataset.kind=kind;$('#evKind').textContent=ev.tech?'Tech moment':{health:'Health',good:'Milestone',bad:'Setback',normal:'Life event'}[kind];$('#evText').textContent=ev.x;
+  const box=$('#evChoices');box.innerHTML='';
+  for(const c of ev.c){const b=document.createElement('button');b.className='choice';b.textContent=c.l;b.onclick=()=>{$('#eventModal').classList.add('hidden');paused=false;applyEff(c.e);if(c.msg)toast(c.msg);render(true);save();};box.appendChild(b);}
+  $('#eventModal').classList.remove('hidden');play('chime');
+  const KI={normal:['photo_album','📰'],good:['party_cup','⭐'],bad:['bandaid','⚡'],health:['stethoscope','✚']}[$('.event-card').dataset.kind];$('#evIcon').innerHTML=ART.icon(ev.tech?'holo_laptop':KI[0],KI[1]);
+  setTimeout(()=>box.firstChild&&box.firstChild.focus(),50);
+}
+function applyEff(e){
+  if(!e) return;
+  if(e.chance){const [pr,a,b]=e.chance;applyEff(rnd()<pr?a:(b||{}));}
+  for(const [k,v] of Object.entries(e)){
+    if(k in S.needs&&k!=='health'){S.needs[k]=clamp(S.needs[k]+v,0,100);}
+    else switch(k){
+      case 'health':S.health=clamp(S.health+v,0,S.base);break;
+      case 'happy':S.happy=clamp(S.happy+v*3,0,100);break;
+      case 'money':S.money+=v;break;
+      case 'base':S.base=clamp(S.base+v,5,100);break;
+      case 'rel':S.rel=clamp(S.rel+relGain(v),0,100);break;
+      case 'tech':setTech(v);break;
+      case 'moment':addMoment(v);break;
+      case 'legacy':S.legacy+=v;break;
+      case 'exo':S.exo=1;break;
+      case 'plush':S.plush=1;break;
+      case 'trait':addTrait(v);break;
+      case 'ill':addIll(v);break;
+      case 'ach':addAch(v);break;
+      case 'kids':S.kids+=v;break;
+      case 'partner':S.partner=true;break;
+      case 'careerPeak':S.careerPeak=Math.min(4,S.careerPeak+v);break;
+      case 'hospital':S.hospital=1;break;
+      case 'death':return die(v);
     }
-    S.age+=dt;
-    const m=mood();
-    if(m==='crying'){ cryT-=dt/S.speed; if(cryT<=0){ play('cry'); cryT=4; } } else cryT=0;
-    saveAcc+=dt/S.speed; if(saveAcc>3){ saveAcc=0; save(); }
-    render();
   }
-  requestAnimationFrame(tick);
 }
-function evolve(){
-  if(S.stage>=3) return;
-  evolving=true; S.stage++; S.xp=0; S.sleeping=false;
-  for(const k in S.needs) S.needs[k]=Math.max(S.needs[k],70);
-  save();
-  $('#evoImg').src=STAGES[S.stage].img; $('#evoTxt').textContent=STAGES[S.stage-1].txt;
-  $('#evolve').classList.remove('hidden'); play('fanfare');
-  confetti();
-}
-function confetti(){
-  const host=$('#evolve'); const cols=['#2ff3ff','#ff4fd8','#ffe066','#7cff8a','#fff'];
-  for(let i=0;i<70;i++){ const p=document.createElement('div'); p.className='p'; p.style.cssText=`left:${Math.random()*100}%;top:-20px;width:${6+Math.random()*6}px;height:${10+Math.random()*8}px;background:${cols[i%5]};border-radius:2px;z-index:1`; host.appendChild(p);
-    p.animate([{transform:`translateY(0) rotate(0)`},{transform:`translate(${(Math.random()-.5)*160}px,${innerHeight+40}px) rotate(${Math.random()*900}deg)`}],{duration:2200+Math.random()*2200,delay:Math.random()*900,easing:'cubic-bezier(.3,.6,.6,1)',fill:'forwards'}).onfinish=()=>p.remove(); }
-}
-$('#btnEvoOk').onclick=()=>{ $('#evolve').classList.add('hidden'); evolving=false; lastStage=-1; render(); bounce(); burst('stars',16); play('giggle'); };
 
-/* ---------- screens & controls ---------- */
-function start(){ ac(); S.started=true; $('#title').classList.add('hidden'); $('#game').classList.remove('hidden'); running=true; lastStage=-1; lastMood=''; render(); play('chime'); if(awayMsg){toast(awayMsg); awayMsg=null;} save(); }
-$('#btnStart').onclick=start;
-$('#btnReset').onclick=()=>{ if(confirm('Start over with a brand-new baby?')){ const m=S.muted; S=fresh(); S.muted=m; save(); $('#btnStart').textContent='▶ Start'; toast('New baby!'); } };
-if(S.started && (S.stage>0||S.xp>0)) $('#btnStart').textContent='▶ Continue';
-$('#btnHome').onclick=()=>{ running=false; save(); $('#game').classList.add('hidden'); $('#title').classList.remove('hidden'); $('#btnStart').textContent='▶ Continue'; };
-const SPEEDS=DEBUG?[1,2,4,10,30]:[1,2,4];
-$('#btnSpeed').onclick=()=>{ S.speed=SPEEDS[(SPEEDS.indexOf(S.speed)+1)%SPEEDS.length]||1; toast(`Time speed ${S.speed}×`); render(); save(); };
-$('#btnMute').onclick=()=>{ S.muted=!S.muted; render(); save(); if(!S.muted) play('tap'); };
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); else { last=performance.now(); } });
-window.addEventListener('pagehide',save);
-
-if(DEBUG){
-  const d=$('#debug'); d.classList.remove('hidden');
-  const btn=(t,f)=>{const b=document.createElement('button'); b.textContent=t; b.onclick=f; d.appendChild(b);};
-  btn('+XP',()=>{S.xp+=STAGES[S.stage].xpNeed*.34;}); btn('Evolve',()=>{S.xp=1e9;});
-  btn('Drain',()=>{for(const k in S.needs) S.needs[k]=10;}); btn('Dirty',()=>{S.needs.hygiene=20;}); btn('Reset',()=>{S=fresh();S.started=true;lastStage=-1;});
-  if(Q.has('speed')) S.speed=+Q.get('speed')||1;
-  if(Q.has('needs')){ const v=Q.get('needs').split(',').map(Number); NEEDS.forEach((n,i)=>{ if(!isNaN(v[i])) S.needs[n.k]=v[i]; }); }
-  if(Q.has('sleep')) S.sleeping=true;
+/* ---------------- actions ---------------- */
+function doAction(a,el){
+  if(!S.alive||paused) return;
+  const now=S.t;if((S.cds[a.id]||0)>now){nope(el);toast('Not yet…');return;}
+  if(a.req==='kids'&&!S.kids){nope(el);toast('No grandkids yet');return;}
+  if(a.cost&&S.money<a.cost){nope(el);toast('Not enough money');return;}
+  // energy-gated actions
+  const st=stage();
+  if(a.eff.energy<0&&st.needs.energy&&S.needs.energy<Math.abs(a.eff.energy)){nope(el);toast('Too tired');return;}
+  if(a.cost) S.money-=a.cost;
+  const em=(1+S.careerPeak*.15)*(S.tech>=65?1.1:1);if(a.earn) S.money+=a.earn*em;
+  const parts=[];
+  for(const [k,v] of Object.entries(a.eff)){ if(!v) continue; if(k==='health'){S.health=clamp(S.health+v,0,S.base);} else if(k in S.needs){S.needs[k]=clamp(S.needs[k]+v,0,100);} if(k in st.needs&&Math.abs(v)>=5) parts.push((v>0?'+':'')+v+' '+D.NEEDS[k].l); }
+  if(a.earn) parts.push('+'+Math.round(a.earn*em)+' 💰');
+  if(a.happy) S.happy=clamp(S.happy+a.happy*2,0,100);
+  if(a.rel) S.rel=clamp(S.rel+relGain(a.rel),0,100);
+  if(a.ai) setTech(a.ai*.3); else setTech(-.15);
+  if(a.moment) addMoment(a.moment);
+  if(a.plush) S.plush=1;
+  if(a.exo) S.exo=1;
+  if(a.legacy) S.legacy+=a.legacy;
+  if(a.bondCost) S.rel=clamp(S.rel-a.bondCost*.5,0,100);
+  if(a.companion) S.happy=clamp(S.happy+1,0,100); // AI companionship: small; real romance (date/partner events) always gives more
+  if(a.id==='tutor') S.tutorRun++; if(a.id==='playout'||a.id==='friends'||a.id==='selfstudy') S.tutorRun=0;
+  if(a.early&&Object.keys(S.ills).length) addMoment('AI caught an illness early');
+  // low reliance: doing it yourself costs more time and energy
+  if(!a.ai&&S.tech<=35&&st.needs.energy&&a.eff.energy<0) S.needs.energy=clamp(S.needs.energy-2,0,100);
+  if(a.base) S.base=clamp(S.base+a.base,5,100);
+  if(a.trait&&rnd()<a.trait[1]) addTrait(a.trait[0]);
+  if(a.id==='work'||a.id==='sprint'||a.id==='agentsprint'){ if(S.needs.career>=95&&S.careerPeak<4&&rnd()<.03){S.careerPeak++;S.needs.career=55;toast('📈 Promoted on merit');addAch('Promoted');} }
+  if(['nap','sleep','rest'].includes(a.id)) S.lastSleep=now;
+  // treatment
+  for(const id in S.ills){const I=D.ILLS[id];if(I.tx.includes(a.id)){S.ills[id].tx++;if(S.ills[id].tx>=I.need){delete S.ills[id];toast('✅ '+I.l+' treated');play('chime');renderConds();}}}
+  S.cds[a.id]=now+(a.cd||1.2);
+  bounce();float(parts.join('  '),el);burst(a.e);play(a.cost?'coin':'pop');render(true);
 }
-if(Q.has('autostart')) start();
-if(DEBUG && Q.has('evolve')) setTimeout(()=>{S.xp=1e9;},300);
-render();
-requestAnimationFrame(tick);
+
+/* ---------------- death ---------------- */
+function die(cause){
+  if(!S.alive) return;S.alive=false;S.cause=cause;paused=true;save();
+  const sc=score();const list=bests();list.push({name:S.name,age:Math.floor(S.age),score:sc,cause,when:new Date().toISOString().slice(0,10)});list.sort((a,b)=>b.score-a.score);
+  try{localStorage.setItem(BEST_KEY,JSON.stringify(list.slice(0,5)));localStorage.removeItem(SAVE_KEY);}catch(e){}
+  heartbeatOut(()=>{ showEpitaph(sc,list[0]); });
+}
+function showEpitaph(sc,best){
+  $('#tomb').innerHTML=ART.tombstone()+(S.legacy>0||S.tech>=50?`<div class="avatar" title="AI avatar">${ART.avatar('elder')}</div>`:'');
+  const bg=ART.deathBg();$('#death').style.backgroundImage=bg||'';
+  $('#epName').textContent=S.name;
+  $('#epLine').textContent=`${YEAR0}–${YEAR0+Math.floor(S.age)} · aged ${Math.floor(S.age)} · ${S.cause}`;
+  const avgH=Math.round(S.happyN?S.happySum/S.happyN:S.happy);
+  const careers=['None','Entry level','Senior','Manager','Director','Executive'];
+  const items=[`Life satisfaction: ${avgH}/100`,`Relationships: ${Math.round(S.rel)}/100${S.partner?' · had a partner':''}${S.kids?` · ${S.kids} child${S.kids>1?'ren':''}`:''}`,`Career peak: ${careers[Math.min(careers.length-1,S.careerPeak+(S.achs.includes('First job')?1:0))]}`,`Savings: ${Math.round(S.money)}`,`Traits: ${Object.keys(S.traits).map(t=>D.TRAITS[t].l).join(', ')||'none'}`,`Achievements: ${S.achs.join(', ')||'none'}`];
+  const ta=S.techN?S.techSum/S.techN:S.tech;const style=ta>=65?'Early adopter':ta<=35?'Analog soul':'Balanced';const path=ta>=65?'Embraced AI':ta<=35?'Stayed human':'Balanced';
+  items.push(`Tech style: ${style}`,`Tech path: ${path} (reliance ${Math.round(ta)}/100)`,`Tech moments: ${S.moments.join(' · ')||'none'}`);if(S.legacy)items.push(`Digital legacy: ${Math.round(S.legacy)} (adds ${Math.min(300,Math.round(S.legacy*2))} to score)`);
+  $('#epSummary').innerHTML=items.map((t,i)=>`<li style="animation-delay:${.15*i}s">${esc(t)}</li>`).join('');lastShare=`${S.name} (${YEAR0}–${YEAR0+Math.floor(S.age)}) lived to ${Math.floor(S.age)} in Ken.AI. Life score ${sc}. ${items.find(x=>x.startsWith('Tech path'))}.`;
+  $('#epScore').textContent=sc;$('#epBest').textContent=best&&best.score>sc?`(best: ${best.score}, ${best.name})`:'(new best!)';
+  $('#death').classList.remove('hidden');
+}
+let lastShare='';
+$('#btnShare').onclick=async()=>{try{if(navigator.share){await navigator.share({text:lastShare});}else{await navigator.clipboard.writeText(lastShare);toastDeath('Copied to clipboard');}}catch(e){}};
+function toastDeath(t){const b=$('#btnShare');const o=b.textContent;b.textContent=t;setTimeout(()=>b.textContent=o,1500);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------------- render ---------------- */
+let lastMoodKey='',lastStageRendered=-1,uiT=0;
+function moodNow(){
+  if(S.hospital>0) return 'sleeping'; // SPEC: hospital uses the sleeping pose
+  if(S.t-S.lastSleep<2.5) return 'sleeping';
+  const il=Object.keys(S.ills);if(il.length) return D.ILLS[il[0]].mood||'sick';
+  const st=stage();
+  if(st.needs.stress&&S.needs.stress>70) return 'stressed';
+  if(st.needs.pain&&S.needs.pain>70) return 'stressed'; // senior/elder 'pain' sprite
+  if(Object.keys(st.needs).some(isBad)||S.happy<30) return 'sad';
+  if(S.happy>65) return 'happy';
+  return 'neutral';
+}
+/* sprite anchoring (SPEC): all sprites share one scale (adult ~528px tall = 45% of the stage view), foot baseline = bottom - 8px */
+const SPRITE_REF=528;
+/* tech-prop anchor table, % of the sprite box: [left, top, width] (glasses on the face, watch on the wrist, brace on the knee) */
+const ANCHORS={
+  smartwatch:{adult:[10,47,16],middle:[10,47,16]},
+  exo_knee_brace:{senior:[33,66,22],elder:[33,66,22]}
+};
+const BADGES=['bandage','arm_cast_sling'];
+/* SPEC: worn injuries exist only for the adult as full replacement sprites (gown = hospital stay, bandage = head injury, sling = broken arm) */
+function injuryAlt(st,ills){if(!S.alive||!ASSETS['char.'+st.id+'.gown'])return null;if(S.hospital>0)return 'gown';const ov=ills.map(id=>D.ILLS[id].ov);if(ov.includes('arm_cast_sling'))return 'sling';if(ov.includes('bandage'))return 'bandage';return null;}
+function badgeOv(id){const o=D.ILLS[id].ov;if(!BADGES.includes(o))return '';if(S&&ASSETS['char.'+stage().id+'.gown'])return '';return ART.overlay(o);}
+function spriteK(){return ($('#stage').clientHeight||400)*.42/SPRITE_REF;} // adult = 42% of scene height; other stages keep the manifest's age ratios
+/* Feet on the floor: crop the portrait bg (object-fit:cover) so its floor line (manifest floorY) lands at ~90% of the scene, then stand Ken on it */
+const FOOT_AT=.90, BED_Y=.70;
+function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
+  const room=$('#bg').dataset.room||stage().room;const fy=(ART.FLOOR&&ART.FLOOR[room])||.9;
+  const im=$('#bg img');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;const s=Math.max(W/iw,H/ih),ihs=ih*s;
+  const off=clamp(FOOT_AT*H-fy*ihs,H-ihs,0);
+  for(const i of document.querySelectorAll('#bg img,#bgOld img'))i.style.objectPosition=`50% ${off}px`;
+  const w=$('#charWrap');const inbed=w.classList.contains('inbed');
+  const foot=H-(off+(inbed?BED_Y:fy)*ihs);sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
+addEventListener('resize',()=>placeScene());
+function trayEnd(){const t=$('#tray');t.classList.toggle('end',t.scrollLeft+t.clientWidth>=t.scrollWidth-4);}
+$('#tray').addEventListener('scroll',trayEnd,{passive:true});
+function fitSprite(){const k=spriteK();const w=$('#charWrap');w.style.setProperty('--k',k);
+  const im=$('#char img');if(im){const set=()=>{w.style.setProperty('--sh',(im.naturalHeight*k)+'px');};if(im.complete&&im.naturalHeight)set();else im.onload=set;w.style.setProperty('--mask',`url("${im.getAttribute('src')}")`);}
+  else w.style.setProperty('--sh',($('#stage').clientHeight*.5)+'px');
+  const pr=$('#props img');if(pr){const s=()=>$('#props').style.setProperty('--ph',(pr.naturalHeight*k*.55)+'px');if(pr.complete&&pr.naturalHeight)s();else pr.onload=s;}}
+addEventListener('resize',()=>{if(S){fitSprite();lastMoodKey='';}});
+function setWideBg(room){const wb=$('#wideBg');if(!wb)return;const u=ASSETS[`bg.${room}.wide`];wb.style.backgroundImage=u?`url(${u})`:'';}
+function ageDigits(n){const el=$('#hudAge');const s=String(n);if(el.dataset.v===s)return;const old=el.dataset.v||'';el.dataset.v=s;
+  el.innerHTML=s.split('').map((c,i)=>`<span class="${old[i]!==c||old.length!==s.length?'d':''}">${c}</span>`).join('');}
+function buildStageUI(){
+  const st=stage();
+  const ne=$('#needs');ne.innerHTML='';
+  for(const k in st.needs){const N=D.NEEDS[k];const d=document.createElement('div');d.className='need'+(N.inv?' inv':'');d.dataset.k=k;d.title=N.l;d.innerHTML=`<div class="ic" aria-hidden="true">${N.i}</div><span>${N.l}</span><div class="bar" role="meter" aria-label="${N.l}" aria-valuemin="0" aria-valuemax="100"><i></i></div><b class="val">0</b>`;ne.appendChild(d);}
+  const tr=$('#tray');tr.innerHTML='';
+  for(const a of D.ACTIONS.filter(a=>a.st.includes(st.id))){const b=document.createElement('button');b.className='card';b.dataset.id=a.id;b.innerHTML=`${ART.icon(a.icon,a.e)}<span class="lbl">${a.l}</span>${a.cost?`<span class="cost">${a.cost}</span>`:''}<i class="cdbar"></i>`;b.setAttribute('aria-label',a.l+(a.cost?`, costs ${a.cost}`:''));b.onclick=()=>doAction(a,b);tr.appendChild(b);}
+  lastStageRendered=S.stageIdx;lastMoodKey='';renderConds();requestAnimationFrame(trayEnd);
+}
+function renderConds(){ if(!S) return; $('#conditions').innerHTML=Object.keys(S.ills).map(id=>{const I=D.ILLS[id];return `<span class="cond" title="Treat with: ${I.tx.join(', ')}">${badgeOv(id)?`<i class="cbadge">${badgeOv(id)}</i>`:'🤒'} ${I.l} <small>${S.ills[id].tx}/${I.need} · ${I.tx.map(t=>(D.ACTIONS.find(a=>a.id===t)||{l:t}).l).join(' / ')}</small></span>`}).join(''); lastMoodKey=''; }
+let lastBadges='';
+function render(force){
+  if(!S) return;
+  if(lastStageRendered!==S.stageIdx) buildStageUI();
+  const st=stage();
+  $('#hudName').textContent=S.name;$('#hudStage').textContent=st.name;$('#hudEra').textContent=EP[st.id]?EP[st.id].era:'';
+  ageDigits(Math.floor(S.age));$('#hudYear').textContent=YEAR0+Math.floor(S.age);
+  $('#hudMoney').textContent=Math.round(S.money);$('#hudHappy').textContent=Math.round(S.happy);$('#hudBase').textContent=Math.round(S.base);$('#hudScore').textContent=score();
+  for(const el of document.querySelectorAll('#needs .need')){const k=el.dataset.k;const v=needVal(k);const g=goodness(k);const b=el.querySelector('.bar');b.firstChild.style.width=v+'%';b.setAttribute('aria-valuenow',Math.round(v));el.querySelector('.val').textContent=Math.round(v);el.classList.toggle('low',g<40);el.classList.toggle('crit',g<20);}
+  for(const c of document.querySelectorAll('#tray .card')){const a=D.ACTIONS.find(x=>x.id===c.dataset.id);const left=(S.cds[a.id]||0)-S.t;const tot=a.cd||1.2;c.querySelector('.cdbar').style.width=(left>0?left/tot*100:0)+'%';c.classList.toggle('cant',!!(a.cost&&S.money<a.cost)||(a.req==='kids'&&!S.kids));}
+  if(!S.alive&&force!==1&&force!==2){if(DEBUG)renderDebug();return;}
+  const room=S.hospital>0?'hospital':st.room;const mood=S.alive?moodNow():'sleeping';
+  let ovs=Object.keys(S.ills).map(id=>D.ILLS[id].ov);
+  if(st.id==='elder') ovs=ovs.filter(o=>o!=='cane'); // elder sprites already hold a cane
+  if((st.id==='teen'||st.id==='youngadult')&&S.tech>=40)ovs.push('ar_glasses');if((st.id==='adult'||st.id==='middle')&&S.tech>=35)ovs.push('smartwatch');if((st.id==='senior'||st.id==='elder')&&S.exo)ovs.push('exo_knee_brace');
+  ovs=[...new Set(ovs)];
+  const plush=S.plush&&st.id==='toddler'?'ai_plush_new':S.plush&&st.id==='elder'?'ai_plush_worn':'';
+  const ills=Object.keys(S.ills);
+  const sick=ills.some(id=>D.ILLS[id].ov==='pale'||D.ILLS[id].mood==='sick'),fever=ills.some(id=>['flu','teething'].includes(id)),blue=ills.some(id=>id==='depression'||id==='burnout');
+  document.body.classList.toggle('blue',blue);$('#stage').classList.toggle('hosp',S.hospital>0);
+  const key=st.id+mood+room+ovs.join()+plush+sick+fever+(S.hospital>0);
+  if(key!==lastMoodKey||force===2){
+    const roomChanged=$('#bg').dataset.room!==room;
+    if(roomChanged&&$('#bg').dataset.room&&force!==2){$('#bgOld').innerHTML=$('#bg').innerHTML;$('#bgOld').classList.remove('out');void $('#bgOld').offsetWidth;$('#bgOld').classList.add('out');}
+    if(roomChanged||force===2){$('#bg').innerHTML=ART.bg(room);$('#bg').dataset.room=room;setWideBg(room);}
+    lastMoodKey=key;const alt=injuryAlt(st,ills);$('#char').innerHTML=(alt&&ART.charAlt(st.id,alt))||ART.char(st.id,mood);
+    $('#roomProp').innerHTML=ART.roomProp(room);
+    $('#under').innerHTML=ovs.includes('wheelchair')?ART.overlay('wheelchair'):'';
+    $('#overlay').innerHTML=ovs.filter(o=>mood!=='sleeping'&&ANCHORS[o]&&ANCHORS[o][st.id]).map(o=>{const [l,t,w]=ANCHORS[o][st.id];return `<div class="anc anc-${o}" style="left:${l}%;top:${t}%;width:${w}%">${ART.overlay(o)}</div>`}).join('');
+    const bd=ovs.filter(o=>BADGES.includes(o)).join();
+    if(bd!==lastBadges){const gone=lastBadges&&lastBadges.split(',').filter(o=>o&&!bd.includes(o));
+      if(gone&&gone.length){const fx=$('#fx');for(let i=0;i<5;i++){const s=document.createElement('div');s.className='spark';s.textContent='✦';s.style.left=(70+rnd()*20)+'%';s.style.top=(55+rnd()*15)+'%';s.style.setProperty('--dx',(rnd()-.5)*40+'px');s.style.setProperty('--dy',-30-rnd()*30+'px');fx.appendChild(s);setTimeout(()=>s.remove(),800);}}
+      lastBadges=bd;}
+    $('#techBadge').innerHTML=ovs.includes('ar_glasses')&&mood!=='sleeping'?`<div class="badge" title="Wearing AR glasses">${ART.overlay('ar_glasses')}</div>`:'';
+    $('#props').innerHTML=plush&&ASSETS['char.plush.'+(plush.endsWith('new')?'new':'worn')]?`<img src="${ASSETS['char.plush.'+(plush.endsWith('new')?'new':'worn')]}" alt="AI plush">`:plush?ART.overlay(plush):'';
+    const w=$('#charWrap');w.classList.toggle('sick',sick&&S.hospital<=0);w.classList.toggle('fever',fever&&S.hospital<=0);w.classList.toggle('gown',S.hospital>0&&!alt);w.classList.toggle('inbed',S.hospital>0&&!alt);
+    ['m-neutral','m-happy','m-sad','m-sick','m-sleeping','m-stressed'].forEach(c=>w.classList.remove(c));w.classList.add('m-'+mood);
+    fitSprite();placeScene();{const bi=$('#bg img');if(bi&&!bi.complete)bi.addEventListener('load',placeScene,{once:true});}
+  }
+  $('#btnSpeed').textContent=settings.speed+'×';$('#btnMute').textContent=settings.muted?'🔇':'🔊';
+  document.body.classList.toggle('danger',S.health<25&&S.alive);
+  if(DEBUG) renderDebug();
+}
+/* stage-up (~1.5s, SPEC): flash + chime, age odometer, chip pop, sprite morph, bg crossfade, toast */
+function stageUp(){
+  paused=true;const st=stage();
+  const f=$('#flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');play('chime');
+  setTimeout(()=>{$('#hudAge').dataset.v='';render();const c=$('#hudStage');c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');},200);
+  setTimeout(()=>{buildStageUI();render(1);const ch=$('#char');ch.classList.remove('xfade');void ch.offsetWidth;ch.classList.add('xfade');},300);
+  setTimeout(()=>{toast(`${S.name} is now ${/^[aeiou]/i.test(st.name)?'an':'a'} ${st.name}${EP[st.id]?' · '+EP[st.id].era:''}`);if(st.id!=='baby')confetti();},900);
+  setTimeout(()=>{paused=false;save();},1500);
+}
+$('#btnSuOk').onclick=()=>{$('#stageUp').classList.add('hidden');paused=false;};
+
+/* ---------------- juice ---------------- */
+let toastT;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200);}
+function bounce(){const c=$('#charWrap');c.classList.remove('bounce');void c.offsetWidth;c.classList.add('bounce');}
+function nope(el){if(!el)return;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');play('nope');}
+function float(txt,el){if(!txt)return;const f=document.createElement('div');f.className='float';f.textContent=txt;$('#fx').appendChild(f);setTimeout(()=>f.remove(),1400);}
+function burst(emo){const fx=$('#fx');for(let i=0;i<6;i++){const p=document.createElement('div');p.className='pt';p.textContent=emo;const dx=(rnd()-.5)*160,dy=-60-rnd()*90;p.style.setProperty('--dx',dx+'px');p.style.setProperty('--dy',dy+'px');fx.appendChild(p);setTimeout(()=>p.remove(),900);}}
+function confetti(){const fx=$('#fx');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='cf';p.style.left=rnd()*100+'%';p.style.background=pick(['#2ff3ff','#a78bfa','#ffe066','#ff7a59','#7dd3fc']);p.style.animationDelay=rnd()*.4+'s';fx.appendChild(p);setTimeout(()=>p.remove(),2200);}}
+
+/* ---------------- audio ---------------- */
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,vol,when){const c=ac();if(!c||settings.muted)return;const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=f;const t=c.currentTime+(when||0);g.gain.setValueAtTime(vol||.08,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.02);}
+function play(n){({pop:()=>tone(660,.12,'triangle'),coin:()=>{tone(880,.08,'square',.04);tone(1320,.12,'square',.04,.07)},nope:()=>tone(160,.18,'sawtooth',.05),chime:()=>{tone(784,.3);tone(1046,.4,'sine',.06,.12)},fanfare:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.25,'triangle',.07,i*.11))}[n]||(()=>{}))();}
+/* death sequence (~7s, SPEC), skippable after 2s; reduced motion: grayscale snap + 400ms fade */
+let deathTimers=[],deathDone=null;
+function heartbeatOut(done){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;deathDone=done;deathTimers=[];
+  const T=(ms,f)=>deathTimers.push(setTimeout(f,ms));
+  document.body.classList.add('dying');
+  if(reduce){T(400,finishDeath);return;}
+  // heartbeat 70 bpm for 1.5s, slowing to 40 bpm by 3.5s
+  let t=0,bpm=70;while(t<3500){const at=t;T(at,()=>{tone(70,.18,'sine',.25);setTimeout(()=>tone(60,.2,'sine',.2),160);});bpm=t<1500?70:70-30*Math.min(1,(t-1500)/2000);t+=60000/bpm;}
+  T(1500,()=>document.body.classList.add('dying2'));
+  T(2000,()=>{$('#skipHint').classList.remove('hidden');});
+  T(3500,()=>{lastMoodKey='';render(1);$('#char').innerHTML=ART.char(stage().id,'sleeping');fitSprite();placeScene();});
+  T(4700,()=>$('#charWrap').classList.add('gone')); // lying pose held 1.2s at full opacity, then 1.2s fade
+  T(5900,()=>{$('#flat').classList.add('go');tone(1000,.8,'sine',.06);});
+  T(6700,finishDeath);
+}
+function finishDeath(){deathTimers.forEach(clearTimeout);deathTimers=[];$('#skipHint').classList.add('hidden');const d=deathDone;deathDone=null;if(d)d();}
+$('#stage').addEventListener('click',()=>{if(deathDone&&!$('#skipHint').classList.contains('hidden'))finishDeath();});
+
+/* ---------------- loop ---------------- */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.25,(now-last)/1000);last=now;
+  if(S&&S.alive&&gameVisible()&&autopilot)autoAct();
+  if(S&&S.alive&&!paused&&gameVisible()){acc+=dt*settings.speed;const stepSize=.1;let guard=0;while(acc>=stepSize&&guard++<700){step(stepSize);acc-=stepSize;if(autopilot&&S.alive&&(S.t*2|0)!==(lastAuto*2|0)){lastAuto=S.t;autoAct();}if(paused||!S.alive)break;}if(guard>=700)acc=0;}
+  uiT+=dt;if(S&&uiT>.1){uiT=0;render();}
+  requestAnimationFrame(frame);
+}
+function gameVisible(){return !$('#game').classList.contains('hidden');}
+setInterval(()=>{if(S&&S.alive)save();},5000);
+addEventListener('pagehide',save);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();last=performance.now();});
+
+/* ---------------- screens ---------------- */
+function showTitle(){
+  $('#game').classList.add('hidden');$('#death').classList.add('hidden');$('#title').classList.remove('hidden');
+  const s=load();$('#btnContinue').classList.toggle('hidden',!s);if(s)$('#btnContinue').textContent=`▶ Continue ${s.name} (age ${Math.floor(s.age)})`;
+  const b=bests();$('#bestBox').innerHTML=b.length?'<h3>Best lives</h3><ol>'+b.map(x=>`<li><b>${esc(x.name)}</b>, ${x.age} y · ${esc(x.cause)} · <b>${x.score}</b></li>`).join('')+'</ol>':'';
+  $('#titleArt').innerHTML=ART.char('youngadult','happy');
+}
+function startGame(s){S=s;paused=false;deathDone=null;deathTimers.forEach(clearTimeout);document.body.classList.remove('dying','dying2','blue','danger');$('#charWrap').className='';$('#flat').classList.remove('go');$('#skipHint').classList.add('hidden');$('#bg').dataset.room='';lastBadges='';$('#title').classList.add('hidden');$('#death').classList.add('hidden');$('#game').classList.remove('hidden');lastStageRendered=-1;buildStageUI();render(2);save();ac();}
+$('#btnNew').onclick=()=>{ if(load()&&!confirm('Start a new life? The current life will be lost.')) return; startGame(freshLife($('#nameInput').value)); play('chime'); };
+$('#btnContinue').onclick=()=>{const s=load();if(s)startGame(s);};
+$('#btnAgain').onclick=()=>{const n=S?S.name:'Ken';startGame(freshLife(n));play('chime');};
+$('#btnMenu').onclick=()=>{save();showTitle();};
+$('#btnSpeed').onclick=()=>{const all=DEBUG?SPEEDS.concat([16,64]):SPEEDS;settings.speed=all[(all.indexOf(settings.speed)+1)%all.length]||1;toast('Time speed '+settings.speed+'×');render();save();};
+$('#btnMute').onclick=()=>{settings.muted=!settings.muted;render();save();};
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#game').classList.contains('hidden')&&$('#eventModal').classList.contains('hidden')){save();showTitle();}});
+
+/* ---------------- debug (?debug=1) ---------------- */
+let autopilot=false,lastAuto=0;
+function renderDebug(){const d=$('#debug');const ag=d.querySelector('.dbg-age');if(ag)ag.textContent=`age ${S.age.toFixed(2)} · hp ${S.health.toFixed(0)}/${S.base.toFixed(0)} · next event ${(S.nextEvent/D.YEAR_SECONDS).toFixed(2)}y`;}
+function setupDebug(){
+  const d=$('#debug');d.classList.remove('hidden');
+  const opt=(arr,f)=>arr.map(x=>`<option value="${f?f(x)[0]:x}">${f?f(x)[1]:x}</option>`).join('');
+  const evs=[];for(const k in D.EVENTS)D.EVENTS[k].forEach((e,i)=>evs.push([k+':'+i,k+' · '+e.t]));
+  d.innerHTML=`<button class="dbg-toggle" data-a="min">DEBUG ▾</button> <span class="dbg-age"></span><br>
+  <button data-a="y1">+1y</button><button data-a="y5">+5y</button><button data-a="y10">+10y</button>
+  <select class="dbg-stage">${opt(D.STAGES,s=>[s.from,s.name])}</select><button data-a="jump">Jump</button><br>
+  <select class="dbg-need">${opt(ALL_NEEDS.concat(['money','base','happy','tech','legacy']))}</select><input class="dbg-val" type="number" value="100" style="width:64px"><button data-a="set">Set</button><button data-a="fill">Fill all</button><button data-a="drain">Drain all</button><br>
+  <select class="dbg-ev">${opt(evs,x=>x)}</select><button data-a="ev">Event</button>
+  <select class="dbg-ill">${opt(Object.keys(D.ILLS))}</select><button data-a="ill">Illness</button><br>
+  <button data-a="kill">Kill</button><button data-a="s16">16×</button><button data-a="s64">64×</button><button data-a="auto">Autopilot</button><button data-a="wipe">Wipe saves</button>`;
+  d.onclick=e=>{const a=e.target.dataset&&e.target.dataset.a;if(a==='min'){d.classList.toggle('min');return;}if(!a||!S)return;
+    const skip=y=>{for(let i=0;i<y*D.YEAR_SECONDS/0.5&&S.alive&&!paused;i++)step(.5);};
+    if(a[0]==='y'){S.health=S.base;skip(+a.slice(1));}
+    if(a==='jump'){const to=+d.querySelector('.dbg-stage').value;S.age=to;S.stageIdx=stageIdxForAge(to);if(to>=18&&S.money<300)S.money=500;for(const k in S.needs)S.needs[k]=D.NEEDS[k].inv?20:75;S.base=Math.max(20,100-Math.max(0,to-50)*0.6);S.health=S.base;stageUp();}
+    if(a==='set'){const k=d.querySelector('.dbg-need').value,v=+d.querySelector('.dbg-val').value;if(k==='money')S.money=v;else if(k==='base')S.base=v;else if(k==='happy')S.happy=v;else if(k==='tech')S.tech=v;else if(k==='legacy')S.legacy=v;else if(k==='health')S.health=Math.min(v,S.base);else S.needs[k]=v;}
+    if(a==='fill'){for(const k in S.needs)S.needs[k]=D.NEEDS[k].inv?0:100;S.health=S.base;}
+    if(a==='drain'){for(const k in S.needs)S.needs[k]=D.NEEDS[k].inv?100:0;}
+    if(a==='ev'){const [k,i]=d.querySelector('.dbg-ev').value.split(':');fireEvent(D.EVENTS[k][+i]);}
+    if(a==='ill')addIll(d.querySelector('.dbg-ill').value);
+    if(a==='kill')die('Debug');
+    if(a==='min'){d.classList.toggle('min');return;}
+    if(a==='s16'||a==='s64'){settings.speed=+a.slice(1);}
+    if(a==='auto'){autopilot=!autopilot;toast('Autopilot '+(autopilot?'on':'off'));}
+    if(a==='wipe'){localStorage.removeItem(SAVE_KEY);localStorage.removeItem(BEST_KEY);toast('Saves wiped');}
+    render(2);};
+}
+/* Autopilot (debug/testing). policy: 'first' | 'random' | 'human' (non-AI: picks the lowest-reliance choice and avoids AI actions) */
+let autoPolicy='first';
+function choiceTech(c){let t=0;const w=e=>{if(!e)return;if(e.tech)t+=e.tech;if(e.chance){w(e.chance[1]);}};w(c.e);return t;}
+function autoAct(){ if(!autopilot||!S||!S.alive) return;
+    if(!$('#eventModal').classList.contains('hidden')){const bs=[...$('#evChoices').children];if(!bs.length)return;let i=0;
+      if(autoPolicy==='random')i=Math.floor(rnd()*bs.length);
+      else if(autoPolicy==='human'&&curEv){const ts=curEv.c.map(choiceTech);i=ts.indexOf(Math.min(...ts));if(Math.min(...ts)===0&&Math.max(...ts)===0)i=Math.floor(rnd()*bs.length);}
+      bs[i].click();return;}
+    if(!$('#stageUp').classList.contains('hidden'))$('#btnSuOk').click();
+    const st=stage();let acts=D.ACTIONS.filter(a=>a.st.includes(st.id)&&!(a.cost>=1000)&&(S.cds[a.id]||0)<=S.t&&!(a.cost>S.money)&&!(a.req==='kids'&&!S.kids)&&!(a.eff.energy<0&&st.needs.energy&&S.needs.energy<Math.abs(a.eff.energy)));
+    if(autoPolicy==='human'){const h=acts.filter(a=>!(a.ai>0));acts=h.length?h:acts;}
+    for(const id in S.ills){const a=acts.find(x=>D.ILLS[id].tx.includes(x.id));if(a){doAction(a);return;}}
+    if(st.needs.money!==undefined&&needVal('money')<60){const w=acts.find(x=>x.earn);if(w){doAction(w);return;}}
+    // worst need first, but fall through to the next need when nothing helps (fixes elder pain lock)
+    const order=Object.keys(st.needs).filter(k=>k!=='money'&&k!=='health').sort((a,b)=>goodness(a)-goodness(b));
+    for(const k of order){if(goodness(k)>85)break;const sgn=D.NEEDS[k].inv?-1:1;
+      let c=acts.filter(x=>(x.eff[k]||0)*sgn>0);if(!c.length)continue;
+      c.sort((x,y)=>Math.abs(y.eff[k])-Math.abs(x.eff[k]));const a=autoPolicy==='random'?pick(c):c[0];doAction(a);return;}
+    if(st.needs.health!==undefined&&S.health<S.base*.7){const d=acts.find(x=>x.eff.health>0);if(d){doAction(d);return;}}
+}
+window.KEN={get S(){return S},step,die,fireEvent,addIll,D,ASSETS,score,setAutopilot:(v,p)=>{autopilot=v;if(p)autoPolicy=p;}};
+
+/* ---------------- boot ---------------- */
+showTitle();if(DEBUG)setupDebug();requestAnimationFrame(frame);
 })();

@@ -1,0 +1,1025 @@
+[
+ {
+  "file": "char/baby_neutral.webp",
+  "stage": "baby",
+  "use": "neutral",
+  "size_px": "132x200",
+  "bytes": 6768
+ },
+ {
+  "file": "char/baby_happy.webp",
+  "stage": "baby",
+  "use": "happy",
+  "size_px": "132x201",
+  "bytes": 7102
+ },
+ {
+  "file": "char/baby_sad.webp",
+  "stage": "baby",
+  "use": "sad",
+  "size_px": "133x201",
+  "bytes": 7072
+ },
+ {
+  "file": "char/baby_sick.webp",
+  "stage": "baby",
+  "use": "sick",
+  "size_px": "138x201",
+  "bytes": 6808
+ },
+ {
+  "file": "char/baby_sleeping.webp",
+  "stage": "baby",
+  "use": "sleeping",
+  "size_px": "248x112",
+  "bytes": 6304
+ },
+ {
+  "file": "char/baby_fussy.webp",
+  "stage": "baby",
+  "use": "fussy",
+  "size_px": "136x201",
+  "bytes": 7254
+ },
+ {
+  "file": "char/toddler_neutral.webp",
+  "stage": "toddler",
+  "use": "neutral",
+  "size_px": "118x282",
+  "bytes": 9742
+ },
+ {
+  "file": "char/toddler_happy.webp",
+  "stage": "toddler",
+  "use": "happy",
+  "size_px": "251x245",
+  "bytes": 13586
+ },
+ {
+  "file": "char/toddler_sad.webp",
+  "stage": "toddler",
+  "use": "sad",
+  "size_px": "123x285",
+  "bytes": 10270
+ },
+ {
+  "file": "char/toddler_sick.webp",
+  "stage": "toddler",
+  "use": "sick",
+  "size_px": "114x277",
+  "bytes": 9102
+ },
+ {
+  "file": "char/toddler_sleeping.webp",
+  "stage": "toddler",
+  "use": "sleeping",
+  "size_px": "322x142",
+  "bytes": 8892
+ },
+ {
+  "file": "char/toddler_tantrum.webp",
+  "stage": "toddler",
+  "use": "tantrum",
+  "size_px": "221x256",
+  "bytes": 12178
+ },
+ {
+  "file": "char/child_neutral.webp",
+  "stage": "child",
+  "use": "neutral",
+  "size_px": "147x374",
+  "bytes": 12160
+ },
+ {
+  "file": "char/child_happy.webp",
+  "stage": "child",
+  "use": "happy",
+  "size_px": "152x375",
+  "bytes": 11982
+ },
+ {
+  "file": "char/child_sad.webp",
+  "stage": "child",
+  "use": "sad",
+  "size_px": "149x376",
+  "bytes": 12144
+ },
+ {
+  "file": "char/child_sick.webp",
+  "stage": "child",
+  "use": "sick",
+  "size_px": "136x368",
+  "bytes": 11594
+ },
+ {
+  "file": "char/child_sleeping.webp",
+  "stage": "child",
+  "use": "sleeping",
+  "size_px": "461x159",
+  "bytes": 11978
+ },
+ {
+  "file": "char/child_stressed.webp",
+  "stage": "child",
+  "use": "stressed",
+  "size_px": "137x370",
+  "bytes": 11672
+ },
+ {
+  "file": "char/teen_neutral.webp",
+  "stage": "teen",
+  "use": "neutral",
+  "size_px": "179x487",
+  "bytes": 15158
+ },
+ {
+  "file": "char/teen_happy.webp",
+  "stage": "teen",
+  "use": "happy",
+  "size_px": "179x487",
+  "bytes": 15132
+ },
+ {
+  "file": "char/teen_sad.webp",
+  "stage": "teen",
+  "use": "sad",
+  "size_px": "182x491",
+  "bytes": 15690
+ },
+ {
+  "file": "char/teen_sick.webp",
+  "stage": "teen",
+  "use": "sick",
+  "size_px": "158x460",
+  "bytes": 14512
+ },
+ {
+  "file": "char/teen_sleeping.webp",
+  "stage": "teen",
+  "use": "sleeping",
+  "size_px": "544x206",
+  "bytes": 15370
+ },
+ {
+  "file": "char/teen_stressed.webp",
+  "stage": "teen",
+  "use": "stressed",
+  "size_px": "248x487",
+  "bytes": 17448
+ },
+ {
+  "file": "char/young_adult_neutral.webp",
+  "stage": "young_adult",
+  "use": "neutral",
+  "size_px": "202x528",
+  "bytes": 18320
+ },
+ {
+  "file": "char/young_adult_happy.webp",
+  "stage": "young_adult",
+  "use": "happy",
+  "size_px": "206x535",
+  "bytes": 18442
+ },
+ {
+  "file": "char/young_adult_sad.webp",
+  "stage": "young_adult",
+  "use": "sad",
+  "size_px": "213x531",
+  "bytes": 19666
+ },
+ {
+  "file": "char/young_adult_sick.webp",
+  "stage": "young_adult",
+  "use": "sick",
+  "size_px": "169x486",
+  "bytes": 15894
+ },
+ {
+  "file": "char/young_adult_sleeping.webp",
+  "stage": "young_adult",
+  "use": "sleeping",
+  "size_px": "557x245",
+  "bytes": 17080
+ },
+ {
+  "file": "char/young_adult_stressed.webp",
+  "stage": "young_adult",
+  "use": "stressed",
+  "size_px": "195x528",
+  "bytes": 18514
+ },
+ {
+  "file": "char/adult_neutral.webp",
+  "stage": "adult",
+  "use": "neutral",
+  "size_px": "193x528",
+  "bytes": 18248
+ },
+ {
+  "file": "char/adult_happy.webp",
+  "stage": "adult",
+  "use": "happy",
+  "size_px": "195x532",
+  "bytes": 19244
+ },
+ {
+  "file": "char/adult_sad.webp",
+  "stage": "adult",
+  "use": "sad",
+  "size_px": "195x529",
+  "bytes": 18344
+ },
+ {
+  "file": "char/adult_sick.webp",
+  "stage": "adult",
+  "use": "sick",
+  "size_px": "163x492",
+  "bytes": 15328
+ },
+ {
+  "file": "char/adult_sleeping.webp",
+  "stage": "adult",
+  "use": "sleeping",
+  "size_px": "554x233",
+  "bytes": 18204
+ },
+ {
+  "file": "char/adult_stressed.webp",
+  "stage": "adult",
+  "use": "stressed",
+  "size_px": "180x505",
+  "bytes": 16148
+ },
+ {
+  "file": "char/middle_age_neutral.webp",
+  "stage": "middle_age",
+  "use": "neutral",
+  "size_px": "216x523",
+  "bytes": 17090
+ },
+ {
+  "file": "char/middle_age_happy.webp",
+  "stage": "middle_age",
+  "use": "happy",
+  "size_px": "219x524",
+  "bytes": 17358
+ },
+ {
+  "file": "char/middle_age_sad.webp",
+  "stage": "middle_age",
+  "use": "sad",
+  "size_px": "223x526",
+  "bytes": 17972
+ },
+ {
+  "file": "char/middle_age_sick.webp",
+  "stage": "middle_age",
+  "use": "sick",
+  "size_px": "230x483",
+  "bytes": 16110
+ },
+ {
+  "file": "char/middle_age_sleeping.webp",
+  "stage": "middle_age",
+  "use": "sleeping",
+  "size_px": "617x199",
+  "bytes": 15446
+ },
+ {
+  "file": "char/middle_age_stressed.webp",
+  "stage": "middle_age",
+  "use": "stressed",
+  "size_px": "239x523",
+  "bytes": 19062
+ },
+ {
+  "file": "char/senior_neutral.webp",
+  "stage": "senior",
+  "use": "neutral",
+  "size_px": "193x502",
+  "bytes": 16228
+ },
+ {
+  "file": "char/senior_happy.webp",
+  "stage": "senior",
+  "use": "happy",
+  "size_px": "196x504",
+  "bytes": 16238
+ },
+ {
+  "file": "char/senior_sad.webp",
+  "stage": "senior",
+  "use": "sad",
+  "size_px": "198x498",
+  "bytes": 16592
+ },
+ {
+  "file": "char/senior_sick.webp",
+  "stage": "senior",
+  "use": "sick",
+  "size_px": "223x442",
+  "bytes": 17574
+ },
+ {
+  "file": "char/senior_sleeping.webp",
+  "stage": "senior",
+  "use": "sleeping",
+  "size_px": "567x200",
+  "bytes": 15478
+ },
+ {
+  "file": "char/senior_pain.webp",
+  "stage": "senior",
+  "use": "pain",
+  "size_px": "229x459",
+  "bytes": 17606
+ },
+ {
+  "file": "char/elder_neutral.webp",
+  "stage": "elder",
+  "use": "neutral",
+  "size_px": "224x477",
+  "bytes": 20728
+ },
+ {
+  "file": "char/elder_happy.webp",
+  "stage": "elder",
+  "use": "happy",
+  "size_px": "228x479",
+  "bytes": 20598
+ },
+ {
+  "file": "char/elder_sad.webp",
+  "stage": "elder",
+  "use": "sad",
+  "size_px": "230x478",
+  "bytes": 21060
+ },
+ {
+  "file": "char/elder_sick.webp",
+  "stage": "elder",
+  "use": "sick",
+  "size_px": "228x455",
+  "bytes": 19986
+ },
+ {
+  "file": "char/elder_sleeping.webp",
+  "stage": "elder",
+  "use": "sleeping",
+  "size_px": "502x210",
+  "bytes": 16472
+ },
+ {
+  "file": "char/elder_pain.webp",
+  "stage": "elder",
+  "use": "pain",
+  "size_px": "242x466",
+  "bytes": 21564
+ },
+ {
+  "file": "icon/bottle.webp",
+  "stage": "all",
+  "use": "action icon: bottle",
+  "size_px": "128x128",
+  "bytes": 3190
+ },
+ {
+  "file": "icon/diaper.webp",
+  "stage": "all",
+  "use": "action icon: diaper",
+  "size_px": "128x128",
+  "bytes": 4666
+ },
+ {
+  "file": "icon/crib.webp",
+  "stage": "all",
+  "use": "action icon: crib",
+  "size_px": "128x128",
+  "bytes": 4882
+ },
+ {
+  "file": "icon/teddy.webp",
+  "stage": "all",
+  "use": "action icon: teddy",
+  "size_px": "128x128",
+  "bytes": 5322
+ },
+ {
+  "file": "icon/medicine.webp",
+  "stage": "all",
+  "use": "action icon: medicine",
+  "size_px": "128x128",
+  "bytes": 4112
+ },
+ {
+  "file": "icon/food_bowl.webp",
+  "stage": "all",
+  "use": "action icon: food_bowl",
+  "size_px": "128x128",
+  "bytes": 4460
+ },
+ {
+  "file": "icon/bath.webp",
+  "stage": "all",
+  "use": "action icon: bath",
+  "size_px": "128x128",
+  "bytes": 3816
+ },
+ {
+  "file": "icon/nap_pillow.webp",
+  "stage": "all",
+  "use": "action icon: nap_pillow",
+  "size_px": "128x128",
+  "bytes": 3952
+ },
+ {
+  "file": "icon/blocks.webp",
+  "stage": "all",
+  "use": "action icon: blocks",
+  "size_px": "128x128",
+  "bytes": 3284
+ },
+ {
+  "file": "icon/bandaid.webp",
+  "stage": "all",
+  "use": "action icon: bandaid",
+  "size_px": "128x128",
+  "bytes": 3476
+ },
+ {
+  "file": "icon/lunchbox.webp",
+  "stage": "all",
+  "use": "action icon: lunchbox",
+  "size_px": "128x128",
+  "bytes": 3982
+ },
+ {
+  "file": "icon/school_bag.webp",
+  "stage": "all",
+  "use": "action icon: school_bag",
+  "size_px": "128x128",
+  "bytes": 5024
+ },
+ {
+  "file": "icon/ball.webp",
+  "stage": "all",
+  "use": "action icon: ball",
+  "size_px": "128x128",
+  "bytes": 4800
+ },
+ {
+  "file": "icon/homework.webp",
+  "stage": "all",
+  "use": "action icon: homework",
+  "size_px": "128x128",
+  "bytes": 5064
+ },
+ {
+  "file": "icon/stethoscope.webp",
+  "stage": "all",
+  "use": "action icon: stethoscope",
+  "size_px": "128x128",
+  "bytes": 7188
+ },
+ {
+  "file": "icon/snack.webp",
+  "stage": "all",
+  "use": "action icon: snack",
+  "size_px": "128x128",
+  "bytes": 5496
+ },
+ {
+  "file": "icon/ar_glasses.webp",
+  "stage": "all",
+  "use": "action icon: ar_glasses",
+  "size_px": "128x128",
+  "bytes": 4840
+ },
+ {
+  "file": "icon/study_books.webp",
+  "stage": "all",
+  "use": "action icon: study_books",
+  "size_px": "128x128",
+  "bytes": 4946
+ },
+ {
+  "file": "icon/rose.webp",
+  "stage": "all",
+  "use": "action icon: rose",
+  "size_px": "128x128",
+  "bytes": 5500
+ },
+ {
+  "file": "icon/party_cup.webp",
+  "stage": "all",
+  "use": "action icon: party_cup",
+  "size_px": "128x128",
+  "bytes": 5668
+ },
+ {
+  "file": "icon/coffee.webp",
+  "stage": "all",
+  "use": "action icon: coffee",
+  "size_px": "128x128",
+  "bytes": 4224
+ },
+ {
+  "file": "icon/briefcase.webp",
+  "stage": "all",
+  "use": "action icon: briefcase",
+  "size_px": "128x128",
+  "bytes": 4154
+ },
+ {
+  "file": "icon/ai_companion.webp",
+  "stage": "all",
+  "use": "action icon: ai_companion",
+  "size_px": "128x128",
+  "bytes": 4026
+ },
+ {
+  "file": "icon/piggy_bank.webp",
+  "stage": "all",
+  "use": "action icon: piggy_bank",
+  "size_px": "128x128",
+  "bytes": 4602
+ },
+ {
+  "file": "icon/gym.webp",
+  "stage": "all",
+  "use": "action icon: gym",
+  "size_px": "128x128",
+  "bytes": 4104
+ },
+ {
+  "file": "icon/meal.webp",
+  "stage": "all",
+  "use": "action icon: meal",
+  "size_px": "128x128",
+  "bytes": 5432
+ },
+ {
+  "file": "icon/holo_laptop.webp",
+  "stage": "all",
+  "use": "action icon: holo_laptop",
+  "size_px": "128x128",
+  "bytes": 4114
+ },
+ {
+  "file": "icon/family_house.webp",
+  "stage": "all",
+  "use": "action icon: family_house",
+  "size_px": "128x128",
+  "bytes": 4346
+ },
+ {
+  "file": "icon/digital_wallet.webp",
+  "stage": "all",
+  "use": "action icon: digital_wallet",
+  "size_px": "128x128",
+  "bytes": 3434
+ },
+ {
+  "file": "icon/yoga_mat.webp",
+  "stage": "all",
+  "use": "action icon: yoga_mat",
+  "size_px": "128x128",
+  "bytes": 3702
+ },
+ {
+  "file": "icon/salad.webp",
+  "stage": "all",
+  "use": "action icon: salad",
+  "size_px": "128x128",
+  "bytes": 5080
+ },
+ {
+  "file": "icon/helper_robot.webp",
+  "stage": "all",
+  "use": "action icon: helper_robot",
+  "size_px": "128x128",
+  "bytes": 4238
+ },
+ {
+  "file": "icon/health_band.webp",
+  "stage": "all",
+  "use": "action icon: health_band",
+  "size_px": "128x128",
+  "bytes": 3852
+ },
+ {
+  "file": "icon/pills.webp",
+  "stage": "all",
+  "use": "action icon: pills",
+  "size_px": "128x128",
+  "bytes": 3106
+ },
+ {
+  "file": "icon/vacation.webp",
+  "stage": "all",
+  "use": "action icon: vacation",
+  "size_px": "128x128",
+  "bytes": 3542
+ },
+ {
+  "file": "icon/tea.webp",
+  "stage": "all",
+  "use": "action icon: tea",
+  "size_px": "128x128",
+  "bytes": 5170
+ },
+ {
+  "file": "icon/exoskeleton.webp",
+  "stage": "all",
+  "use": "action icon: exoskeleton",
+  "size_px": "128x128",
+  "bytes": 3936
+ },
+ {
+  "file": "icon/holo_call.webp",
+  "stage": "all",
+  "use": "action icon: holo_call",
+  "size_px": "128x128",
+  "bytes": 4434
+ },
+ {
+  "file": "icon/physio_band.webp",
+  "stage": "all",
+  "use": "action icon: physio_band",
+  "size_px": "128x128",
+  "bytes": 3844
+ },
+ {
+  "file": "icon/garden.webp",
+  "stage": "all",
+  "use": "action icon: garden",
+  "size_px": "128x128",
+  "bytes": 6564
+ },
+ {
+  "file": "icon/soup.webp",
+  "stage": "all",
+  "use": "action icon: soup",
+  "size_px": "128x128",
+  "bytes": 4042
+ },
+ {
+  "file": "icon/armchair.webp",
+  "stage": "all",
+  "use": "action icon: armchair",
+  "size_px": "128x128",
+  "bytes": 4520
+ },
+ {
+  "file": "icon/photo_album.webp",
+  "stage": "all",
+  "use": "action icon: photo_album",
+  "size_px": "128x128",
+  "bytes": 4772
+ },
+ {
+  "file": "icon/pill_organizer.webp",
+  "stage": "all",
+  "use": "action icon: pill_organizer",
+  "size_px": "128x128",
+  "bytes": 3388
+ },
+ {
+  "file": "icon/hospital_bed.webp",
+  "stage": "all",
+  "use": "action icon: hospital_bed",
+  "size_px": "128x128",
+  "bytes": 4570
+ },
+ {
+  "file": "icon/memory_chip.webp",
+  "stage": "all",
+  "use": "action icon: memory_chip",
+  "size_px": "128x128",
+  "bytes": 6314
+ },
+ {
+  "file": "icon/gene_therapy.webp",
+  "stage": "all",
+  "use": "action icon: gene_therapy",
+  "size_px": "128x128",
+  "bytes": 5090
+ },
+ {
+  "file": "icon/digital_twin.webp",
+  "stage": "all",
+  "use": "action icon: digital_twin",
+  "size_px": "128x128",
+  "bytes": 4100
+ },
+ {
+  "file": "icon/ai_plush_new.webp",
+  "stage": "all",
+  "use": "action icon: ai_plush_new",
+  "size_px": "128x128",
+  "bytes": 4488
+ },
+ {
+  "file": "char/ai_plush_new.webp",
+  "stage": "all",
+  "use": "overlay/companion: ai_plush_new",
+  "size_px": "169x242",
+  "bytes": 6448
+ },
+ {
+  "file": "icon/ai_plush_worn.webp",
+  "stage": "all",
+  "use": "action icon: ai_plush_worn",
+  "size_px": "128x128",
+  "bytes": 5622
+ },
+ {
+  "file": "char/ai_plush_worn.webp",
+  "stage": "all",
+  "use": "overlay/companion: ai_plush_worn",
+  "size_px": "195x237",
+  "bytes": 9402
+ },
+ {
+  "file": "icon/ai_nanny.webp",
+  "stage": "all",
+  "use": "action icon: ai_nanny",
+  "size_px": "128x128",
+  "bytes": 3620
+ },
+ {
+  "file": "icon/vr_headset.webp",
+  "stage": "all",
+  "use": "action icon: vr_headset",
+  "size_px": "128x128",
+  "bytes": 3882
+ },
+ {
+  "file": "icon/ai_wingman.webp",
+  "stage": "all",
+  "use": "action icon: ai_wingman",
+  "size_px": "128x128",
+  "bytes": 4076
+ },
+ {
+  "file": "icon/agent_team.webp",
+  "stage": "all",
+  "use": "action icon: agent_team",
+  "size_px": "128x128",
+  "bytes": 4762
+ },
+ {
+  "file": "icon/robotaxi.webp",
+  "stage": "all",
+  "use": "action icon: robotaxi",
+  "size_px": "128x128",
+  "bytes": 4036
+ },
+ {
+  "file": "icon/smartwatch.webp",
+  "stage": "all",
+  "use": "action icon: smartwatch",
+  "size_px": "128x128",
+  "bytes": 4576
+ },
+ {
+  "file": "overlay/smartwatch.webp",
+  "stage": "all",
+  "use": "overlay/companion: smartwatch",
+  "size_px": "181x203",
+  "bytes": 5928
+ },
+ {
+  "file": "icon/exo_knee_brace.webp",
+  "stage": "all",
+  "use": "action icon: exo_knee_brace",
+  "size_px": "128x128",
+  "bytes": 4794
+ },
+ {
+  "file": "overlay/exo_knee_brace.webp",
+  "stage": "all",
+  "use": "overlay/companion: exo_knee_brace",
+  "size_px": "142x234",
+  "bytes": 6608
+ },
+ {
+  "file": "icon/memory_archive.webp",
+  "stage": "all",
+  "use": "action icon: memory_archive",
+  "size_px": "128x128",
+  "bytes": 5216
+ },
+ {
+  "file": "icon/tutor_tablet.webp",
+  "stage": "all",
+  "use": "action icon: tutor_tablet",
+  "size_px": "128x128",
+  "bytes": 4628
+ },
+ {
+  "file": "icon/home_robot.webp",
+  "stage": "all",
+  "use": "action icon: home_robot",
+  "size_px": "128x128",
+  "bytes": 3752
+ },
+ {
+  "file": "death/tombstone.webp",
+  "stage": "death",
+  "use": "tombstone",
+  "size_px": "310x292",
+  "bytes": 13254
+ },
+ {
+  "file": "overlay/bandage.webp",
+  "stage": "all",
+  "use": "badge icon (loose prop): bandage",
+  "size_px": "306x262",
+  "bytes": 6864
+ },
+ {
+  "file": "overlay/arm_cast_sling.webp",
+  "stage": "all",
+  "use": "badge icon (loose prop): arm_cast_sling",
+  "size_px": "340x265",
+  "bytes": 7444
+ },
+ {
+  "file": "overlay/cane.webp",
+  "stage": "all",
+  "use": "cane",
+  "size_px": "167x332",
+  "bytes": 3512
+ },
+ {
+  "file": "overlay/wheelchair.webp",
+  "stage": "all",
+  "use": "wheelchair",
+  "size_px": "341x322",
+  "bytes": 15826
+ },
+ {
+  "file": "overlay/ar_glasses.webp",
+  "stage": "all",
+  "use": "ar_glasses",
+  "size_px": "366x167",
+  "bytes": 6356
+ },
+ {
+  "file": "bg/nursery_portrait.webp",
+  "stage": "nursery",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 62314,
+  "floorY": 0.9
+ },
+ {
+  "file": "bg/nursery_wide.webp",
+  "stage": "nursery",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 68172
+ },
+ {
+  "file": "bg/kids_room_portrait.webp",
+  "stage": "kids_room",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 41226,
+  "floorY": 0.89
+ },
+ {
+  "file": "bg/kids_room_wide.webp",
+  "stage": "kids_room",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 65322
+ },
+ {
+  "file": "bg/teen_room_portrait.webp",
+  "stage": "teen_room",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 50794,
+  "floorY": 0.9
+ },
+ {
+  "file": "bg/teen_room_wide.webp",
+  "stage": "teen_room",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 63270
+ },
+ {
+  "file": "bg/apartment_portrait.webp",
+  "stage": "apartment",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 41418,
+  "floorY": 0.9
+ },
+ {
+  "file": "bg/apartment_wide.webp",
+  "stage": "apartment",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 57688
+ },
+ {
+  "file": "bg/office_portrait.webp",
+  "stage": "office",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 48326,
+  "floorY": 0.88
+ },
+ {
+  "file": "bg/office_wide.webp",
+  "stage": "office",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 61472
+ },
+ {
+  "file": "bg/family_home_portrait.webp",
+  "stage": "family_home",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 54844,
+  "floorY": 0.91
+ },
+ {
+  "file": "bg/family_home_wide.webp",
+  "stage": "family_home",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 66658
+ },
+ {
+  "file": "bg/senior_living_portrait.webp",
+  "stage": "senior_living",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 60972,
+  "floorY": 0.9
+ },
+ {
+  "file": "bg/senior_living_wide.webp",
+  "stage": "senior_living",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 76826
+ },
+ {
+  "file": "bg/hospital_portrait.webp",
+  "stage": "hospital",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 35752,
+  "floorY": 0.92
+ },
+ {
+  "file": "bg/hospital_wide.webp",
+  "stage": "hospital",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 47242
+ },
+ {
+  "file": "death/death_candle_portrait.webp",
+  "stage": "death_candle",
+  "use": "background 9:16 phone",
+  "size_px": "720x1280",
+  "bytes": 29720
+ },
+ {
+  "file": "death/death_candle_wide.webp",
+  "stage": "death_candle",
+  "use": "background 16:9 desktop",
+  "size_px": "1280x720",
+  "bytes": 17464
+ },
+ {
+  "file": "char/adult_gown.webp",
+  "stage": "adult",
+  "use": "injury replacement sprite: gown",
+  "size_px": "196x528",
+  "bytes": 17260
+ },
+ {
+  "file": "char/adult_bandage.webp",
+  "stage": "adult",
+  "use": "injury replacement sprite: bandage",
+  "size_px": "179x528",
+  "bytes": 17042
+ },
+ {
+  "file": "char/adult_sling.webp",
+  "stage": "adult",
+  "use": "injury replacement sprite: sling",
+  "size_px": "180x528",
+  "bytes": 17212
+ }
+]
