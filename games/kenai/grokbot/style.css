@@ -198,3 +198,9 @@ body.dying2 #vignette{box-shadow:inset 0 0 160px 90px #000}
 #hospTint{position:absolute;inset:0;pointer-events:none;background:#a9d4f5;mix-blend-mode:soft-light;opacity:0;transition:opacity .6s;z-index:1}
 #stage.hosp #hospTint{opacity:.55}
 #charWrap{z-index:2}
+
+/* round 3: pulled-back rooms, bottom-aligned; slight blur/darken for depth so Ken reads in front */
+#bg img.bgimg,#bgOld img.bgimg{object-position:50% 100%;filter:blur(1px) brightness(.95)}
+#bg img.bgblur{filter:blur(16px) brightness(.8);transform:scale(1.1)}
+#bg img.bgimg.contain{inset:auto;object-fit:fill}
+#charWrap.inbed #char img.sprite{transform:scaleX(-1)} /* head on the pillow (pillow is at the right of the hospital bed) */

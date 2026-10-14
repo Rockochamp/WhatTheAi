@@ -223,23 +223,37 @@ const BADGES=['bandage','arm_cast_sling'];
 /* SPEC: worn injuries exist only for the adult as full replacement sprites (gown = hospital stay, bandage = head injury, sling = broken arm) */
 function injuryAlt(st,ills){if(!S.alive||!ASSETS['char.'+st.id+'.gown'])return null;if(S.hospital>0)return 'gown';const ov=ills.map(id=>D.ILLS[id].ov);if(ov.includes('arm_cast_sling'))return 'sling';if(ov.includes('bandage'))return 'bandage';return null;}
 function badgeOv(id){const o=D.ILLS[id].ov;if(!BADGES.includes(o))return '';if(S&&ASSETS['char.'+stage().id+'.gown'])return '';return ART.overlay(o);}
-function spriteK(){return ($('#stage').clientHeight||400)*.42/SPRITE_REF;} // adult = 42% of scene height; other stages keep the manifest's age ratios
-/* Feet on the floor: crop the portrait bg (object-fit:cover) so its floor line (manifest floorY) lands at ~90% of the scene, then stand Ken on it */
-const FOOT_AT=.90, BED_Y=.70;
+/* Scene rule (Muse, round 3): Ken always stands in the FOREGROUND, feet at FOOT_AT of the scene height, in front of the
+   furniture, with a contact shadow. Adult height = ADULT_H of the scene; other ages keep their ratios to the adult and
+   baby/toddler get an extra 1.3x so they stay readable. Rooms are pulled-back portraits shown cover, bottom-aligned.
+   NEUTRAL_H = natural px height of <stage>_neutral.webp (manifest). */
+const FOOT_AT=.93, ADULT_H=.52;
+const STAGE_RATIO={baby:.455*1.0,toddler:.606*1.15,child:.758,teen:.909,youngadult:.985,adult:1,middle:.985,senior:.955,elder:.909};
+const NEUTRAL_H={baby:200,toddler:282,child:374,teen:487,youngadult:528,adult:528,middle:523,senior:502,elder:477};
+/* hospital bed in the portrait bg (fractions of the image): mattress top surface y, bed centre x, sprite length.
+   The lying sprite sits on the mattress, centred on the bed and scaled to its length. */
+const BED={hospital:{y:.555,cx:.48,len:.66}};
+function bedGeo(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;const room=$('#bg').dataset.room;const b=BED[room];
+  if(!b||!$('#charWrap').classList.contains('inbed'))return null;const im=$('#bg img.bgimg');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;
+  const s=Math.max(W/iw,H/ih),iws=iw*s,ihs=ih*s;return {bottom:(1-b.y)*ihs-.015*ihs,cx:(W-iws)/2+b.cx*iws,len:b.len*iws};}
+function spriteK(){const id=S?stage().id:'adult';const bg=bedGeo(),ci=$('#char img');if(bg&&ci&&ci.naturalWidth)return bg.len/ci.naturalWidth;return ($('#stage').clientHeight||400)*ADULT_H*(STAGE_RATIO[id]||1)/(NEUTRAL_H[id]||SPRITE_REF);}
 function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
-  const room=$('#bg').dataset.room||stage().room;const fy=(ART.FLOOR&&ART.FLOOR[room])||.9;
-  const im=$('#bg img');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;const s=Math.max(W/iw,H/ih),ihs=ih*s;
-  const off=clamp(FOOT_AT*H-fy*ihs,H-ihs,0);
-  for(const i of document.querySelectorAll('#bg img,#bgOld img'))i.style.objectPosition=`50% ${off}px`;
-  const w=$('#charWrap');const inbed=w.classList.contains('inbed');
-  const foot=H-(off+(inbed?BED_Y:fy)*ihs);sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
+  const room=$('#bg').dataset.room||stage().room;const w=$('#charWrap');const inbed=w.classList.contains('inbed');
+  const c=$('#bg img.contain');
+  if(c){ // nursery: old art shown nearly whole (much less zoom), blurred copy fills the sides
+    const iw=c.naturalWidth||1280,ih=c.naturalHeight||720;let ihs=H*.75,iws=ihs*iw/ih;if(iws<W){iws=W;ihs=W*ih/iw;}
+    c.style.cssText=`width:${iws}px;height:${ihs}px;left:${clamp(W/2-.38*iws,W-iws,0)}px;top:${H-ihs}px`;}
+  let foot=(1-FOOT_AT)*H;
+  const bg=bedGeo();w.style.left=bg?bg.cx+'px':'';if(bg)foot=bg.bottom;
+  else if(inbed)foot=.30*H;
+  sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
 addEventListener('resize',()=>placeScene());
 function trayEnd(){const t=$('#tray');t.classList.toggle('end',t.scrollLeft+t.clientWidth>=t.scrollWidth-4);}
 $('#tray').addEventListener('scroll',trayEnd,{passive:true});
 function fitSprite(){const k=spriteK();const w=$('#charWrap');w.style.setProperty('--k',k);
-  const im=$('#char img');if(im){const set=()=>{w.style.setProperty('--sh',(im.naturalHeight*k)+'px');};if(im.complete&&im.naturalHeight)set();else im.onload=set;w.style.setProperty('--mask',`url("${im.getAttribute('src')}")`);}
+  const im=$('#char img');if(im){const set=()=>{w.style.setProperty('--sh',(im.naturalHeight*spriteK())+'px');};if(im.complete&&im.naturalHeight)set();else im.onload=set;w.style.setProperty('--mask',`url("${im.getAttribute('src')}")`);}
   else w.style.setProperty('--sh',($('#stage').clientHeight*.5)+'px');
-  const pr=$('#props img');if(pr){const s=()=>$('#props').style.setProperty('--ph',(pr.naturalHeight*k*.55)+'px');if(pr.complete&&pr.naturalHeight)s();else pr.onload=s;}}
+  const pr=$('#props img');if(pr){const s=()=>$('#props').style.setProperty('--ph',(pr.naturalHeight*k*.35)+'px');if(pr.complete&&pr.naturalHeight)s();else pr.onload=s;}}
 addEventListener('resize',()=>{if(S){fitSprite();lastMoodKey='';}});
 function setWideBg(room){const wb=$('#wideBg');if(!wb)return;const u=ASSETS[`bg.${room}.wide`];wb.style.backgroundImage=u?`url(${u})`:'';}
 function ageDigits(n){const el=$('#hudAge');const s=String(n);if(el.dataset.v===s)return;const old=el.dataset.v||'';el.dataset.v=s;
