@@ -228,10 +228,15 @@ function badgeOv(id){const o=D.ILLS[id].ov;if(!BADGES.includes(o))return '';if(S
    baby/toddler get an extra 1.3x so they stay readable. Rooms are pulled-back portraits shown cover, bottom-aligned.
    NEUTRAL_H = natural px height of <stage>_neutral.webp (manifest). */
 const FOOT_AT=.93, ADULT_H=.52;
-const STAGE_RATIO={baby:.455*1.3,toddler:.606*1.3,child:.758,teen:.909,youngadult:.985,adult:1,middle:.985,senior:.955,elder:.909};
+const STAGE_RATIO={baby:.455*1.0,toddler:.606*1.15,child:.758,teen:.909,youngadult:.985,adult:1,middle:.985,senior:.955,elder:.909};
 const NEUTRAL_H={baby:200,toddler:282,child:374,teen:487,youngadult:528,adult:528,middle:523,senior:502,elder:477};
-const BED_Y={hospital:.52};
-function spriteK(){const id=S?stage().id:'adult';return ($('#stage').clientHeight||400)*ADULT_H*(STAGE_RATIO[id]||1)/(NEUTRAL_H[id]||SPRITE_REF);}
+/* hospital bed in the portrait bg (fractions of the image): mattress top surface y, bed centre x, sprite length.
+   The lying sprite sits on the mattress, centred on the bed and scaled to its length. */
+const BED={hospital:{y:.555,cx:.48,len:.66}};
+function bedGeo(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;const room=$('#bg').dataset.room;const b=BED[room];
+  if(!b||!$('#charWrap').classList.contains('inbed'))return null;const im=$('#bg img.bgimg');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;
+  const s=Math.max(W/iw,H/ih),iws=iw*s,ihs=ih*s;return {bottom:(1-b.y)*ihs-.015*ihs,cx:(W-iws)/2+b.cx*iws,len:b.len*iws};}
+function spriteK(){const id=S?stage().id:'adult';const bg=bedGeo(),ci=$('#char img');if(bg&&ci&&ci.naturalWidth)return bg.len/ci.naturalWidth;return ($('#stage').clientHeight||400)*ADULT_H*(STAGE_RATIO[id]||1)/(NEUTRAL_H[id]||SPRITE_REF);}
 function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
   const room=$('#bg').dataset.room||stage().room;const w=$('#charWrap');const inbed=w.classList.contains('inbed');
   const c=$('#bg img.contain');
@@ -239,14 +244,14 @@ function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHei
     const iw=c.naturalWidth||1280,ih=c.naturalHeight||720;let ihs=H*.75,iws=ihs*iw/ih;if(iws<W){iws=W;ihs=W*ih/iw;}
     c.style.cssText=`width:${iws}px;height:${ihs}px;left:${clamp(W/2-.38*iws,W-iws,0)}px;top:${H-ihs}px`;}
   let foot=(1-FOOT_AT)*H;
-  if(inbed&&BED_Y[room]){const im=$('#bg img.bgimg');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;const ihs=ih*Math.max(W/iw,H/ih);foot=(1-BED_Y[room])*ihs;}
+  const bg=bedGeo();w.style.left=bg?bg.cx+'px':'';if(bg)foot=bg.bottom;
   else if(inbed)foot=.30*H;
   sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
 addEventListener('resize',()=>placeScene());
 function trayEnd(){const t=$('#tray');t.classList.toggle('end',t.scrollLeft+t.clientWidth>=t.scrollWidth-4);}
 $('#tray').addEventListener('scroll',trayEnd,{passive:true});
 function fitSprite(){const k=spriteK();const w=$('#charWrap');w.style.setProperty('--k',k);
-  const im=$('#char img');if(im){const set=()=>{w.style.setProperty('--sh',(im.naturalHeight*k)+'px');};if(im.complete&&im.naturalHeight)set();else im.onload=set;w.style.setProperty('--mask',`url("${im.getAttribute('src')}")`);}
+  const im=$('#char img');if(im){const set=()=>{w.style.setProperty('--sh',(im.naturalHeight*spriteK())+'px');};if(im.complete&&im.naturalHeight)set();else im.onload=set;w.style.setProperty('--mask',`url("${im.getAttribute('src')}")`);}
   else w.style.setProperty('--sh',($('#stage').clientHeight*.5)+'px');
   const pr=$('#props img');if(pr){const s=()=>$('#props').style.setProperty('--ph',(pr.naturalHeight*k*.35)+'px');if(pr.complete&&pr.naturalHeight)s();else pr.onload=s;}}
 addEventListener('resize',()=>{if(S){fitSprite();lastMoodKey='';}});

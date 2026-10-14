@@ -902,7 +902,7 @@
   "stage": "teen_room",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 47750,
+  "bytes": 40332,
   "floorY": 0.9
  },
  {
@@ -917,7 +917,7 @@
   "stage": "apartment",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 59948,
+  "bytes": 60380,
   "floorY": 0.9
  },
  {
@@ -977,7 +977,7 @@
   "stage": "hospital",
   "use": "background 9:16 phone",
   "size_px": "720x1280",
-  "bytes": 53638,
+  "bytes": 52344,
   "floorY": 0.92
  },
  {
