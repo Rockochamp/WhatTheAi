@@ -272,7 +272,9 @@ function bedGeo(){const room=$('#bg').dataset.room;const b=BED[room];
   if(!b||!$('#charWrap').classList.contains('inbed')||!GEO)return null;
   return {bottom:GEO.H-(GEO.top+b.y*GEO.ihs)-.015*GEO.ihs,cx:GEO.left+b.cx*GEO.iws,len:b.len*GEO.iws};}
 function spriteK(){const id=S?stage().id:'adult';GEO=roomGeo();const bg=bedGeo(),ci=$('#char img');if(bg&&ci&&ci.naturalWidth)return bg.len/ci.naturalWidth;
-  const H=$('#stage').clientHeight||400;const px=GEO?(HEIGHT_M[id]||1.78)*GEO.g.p*GEO.ihs:H*.5*(HEIGHT_M[id]||1.78)/1.78;return px/(VIS[id]||512);}
+  const H=$('#stage').clientHeight||400;let px=GEO?(HEIGHT_M[id]||1.78)*GEO.g.p*GEO.ihs:H*.5*(HEIGHT_M[id]||1.78)/1.78;
+  if(GEO)px=Math.min(px,H-GEO.foot-.06*H); // guard: on wide/short desktop scenes the room zooms in a lot; never let his head reach the HUD
+  return px/(VIS[id]||512);}
 function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
   const w=$('#charWrap');const inbed=w.classList.contains('inbed');GEO=roomGeo();
   const imgs=$('#bg').querySelectorAll('img.bgimg');
