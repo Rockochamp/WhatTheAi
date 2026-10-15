@@ -238,29 +238,52 @@ const BADGES=['bandage','arm_cast_sling'];
 /* SPEC: worn injuries exist only for the adult as full replacement sprites (gown = hospital stay, bandage = head injury, sling = broken arm) */
 function injuryAlt(st,ills){if(!S.alive||!ASSETS['char.'+st.id+'.gown'])return null;if(S.hospital>0)return 'gown';const ov=ills.map(id=>D.ILLS[id].ov);if(ov.includes('arm_cast_sling'))return 'sling';if(ov.includes('bandage'))return 'bandage';return null;}
 function badgeOv(id){const o=D.ILLS[id].ov;if(!BADGES.includes(o))return '';if(S&&ASSETS['char.'+stage().id+'.gown'])return '';return ART.overlay(o);}
-/* Scene rule (Muse, round 3): Ken always stands in the FOREGROUND, feet at FOOT_AT of the scene height, in front of the
-   furniture, with a contact shadow. Adult height = ADULT_H of the scene; other ages keep their ratios to the adult and
-   baby/toddler get an extra 1.3x so they stay readable. Rooms are pulled-back portraits shown cover, bottom-aligned.
-   NEUTRAL_H = natural px height of <stage>_neutral.webp (manifest). */
-const FOOT_AT=.93, ADULT_H=.52;
-const STAGE_RATIO={baby:.455*1.0,toddler:.606*1.15,child:.758,teen:.909,youngadult:.985,adult:1,middle:.985,senior:.955,elder:.909};
-const NEUTRAL_H={baby:200,toddler:282,child:374,teen:487,youngadult:528,adult:528,middle:523,senior:502,elder:477};
-/* hospital bed in the portrait bg (fractions of the image): mattress top surface y, bed centre x, sprite length.
-   The lying sprite sits on the mattress, centred on the bed and scaled to its length. */
-const BED={hospital:{y:.555,cx:.48,len:.66}};
-function bedGeo(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;const room=$('#bg').dataset.room;const b=BED[room];
-  if(!b||!$('#charWrap').classList.contains('inbed'))return null;const im=$('#bg img.bgimg');const iw=(im&&im.naturalWidth)||720,ih=(im&&im.naturalHeight)||1280;
-  const s=Math.max(W/iw,H/ih),iws=iw*s,ihs=ih*s;return {bottom:(1-b.y)*ihs-.015*ihs,cx:(W-iws)/2+b.cx*iws,len:b.len*iws};}
-function spriteK(){const id=S?stage().id:'adult';const bg=bedGeo(),ci=$('#char img');if(bg&&ci&&ci.naturalWidth)return bg.len/ci.naturalWidth;return ($('#stage').clientHeight||400)*ADULT_H*(STAGE_RATIO[id]||1)/(NEUTRAL_H[id]||SPRITE_REF);}
+/* Scene rule (round 4, real-world scale): every room has a measured floor point next to its reference furniture
+   (fy = floor y, fraction of the bg image height), the pixels-per-metre at that depth (p, fraction of the image
+   height per metre, measured from the desk/sofa/bed/crib) and a horizontal focus (cx). The bg is drawn at zoom z
+   (image height / scene height, never below cover), positioned so that floor point sits at FOOT_Y of the scene, and
+   Ken stands exactly there with height = HEIGHT_M[stage] * p * image height. So Ken and the furniture always share
+   one scale and one floor plane. Sprites have 8px transparent padding (VIS = visible px height of <stage>_neutral). */
+const FOOT_Y=.9;
+const ROOM_GEO={
+  nursery:{img:'wide',fy:.88,p:.47,cx:.40,kx:.62,z:1.0},
+  kids_room:{fy:.64,p:.215,cx:.55,kx:.42,z:1.55},
+  teen_room:{fy:.76,p:.215,cx:.50,kx:.22,z:1.30},
+  apartment:{fy:.68,p:.215,cx:.50,kx:.50,z:1.30},
+  family_home:{fy:.74,p:.30,cx:.50,kx:.50,z:1.0},
+  office:{fy:.76,p:.27,cx:.50,kx:.15,z:1.05},
+  senior_living:{fy:.66,p:.225,cx:.55,kx:.54,z:1.35},
+  hospital:{fy:.77,p:.25,cx:.55,kx:.12,z:1.05}
+};
+const HEIGHT_M={baby:.45,toddler:.9,child:1.3,teen:1.65,youngadult:1.78,adult:1.78,middle:1.78,senior:1.74,elder:1.7};
+const VIS={baby:184,toddler:266,child:358,teen:471,youngadult:512,adult:512,middle:507,senior:486,elder:461};
+/* hospital bed in the portrait bg (fractions of the image): mattress top surface y, bed centre x, sprite length. */
+const BED={hospital:{y:.575,cx:.54,len:.52}};
+let GEO=null; // {left,top,iws,ihs} of the drawn bg image in scene px
+function roomGeo(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;const room=$('#bg').dataset.room||(S&&stage().room);
+  const g=ROOM_GEO[room];const im=$('#bg img.bgimg');if(!g||!im||!W||!H)return null;
+  const iw=im.naturalWidth||(g.img==='wide'?1280:720),ih=im.naturalHeight||(g.img==='wide'?720:1280);
+  if(g.img!=='wide'&&iw>ih)return null; // landscape art (wide app): keep the default cover layout
+  const ihs=Math.max(H*g.z,H,W*ih/iw);
+  const iws=ihs*iw/ih;let top=FOOT_Y*H-g.fy*ihs;top=clamp(top,H-ihs,0);
+  let left=W/2-g.cx*iws;if(iws>=W)left=clamp(left,W-iws,0);
+  return {g,left,top,iws,ihs,W,H,foot:H-(top+g.fy*ihs),kx:left+g.kx*iws};}
+function bedGeo(){const room=$('#bg').dataset.room;const b=BED[room];
+  if(!b||!$('#charWrap').classList.contains('inbed')||!GEO)return null;
+  return {bottom:GEO.H-(GEO.top+b.y*GEO.ihs)-.015*GEO.ihs,cx:GEO.left+b.cx*GEO.iws,len:b.len*GEO.iws};}
+function spriteK(){const id=S?stage().id:'adult';GEO=roomGeo();const bg=bedGeo(),ci=$('#char img');if(bg&&ci&&ci.naturalWidth)return bg.len/ci.naturalWidth;
+  const H=$('#stage').clientHeight||400;let px=GEO?(HEIGHT_M[id]||1.78)*GEO.g.p*GEO.ihs:H*.5*(HEIGHT_M[id]||1.78)/1.78;
+  if(GEO)px=Math.min(px,H-GEO.foot-.06*H); // guard: on wide/short desktop scenes the room zooms in a lot; never let his head reach the HUD
+  return px/(VIS[id]||512);}
 function placeScene(){const sv=$('#stage');const W=sv.clientWidth,H=sv.clientHeight;if(!W||!H||!S)return;
-  const room=$('#bg').dataset.room||stage().room;const w=$('#charWrap');const inbed=w.classList.contains('inbed');
-  const c=$('#bg img.contain');
-  if(c){ // nursery: old art shown nearly whole (much less zoom), blurred copy fills the sides
-    const iw=c.naturalWidth||1280,ih=c.naturalHeight||720;let ihs=H*.75,iws=ihs*iw/ih;if(iws<W){iws=W;ihs=W*ih/iw;}
-    c.style.cssText=`width:${iws}px;height:${ihs}px;left:${clamp(W/2-.38*iws,W-iws,0)}px;top:${H-ihs}px`;}
-  let foot=(1-FOOT_AT)*H;
-  const bg=bedGeo();w.style.left=bg?bg.cx+'px':'';if(bg)foot=bg.bottom;
+  const w=$('#charWrap');const inbed=w.classList.contains('inbed');GEO=roomGeo();
+  const imgs=$('#bg').querySelectorAll('img.bgimg');
+  if(GEO){imgs.forEach(im=>{im.style.cssText=`inset:auto;object-fit:fill;width:${GEO.iws}px;height:${GEO.ihs}px;left:${GEO.left}px;top:${GEO.top}px`;});}
+  else imgs.forEach(im=>im.style.cssText='');
+  let foot=GEO?GEO.foot:.07*H;
+  const bg=bedGeo();let x=GEO?clamp(GEO.kx,W*.18,W*.82):W/2;if(bg){x=bg.cx;foot=bg.bottom;}
   else if(inbed)foot=.30*H;
+  w.style.left=x+'px';
   sv.style.setProperty('--foot',foot+'px');w.style.bottom=foot+'px';}
 addEventListener('resize',()=>placeScene());
 function trayEnd(){const t=$('#tray');t.classList.toggle('end',t.scrollLeft+t.clientWidth>=t.scrollWidth-4);}

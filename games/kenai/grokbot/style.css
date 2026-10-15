@@ -238,3 +238,4 @@ body.dying2 #vignette{box-shadow:inset 0 0 160px 90px #000}
 .meta{font-size:.85rem;margin-top:8px;opacity:.9}.ambset span{opacity:.3}.ambset span.got{opacity:1}
 .card.stageup{flex:none;width:100%;max-width:420px;height:auto;max-height:92%;overflow:auto;display:block}
 .gchip{background:#fff;color:var(--ink);border-color:#d8d0c0}.gchip.done,.gchip.amb,.gchip.streak.hot{color:#fff}
+#charWrap.inbed #tint{transform:scaleX(-1)} /* the gown tint is masked by the sprite; mirror it with the mirrored lying sprite (was a pale band beside him) */
