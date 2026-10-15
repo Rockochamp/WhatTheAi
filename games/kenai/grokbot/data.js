@@ -1,6 +1,6 @@
 /* Ken.AI v2 — game data (stages, needs, actions, illnesses, events, traits). Pure data, no logic. */
 window.KEN_DATA=(function(){
-const YEAR_SECONDS=50; // one in-game year at 1x
+const YEAR_SECONDS=20; // one in-game year at 1x
 /* need: label, icon, inverted (high = bad), base decay per second at 1x */
 const NEEDS={
  food:{l:'Food',i:'🍽️'},diaper:{l:'Diaper',i:'🧷'},sleep:{l:'Sleep',i:'🌙'},comfort:{l:'Comfort',i:'🤗'},health:{l:'Health',i:'❤️'},

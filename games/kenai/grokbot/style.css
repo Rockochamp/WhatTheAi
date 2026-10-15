@@ -204,3 +204,37 @@ body.dying2 #vignette{box-shadow:inset 0 0 160px 90px #000}
 #bg img.bgblur{filter:blur(16px) brightness(.8);transform:scale(1.1)}
 #bg img.bgimg.contain{inset:auto;object-fit:fill}
 #charWrap.inbed #char img.sprite{transform:scaleX(-1)} /* head on the pillow (pillow is at the right of the hospital bed) */
+
+/* ---- FUN layer ---- */
+.goals{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.gchip{position:relative;overflow:hidden;font:600 11.5px var(--ui);padding:3px 8px;border-radius:999px;background:#ffffff1a;border:1px solid #ffffff33;color:#fff;white-space:nowrap}
+.gchip i{position:absolute;left:0;bottom:0;height:3px;background:#2ff3ff;transition:width .3s}
+.gchip.done{background:#2e7d4f;border-color:#57c78a}
+.gchip.amb{background:#5b3fa8;border-color:#a78bfa}
+.gchip.streak.hot{background:#b34a12;border-color:#ff9a4a;animation:hot 1s ease-in-out infinite}@keyframes hot{50%{filter:brightness(1.25)}}
+.gchip.streak.off{opacity:.6}
+.gchip.streak i{background:#ffd166}
+.need.up .bar{animation:nup .5s}.need.down .bar{animation:ndn .5s}
+@keyframes nup{30%{box-shadow:0 0 0 3px #57c78a;transform:scaleY(1.4)}}@keyframes ndn{30%{box-shadow:0 0 0 3px #ff5d5d}}
+.scorepop{position:absolute;right:14px;top:8%;font:800 18px var(--ui);color:#ffe066;text-shadow:0 2px 6px #000;animation:spop 1.3s forwards;pointer-events:none;z-index:7}
+@keyframes spop{0%{transform:scale(.5);opacity:0}20%{transform:scale(1.2);opacity:1}100%{transform:translateY(-50px);opacity:0}}
+#stage.shk{animation:shk .35s}@keyframes shk{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.odds{float:right;opacity:.7;font-weight:600}
+.outcome{text-align:left}.ochosen{font-weight:700;margin:0 0 8px}.lucky{color:#2e7d4f}.unlucky{color:#c0392b}
+.ocs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.oc{font:700 13px var(--ui);padding:4px 9px;border-radius:999px;background:#eee;animation:ocin .35s both}
+.oc.g{background:#d7f5e3;color:#1d6b40}.oc.b{background:#fde0dc;color:#9b2a1d}
+.ocs .oc:nth-child(2){animation-delay:.08s}.ocs .oc:nth-child(3){animation-delay:.16s}.ocs .oc:nth-child(4){animation-delay:.24s}.ocs .oc:nth-child(5){animation-delay:.32s}
+@keyframes ocin{from{transform:scale(.4);opacity:0}}
+.omsg{font-size:.85rem;opacity:.8}
+.choice.ok{text-align:center;background:var(--info);color:#fff;border-color:var(--info)}
+.stageup .year{font-size:56px;line-height:1}
+.stageup .year[data-g=A]{color:#2e9d5f}.stageup .year[data-g=B]{color:#2a7fd4}.stageup .year[data-g=D],.stageup .year[data-g=F]{color:#c0392b}
+#suText{text-align:left}.rl{display:block;font-size:.9rem;margin:3px 0}.rl.nx{margin-top:10px}.rl.g{font-size:.85rem;opacity:.85}
+.ambpick{margin:10px 0;display:grid;gap:6px}.amblbl{margin:0;font-weight:700;font-size:.9rem}
+.ambbtn{display:block;text-align:left;background:#fff;color:var(--ink);border:1.5px solid #d8d0c0;border-radius:10px;padding:7px 10px}
+.ambbtn small{display:block;font-size:.78rem;opacity:.75}.ambbtn.on{border-color:var(--info);box-shadow:0 0 0 2px var(--info) inset;background:#eef6ff}
+.ambbtn.got b::after{content:' ✓';color:#2e9d5f}
+.meta{font-size:.85rem;margin-top:8px;opacity:.9}.ambset span{opacity:.3}.ambset span.got{opacity:1}
+.card.stageup{flex:none;width:100%;max-width:420px;height:auto;max-height:92%;overflow:auto;display:block}
+.gchip{background:#fff;color:var(--ink);border-color:#d8d0c0}.gchip.done,.gchip.amb,.gchip.streak.hot{color:#fff}
