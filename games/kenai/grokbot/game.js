@@ -191,6 +191,8 @@ function die(cause){
   if(!S.alive) return;S.alive=false;S.cause=cause;paused=true;settleAmbition();save();
   const sc=score();const list=bests();list.push({name:S.name,age:Math.floor(S.age),score:sc,cause,when:new Date().toISOString().slice(0,10)});list.sort((a,b)=>b.score-a.score);
   try{localStorage.setItem(BEST_KEY,JSON.stringify(list.slice(0,5)));localStorage.removeItem(SAVE_KEY);}catch(e){}
+  const ambRec=S.amb&&AMBS[S.amb]?AMBS[S.amb]:null;
+  rankSubmit={p:submitRank({playerName:S.name,score:sc,age:Math.floor(S.age),cause:String(cause||'').slice(0,60),ambition:ambRec?ambRec.l:'',ambitionMet:!!S.ambOk,grades:(S.grades||[]).join('')}),rank:null,err:null};rankSubmit.p.catch(()=>{});
   heartbeatOut(()=>{ showEpitaph(sc,list[0]); });
 }
 function showEpitaph(sc,best){
@@ -207,7 +209,7 @@ function showEpitaph(sc,best){
   items.push(`Tech style: ${style}`,`Tech path: ${path} (reliance ${Math.round(ta)}/100)`,`Tech moments: ${S.moments.join(' · ')||'none'}`);if(S.legacy)items.push(`Digital legacy: ${Math.round(S.legacy)} (adds ${Math.min(300,Math.round(S.legacy*2))} to score)`);
   $('#epSummary').innerHTML=items.map((t,i)=>`<li style="animation-delay:${.15*i}s">${esc(t)}</li>`).join('');lastShare=`${S.name} (${YEAR0}–${YEAR0+Math.floor(S.age)}) lived to ${Math.floor(S.age)} in Ken.AI. Life score ${sc}. ${items.find(x=>x.startsWith('Tech path'))}.`;
   $('#epScore').textContent=sc;$('#epBest').textContent=best&&best.score>sc?`(best: ${best.score}, ${best.name})`:'(new best!)';
-  $('#death').classList.remove('hidden');
+  $('#death').classList.remove('hidden');showEpRank();
 }
 let lastShare='';
 $('#btnShare').onclick=async()=>{try{if(navigator.share){await navigator.share({text:lastShare});}else{await navigator.clipboard.writeText(lastShare);toastDeath('Copied to clipboard');}}catch(e){}};
@@ -566,4 +568,29 @@ function shake(){const s=$('#stage');s.classList.remove('shk');void s.offsetWidt
 
 /* ---------------- boot ---------------- */
 showTitle();if(DEBUG)setupDebug();requestAnimationFrame(frame);
+/* ---------------- global rankings (Firestore, shared with the other whatthe.ai games) ---------------- */
+let rankSubmit=null;
+function submitRank(rec){const R=window.KENRANK;if(!R||!R.allowed())return Promise.reject(new Error('offline'));
+  return R.submit(rec).then(r=>{if(rankSubmit)rankSubmit.rank=r.rank;return r;},e=>{if(rankSubmit)rankSubmit.err=e;throw e;});}
+function showEpRank(){const el=$('#epRank');if(!el)return;if(!rankSubmit||!window.KENRANK||!window.KENRANK.allowed()){el.textContent='';return;}
+  el.textContent='Placing you on the world ranking…';
+  rankSubmit.p.then(r=>{el.textContent=`🌍 You placed #${r.rank} worldwide`;},()=>{el.textContent='Ranking unavailable right now';});}
+function rkEsc(s){return esc(String(s==null?'':s));}
+async function openRankings(){const m=$('#rankModal');m.classList.remove('hidden');const L=$('#rkList'),me=$('#rkMe');me.innerHTML='';
+  const R=window.KENRANK;if(!R||!R.allowed()){L.innerHTML='<p class="rkmsg">Global rankings are available on whatthe.ai.</p>';return;}
+  L.innerHTML='<p class="rkmsg">Loading the world ranking…</p>';
+  try{if(rankSubmit)await rankSubmit.p.catch(()=>{});const rows=await R.top();const mineIds=R.mine();
+    if(!rows.length){L.innerHTML='<p class="rkmsg">No lives ranked yet. Be the first!</p>';return;}
+    let myBest=-1;rows.forEach((r,i)=>{if(myBest<0&&mineIds.includes(r.id))myBest=i;});
+    L.innerHTML=rows.map((r,i)=>{const sub=[r.age!=null?`aged ${r.age}`:'',r.ambition?(r.ambitionMet?'✓ ':'')+r.ambition:'',r.cause||''].filter(Boolean).join(' · ');
+      return `<div class="rkrow${i<3?' g'+(i+1):''}${i===myBest?' me':''}"><span class="rn">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="nm">${rkEsc(r.playerName)}${i===myBest?' (you)':''}<small>${rkEsc(sub)}</small></span><span class="sc">${r.score}</span></div>`;}).join('');
+    if(myBest>=0){me.innerHTML=`Your best: <b>#${myBest+1}</b> with <b>${rows[myBest].score}</b> ★`;const el=L.querySelectorAll('.rkrow')[myBest];el&&el.scrollIntoView({block:'center'});}
+    else if(rankSubmit&&rankSubmit.rank){me.innerHTML=`Your last life placed <b>#${rankSubmit.rank}</b> worldwide`;}
+    else if(mineIds.length)me.innerHTML='Your lives are outside the top 50 so far. Keep living!';
+  }catch(e){L.innerHTML='<p class="rkmsg">Could not load rankings. Check your connection and try again.</p>';}}
+function closeRankings(){$('#rankModal').classList.add('hidden');}
+$('#btnRank').onclick=openRankings;$('#btnEpRank').onclick=openRankings;$('#rkClose').onclick=closeRankings;
+$('#rankModal').addEventListener('click',e=>{if(e.target.id==='rankModal')closeRankings();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#rankModal').classList.contains('hidden'))closeRankings();});
+
 })();

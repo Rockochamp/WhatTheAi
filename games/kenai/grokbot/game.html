@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#12152a">
 <link rel="icon" href="/images/favicon.ico">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 <title>Ken.AI — Grokbot | What the Ai</title>
 <meta name="description" content="Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score." />
 <link rel="canonical" href="https://whatthe.ai/games/kenai/grokbot/game.html" />
@@ -38,6 +38,7 @@
       <button id="btnContinue" class="big hidden">▶ Continue life</button>
       <div id="ambPick" class="ambpick"></div>
       <button id="btnNew" class="big">✦ Begin a new life</button>
+      <button id="btnRank" class="big ghost rankbtn">🏆 Rankings</button>
       <div id="metaBox" class="meta"></div>
       <div id="bestBox" class="best"></div>
     </div>
@@ -69,11 +70,13 @@
   </section>
   <div id="eventModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="evTitle"><div class="card event-card"><div class="evband"></div><div class="evhead"><div id="evIcon" class="evicon"></div><div id="evKind" class="kind"></div></div><h2 id="evTitle"></h2><p id="evText"></p><div id="evChoices" class="choices"></div></div></div>
   <div id="stageUp" class="modal hidden"><div class="card stageup"><div class="year" id="suYear">0</div><h2 id="suTitle"></h2><p id="suText"></p><button id="btnSuOk" class="big">Continue</button></div></div>
-  <div id="death" class="hidden"><div class="death-inner"><div id="tomb"></div><h2 id="epName"></h2><p id="epLine" class="epline"></p><ul id="epSummary"></ul><p class="lifescore">Life score <b id="epScore">0</b> <span id="epBest"></span></p><div class="dbtns"><button id="btnAgain" class="big">✦ Live again</button><button id="btnShare" class="big ghost">Share</button></div></div></div>
+  <div id="death" class="hidden"><div class="death-inner"><div id="tomb"></div><h2 id="epName"></h2><p id="epLine" class="epline"></p><ul id="epSummary"></ul><p class="lifescore">Life score <b id="epScore">0</b> <span id="epBest"></span></p><p id="epRank" class="eprank"></p><div class="dbtns"><button id="btnAgain" class="big">✦ Live again</button><button id="btnShare" class="big ghost">Share</button><button id="btnEpRank" class="big ghost">🏆 Rankings</button></div></div></div>
+  <div id="rankModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rkTitle"><div class="rankcard"><button id="rkClose" class="rkx" aria-label="Close">✕</button><h2 id="rkTitle">🏆 Global Rankings</h2><p class="rksub">Top 50 lives worldwide · Ken.AI</p><div id="rkMe" class="rkme"></div><div id="rkList" class="rklist"></div></div></div>
   <div id="debug" class="hidden"></div>
 </div>
 <script src="assets.js?v=5"></script>
 <script src="data.js?v=3"></script>
 <script src="epochs.js?v=2"></script>
-<script src="game.js?v=6"></script>
+<script src="rank.js?v=1"></script>
+<script src="game.js?v=7"></script>
 </body></html>
