@@ -18,13 +18,22 @@ const LANE_GAP = 52;
 const cv = $('#cv'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1, view = {};
 function resize() {
-  W = innerWidth; H = innerHeight; DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const VW = innerWidth, VH = innerHeight, portrait = VH > VW * 1.05, racing = mode === 'race';
+  document.body.classList.toggle('lay-portrait', portrait); document.body.classList.toggle('lay-landscape', !portrait);
+  // thumb zones: the playfield (canvas) never sits under a button
+  const lane = 80, btn = portrait ? Math.round(Math.max(96, Math.min(140, (VW - lane - 16 * 2 - 28) / 2))) : (VH <= 520 ? 104 : 128);
+  const gut = btn + 24, strip = Math.round(Math.max(btn + 40, lane * 2 + 16 + 36, VH * 0.4));
+  const ctl = $('#controls'); ctl.style.setProperty('--btn', btn + 'px'); ctl.style.setProperty('--gut', gut + 'px'); ctl.style.setProperty('--strip', strip + 'px'); ctl.style.setProperty('--lane', lane + 'px');
+  document.documentElement.style.setProperty('--gut', gut + 'px');
+  let L = 0, CW = VW, CH = VH;
+  if (racing) { if (portrait) CH = VH - strip; else { L = gut; CW = VW - gut * 2; } }
+  cv.style.left = L + 'px'; cv.style.top = '0px'; cv.style.width = CW + 'px'; cv.style.height = CH + 'px';
+  W = CW; H = CH; DPR = Math.min(window.devicePixelRatio || 1, 2);
   if (W * H * DPR * DPR > 3.2e6) DPR = Math.max(1, Math.sqrt(3.2e6 / (W * H)));
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
-  const portrait = H > W * 1.05, s = portrait ? Math.min(W / 600, H / 640) : Math.min(W / 720, H / 560);
-  const ctrl = portrait ? Math.min(178, H * 0.24) : 0;
-  const groundY = portrait ? H - ctrl - LANE_GAP * s * 1.15 : H - LANE_GAP * s * 1.1 - Math.max(16, H * 0.05);
-  view = { s, portrait, groundY, anchorX: W * (portrait ? 0.3 : 0.3), ctrl };
+  const s = portrait ? Math.min(W / 600, H / 640) : Math.min(W / 720, H / 560);
+  const groundY = H - LANE_GAP * s * 1.25 - Math.max(10, H * 0.03);
+  view = { s, portrait, groundY, anchorX: W * 0.3 };
   if (mode === 'cube') layoutCube();
 }
 addEventListener('resize', resize);
@@ -103,13 +112,23 @@ function drawPlayer(R, t) {
   if (P.onGround && V.fly !== 'always') { rot += Math.sin(t * 30) * 0.004 * P.speed / V.speed; }
   if (R.p.superT > 0 && V.special === 'spin') rot = (t * 14) % (Math.PI * 2);
   if (R.landT > 0) sq = R.landT * 0.4;
-  const bob = P.onGround && V.fly !== 'always' && V.fly !== 'hover' ? Math.abs(Math.sin(t * 18)) * 2 : 0;
+  let bob = P.onGround && V.fly !== 'always' && V.fly !== 'hover' ? Math.abs(Math.sin(t * 18)) * 2 : 0;
+  if (R.finished) { bob += Math.abs(Math.sin(t * 6)) * 28; rot += Math.sin(t * 6) * 0.08; } // celebrate bounce (works with any art)
   // specials behind/around
   if (P.superT > 0) drawSpecial(R, t, true);
   drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq });
+  if (P.boostT > 0 && ART.resolve(sp) !== 'veh.' + V.id + '.boost') boostFlame(R, sp, P.z + bob, rot, t);
   if (P.superT > 0) drawSpecial(R, t, false);
   if (P.boostT > 0 && !reduced()) { ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { const y = laneY(P.laneF) - (P.z + 10 + i * 14) * view.s, x = X(P.x) - V.len * 0.6 * view.s - ((t * 900 + i * 137) % 220); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 60, y); ctx.stroke(); } }
 }
+function boostFlame(R, name, z, rot, t) {
+  const P = R.p, sp = ART.get(name), k = kL(P.laneF), w = sp.wu * view.s * k, h = w * sp.h / sp.w, ex = ART.fx(name).exhaust || [0.08, 0.6];
+  const ox = (ex[0] - sp.ax) * w, oy = (ex[1] - sp.ay) * h, c = Math.cos(rot), s2 = Math.sin(rot);
+  const x = X(P.x) + ox * c - oy * s2, y = laneY(P.laneF) - z * view.s * k + ox * s2 + oy * c, L = h * (0.9 + Math.random() * 0.35) * (P.superT > 0 ? 1.5 : 1), Hh = h * 0.32;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  [['#ff3d00', 1], ['#ff9800', 0.74], ['#ffe066', 0.48], ['#ffffff', 0.24]].forEach(([col, q]) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -Hh * q / 2);
+    ctx.quadraticCurveTo(-L * q * 0.5, -Hh * q * 0.75, -L * q, Math.sin(t * 40) * Hh * 0.08); ctx.quadraticCurveTo(-L * q * 0.5, Hh * q * 0.75, 0, Hh * q / 2); ctx.fill(); });
+  ctx.restore(); }
 function drawSpecial(R, t, back) {
   const P = R.p, V = R.veh, x = X(P.x), y = laneY(P.laneF) - (P.z + V.h * 0.5) * view.s, s = view.s;
   if (V.special === 'nitro' && !back) { ctx.save(); ctx.globalAlpha = 0.85; const len = 340 * s * (0.9 + Math.random() * 0.2);
@@ -244,7 +263,8 @@ function updateHud(dt) { const R = race; hudScore += (R.score - hudScore) * Math
   $('#hScore').textContent = Math.round(hudScore); if (hudStars !== R.stars) { hudStars = R.stars; $('#hStars').textContent = R.stars; }
   const L = R.tr.L, pct = x => Math.max(0, Math.min(100, x / L * 100)) + '%'; $('#prMe').style.left = pct(R.p.x); R.rivals.forEach((rv, i) => { $('#pr' + i).style.left = pct(rv.x); });
   $('#ringFg').style.strokeDashoffset = String(283 * (1 - R.boost)); $('#bBoost').classList.toggle('ready', R.boost >= 0.999);
-  $('#bJump .lb').textContent = R.veh.fly === 'bounce' ? 'JUMP' : 'FLY'; }
+  const V = R.veh, canFly = V.fly !== 'bounce' && (V.fly === 'always' || V.fly === 'hover' || !R.p.onGround);
+  if (bJ.classList.contains('fly') !== canFly) { bJ.classList.toggle('fly', canFly); $('#bJump .lb').textContent = canFly ? 'FLY' : 'JUMP'; bJ.setAttribute('aria-label', canFly ? 'Fly. Hold to fly up.' : 'Jump'); } }
 
 /* ---------------- input ---------------- */
 function press(btn, down) { btn.classList.toggle('down', down); }
@@ -283,7 +303,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && mod
 /* ---------------- screens ---------------- */
 function show(id) { ['title', 'pick', 'cube', 'party'].forEach(s => $('#' + s).classList.toggle('hidden', s !== id));
   const racing = id === 'race'; $('#hud').classList.toggle('hidden', !racing); $('#controls').classList.toggle('hidden', !racing); if (!racing) $('#countdown').classList.add('hidden'); }
-function setMode(m) { mode = m; document.body.dataset.mode = m; }
+function setMode(m) { const was = mode; mode = m; document.body.dataset.mode = m; if ((was === 'race') !== (m === 'race')) resize(); }
 function toggleMute() { AU.unlock(); AU.setMuted(!AU.muted); $('#bMute').textContent = AU.muted ? '🔇' : '🔊'; }
 $('#bMute').addEventListener('click', toggleMute);
 function applyReduced() { document.documentElement.classList.toggle('reduced', !!settings.reduced); }
@@ -292,11 +312,14 @@ function applyReduced() { document.documentElement.classList.toggle('reduced', !
 function buildTitle() {
   const box = $('#names'); box.innerHTML = '';
   NAMES.forEach(n => { const b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(settings.name === n)); b.textContent = n || 'No name';
-    b.onclick = () => { settings.name = n; saveSettings(); AU.unlock(); AU.play('tap'); buildTitle(); }; box.appendChild(b); });
+    b.onclick = () => { settings.name = n; saveSettings(); AU.unlock(); AU.play('tap'); buildTitle(); toggleNames(false); }; box.appendChild(b); });
+  $('#bName').textContent = settings.name ? 'Name: ' + settings.name + ' ✎' : 'Pick a name';
   $('#oAssist').checked = settings.assist; $('#oMotion').checked = settings.reduced; $('#oPro').checked = settings.pro; $('#oUnlock').checked = settings.unlockAll;
   const b = prog.best, rows = SIM.TRACKS.filter(t => b[t.id]).map(t => `<span>🏆 ${t.name}: <b>${b[t.id]}</b></span>`);
   $('#bests').innerHTML = (prog.stars ? `<span>⭐ ${prog.stars} stars</span>` : '') + rows.join('');
 }
+function toggleNames(open) { const box = $('#names'), b = $('#bName'); open = open == null ? box.classList.contains('hidden') : open; box.classList.toggle('hidden', !open); b.setAttribute('aria-expanded', String(open)); }
+$('#bName').onclick = () => { AU.unlock(); AU.play('tap'); toggleNames(); };
 $('#oAssist').onchange = e => { settings.assist = e.target.checked; saveSettings(); };
 $('#oMotion').onchange = e => { settings.reduced = e.target.checked; saveSettings(); applyReduced(); };
 $('#oPro').onchange = e => { settings.pro = e.target.checked; saveSettings(); };
@@ -312,8 +335,8 @@ function drawPreview(c, name) { const sp = ART.get(name), g = c.getContext('2d')
 function buildPick() {
   const hb = $('#heroes'); hb.innerHTML = '';
   SIM.VEHICLE_ORDER.forEach(id => { const V = SIM.VEHICLES[id], b = document.createElement('button'); b.type = 'button'; b.className = 'hero' + (settings.vehicle === id ? ' sel' : ''); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(settings.vehicle === id)); b.setAttribute('aria-label', V.name);
-    const dots = n => '●'.repeat(n) + '○'.repeat(3 - n);
-    b.innerHTML = `<canvas width="440" height="220"></canvas><span class="nm">${V.name}</span><span class="stats"><span title="Speed">⚡<i>${dots(V.stats.speed)}</i></span><span title="Smash">💥<i>${dots(V.stats.smash)}</i></span><span title="Fly">🪽<i>${dots(V.stats.fly)}</i></span></span><span class="sp">${V.specialName}</span>`;
+    const dots = n => [0, 1, 2].map(i => `<b class="pip${i < n ? ' on' : ''}"></b>`).join('');
+    b.innerHTML = `<canvas width="440" height="220"></canvas><span class="nm">${V.name}</span><span class="stats"><span title="Speed" aria-label="Speed ${V.stats.speed} of 3">⚡${dots(V.stats.speed)}</span><span title="Smash" aria-label="Smash ${V.stats.smash} of 3">💥${dots(V.stats.smash)}</span><span title="Fly" aria-label="Fly ${V.stats.fly} of 3">🪽${dots(V.stats.fly)}</span></span><span class="sp">${V.specialName}</span>`;
     drawPreview(b.querySelector('canvas'), 'veh.' + id + (V.fly === 'always' || V.fly === 'hover' ? '.fly' : '.drive'));
     b.onclick = () => { settings.vehicle = id; saveSettings(); AU.horn(V.horn); $$('.hero').forEach(x => { x.classList.remove('sel'); x.setAttribute('aria-checked', 'false'); }); b.classList.add('sel', 'cheer'); b.setAttribute('aria-checked', 'true');
       const c = b.querySelector('canvas'); drawPreview(c, 'veh.' + id + '.celebrate'); setTimeout(() => { b.classList.remove('cheer'); drawPreview(c, 'veh.' + id + (V.fly === 'always' || V.fly === 'hover' ? '.fly' : '.drive')); }, 900); newDemo(); };
@@ -346,14 +369,14 @@ function placeArrows() { if (!cubeState) return; const box = $('#arrows'); const
   $('#cube').classList.toggle('pro', cubeState.n === 3); }
 function showCube() {
   setMode('cube'); show('cube'); const n = settings.pro ? 3 : 2, tw = n === 3 ? 20 : Math.min(3, 1 + prog.cubeSolves);
-  cubeState = { n, pz: CUBE.newPuzzle(tw, null, n), anim: null, idle: 0, done: false, fw: [], wob: 0, t: 0 };
-  $('#cubeWin').classList.add('hidden'); $('#bHelp').classList.add('hidden'); $('#cubeMoves').textContent = ''; $('#arrows').innerHTML = ''; $('#arrows').classList.remove('hidden');
+  cubeState = { n, pz: CUBE.newPuzzle(tw, null, n), anim: null, idle: 0, done: false, fw: [], wob: 0, t: 0, lastGood: 0 };
+  $('#arrows').classList.remove('hinting'); $('#cubeWin').classList.add('hidden'); $('#bHelp').classList.add('hidden'); $('#cubeMoves').textContent = ''; $('#arrows').innerHTML = ''; $('#arrows').classList.remove('hidden');
   $('#cubeTip').textContent = n === 3 ? '3x3 Pro: make every side one colour!' : tw === 1 ? 'One twist to fix it! Tap an arrow.' : 'Make every side one colour!';
   requestAnimationFrame(layoutCube);
 }
 function cubeMove(m, help) {
   const C = cubeState; if (!C || C.done || C.anim) return; AU.unlock(); const mv = CUBE.MOVES[m]; if (!mv) return;
-  const solvedNow = CUBE.play(C.pz, mv); C.anim = { axis: mv.axis, layer: mv.layer, q: mv.q, t: 0, e: 0 }; C.idle = 0; AU.play('click'); C.wob = 1;
+  const before = C.pz.sol.length, solvedNow = CUBE.play(C.pz, mv); if (C.pz.sol.length < before) C.lastGood = C.t; C.anim = { axis: mv.axis, layer: mv.layer, q: mv.q, t: 0, e: 0 }; C.idle = 0; AU.play('click'); C.wob = 1;
   $('#cubeMoves').textContent = C.pz.moves + (C.pz.moves === 1 ? ' move' : ' moves');
   if (!help && C.pz.moves >= 6) $('#bHelp').classList.remove('hidden');
   if (solvedNow) { C.done = true; setTimeout(cubeWin, 360); }
@@ -383,7 +406,7 @@ function renderCube(dt) {
   const sc = (C.n === 3 ? 0.92 : 1) * (1 + (reduced() ? 0 : Math.sin(C.wob * Math.PI) * 0.05)) * (C.done ? 1 + Math.sin(C.t * 5) * 0.04 : 1);
   CUBE.render(g, C.pz.cube, cW, cH, C.anim, { scale: sc });
   // hint glow after 5 s idle
-  const h = !C.done && C.idle > 5 ? CUBE.hint(C.pz) : null; $$('.arr').forEach(b => b.classList.toggle('hint', b.dataset.m === h));
+  const h = !C.done && !C.anim && C.t - C.lastGood > 4 ? CUBE.hint(C.pz) : null; $$('.arr').forEach(b => b.classList.toggle('hint', b.dataset.m === h)); $('#arrows').classList.toggle('hinting', !!h);
   for (let i = C.fw.length - 1; i >= 0; i--) { const p = C.fw[i]; p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 160 * dt; if (p.t > 1.3) { C.fw.splice(i, 1); continue; }
     g.globalAlpha = 1 - p.t / 1.3; g.fillStyle = p.col; g.beginPath(); g.arc(p.x, p.y, 5, 0, 7); g.fill(); } g.globalAlpha = 1;
   if (C.done && !reduced() && Math.random() < dt * 1.2) firework();
@@ -419,15 +442,22 @@ function showParty() {
   const st = $$('#pAward .st'); st.forEach(s => s.classList.remove('on'));
   st.forEach((s, i) => { if (i < S.award) setTimeout(() => { s.classList.add('on'); AU.play('star'); }, 450 + i * 420); });
   AU.say(settings.name ? 'You did it, ' + settings.name + '!' : 'You did it!');
-  const R = window.LEORANK; $('#bSubmit').classList.toggle('hidden', !(R && R.allowed())); $('#bSubmit').disabled = false; $('#pRank').textContent = '';
+  const R = window.LEORANK; $('#bSubmit').classList.toggle('hidden', !(R && R.allowed())); $('#bSubmit').disabled = false; $('#bSubmit').classList.remove('holding'); $('#pRank').textContent = '';
   confetti(reduced() ? 40 : 140, race.p.x + 300, 1, 200);
   setTimeout(() => $('#bAgain').focus(), 60);
 }
 $('#bAgain').onclick = () => { AU.unlock(); AU.play('tap'); showCube(); };
 $('#bNewHero').onclick = () => { AU.play('tap'); showPick(); };
-$('#bSubmit').onclick = () => { const R = window.LEORANK; if (!R || !lastSummary || submitted) return; submitted = true; $('#bSubmit').disabled = true; $('#pRank').textContent = 'Putting you on the world board…';
+function submitScore() { const R = window.LEORANK; if (!R || !lastSummary || submitted) return; submitted = true; $('#bSubmit').disabled = true; $('#pRank').textContent = 'Putting you on the world board…';
   const S = lastSummary; R.submit({ playerName: settings.name || 'Racer', score: S.score, track: S.track, vehicle: S.vehicle, place: S.place, stars: S.stars, award: S.award })
-    .then(r => { $('#pRank').textContent = `🌍 You are #${r.rank} in the world!`; }, () => { submitted = false; $('#bSubmit').disabled = false; $('#pRank').textContent = 'The world board is busy right now. Try again later.'; }); };
+    .then(r => { $('#pRank').textContent = `🌍 You are #${r.rank} in the world!`; }, () => { submitted = false; $('#bSubmit').disabled = false; $('#pRank').textContent = 'The world board is busy right now. Try again later.'; }); }
+// hold-to-confirm (1.5 s) so a tapping child never posts by accident
+const bS = $('#bSubmit'); let holdT = 0;
+const holdStart = e => { if (e) e.preventDefault(); if (submitted || bS.disabled) return; bS.classList.add('holding'); $('#pRank').textContent = 'Keep holding…'; clearTimeout(holdT); holdT = setTimeout(() => { bS.classList.remove('holding'); submitScore(); }, 1500); };
+const holdEnd = () => { if (!bS.classList.contains('holding')) return; bS.classList.remove('holding'); clearTimeout(holdT); if (!submitted) $('#pRank').textContent = 'Hold the button to put your score on the world board.'; };
+bS.addEventListener('pointerdown', holdStart); ['pointerup', 'pointercancel', 'pointerleave'].forEach(n => bS.addEventListener(n, holdEnd));
+bS.addEventListener('keydown', e => { if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat) holdStart(e); }); bS.addEventListener('keyup', e => { if (e.code === 'Enter' || e.code === 'Space') holdEnd(); });
+bS.addEventListener('click', e => e.preventDefault()); bS.addEventListener('contextmenu', e => e.preventDefault());
 async function openBoard() { const m = $('#rankModal'), L = $('#rkList'), me = $('#rkMe'); m.classList.remove('hidden'); me.textContent = ''; const R = window.LEORANK;
   if (!R || !R.allowed()) { L.innerHTML = '<p class="rkmsg">The world board works on whatthe.ai.</p>'; return; }
   L.innerHTML = '<p class="rkmsg">Loading…</p>';
@@ -444,6 +474,6 @@ mq.addEventListener && mq.addEventListener('change', e => { if (e.matches) { set
 applyReduced(); resize(); ART.decorate(); ART.onChange(() => { if (mode === 'pick') buildPick(); });
 showTitle(); requestAnimationFrame(frame);
 // test hooks (used by the screenshot/QA scripts; harmless for players)
-window.LEOGAME = { get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
+window.LEOGAME = { submitScore, get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
 if (QS.get('screen') === 'pick') showPick();
 })();

@@ -3,29 +3,32 @@
    - v:   bump the global `version` (or a per-entry `v`) whenever a file changes: the CDN caches each URL for 30 days.
    - size: the canvas size the art is authored at, [w, h] px. anchor: [ax, ay] point (0..1) that sits on the ground/contact line.
    - wu:  drawn width in world units (the game scales art to this; height follows the image aspect ratio).
+   - alias: 'other.name' reuses another sprite; fx.exhaust: [x, y] (0..1 of the drive canvas) is where boost flames come out.
    A missing or broken file silently falls back to the interim art, so partial drops are safe. */
 window.LEO_MANIFEST = {
-  version: 1,
+  version: 2,
   base: 'art/',
+  // Vehicle poses without their own file borrow another pose; the game adds the boost flames and the celebrate bounce in code.
+  poseAliases: { boost: 'drive', celebrate: 'fly' },
   sprites: {
     // Vehicles: side view facing right, 2:1 canvas. Wheels (or the bottom of the hull) touch y = 92% in every pose.
-    'veh.dragster.drive': { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
+    'veh.dragster.drive': { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { exhaust: [0.07, 0.62] } },
     'veh.dragster.fly':   { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
     'veh.dragster.boost': { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
     'veh.dragster.celebrate': { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
-    'veh.bibi.drive':     { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 190 },
+    'veh.bibi.drive':     { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 190, fx: { exhaust: [0.24, 0.70] } },
     'veh.bibi.fly':       { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 190 },
     'veh.bibi.boost':     { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 190 },
     'veh.bibi.celebrate': { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 190 },
-    'veh.truck.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 245 },
+    'veh.truck.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 245, fx: { exhaust: [0.13, 0.44] } },
     'veh.truck.fly':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 245 },
     'veh.truck.boost':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 245 },
     'veh.truck.celebrate': { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 245 },
-    'veh.sword.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.80], wu: 250 },
+    'veh.sword.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.80], wu: 250, fx: { exhaust: [0.14, 0.50] } },
     'veh.sword.fly':      { src: null, size: [512, 256], anchor: [0.5, 0.80], wu: 250 },
     'veh.sword.boost':    { src: null, size: [512, 256], anchor: [0.5, 0.80], wu: 250 },
     'veh.sword.celebrate': { src: null, size: [512, 256], anchor: [0.5, 0.80], wu: 250 },
-    'veh.jet.drive':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
+    'veh.jet.drive':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { exhaust: [0.22, 0.66] } },
     'veh.jet.fly':        { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
     'veh.jet.boost':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
     'veh.jet.celebrate':  { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
