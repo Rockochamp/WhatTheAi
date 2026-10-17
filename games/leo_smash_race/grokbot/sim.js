@@ -19,12 +19,13 @@ const VEHICLE_ORDER = ['dragster', 'bibi', 'truck', 'sword', 'jet'];
 
 /* Smashable kinds: points per smash group, world size, debris sprite and sound. */
 const KINDS = {
-  cone:    { pts: 10,  w: 62,  h: 78,  debris: 'cone',    snd: 'bonk',    chunks: 6 },
+  cone:    { pts: 10,  w: 60,  h: 66,  debris: 'cone',    snd: 'bonk',    chunks: 6 },
   box:     { pts: 10,  w: 76,  h: 76,  debris: 'card',    snd: 'bonk',    chunks: 7 },
   crate:   { pts: 50,  w: 84,  h: 84,  debris: 'wood',    snd: 'crash',   chunks: 7 },
   block:   { pts: 50,  w: 84,  h: 84,  debris: 'block',   snd: 'crash',   chunks: 6 },
-  wall:    { pts: 100, w: 90,  h: 210, debris: 'brick',   snd: 'crumble', chunks: 16 },
-  barrel:  { pts: 300, w: 80,  h: 96,  debris: 'barrel',  snd: 'boom',    chunks: 7 },
+  wall:    { pts: 100, w: 100, h: 152, debris: 'brick',   snd: 'crumble', chunks: 16 },
+  wallw:   { pts: 100, w: 172, h: 126, debris: 'brick',   snd: 'crumble', chunks: 18 },
+  barrel:  { pts: 300, w: 86,  h: 62,  debris: 'barrel',  snd: 'boom',    chunks: 7 },
   mega:    { pts: 300, w: 86,  h: 86,  debris: 'block',   snd: 'boom',    chunks: 6 },
   balloon: { pts: 150, w: 70,  h: 110, debris: 'balloon', snd: 'pop',     chunks: 8, sky: true },
   cloud:   { pts: 150, w: 120, h: 84,  debris: 'cloud',   snd: 'pop',     chunks: 8, sky: true },
@@ -81,7 +82,7 @@ function buildTrack(track, veh, seed) {
       t += 0.95;
     } else if (p === 'wall') {
       const k = track.wall;
-      if (k === 'wall') add('wall', x, lane, 0, { group: ++gid, pts: 100, lead: true });
+      if (k === 'wall') add(r() < 0.4 ? 'wallw' : 'wall', x, lane, 0, { group: ++gid, pts: 100, lead: true });
       else { const g = ++gid; for (let row = 0; row < 2; row++) for (let c = 0; c < 2; c++) add(k, x + c * 84, lane, row * 82, { group: g, pts: row + c === 0 ? 100 : 0, lead: row + c === 0 }); }
       t += 0.9;
     } else if (p === 'sky') {

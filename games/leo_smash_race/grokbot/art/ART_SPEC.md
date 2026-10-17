@@ -59,3 +59,11 @@ Supported roles, drawn back to front in manifest order (up to 5 per track):
 - **Rendering**: Canvas 2D with devicePixelRatio scaling (capped at 2× and about 3.2 MP), one `drawImage` per sprite, debris capped at 240 pieces (90 with reduced motion) and particles at 500.
 - **Performance budget**: 60 fps on a mid-range phone. First race within about 15 s of opening the page: keep the vehicles, rivals, smashables, debris and items under **1.5 MB total** (about 60 KB per vehicle pose, 30 KB per smashable, 5 KB per debris piece) and each track's layers under **700 KB** (layers load only for the chosen track). Decoded memory matters too: avoid canvases larger than the sizes above.
 - **Cube**: rendered in code (`cube.js`), no sprites needed.
+
+## Art drop v1 (Muse, 2026-10-17): wired in
+- 61 of 75 manifest entries are real files now (vehicles, rivals, cone/crate/wall/wall_wide/barrel/balloon/cloud, debris, all 4 tracks x sky/mid/ground/front). Code art is still used for smash.box, smash.block, smash.mega, debris.card, debris.block, item.* and ui.*.
+- No far layer on any track. `base` (0..1) on a layer is the image row that sits on the horizon; toyroom_mid uses 0.725 because its bottom band is transparent.
+- smash.barrel lies on its side: the canvas is 160x112 (cropped from the 160x192 delivery), hitbox 86x62.
+- smash.wallw (wall_wide.webp, 384x256, wu 200) has its own hitbox (172x126) and turns up in about 40% of wall spawns.
+- Debris variants: `debris.<type>.2`, `.3`, ... are picked at random per chunk. Just add entries to the manifest.
+- Smashables and debris draw at their manifest `wu`. Sim hitboxes in sim.js KINDS are matched to the visible art.

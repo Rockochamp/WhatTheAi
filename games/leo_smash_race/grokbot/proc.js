@@ -223,11 +223,15 @@ def('smash.wall', (g) => { rr(g, 8, 10, 176, 366, 8); ink(g, '#a8442a');
   for (let r = 0; r < 9; r++) for (let c = -1; c < 3; c++) { const x = 12 + c * 86 + (r % 2 ? 43 : 0), y = 14 + r * 40; if (x > 180 || x + 80 < 10) continue;
     g.save(); rr(g, 8, 10, 176, 366, 8); g.clip(); rr(g, x, y, 80, 34, 6); g.fillStyle = lg(g, 0, y, 0, y + 34, [[0, ['#ef7a52', '#e06640', '#d9583a'][(r + c + 3) % 3]], [1, '#a8442a']]); g.fill(); g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(x + 6, y + 4, 60, 5); g.restore(); }
   rr(g, 8, 10, 176, 366, 8); g.lineWidth = 6; g.strokeStyle = OUT; g.stroke(); });
-def('smash.barrel', (g, v) => { const col = ['#e53935', '#2f6fdf', '#2ec46b'][(v || 0) % 3];
-  g.beginPath(); g.moveTo(26, 18); g.quadraticCurveTo(14, 96, 26, 176); g.lineTo(134, 176); g.quadraticCurveTo(146, 96, 134, 18); g.closePath(); ink(g, lg(g, 16, 0, 144, 0, [[0, shade(col, -0.35)], [0.35, shade(col, 0.25)], [0.6, col], [1, shade(col, -0.45)]]));
-  [40, 96, 152].forEach(y => { rr(g, 16, y - 7, 128, 14, 6); ink(g, lg(g, 0, y - 7, 0, y + 7, [[0, '#e0e4ee'], [1, '#7c869e']]), 3); });
-  g.beginPath(); g.ellipse(80, 20, 54, 10, 0, 0, 7); ink(g, shade(col, -0.2), 4); gloss(g, 44, 56, 14, 80, 0.35);
-  g.fillStyle = '#fff'; starPath(g, 80, 124, 14, 6); g.fill(); });
+def('smash.barrel', (g, v) => { const col = ['#e53935', '#2f6fdf', '#2ec46b'][(v || 0) % 3]; // lying on its side, 160x112
+  g.beginPath(); g.moveTo(22, 14); g.quadraticCurveTo(80, 4, 138, 14); g.lineTo(138, 106); g.quadraticCurveTo(80, 112, 22, 106); g.closePath(); ink(g, lg(g, 0, 8, 0, 108, [[0, shade(col, 0.3)], [0.4, col], [1, shade(col, -0.45)]]));
+  [44, 116].forEach(x => { rr(g, x - 7, 8, 14, 100, 6); ink(g, lg(g, x - 7, 0, x + 7, 0, [[0, '#e0e4ee'], [1, '#7c869e']]), 3); });
+  g.beginPath(); g.ellipse(140, 60, 14, 46, 0, 0, 7); ink(g, shade(col, -0.2), 4); gloss(g, 30, 22, 96, 12, 0.35);
+  g.fillStyle = '#fff'; starPath(g, 80, 60, 14, 6); g.fill(); });
+def('smash.wallw', (g) => { rr(g, 10, 8, 364, 242, 8); ink(g, '#a8442a');
+  for (let r = 0; r < 6; r++) for (let c = -1; c < 5; c++) { const x = 14 + c * 86 + (r % 2 ? 43 : 0), y = 12 + r * 40;
+    g.save(); rr(g, 10, 8, 364, 242, 8); g.clip(); rr(g, x, y, 80, 34, 6); g.fillStyle = lg(g, 0, y, 0, y + 34, [[0, ['#ef7a52', '#e06640', '#d9583a'][(r + c + 3) % 3]], [1, '#a8442a']]); g.fill(); g.restore(); }
+  rr(g, 10, 8, 364, 242, 8); g.lineWidth = 6; g.strokeStyle = OUT; g.stroke(); });
 def('smash.balloon', (g, v) => { const col = ['#ff4d6d', '#ffd23f', '#4cc9f0', '#9b5cf0'][(v || 0) % 4];
   g.strokeStyle = '#6b6b78'; g.lineWidth = 3; g.beginPath(); g.moveTo(80, 170); g.quadraticCurveTo(66, 200, 84, 226); g.quadraticCurveTo(96, 244, 80, 254); g.stroke();
   g.beginPath(); g.ellipse(80, 90, 62, 76, 0, 0, 7); ink(g, rgr(g, 80, 90, 6, 80, [[0, shade(col, 0.6)], [0.5, col], [1, shade(col, -0.35)]], -22, -30));
@@ -326,7 +330,7 @@ function sprite(name, size) {
   const m = name.match(/^veh\.(\w+)\.(\w+)$/);
   if (m) { g.save(); g.scale(w / 512, h / 256); ({ dragster, bibi, truck, sword, jet })[m[1]](g, m[2]); g.restore(); return c; }
   const rv = name.match(/^rival\.(\w+)$/); if (rv) { g.save(); g.scale(w / 384, h / 192); rival(g, { orange: '#ff8a1f', green: '#27c46b', blue: '#2f8cff' }[rv[1]] || '#ff8a1f'); g.restore(); return c; }
-  const db = name.match(/^debris\.(\w+)$/); if (db) { g.save(); g.scale(w / 64, h / 64); debris(g, db[1]); g.restore(); return c; }
+  const db = name.match(/^debris\.(\w+)(?:\.\d+)?$/); if (db) { g.save(); g.scale(w / 64, h / 64); debris(g, db[1]); g.restore(); return c; }
   const base = name.replace(/\.\d+$/, ''), v = +(name.match(/\.(\d+)$/) || [0, 0])[1];
   if (SPR[base]) { SPR[base](g, v); return c; }
   // UI icons

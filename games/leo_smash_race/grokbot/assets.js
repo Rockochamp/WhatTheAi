@@ -31,7 +31,7 @@ function get(name) {
 function layers(track) {
   if (layerCache[track]) return layerCache[track];
   const list = (M.layers[track] || []).map(L => { const w = Math.round(L.size[0] / 2), h = Math.round(L.size[1] / 2);
-    const o = { role: L.role, par: L.par, img: L.role === 'front' ? null : root.LeoProc.layer(track, L.role, w, h), w, h, real: false };
+    const o = { role: L.role, par: L.par, base: L.base == null ? 1 : L.base, img: L.role === 'front' ? null : root.LeoProc.layer(track, L.role, w, h), w, h, real: false };
     if (L.src) load(L, im => { o.img = im; o.w = im.naturalWidth; o.h = im.naturalHeight; o.real = true; }); return o; });
   return (layerCache[track] = list);
 }
@@ -39,5 +39,8 @@ function layers(track) {
 function decorate(rootEl) { (rootEl || document).querySelectorAll('[data-art]').forEach(el => { const e = entry(el.dataset.art); if (!e || !e.src || el.dataset.artDone) return;
   el.dataset.artDone = '1'; const im = new Image(); im.alt = ''; im.className = 'art-img'; im.onload = () => { el.textContent = ''; el.appendChild(im); }; im.src = url(e); }); }
 function preload(names) { names.forEach(get); }
-root.LeoArt = { get, resolve, fx, layers, decorate, preload, onChange: f => listeners.push(f), stats: () => ({ pending, loaded, failed: failed.slice() }), manifest: M };
+/* Variants: 'debris.wood' -> ['debris.wood', 'debris.wood.2', ...] (only names the manifest lists). */
+const varCache = {};
+function variants(name) { if (varCache[name]) return varCache[name]; const re = new RegExp('^' + name.replace(/\./g, '\\.') + '\\.\\d+$'); const v = [name].concat(Object.keys(M.sprites).filter(k => re.test(k))); return (varCache[name] = v); }
+root.LeoArt = { get, resolve, fx, variants, layers, decorate, preload, onChange: f => listeners.push(f), stats: () => ({ pending, loaded, failed: failed.slice() }), manifest: M };
 })(window);

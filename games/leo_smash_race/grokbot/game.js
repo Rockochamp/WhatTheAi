@@ -32,8 +32,9 @@ function resize() {
   if (W * H * DPR * DPR > 3.2e6) DPR = Math.max(1, Math.sqrt(3.2e6 / (W * H)));
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
   const s = portrait ? Math.min(W / 600, H / 640) : Math.min(W / 720, H / 560);
-  const groundY = H - LANE_GAP * s * 1.25 - Math.max(10, H * 0.03);
-  view = { s, portrait, groundY, anchorX: W * 0.3 };
+  const frontH = Math.min(H * 0.13, 130 * s), hasFront = (ART.layers(settings.track) || []).some(l => l.role === 'front');
+  const groundY = H - LANE_GAP * s * 1.25 - Math.max(10, H * 0.03) - (racing && hasFront ? frontH * 0.45 : 0);
+  view = { s, portrait, groundY, anchorX: W * 0.3, frontH };
   if (mode === 'cube') layoutCube();
 }
 addEventListener('resize', resize);
@@ -76,8 +77,8 @@ function drawWorldBack(R) {
   let filled = false;
   for (const L of Ls) { if (!L.img) continue;
     if (L.role === 'sky') { if (!filled) { ctx.fillStyle = layerTop(R.track.id, L); ctx.fillRect(0, 0, W, H); filled = true; } const h = Math.max(roadTop + 30, H * 0.5); drawLayer(L, roadTop + 30 - h, h, L.par, cx); }
-    else if (L.role === 'far') { const h = Math.min(roadTop * 0.8, 520 * view.s); drawLayer(L, roadTop - h + 6, h, L.par, cx); }
-    else if (L.role === 'mid') { const h = Math.min(roadTop * 0.62, 380 * view.s); drawLayer(L, roadTop - h + 8, h, L.par, cx); }
+    else if (L.role === 'far') { const h = Math.min(roadTop * 0.8, 520 * view.s) / L.base; drawLayer(L, roadTop + 6 - h * L.base, h, L.par, cx); }
+    else if (L.role === 'mid') { const h = Math.min(roadTop * 0.62, 380 * view.s) / L.base; drawLayer(L, roadTop + 8 - h * L.base, h, L.par, cx); }
     else if (L.role === 'ground') { const h0 = Math.max(80, H - (view.groundY - LANE_GAP * view.s * 1.8)); drawLayer(L, roadTop, h0 + camZ * view.s, L.par, cx); } }
   if (roadTop + 0 < H) { // road edge + lane stripes
     ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(0, roadTop, W, 6);
@@ -103,9 +104,11 @@ function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   if (P.boostT > 0) return 'veh.' + V.id + '.boost';
   if (V.fly === 'always' || V.fly === 'hover' || P.z > floor + 25 || P.wing > 0.5) return 'veh.' + V.id + '.fly';
   return 'veh.' + V.id + '.drive'; }
+// shadow widths matched to the visible footprint of Muse's art (v1); the interim art uses the hitbox length
+const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150 };
 function drawPlayer(R, t) {
   const P = R.p, V = R.veh, sp = vehSprite(R);
-  shadow(P.x, P.laneF, P.z, V.len * 1.05, 0.32);
+  shadow(P.x, P.laneF, P.z, (ART.get(sp).real && SHADOW_W[V.id]) || V.len * 1.05, 0.32);
   let rot = 0, sq = 0;
   if (V.fly === 'wings' || V.fly === 'bounce') rot = Math.max(-0.3, Math.min(0.3, -P.vz / 2400)) * (P.onGround ? 0 : 1);
   if (V.fly === 'always' || V.fly === 'hover') rot = Math.max(-0.15, Math.min(0.15, -P.vz / 3000)) + Math.sin(t * 3) * 0.03;
@@ -145,19 +148,20 @@ function drawObj(o, t) {
   if (o.star) { const k = kL(o.lane); const sc = 1 + Math.sin(t * 6 + o.x) * 0.08; drawSprite('item.star', o.x, o.lane, o.z + 26, { rot: Math.sin(t * 3 + o.x) * 0.25, sq: 0, wu: 52 * sc }); return; }
   if (o.z < 5) shadow(o.x, o.lane, 0, o.w * 1.2, 0.22);
   const bob = SIM.KINDS[o.kind].sky ? Math.sin(t * 2.5 + o.x * 0.01) * 8 : 0;
-  drawSprite(objSprite(o), o.x, o.lane, o.z + bob, { wu: SIM.KINDS[o.kind].sky ? undefined : o.w * 1.07 });
+  drawSprite(objSprite(o), o.x, o.lane, o.z + bob);
 }
 
 /* ---------------- debris + particles ---------------- */
 const CAP = () => reduced() ? 90 : 240;
 function burst(o, R, how) {
   const K = SIM.KINDS[o.kind], n = Math.round(K.chunks * (reduced() ? 0.5 : 1)), sp = R ? R.p.speed : 400;
-  for (let i = 0; i < n && debris.length < CAP(); i++) debris.push({ spr: 'debris.' + K.debris, x: o.x + rand(-o.w * 0.4, o.w * 0.4), lane: o.lane + rand(-0.25, 0.25), z: o.z + rand(0.1, 0.9) * o.h, vx: sp * 0.5 + rand(-200, 600), vz: rand(250, 900), r: rand(0, 6), vr: rand(-12, 12), life: rand(1.1, 1.8), t: 0, sz: rand(0.7, 1.3) });
+  const vars = ART.variants('debris.' + K.debris);
+  for (let i = 0; i < n && debris.length < CAP(); i++) debris.push({ spr: vars[Math.random() * vars.length | 0], x: o.x + rand(-o.w * 0.4, o.w * 0.4), lane: o.lane + rand(-0.25, 0.25), z: o.z + rand(0.1, 0.9) * o.h, vx: sp * 0.5 + rand(-200, 600), vz: rand(250, 900), r: rand(0, 6), vr: rand(-12, 12), life: rand(1.1, 1.8), t: 0, sz: rand(0.7, 1.3) });
   const pc = reduced() ? 4 : 10;
   for (let i = 0; i < pc && parts.length < 500; i++) parts.push({ kind: 'dust', x: o.x, lane: o.lane, z: o.z + o.h * 0.4, vx: rand(-200, 300), vz: rand(-50, 250), life: rand(0.4, 0.8), t: 0, r: rand(10, 24), c: K.sky ? '255,255,255' : '230,220,200' });
   for (let i = 0; i < pc && parts.length < 500; i++) parts.push({ kind: 'spark', x: o.x, lane: o.lane, z: o.z + o.h * 0.5, vx: rand(-600, 900), vz: rand(-400, 800), life: rand(0.25, 0.5), t: 0, r: rand(3, 6), c: ['255,210,63', '255,255,255', '255,120,80'][i % 3] });
 }
-function topple(o, R) { debris.push({ spr: objSprite(o), x: o.x, lane: o.lane, z: o.z, vx: (R ? R.p.speed : 400) * 0.6 + rand(100, 400), vz: rand(200, 600), r: 0, vr: rand(-5, 5), life: 2, t: 0, sz: 1, whole: o, burstOnLand: true, wu: o.w * 1.07 }); }
+function topple(o, R) { debris.push({ spr: objSprite(o), x: o.x, lane: o.lane, z: o.z, vx: (R ? R.p.speed : 400) * 0.6 + rand(100, 400), vz: rand(200, 600), r: 0, vr: rand(-5, 5), life: 2, t: 0, sz: 1, whole: o, burstOnLand: true }); }
 function confetti(n, x, lane, z) { for (let i = 0; i < n && parts.length < 600; i++) parts.push({ kind: 'conf', x: x + rand(-200, 200), lane: lane + rand(-0.5, 0.5), z: z + rand(0, 200), vx: rand(-300, 300), vz: rand(200, 900), life: rand(1.5, 2.6), t: 0, r: rand(5, 9), rot: rand(0, 6), c: ['#ff4d6d', '#ffd23f', '#2ec4b6', '#4361ee', '#9b5cf0', '#ff9f1c'][i % 6] }); }
 function popText(text, x, lane, z, col, big) { if (pops.length > 24) pops.shift(); pops.push({ text, x, lane, z, t: 0, col: col || '#fff', big: !!big }); }
 function updateFx(dt, R) {
@@ -196,7 +200,7 @@ function render(t) {
   }
   for (const s of R.shots) if (s.live) drawSprite('item.shot', s.x, s.lane, s.z, { rot: t * 10 });
   drawFx();
-  for (const L of ART.layers(R.track.id)) if (L.role === 'front' && L.img) { const h = Math.min(H * 0.16, 170 * view.s); drawLayer(L, H - h + camZ * view.s * 0.3, h, L.par, camX()); }
+  for (const L of ART.layers(R.track.id)) if (L.role === 'front' && L.img) { const h = view.frontH; drawLayer(L, H - h + camZ * view.s, h, L.par, camX()); }
   if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.5})`; ctx.fillRect(0, 0, W, H); }
   if (mode === 'title' || mode === 'pick' || mode === 'cube') { ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, 0, W, H); }
 }
