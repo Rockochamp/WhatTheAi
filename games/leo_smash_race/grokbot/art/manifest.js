@@ -7,7 +7,7 @@
    - alias: 'other.name' reuses another sprite; fx.exhaust: [x, y] (0..1 of the drive canvas) is where boost flames come out.
    A missing or broken file silently falls back to the interim art, so partial drops are safe. */
 window.LEO_MANIFEST = {
-  version: 3,  // art drop v1 (Muse), wired in by Grokbot
+  version: 4,  // Muse art drop 2: new road grounds, sword v3, truck v3 (same file names, cache bust)
   base: 'art/',
   // Vehicle poses without their own file borrow another pose; the game adds the boost flames and the celebrate bounce in code.
   poseAliases: { boost: 'drive', celebrate: 'fly' },
@@ -21,7 +21,7 @@ window.LEO_MANIFEST = {
     'veh.bibi.fly':       { src: 'vehicles/bibi_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 190 },
     'veh.bibi.boost':     { src: 'vehicles/bibi_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 190 },  // = drive (no boost pose yet; flames/speed FX in code)
     'veh.bibi.celebrate': { src: 'vehicles/bibi_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 190 },  // = fly (no celebrate pose yet)
-    'veh.truck.drive':    { src: 'vehicles/truck_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 245, fx: { exhaust: [0.13, 0.44] } },
+    'veh.truck.drive':    { src: 'vehicles/truck_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 245, fx: { exhaust: [0.20, 0.40] } },  // Grokbot: moved onto the rear of the v3 body (0.13/0.44 sat in the air behind the tyre)
     'veh.truck.fly':      { src: 'vehicles/truck_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 245 },
     'veh.truck.boost':    { src: 'vehicles/truck_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 245 },  // = drive (no boost pose yet; flames/speed FX in code)
     'veh.truck.celebrate': { src: 'vehicles/truck_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 245 },  // = fly (no celebrate pose yet)

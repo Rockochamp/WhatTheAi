@@ -1,15 +1,21 @@
 {
+ "version": 4,
+ "changes_v4": [
+  "ground layers replaced by Pixel round-2 road textures (all 4 tracks)",
+  "sword -> hero-sword_fly_v3 (silver blade), same body scale, sparkle rings filled",
+  "truck -> bat-truck drive_v3/fly_v3 (grey tyres), shared scale and 0.92 baseline"
+ ],
  "generated": "2026-10-17 (Europe/Zurich)",
  "by": "Muse",
  "spec": "/workspace/WhatTheAi/games/leo_smash_race/grokbot/art/ART_SPEC.md",
  "file_count": 66,
- "total_bytes": 1158576,
- "sprite_bytes": 290656,
+ "total_bytes": 1160688,
+ "sprite_bytes": 290430,
  "track_bytes": {
-  "toyroom": 226182,
-  "desert": 241802,
-  "castle": 215304,
-  "city": 184632
+  "toyroom": 176510,
+  "desert": 337278,
+  "castle": 192930,
+  "city": 163540
  },
  "conventions": {
   "vehicles": "512x256 canvas, anchor [0.5,0.92] (sword [0.5,0.80]); near-side wheel contact on baseline_y_px, body centred on x=256; all poses of one vehicle share scale and baseline",
@@ -161,12 +167,12 @@
     448,
     235
    ],
-   "scale_from_cut": 0.4158,
-   "bytes": 17284,
+   "scale_from_cut": 0.415,
+   "bytes": 18326,
    "type": "vehicle",
    "id": "truck",
    "pose": "drive",
-   "src_raw": "vehicle_bat-truck_drive_v2.jpg"
+   "src_raw": "vehicle_bat-truck_drive_v3.jpg"
   },
   {
    "file": "vehicles/truck_fly.webp",
@@ -182,15 +188,15 @@
    "content_bbox": [
     50,
     19,
-    462,
-    234
+    461,
+    235
    ],
-   "scale_from_cut": 0.4283,
-   "bytes": 19304,
+   "scale_from_cut": 0.415,
+   "bytes": 19020,
    "type": "vehicle",
    "id": "truck",
    "pose": "fly",
-   "src_raw": "vehicle_bat-truck_fly_v2.jpg"
+   "src_raw": "vehicle_bat-truck_fly_v3.jpg"
   },
   {
    "file": "vehicles/bibi_drive.webp",
@@ -300,17 +306,17 @@
    ],
    "baseline_y_px": 205,
    "content_bbox": [
-    13,
-    61,
+    23,
+    62,
     420,
     204
    ],
-   "scale_from_cut": 0.3595,
-   "bytes": 12258,
+   "scale_from_cut": 0.3591,
+   "bytes": 11274,
    "type": "vehicle",
    "id": "sword",
    "pose": "fly",
-   "src_raw": "vehicle_hero-sword_fly_v2.jpg"
+   "src_raw": "vehicle_hero-sword_fly_v3.jpg"
   },
   {
    "file": "rivals/rival_orange.webp",
@@ -1253,15 +1259,15 @@
     1920,
     540
    ],
-   "bytes": 74678,
+   "bytes": 25006,
    "track": "toyroom",
    "role": "ground",
    "par": 1,
-   "src_raw": "track_toy-room-rally_near-ground_v1.jpg",
-   "note": "wrap at 1228px; strip rows 500-719 (set by eye; top bumps/edge gaps cut flat), 361px strip + mirrored fill to 540",
+   "src_raw": "track_toy-room-rally_road_v1.jpg",
+   "note": "rows 413-716, best-match wrap at 1113px, 64px crossfade, level-matched (+0.2); x/y scale 1.830/1.782",
    "seam": [
-    1.9449326992034912,
-    2.0547499656677246
+    0.46663475036621094,
+    0.5083242654800415
    ]
   },
   {
@@ -1317,15 +1323,15 @@
     1920,
     540
    ],
-   "bytes": 61392,
+   "bytes": 156868,
    "track": "desert",
    "role": "ground",
    "par": 1,
-   "src_raw": "track_desert-demolition_near-ground_v1.jpg",
-   "note": "wrap at 1154px; strip rows 465-655 (set by eye; top bumps/edge gaps cut flat), 335px strip + mirrored fill to 540",
+   "src_raw": "track_desert-demolition_road_v1.jpg",
+   "note": "rows 364-718, best-match wrap at 1267px, 64px crossfade, level-matched (+2.0); x/y scale 1.596/1.525",
    "seam": [
-    1.287534475326538,
-    2.336494207382202
+    3.8527543544769287,
+    5.011909484863281
    ]
   },
   {
@@ -1381,15 +1387,15 @@
     1920,
     540
    ],
-   "bytes": 46378,
+   "bytes": 24004,
    "track": "castle",
    "role": "ground",
    "par": 1,
-   "src_raw": "track_castle-sky-run_near-ground_v1.jpg",
-   "note": "wrap at 1242px; strip rows 470-640 (set by eye; top bumps/edge gaps cut flat), 277px strip + mirrored fill to 540",
+   "src_raw": "track_castle-sky-run_road_v1.jpg",
+   "note": "rows 372-704, cut at stone joints x=52..1241 (6 stones, period ~198 px), 12px joint crossfade, level-matched (+2.0); x/y scale 1.615/1.627",
    "seam": [
-    1.3634265661239624,
-    1.1097270250320435
+    9.19001579284668,
+    3.146021604537964
    ]
   },
   {
@@ -1445,15 +1451,15 @@
     1920,
     540
    ],
-   "bytes": 25506,
+   "bytes": 4414,
    "track": "city",
    "role": "ground",
    "par": 1,
-   "src_raw": "track_bat-city-night_near-ground_v1.jpg",
-   "note": "wrap at 1068px; strip rows 418-624 (set by eye; top bumps/edge gaps cut flat), 394px strip + mirrored fill to 540",
+   "src_raw": "track_bat-city-night_road_v1.jpg",
+   "note": "rows 363-718, best-match wrap at 1248px, 24px crossfade, level-matched (+2.7); x/y scale 1.569/1.521",
    "seam": [
-    1.011222004890442,
-    0.8309944272041321
+    0.38379743695259094,
+    0.2850329875946045
    ]
   },
   {

@@ -120,10 +120,13 @@ function drawPlayer(R, t) {
   // specials behind/around
   if (P.superT > 0) drawSpecial(R, t, true);
   drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq });
-  if (P.boostT > 0 && ART.resolve(sp) !== 'veh.' + V.id + '.boost') boostFlame(R, sp, P.z + bob, rot, t);
+  if (P.boostT > 0 && !ownBoostArt(V.id)) boostFlame(R, sp, P.z + bob, rot, t);
   if (P.superT > 0) drawSpecial(R, t, false);
   if (P.boostT > 0 && !reduced()) { ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { const y = laneY(P.laneF) - (P.z + 10 + i * 14) * view.s, x = X(P.x) - V.len * 0.6 * view.s - ((t * 900 + i * 137) % 220); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 60, y); ctx.stroke(); } }
 }
+// true only when the boost pose has its own file (not an alias, and not the drive/fly file reused under the boost name)
+function ownBoostArt(id) { const S = ART.manifest.sprites, n = 'veh.' + id + '.', b = S[ART.resolve(n + 'boost')]; if (!b || !b.src) return false;
+  return ![n + 'drive', n + 'fly'].some(k => S[k] && S[k].src === b.src); }
 function boostFlame(R, name, z, rot, t) {
   const P = R.p, sp = ART.get(name), k = kL(P.laneF), w = sp.wu * view.s * k, h = w * sp.h / sp.w, ex = ART.fx(name).exhaust || [0.08, 0.6];
   const ox = (ex[0] - sp.ax) * w, oy = (ex[1] - sp.ay) * h, c = Math.cos(rot), s2 = Math.sin(rot);
