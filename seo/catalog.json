@@ -241,5 +241,32 @@
       }
     ],
     "image": "/images/kenai.webp"
+  },
+  {
+    "id": 8,
+    "name": "Leo's Smash Race",
+    "hub": "/games/leo_smash_race/index.html",
+    "category": "Racing game",
+    "summary": "Designed by Leo, age 4: solve a chunky colour cube to fill your boost, then race, fly and smash your way to the finish.",
+    "intro": "Leo's Smash Race was designed by Leo, age 4. Pick a hero (the Flame Dragster, Bibi the balance bike, the Bat Truck, the Hero Sword or the Sky Patroller), warm up by solving a chunky 2x2 colour cube for a full boost, then race on one of four tracks: Toy Room Rally, Desert Demolition, Castle Sky Run and Bat City Night. Your hero drives by itself. Smash cones, crate towers, brick walls, barrel pyramids and sky balloons for points, chain smashes into combos up to x5, and fly up to reach the sky targets. There is no way to lose: every race ends with a party, stars and a place on the podium. Bests and stars are saved in your browser.",
+    "controls": [
+      "Tap PLAY, pick a hero and a track, then press GO. On the Cube Warm-up, tap the arrows (or swipe) to turn a row or column until every side is one colour. Help! appears after a few moves, and Race now skips the cube.",
+      "In the race, hold the big FLY button (Space or the Up arrow) to jump and fly; let go to glide down. Bibi bounces instead, with up to three jumps in the air.",
+      "Tap BOOST (Enter or Shift) when the ring fills to fire your hero's special move. The small arrows, a swipe up or down, or the Left and Right keys change lanes; P pauses."
+    ],
+    "tips": [
+      "Smashes less than 1.5 seconds apart build a combo up to x5, and a barrel pyramid is worth 300 points before the combo.",
+      "Assist mode is on by default and steers toward smashables. Grown-ups can switch it off, turn on reduced motion, or try the 3x3 Pro cube in the Grown-ups menu.",
+      "Boosting is how you beat the friendly racers to 1st place. A full boost from the cube gives you one big special right at the start."
+    ],
+    "versions": [
+      {
+        "model": "Grokbot",
+        "path": "/games/leo_smash_race/grokbot/game.html",
+        "detail": "Five heroes with their own special moves, a 2x2 Cube Warm-up with a 3x3 Pro option, four parallax tracks, combos, flying, assist mode, synth sound and an optional world board.",
+        "description": "Play Leo's Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4."
+      }
+    ],
+    "image": "/images/leo_smash_race.webp"
   }
 ]

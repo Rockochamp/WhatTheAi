@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#2f8cff">
+<link rel="icon" href="/images/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="style.css?v=4">
+<title>Leo&#x27;s Smash Race — Grokbot | What the Ai</title>
+<meta name="description" content="Play Leo&#x27;s Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4." />
+<link rel="canonical" href="https://whatthe.ai/games/leo_smash_race/grokbot/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Leo&#x27;s Smash Race — Grokbot | What the Ai" />
+<meta property="og:description" content="Play Leo&#x27;s Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4." />
+<meta property="og:url" content="https://whatthe.ai/games/leo_smash_race/grokbot/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Leo&#x27;s Smash Race — Grokbot | What the Ai" />
+<meta name="twitter:description" content="Play Leo&#x27;s Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4." />
+<meta property="og:image" content="https://whatthe.ai/images/leo_smash_race.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/leo_smash_race.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Leo's Smash Race — Grokbot", "url": "https://whatthe.ai/games/leo_smash_race/grokbot/game.html", "description": "Play Leo's Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Leo's Smash Race", "item": "https://whatthe.ai/games/leo_smash_race/index.html"}, {"@type": "ListItem", "position": 3, "name": "Grokbot", "item": "https://whatthe.ai/games/leo_smash_race/grokbot/game.html"}]}]}</script>
+</head><body>
+<div id="app">
+  <canvas id="cv" aria-label="Race track"></canvas>
+
+  <!-- race HUD -->
+  <div id="hud" class="hidden" aria-live="off">
+    <div class="hud-score"><span class="hud-ic" aria-hidden="true">💥</span><b id="hScore">0</b></div>
+    <div class="hud-prog" aria-hidden="true"><div class="prog-bar"><i class="dot rv" id="pr0"></i><i class="dot rv" id="pr1"></i><i class="dot rv" id="pr2"></i><i class="dot me" id="prMe"></i><span class="flag">🏁</span></div></div>
+    <div class="hud-stars"><span class="hud-star" data-art="ui.star" aria-hidden="true">⭐</span><b id="hStars">0</b></div>
+    <div class="hud-btns"><button id="bPause" class="round" aria-label="Pause">❚❚</button><button id="bMute" class="round" aria-label="Sound on or off">🔊</button></div>
+    <div id="combo" aria-hidden="true"></div>
+    <div id="banner" aria-live="polite"></div>
+  </div>
+  <div id="controls" class="hidden">
+    <button id="bJump" class="big-btn jump" aria-label="Jump"><span class="ic ic-jump" data-art="ui.jump"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8 52 34H40v20H24V34H12z" fill="#fff" stroke="#1d1a2e" stroke-width="4" stroke-linejoin="round"/></svg></span><span class="ic ic-fly" data-art="ui.fly"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M6 40c8-20 26-28 52-30-6 6-9 10-11 15 4 0 7-1 10-3-3 7-8 11-14 13 3 1 6 1 9 0-6 8-17 11-30 10-6 0-11-2-16-5z" fill="#fff" stroke="#1d1a2e" stroke-width="4" stroke-linejoin="round"/><path d="M18 40c8-2 16-6 24-14M22 46c8-1 16-4 22-9" fill="none" stroke="#8de8ff" stroke-width="3" stroke-linecap="round"/></svg></span><span class="lb">JUMP</span></button>
+    <div class="lanes"><button id="bUp" class="lane-btn" aria-label="Move one lane back">▲</button><button id="bDown" class="lane-btn" aria-label="Move one lane to the front">▼</button></div>
+    <button id="bBoost" class="big-btn boost" aria-label="Boost"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45" class="ring-bg"/><circle id="ringFg" cx="50" cy="50" r="45" class="ring-fg"/></svg><span class="ic" data-art="ui.boost"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M34 4c2 12 16 18 16 34a18 18 0 0 1-36 0c0-8 4-12 8-16 0 6 3 9 6 9-2-10 2-20 6-27z" fill="#ffd23f" stroke="#1d1a2e" stroke-width="4" stroke-linejoin="round"/><path d="M32 30c1 6 8 9 8 16a8 8 0 0 1-16 0c0-4 3-7 4-8 1 3 2 4 3 4 0-4 0-8 1-12z" fill="#ff6d00"/></svg></span><span class="lb">BOOST</span></button>
+  </div>
+  <div id="countdown" class="hidden" aria-live="assertive"></div>
+
+  <!-- title -->
+  <section id="title" class="screen">
+    <div class="title-card">
+      <h1 class="logo" data-art="ui.logo"><span class="l1">Leo's</span><span class="l2">Smash Race</span></h1>
+      <p class="credit">Designed by Leo, age 4</p>
+      <button id="bPlay" class="cta" aria-label="Play">▶ PLAY</button>
+      <div class="namebox"><button id="bName" class="linkbtn" aria-expanded="false" aria-controls="names">Pick a name</button><div id="names" class="chips hidden" role="radiogroup" aria-label="Racer name"></div></div>
+      <details class="grownups"><summary>Grown-ups</summary>
+        <div class="opts">
+          <label class="opt"><input type="checkbox" id="oAssist"> <span>Assist mode <small>steers toward smashables</small></span></label>
+          <label class="opt"><input type="checkbox" id="oMotion"> <span>Reduce motion <small>no shake, no slow-mo</small></span></label>
+          <label class="opt"><input type="checkbox" id="oPro"> <span>3x3 Pro cube <small>real shuffle</small></span></label>
+          <label class="opt"><input type="checkbox" id="oUnlock"> <span>Unlock all tracks</span></label>
+          <p class="keys">Keys: <b>Space</b>/<b>↑</b> jump &amp; fly (hold), <b>Enter</b>/<b>Shift</b> boost, <b>←</b>/<b>→</b> change lane, <b>P</b> pause, <b>M</b> sound.</p>
+          <button id="bBoard" class="ghost">🌍 World board</button>
+        </div>
+      </details>
+      <div id="bests" class="bests"></div>
+    </div>
+  </section>
+
+  <!-- pick -->
+  <section id="pick" class="screen hidden">
+    <div class="pick-card">
+      <div class="pick-head"><button id="bPickBack" class="round" aria-label="Back">◀</button><h2>Pick your hero</h2><span class="totstars" id="totStars"></span></div>
+      <div class="pick-scroll">
+      <div id="heroes" class="heroes" role="radiogroup" aria-label="Vehicles"></div>
+      <h3 class="sub">Pick a track</h3>
+      <div id="tracks" class="tracks" role="radiogroup" aria-label="Tracks"></div>
+      </div>
+      <div class="pick-go"><button id="bRaceNow" class="ghost">Race now ▶▶</button><button id="bGo" class="cta">GO! 🧊</button></div>
+    </div>
+  </section>
+
+  <!-- cube warm-up -->
+  <section id="cube" class="screen hidden">
+    <div class="cube-head"><button id="bCubeBack" class="round" aria-label="Back">◀</button><h2>Cube Warm-up</h2><button id="bSkip" class="ghost small">Race now ▶▶</button></div>
+    <p class="cube-tip" id="cubeTip">Make every side one colour!</p>
+    <div id="cubeWrap"><canvas id="cubeCv" aria-label="Colour cube"></canvas><div id="arrows"></div><div id="cubeWin" class="hidden"><p class="win-t" id="cubeWinT">You did it!</p><p class="win-s">⚡ Full boost!</p><button id="bCubeGo" class="cta">GO! 🏁</button></div></div>
+    <div class="cube-foot"><button id="bHelp" class="help hidden">🙋 Help!</button><span id="cubeMoves" class="moves"></span></div>
+  </section>
+
+  <!-- party -->
+  <section id="party" class="screen hidden">
+    <div class="party-card">
+      <div class="medal" id="pMedal">🥇</div>
+      <h2 id="pTitle">You did it!</h2>
+      <div class="award" id="pAward"><span class="st">★</span><span class="st">★</span><span class="st">★</span></div>
+      <ul class="breakdown" id="pBreak"></ul>
+      <p class="pbest" id="pBest"></p>
+      <div class="pbtns"><button id="bAgain" class="cta">↻ Again!</button><button id="bNewHero" class="ghost">🚗 New hero</button></div>
+      <div class="prank"><button id="bSubmit" class="ghost small hold" aria-label="Hold to put my score on the world board"><span class="fill" aria-hidden="true"></span><span class="t">🌍 Hold to put my score on the world board</span></button><p id="pRank" class="rankmsg"></p></div>
+    </div>
+  </section>
+
+  <!-- pause -->
+  <div id="pause" class="modal hidden" role="dialog" aria-modal="true" aria-label="Paused"><div class="mcard"><h2>Paused</h2>
+    <button id="bResume" class="cta">▶ Keep racing</button>
+    <label class="opt"><input type="checkbox" id="pAssist"> <span>Assist mode</span></label>
+    <label class="opt"><input type="checkbox" id="pMotion"> <span>Reduce motion</span></label>
+    <button id="bQuit" class="ghost">🏠 Home</button></div></div>
+  <!-- world board -->
+  <div id="rankModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="World board"><div class="mcard rank"><h2>🌍 World board</h2><div id="rkList" class="rklist"></div><p id="rkMe" class="rkme"></p><button id="rkClose" class="ghost">Close</button></div></div>
+</div>
+<script src="art/manifest.js?v=4"></script>
+<script src="sim.js?v=3"></script>
+<script src="cube.js?v=1"></script>
+<script src="proc.js?v=3"></script>
+<script src="assets.js?v=3"></script>
+<script src="audio.js?v=1"></script>
+<script src="rank.js?v=1"></script>
+<script src="game.js?v=5"></script>
+</body></html>
