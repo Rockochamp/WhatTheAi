@@ -1,0 +1,1473 @@
+{
+ "generated": "2026-10-17 (Europe/Zurich)",
+ "by": "Muse",
+ "spec": "/workspace/WhatTheAi/games/leo_smash_race/grokbot/art/ART_SPEC.md",
+ "file_count": 66,
+ "total_bytes": 1158576,
+ "sprite_bytes": 290656,
+ "track_bytes": {
+  "toyroom": 226182,
+  "desert": 241802,
+  "castle": 215304,
+  "city": 184632
+ },
+ "conventions": {
+  "vehicles": "512x256 canvas, anchor [0.5,0.92] (sword [0.5,0.80]); near-side wheel contact on baseline_y_px, body centred on x=256; all poses of one vehicle share scale and baseline",
+  "rivals": "384x192, anchor [0.5,0.93]",
+  "smash": "bottom-centre anchored, 4 px padding",
+  "debris": "64x64 centred",
+  "layers": "sky opaque 1920x1080; mid 1920x720 transparent (sky keyed); ground 1920x540 opaque; front 1920x300 transparent; all tile horizontally"
+ },
+ "pose_mapping": {
+  "boost": "drive (no boost art)",
+  "celebrate": "fly (no celebrate art)",
+  "sword": "all poses = fly"
+ },
+ "not_provided": [
+  "smash.box",
+  "smash.block",
+  "smash.mega",
+  "debris.card",
+  "debris.block",
+  "layers far (all tracks)",
+  "items.*",
+  "ui.*"
+ ],
+ "src_map": {
+  "veh.dragster.drive": "vehicles/dragster_drive.webp",
+  "veh.dragster.fly": "vehicles/dragster_fly.webp",
+  "veh.truck.drive": "vehicles/truck_drive.webp",
+  "veh.truck.fly": "vehicles/truck_fly.webp",
+  "veh.bibi.drive": "vehicles/bibi_drive.webp",
+  "veh.bibi.fly": "vehicles/bibi_fly.webp",
+  "veh.jet.drive": "vehicles/jet_drive.webp",
+  "veh.jet.fly": "vehicles/jet_fly.webp",
+  "veh.sword.fly": "vehicles/sword_fly.webp",
+  "rival.orange": "rivals/rival_orange.webp",
+  "rival.green": "rivals/rival_green.webp",
+  "rival.blue": "rivals/rival_blue.webp",
+  "veh.dragster.boost": "vehicles/dragster_drive.webp",
+  "veh.dragster.celebrate": "vehicles/dragster_fly.webp",
+  "veh.truck.boost": "vehicles/truck_drive.webp",
+  "veh.truck.celebrate": "vehicles/truck_fly.webp",
+  "veh.bibi.boost": "vehicles/bibi_drive.webp",
+  "veh.bibi.celebrate": "vehicles/bibi_fly.webp",
+  "veh.jet.boost": "vehicles/jet_drive.webp",
+  "veh.jet.celebrate": "vehicles/jet_fly.webp",
+  "veh.sword.drive": "vehicles/sword_fly.webp",
+  "veh.sword.boost": "vehicles/sword_fly.webp",
+  "veh.sword.celebrate": "vehicles/sword_fly.webp",
+  "smash.cone": "smash/cone.webp",
+  "smash.crate": "smash/crate.webp",
+  "smash.balloon": "smash/balloon.webp",
+  "smash.cloud": "smash/cloud.webp",
+  "smash.wall": "smash/wall.webp",
+  "smash.barrel": "smash/barrel.webp",
+  "debris.cone": "debris/cone_1.webp",
+  "debris.cone.2": "debris/cone_2.webp",
+  "debris.cone.3": "debris/cone_3.webp",
+  "debris.cone.4": "debris/cone_4.webp",
+  "debris.cone.5": "debris/cone_5.webp",
+  "debris.wood": "debris/wood_1.webp",
+  "debris.wood.2": "debris/wood_2.webp",
+  "debris.wood.3": "debris/wood_3.webp",
+  "debris.wood.4": "debris/wood_4.webp",
+  "debris.wood.5": "debris/wood_5.webp",
+  "debris.wood.6": "debris/wood_6.webp",
+  "debris.brick": "debris/brick_1.webp",
+  "debris.brick.2": "debris/brick_2.webp",
+  "debris.brick.3": "debris/brick_3.webp",
+  "debris.brick.4": "debris/brick_4.webp",
+  "debris.barrel": "debris/barrel_1.webp",
+  "debris.barrel.2": "debris/barrel_2.webp",
+  "debris.barrel.3": "debris/barrel_3.webp",
+  "debris.barrel.4": "debris/barrel_4.webp",
+  "debris.barrel.5": "debris/barrel_5.webp",
+  "debris.barrel.6": "debris/barrel_6.webp",
+  "debris.balloon": "debris/balloon_1.webp",
+  "debris.balloon.2": "debris/balloon_2.webp",
+  "debris.balloon.3": "debris/balloon_3.webp",
+  "debris.balloon.4": "debris/balloon_4.webp",
+  "debris.balloon.5": "debris/balloon_5.webp",
+  "debris.balloon.6": "debris/balloon_6.webp",
+  "debris.cloud": "debris/cloud_1.webp",
+  "debris.cloud.2": "debris/cloud_2.webp",
+  "debris.cloud.3": "debris/cloud_3.webp",
+  "debris.cloud.4": "debris/cloud_4.webp"
+ },
+ "files": [
+  {
+   "file": "vehicles/dragster_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    6,
+    15,
+    505,
+    236
+   ],
+   "scale_from_cut": 0.4719,
+   "bytes": 21966,
+   "type": "vehicle",
+   "id": "dragster",
+   "pose": "drive",
+   "src_raw": "vehicle_flame-dragster_drive_v3.jpg"
+  },
+  {
+   "file": "vehicles/dragster_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    6,
+    23,
+    492,
+    236
+   ],
+   "scale_from_cut": 0.4719,
+   "bytes": 23188,
+   "type": "vehicle",
+   "id": "dragster",
+   "pose": "fly",
+   "src_raw": "vehicle_flame-dragster_fly_v3.jpg"
+  },
+  {
+   "file": "vehicles/truck_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    63,
+    5,
+    448,
+    235
+   ],
+   "scale_from_cut": 0.4158,
+   "bytes": 17284,
+   "type": "vehicle",
+   "id": "truck",
+   "pose": "drive",
+   "src_raw": "vehicle_bat-truck_drive_v2.jpg"
+  },
+  {
+   "file": "vehicles/truck_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    50,
+    19,
+    462,
+    234
+   ],
+   "scale_from_cut": 0.4283,
+   "bytes": 19304,
+   "type": "vehicle",
+   "id": "truck",
+   "pose": "fly",
+   "src_raw": "vehicle_bat-truck_fly_v2.jpg"
+  },
+  {
+   "file": "vehicles/bibi_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    101,
+    8,
+    411,
+    234
+   ],
+   "scale_from_cut": 0.4305,
+   "bytes": 13726,
+   "type": "vehicle",
+   "id": "bibi",
+   "pose": "drive",
+   "src_raw": "vehicle_bibi_drive_v2.jpg"
+  },
+  {
+   "file": "vehicles/bibi_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    94,
+    5,
+    415,
+    235
+   ],
+   "scale_from_cut": 0.4649,
+   "bytes": 15666,
+   "type": "vehicle",
+   "id": "bibi",
+   "pose": "fly",
+   "src_raw": "vehicle_bibi_fly_v2.jpg"
+  },
+  {
+   "file": "vehicles/jet_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    102,
+    5,
+    412,
+    235
+   ],
+   "scale_from_cut": 0.4158,
+   "bytes": 16830,
+   "type": "vehicle",
+   "id": "jet",
+   "pose": "drive",
+   "src_raw": "vehicle_sky-patroller_drive_v1.jpg"
+  },
+  {
+   "file": "vehicles/jet_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    96,
+    39,
+    417,
+    235
+   ],
+   "scale_from_cut": 0.4324,
+   "bytes": 16982,
+   "type": "vehicle",
+   "id": "jet",
+   "pose": "fly",
+   "src_raw": "vehicle_sky-patroller_fly_v1.jpg"
+  },
+  {
+   "file": "vehicles/sword_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.8
+   ],
+   "baseline_y_px": 205,
+   "content_bbox": [
+    13,
+    61,
+    420,
+    204
+   ],
+   "scale_from_cut": 0.3595,
+   "bytes": 12258,
+   "type": "vehicle",
+   "id": "sword",
+   "pose": "fly",
+   "src_raw": "vehicle_hero-sword_fly_v2.jpg"
+  },
+  {
+   "file": "rivals/rival_orange.webp",
+   "size": [
+    384,
+    192
+   ],
+   "anchor": [
+    0.5,
+    0.93
+   ],
+   "baseline_y_px": 179,
+   "content_bbox": [
+    56,
+    5,
+    326,
+    178
+   ],
+   "scale_from_cut": 0.3418,
+   "bytes": 11330,
+   "type": "rival",
+   "id": "orange",
+   "src_raw": "rival_orange_drive_v1.jpg"
+  },
+  {
+   "file": "rivals/rival_green.webp",
+   "size": [
+    384,
+    192
+   ],
+   "anchor": [
+    0.5,
+    0.93
+   ],
+   "baseline_y_px": 179,
+   "content_bbox": [
+    40,
+    5,
+    345,
+    178
+   ],
+   "scale_from_cut": 0.3601,
+   "bytes": 12468,
+   "type": "rival",
+   "id": "green",
+   "src_raw": "rival_green_drive_v1.jpg"
+  },
+  {
+   "file": "rivals/rival_blue.webp",
+   "size": [
+    384,
+    192
+   ],
+   "anchor": [
+    0.5,
+    0.93
+   ],
+   "baseline_y_px": 179,
+   "content_bbox": [
+    32,
+    5,
+    352,
+    178
+   ],
+   "scale_from_cut": 0.3352,
+   "bytes": 12806,
+   "type": "rival",
+   "id": "blue",
+   "src_raw": "rival_blue_drive_v1.jpg"
+  },
+  {
+   "file": "smash/cone.webp",
+   "size": [
+    128,
+    160
+   ],
+   "bytes": 3842,
+   "content_bbox": [
+    4,
+    30,
+    123,
+    154
+   ],
+   "type": "smashable",
+   "id": "cone",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_cone_intact_v1.jpg"
+  },
+  {
+   "file": "smash/crate.webp",
+   "size": [
+    160,
+    160
+   ],
+   "bytes": 5064,
+   "content_bbox": [
+    4,
+    15,
+    155,
+    154
+   ],
+   "type": "smashable",
+   "id": "crate",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_crate_intact_v1.jpg"
+  },
+  {
+   "file": "smash/balloon.webp",
+   "size": [
+    160,
+    256
+   ],
+   "bytes": 5808,
+   "content_bbox": [
+    5,
+    39,
+    154,
+    250
+   ],
+   "type": "smashable",
+   "id": "balloon",
+   "anchor": [
+    0.5,
+    0.6
+   ],
+   "src_raw": "smash_balloon_intact_v1.jpg"
+  },
+  {
+   "file": "smash/cloud.webp",
+   "size": [
+    256,
+    176
+   ],
+   "bytes": 5420,
+   "content_bbox": [
+    9,
+    5,
+    246,
+    170
+   ],
+   "type": "smashable",
+   "id": "cloud",
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "src_raw": "smash_cloud-block_intact_v2.jpg"
+  },
+  {
+   "file": "smash/wall.webp",
+   "size": [
+    192,
+    384
+   ],
+   "bytes": 8632,
+   "content_bbox": [
+    5,
+    104,
+    186,
+    372
+   ],
+   "type": "smashable",
+   "id": "wall",
+   "anchor": [
+    0.5,
+    0.98
+   ],
+   "src_raw": "smash_brick-wall_intact_v1.jpg",
+   "note": "right 2 brick columns of the 5x4 wall, cut at a mortar line"
+  },
+  {
+   "file": "smash/wall_wide.webp",
+   "size": [
+    384,
+    256
+   ],
+   "bytes": 15266,
+   "content_bbox": [
+    22,
+    5,
+    360,
+    249
+   ],
+   "type": "smashable",
+   "id": "wall_wide",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_brick-wall_intact_v1.jpg",
+   "note": "OPTIONAL full 5x4 wall; needs its own manifest size and a wider KINDS box"
+  },
+  {
+   "file": "smash/barrel.webp",
+   "size": [
+    160,
+    192
+   ],
+   "bytes": 5138,
+   "content_bbox": [
+    5,
+    75,
+    154,
+    183
+   ],
+   "type": "smashable",
+   "id": "barrel",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_barrel-pyramid_intact_v1.jpg",
+   "note": "front barrel cut from the pyramid (GrabCut); code stacks pyramids"
+  },
+  {
+   "file": "debris/cone_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1508,
+   "content_bbox": [
+    14,
+    4,
+    49,
+    59
+   ],
+   "type": "debris",
+   "id": "cone",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cone_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/cone_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1930,
+   "content_bbox": [
+    8,
+    4,
+    53,
+    59
+   ],
+   "type": "debris",
+   "id": "cone",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cone_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/cone_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 2088,
+   "content_bbox": [
+    4,
+    4,
+    59,
+    59
+   ],
+   "type": "debris",
+   "id": "cone",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cone_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/cone_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1448,
+   "content_bbox": [
+    16,
+    5,
+    46,
+    59
+   ],
+   "type": "debris",
+   "id": "cone",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cone_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/cone_5.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1586,
+   "content_bbox": [
+    4,
+    11,
+    59,
+    51
+   ],
+   "type": "debris",
+   "id": "cone",
+   "variant": 5,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cone_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/wood_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1840,
+   "content_bbox": [
+    7,
+    4,
+    54,
+    59
+   ],
+   "type": "debris",
+   "id": "wood",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_crate_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/wood_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1330,
+   "content_bbox": [
+    16,
+    4,
+    47,
+    59
+   ],
+   "type": "debris",
+   "id": "wood",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_crate_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/wood_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1732,
+   "content_bbox": [
+    4,
+    4,
+    58,
+    59
+   ],
+   "type": "debris",
+   "id": "wood",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_crate_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/wood_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1246,
+   "content_bbox": [
+    15,
+    4,
+    47,
+    59
+   ],
+   "type": "debris",
+   "id": "wood",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_crate_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/wood_5.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1298,
+   "content_bbox": [
+    4,
+    13,
+    59,
+    49
+   ],
+   "type": "debris",
+   "id": "wood",
+   "variant": 5,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_crate_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/wood_6.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1812,
+   "content_bbox": [
+    6,
+    4,
+    56,
+    59
+   ],
+   "type": "debris",
+   "id": "wood",
+   "variant": 6,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_crate_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1440,
+   "content_bbox": [
+    4,
+    9,
+    59,
+    53
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1284,
+   "content_bbox": [
+    4,
+    9,
+    59,
+    53
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1258,
+   "content_bbox": [
+    4,
+    12,
+    59,
+    51
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1466,
+   "content_bbox": [
+    4,
+    10,
+    59,
+    53
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1156,
+   "content_bbox": [
+    4,
+    14,
+    59,
+    49
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1576,
+   "content_bbox": [
+    5,
+    4,
+    58,
+    58
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1490,
+   "content_bbox": [
+    4,
+    12,
+    59,
+    50
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1706,
+   "content_bbox": [
+    4,
+    7,
+    59,
+    56
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_5.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1372,
+   "content_bbox": [
+    5,
+    11,
+    59,
+    52
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 5,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_6.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1726,
+   "content_bbox": [
+    4,
+    7,
+    59,
+    55
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 6,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1600,
+   "content_bbox": [
+    8,
+    5,
+    56,
+    59
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1572,
+   "content_bbox": [
+    4,
+    5,
+    59,
+    57
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1502,
+   "content_bbox": [
+    5,
+    9,
+    58,
+    53
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1794,
+   "content_bbox": [
+    5,
+    8,
+    58,
+    54
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_5.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1812,
+   "content_bbox": [
+    5,
+    5,
+    57,
+    58
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 5,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_6.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1330,
+   "content_bbox": [
+    4,
+    13,
+    59,
+    50
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 6,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/cloud_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1454,
+   "content_bbox": [
+    4,
+    8,
+    59,
+    55
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "debris/cloud_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1450,
+   "content_bbox": [
+    4,
+    6,
+    59,
+    56
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "debris/cloud_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1446,
+   "content_bbox": [
+    4,
+    8,
+    59,
+    54
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "debris/cloud_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1426,
+   "content_bbox": [
+    4,
+    7,
+    58,
+    54
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "layers/toyroom_sky.webp",
+   "size": [
+    1920,
+    1080
+   ],
+   "bytes": 51508,
+   "track": "toyroom",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_toy-room-rally_far-sky_v2.jpg",
+   "note": "wallpaper cropped to 2 pattern periods (484 px) + 16 px xfade",
+   "seam": [
+    0.9804535508155823,
+    0.8404545783996582
+   ]
+  },
+  {
+   "file": "layers/toyroom_mid.webp",
+   "size": [
+    1920,
+    720
+   ],
+   "bytes": 74900,
+   "track": "toyroom",
+   "role": "mid",
+   "par": 0.35,
+   "src_raw": "track_toy-room-rally_mid-scenery_v2.jpg",
+   "note": "wrap at 1278px; sky keyed out, level-matched (+13.5), repeats 1x per 1920 px, content top row 245",
+   "seam": [
+    11.306658744812012,
+    5.322919845581055
+   ]
+  },
+  {
+   "file": "layers/toyroom_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 74678,
+   "track": "toyroom",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_toy-room-rally_near-ground_v1.jpg",
+   "note": "wrap at 1228px; strip rows 500-719 (set by eye; top bumps/edge gaps cut flat), 361px strip + mirrored fill to 540",
+   "seam": [
+    1.9449326992034912,
+    2.0547499656677246
+   ]
+  },
+  {
+   "file": "layers/toyroom_front.webp",
+   "size": [
+    1920,
+    300
+   ],
+   "bytes": 25096,
+   "track": "toyroom",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_toy-room-rally_foreground-props_v1.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/desert_sky.webp",
+   "size": [
+    1920,
+    1080
+   ],
+   "bytes": 24646,
+   "track": "desert",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_desert-demolition_far-sky_v1.jpg",
+   "note": "level-matched (-3.7), best-match wrap at 1192px + 96 px crossfade",
+   "seam": [
+    0.555934488773346,
+    0.531208336353302
+   ]
+  },
+  {
+   "file": "layers/desert_mid.webp",
+   "size": [
+    1920,
+    720
+   ],
+   "bytes": 135034,
+   "track": "desert",
+   "role": "mid",
+   "par": 0.35,
+   "src_raw": "track_desert-demolition_mid-scenery_v1.jpg",
+   "note": "wrap at 1230px; sky keyed out, level-matched (+2.2), repeats 1x per 1920 px, content top row 253",
+   "seam": [
+    2.9808804988861084,
+    2.9581995010375977
+   ]
+  },
+  {
+   "file": "layers/desert_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 61392,
+   "track": "desert",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_desert-demolition_near-ground_v1.jpg",
+   "note": "wrap at 1154px; strip rows 465-655 (set by eye; top bumps/edge gaps cut flat), 335px strip + mirrored fill to 540",
+   "seam": [
+    1.287534475326538,
+    2.336494207382202
+   ]
+  },
+  {
+   "file": "layers/desert_front.webp",
+   "size": [
+    1920,
+    300
+   ],
+   "bytes": 20730,
+   "track": "desert",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_desert-demolition_foreground-props_v1.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/castle_sky.webp",
+   "size": [
+    1920,
+    1080
+   ],
+   "bytes": 38378,
+   "track": "castle",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_castle-sky-run_far-sky_v1.jpg",
+   "note": "level-matched (+2.3), best-match wrap at 1228px + 96 px crossfade",
+   "seam": [
+    0.26268067955970764,
+    0.2720569670200348
+   ]
+  },
+  {
+   "file": "layers/castle_mid.webp",
+   "size": [
+    1920,
+    720
+   ],
+   "bytes": 113718,
+   "track": "castle",
+   "role": "mid",
+   "par": 0.35,
+   "src_raw": "track_castle-sky-run_mid-scenery_v1.jpg",
+   "note": "wrap at 1144px; sky keyed out, level-matched (-5.9), repeats 2x per 1920 px, content top row 116",
+   "seam": [
+    3.4716265201568604,
+    2.365859270095825
+   ]
+  },
+  {
+   "file": "layers/castle_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 46378,
+   "track": "castle",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_castle-sky-run_near-ground_v1.jpg",
+   "note": "wrap at 1242px; strip rows 470-640 (set by eye; top bumps/edge gaps cut flat), 277px strip + mirrored fill to 540",
+   "seam": [
+    1.3634265661239624,
+    1.1097270250320435
+   ]
+  },
+  {
+   "file": "layers/castle_front.webp",
+   "size": [
+    1920,
+    300
+   ],
+   "bytes": 16830,
+   "track": "castle",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_castle-sky-run_foreground-props_v2.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/city_sky.webp",
+   "size": [
+    1920,
+    1080
+   ],
+   "bytes": 48812,
+   "track": "city",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_bat-city-night_far-sky_v1.jpg",
+   "note": "level-matched (-0.6), best-match wrap at 1280px + 96 px crossfade",
+   "seam": [
+    1.5601922273635864,
+    1.2186323404312134
+   ]
+  },
+  {
+   "file": "layers/city_mid.webp",
+   "size": [
+    1920,
+    720
+   ],
+   "bytes": 87850,
+   "track": "city",
+   "role": "mid",
+   "par": 0.35,
+   "src_raw": "track_bat-city-night_mid-scenery_v2.jpg",
+   "note": "wrap at 1240px; sky keyed out, level-matched (-0.4), repeats 2x per 1920 px, content top row 128",
+   "seam": [
+    0.38269904255867004,
+    0.4604496359825134
+   ]
+  },
+  {
+   "file": "layers/city_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 25506,
+   "track": "city",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_bat-city-night_near-ground_v1.jpg",
+   "note": "wrap at 1068px; strip rows 418-624 (set by eye; top bumps/edge gaps cut flat), 394px strip + mirrored fill to 540",
+   "seam": [
+    1.011222004890442,
+    0.8309944272041321
+   ]
+  },
+  {
+   "file": "layers/city_front.webp",
+   "size": [
+    1920,
+    300
+   ],
+   "bytes": 22464,
+   "track": "city",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_bat-city-night_foreground-props_v1.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  }
+ ]
+}
