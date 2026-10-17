@@ -36,6 +36,7 @@ function resize() {
   const groundY = H - LANE_GAP * s * 1.25 - Math.max(10, H * 0.03) - (racing && hasFront ? frontH * 0.45 : 0);
   view = { s, portrait, groundY, anchorX: W * 0.3, frontH };
   if (mode === 'cube') layoutCube();
+  hudBottom = 0; // re-measured on the next race frame
 }
 addEventListener('resize', resize);
 
@@ -106,6 +107,19 @@ function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   return 'veh.' + V.id + '.drive'; }
 // shadow widths matched to the visible footprint of Muse's art (v1); the interim art uses the hitbox length
 const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150 };
+/* Fly ceiling: the top of a flying vehicle stays at least 12% of the scene height below the HUD.
+   camNeed = the camera lift that keeps it there; R.maxZ = the highest z the camera can still cover (sim clamps to it). */
+let hudBottom = 0;
+function measureHud() { const c = cv.getBoundingClientRect(); let b = 0; document.querySelectorAll('#hud .hud-score, #hud .hud-stars, #hud .hud-prog').forEach(el => { const r = el.getBoundingClientRect(); if (r.height && r.right > c.left && r.left < c.right) b = Math.max(b, r.bottom - c.top); }); if (b) hudBottom = b; }
+function vehTop(R) { const V = R.veh, a = ART.get('veh.' + V.id + '.fly'), d = ART.get('veh.' + V.id + '.drive'), top = sp => sp.wu * sp.h / sp.w * sp.ay + sp.wu * 0.08; // + tilt slack (at the ceiling vz = 0, so wing tilt is ~0)
+  return Math.max(top(a), top(d)) + 12; }
+function camNeed(R, z, lane) { const limit = (hudBottom || 70) + H * 0.12; return (limit - view.groundY - (lane - 1) * LANE_GAP * view.s) / view.s + (z + vehTop(R)) * kL(lane); }
+function setCeiling(R) { const cap = Math.max(240, (H - 10 - view.groundY) / view.s); let m = SIM.MAXZ;
+  for (const l of [0, 1, 2]) { const limit = (hudBottom || 70) + H * 0.12, base = (limit - view.groundY - (l - 1) * LANE_GAP * view.s) / view.s; m = Math.min(m, (cap - base) / kL(l) - vehTop(R)); }
+  R.maxZ = Math.max(120, m);
+  // anything in the sky stays reachable under this screen's ceiling
+  if (R.reachZ !== R.maxZ) { R.reachZ = R.maxZ; const top = R.maxZ + R.veh.h - 24;
+    for (const o of R.tr.objs) { if (o.z0 == null) o.z0 = o.z; if (o.z0 > 0) o.z = Math.min(o.z0, o.star ? top - 30 : top - (SIM.KINDS[o.kind] ? 0 : 0)); } } }
 function drawPlayer(R, t) {
   const P = R.p, V = R.veh, sp = vehSprite(R);
   shadow(P.x, P.laneF, P.z, (ART.get(sp).real && SHADOW_W[V.id]) || V.len * 1.05, 0.32);
@@ -258,7 +272,9 @@ function frame(ts) {
     AU.engineSet(race.p.speed / race.veh.speed, race.p.boostT > 0);
   } else if (mode === 'party' && race) { acc = 0; SIM.step(race, dt, { jump: false, jumpPressed: false, boostPressed: false, lane: 0 }); handleEvents(race, false); updateFx(dt, race); }
   else if (demo && (mode === 'title' || mode === 'pick' || mode === 'cube')) { acc += dt; while (acc >= SIM.STEP) { SIM.step(demo, SIM.STEP, demoInput(demo)); acc -= SIM.STEP; handleEvents(demo, false); } if (demo.finished) newDemo(); updateFx(dt, demo); }
-  const R = scene(); if (R) { const room = (view.groundY - 150) / view.s; const target = Math.min(240, Math.max(0, R.p.z - room * 0.7)); camZ += (target - camZ) * Math.min(1, dt * 4); }
+  if (race && mode === 'race') { if (!hudBottom) measureHud(); setCeiling(race); }
+  const R = scene(); if (R) { const room = (view.groundY - 150) / view.s; const target = Math.min(240, Math.max(0, R.p.z - room * 0.7)); camZ += (target - camZ) * Math.min(1, dt * 4);
+    camZ = Math.max(camZ, camNeed(R, R.p.z, R.p.laneF)); }
   shake = Math.max(0, shake - dt * 40); flash = Math.max(0, flash - dt * 2.5);
   render(t);
   if (mode === 'cube') renderCube(dt);
@@ -481,6 +497,8 @@ mq.addEventListener && mq.addEventListener('change', e => { if (e.matches) { set
 applyReduced(); resize(); ART.decorate(); ART.onChange(() => { if (mode === 'pick') buildPick(); });
 showTitle(); requestAnimationFrame(frame);
 // test hooks (used by the screenshot/QA scripts; harmless for players)
-window.LEOGAME = { submitScore, get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
+window.LEOGAME = { flyCheck() { const R = race; if (!R) return null; const P = R.p, sp = ART.get(vehSprite(R)), k = kL(P.laneF), w = sp.wu * view.s * k, h = w * sp.h / sp.w;
+    const yA = laneY(P.laneF) - P.z * view.s * k, limit = (hudBottom || 70) + H * 0.12; return { z: Math.round(P.z), maxZ: Math.round(R.maxZ || 0), spriteTop: Math.round(yA - h * sp.ay), limit: Math.round(limit), hudBottom: Math.round(hudBottom), H, camZ: Math.round(camZ), roadY: Math.round(laneY(1)) }; },
+  submitScore, get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
 if (QS.get('screen') === 'pick') showPick();
 })();

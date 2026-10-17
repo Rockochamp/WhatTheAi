@@ -61,7 +61,11 @@ button:focus-visible,summary:focus-visible,input:focus-visible+span{outline:4px 
 .trk.locked::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.18);pointer-events:none}
 .trk .lock{position:absolute;top:6px;right:6px;background:#fff;border:3px solid var(--ink);border-radius:999px;font-weight:700;padding:1px 8px;font-size:14px}
 .pick-go{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;position:sticky;bottom:0;padding:8px 0 calc(4px + var(--safeb));background:linear-gradient(rgba(255,253,246,0),rgba(255,253,246,.95) 30%)}
-#pick{align-items:flex-start}
+#pick{align-items:flex-start;overflow:hidden}
+/* the GO! row is pinned to the card bottom; only the heroes + tracks scroll */
+#pick .pick-card{display:flex;flex-direction:column;max-height:100%;min-height:0}
+.pick-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:0 2px}
+#pick .pick-go{flex:none;position:static;margin-top:8px;background:none}
 @media (max-width:600px){.hero .stats{font-size:14px;gap:6px}.pip{width:9px;height:9px}.heroes{grid-template-columns:repeat(2,1fr);gap:8px}.hero{min-height:0;padding:4px}.hero .nm{font-size:16px}.hero .sp{display:none}.tracks{grid-template-columns:repeat(2,1fr);gap:8px}.trk .tn{font-size:13px}.pick-card{padding:10px}}
 @keyframes bob{50%{transform:translateY(-4px)}}
 @keyframes turn{0%,100%{transform:rotateY(-18deg) translateY(0)}50%{transform:rotateY(18deg) translateY(-5px)}}
@@ -176,3 +180,5 @@ button:focus-visible,summary:focus-visible,input:focus-visible+span{outline:4px 
 .art-img{width:100%;height:100%;object-fit:contain}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 .reduced *{animation-duration:.01ms!important;animation-iteration-count:1!important}
+/* short landscape (phones on their side): slimmer pinned GO row so more of the picker shows */
+@media (max-height:500px){#pick{padding:8px}#pick .pick-card{padding:8px 12px 10px}#pick .pick-head h2{font-size:24px}#pick .pick-go{margin-top:6px;gap:10px}#pick .pick-go .cta{font-size:26px;padding:.25em 1.1em;box-shadow:0 5px 0 var(--ink)}#pick .pick-go .ghost{padding:6px 14px}}

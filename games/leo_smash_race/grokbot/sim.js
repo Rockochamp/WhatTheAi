@@ -184,7 +184,8 @@ function step(R, dt, input) {
     if (P.pounding && P.vz < 0) P.vz -= V.grav * dt; // slam down for the shockwave
   }
   P.z += P.vz * dt;
-  if (P.z > MAXZ) { P.z = MAXZ; if (P.vz > 0) P.vz = 0; }
+  const ceil = Math.min(MAXZ, R.maxZ || MAXZ); // R.maxZ: per-screen ceiling set by the renderer (keeps flyers below the HUD)
+  if (P.z > ceil) { P.z = ceil; if (P.vz > 0) P.vz = 0; }
   // ramps launch you (no gap can stop you: the road is always there)
   if (P.z <= floor + 2) for (const rp of R.tr.ramps) if (!rp.used && P.x >= rp.x && P.x - rp.x < 120) { rp.used = true; P.vz = rp.big ? 1150 : 900; emit(R, { type: 'ramp' }); }
   if (P.z < floor) {
