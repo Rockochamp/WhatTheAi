@@ -7,7 +7,7 @@
    - alias: 'other.name' reuses another sprite; fx.exhaust: [x, y] (0..1 of the drive canvas) is where boost flames come out.
    A missing or broken file silently falls back to the interim art, so partial drops are safe. */
 window.LEO_MANIFEST = {
-  version: 4,  // Muse art drop 2: new road grounds, sword v3, truck v3 (same file names, cache bust)
+  version: 5,  // Muse art drop 3: Addendum B heroes pup + rex (drive/fly/special); v4 was drop 2 (road grounds, sword v3, truck v3)
   base: 'art/',
   // Vehicle poses without their own file borrow another pose; the game adds the boost flames and the celebrate bounce in code.
   poseAliases: { boost: 'drive', celebrate: 'fly' },
@@ -33,6 +33,20 @@ window.LEO_MANIFEST = {
     'veh.jet.fly':        { src: 'vehicles/jet_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 235 },
     'veh.jet.boost':      { src: 'vehicles/jet_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 235 },  // = drive (no boost pose yet; flames/speed FX in code)
     'veh.jet.celebrate':  { src: 'vehicles/jet_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 235 },  // = fly (no celebrate pose yet)
+    // Addendum B heroes (Muse art drop 3, cut to the art/out format: 512x256, 0.92 baseline, one shared scale per hero).
+    // The new `special` pose is the boost pose for these two only; celebrate = fly (pup) / special (rex).
+    // Pup is drawn small on purpose (~60% of the Bat Truck's height). fx.pivot = centre of her ring pose (for the wobble).
+    'veh.pup.drive':      { src: 'vehicles/pup_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 215, fx: { exhaust: [0.30, 0.70], noFlame: true } },
+    'veh.pup.fly':        { src: 'vehicles/pup_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 215 },
+    'veh.pup.special':    { src: 'vehicles/pup_special.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 215, fx: { noFlame: true, pivot: 0.668 } },
+    'veh.pup.boost':      { alias: 'veh.pup.special' },
+    'veh.pup.celebrate':  { alias: 'veh.pup.fly' },
+    // Rex: special lines up with drive to within 1 px, so chomps swap the frames straight. fx.fins = where the code fin-wings pop out on the fly pose.
+    'veh.rex.drive':      { src: 'vehicles/rex_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 280, fx: { exhaust: [0.10, 0.42] } },
+    'veh.rex.fly':        { src: 'vehicles/rex_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 280, fx: { fins: [[0.36, 0.52], [0.62, 0.54]] } },
+    'veh.rex.special':    { src: 'vehicles/rex_special.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 280 },
+    'veh.rex.boost':      { alias: 'veh.rex.special' },
+    'veh.rex.celebrate':  { alias: 'veh.rex.special' },
     // Rivals: friendly smiley racers, drive pose only.
     'rival.orange': { src: 'rivals/rival_orange.webp', size: [384, 192], anchor: [0.5, 0.93], wu: 175 },
     'rival.green':  { src: 'rivals/rival_green.webp', size: [384, 192], anchor: [0.5, 0.93], wu: 175 },

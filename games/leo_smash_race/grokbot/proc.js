@@ -182,6 +182,118 @@ function jet(g, pose) {
   if (pose === 'celebrate') { sparkle(g, 420, 50, 16); sparkle(g, 160, 60, 12); }
   g.restore();
 }
+/* ---- Addendum B heroes (interim art, replaced by Pixel's sprites through the manifest) ---- */
+// Whirly Pup: small chubby pink pup with a white muzzle, amber ear patch, goggles up, silver wings on a harness, curly tail.
+// opts.ear = ear flop angle (radians) for the picker idle animation.
+function pup(g, pose, opts) {
+  opts = opts || {}; const PINK = '#ff7eb6', PK = '#e0458e', AMB = '#f2a33a', ear = opts.ear || 0;
+  g.save(); if (pose === 'celebrate') { g.translate(256, 236); g.rotate(-0.08); g.translate(-256, -236); }
+  if (pose === 'special') { // curled into a ball mid-spin, wings as a blur ring (the tornado is drawn in code)
+    g.save(); g.globalAlpha = 0.55; g.lineWidth = 16; g.strokeStyle = '#e8edf6'; g.beginPath(); g.ellipse(256, 160, 112, 36, -0.25, 0, Math.PI * 2); g.stroke(); g.restore();
+    g.beginPath(); g.arc(256, 162, 70, 0, Math.PI * 2); ink(g, rgr(g, 256, 162, 8, 74, [[0, '#ffd0e6'], [0.45, PINK], [1, PK]], -24, -26), 6);
+    g.save(); g.beginPath(); g.arc(256, 162, 70, 0, Math.PI * 2); g.clip(); g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 7; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(256, 162, 24 + i * 18, -0.3 + i, 1.6 + i); g.stroke(); } g.restore();
+    g.beginPath(); g.ellipse(292, 150, 26, 20, 0.2, 0, Math.PI * 2); ink(g, '#fff6f2', 4); // muzzle peeking out
+    g.beginPath(); g.arc(306, 144, 6, 0, 7); g.fillStyle = OUT; g.fill();
+    g.beginPath(); g.arc(270, 128, 12, 0, 7); ink(g, '#fff', 3); g.beginPath(); g.arc(273, 129, 6.5, 0, 7); g.fillStyle = OUT; g.fill(); g.beginPath(); g.arc(275, 126, 2.4, 0, 7); g.fillStyle = '#fff'; g.fill();
+    g.beginPath(); g.ellipse(220, 116, 26, 16, -0.6, 0, Math.PI * 2); ink(g, AMB, 4);
+    g.save(); g.globalAlpha = 0.85; g.lineWidth = 16; g.strokeStyle = '#f4f6fb'; g.beginPath(); g.ellipse(256, 160, 112, 36, -0.25, 0.15, Math.PI - 0.15); g.stroke(); g.restore();
+    sparkle(g, 380, 110, 14); sparkle(g, 130, 200, 10, '#ffd0e6'); g.restore(); return; }
+  const fly = pose === 'fly' || pose === 'celebrate', lift = fly ? -14 : 0;
+  g.translate(0, lift);
+  // far wing (behind the body)
+  const wing = (x, y, rot, sc, a) => { g.save(); g.translate(x, y); g.rotate(rot); g.scale(sc, sc); g.globalAlpha = a || 1;
+    g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(-30, -70, -96, -84); g.quadraticCurveTo(-70, -56, -84, -44); g.quadraticCurveTo(-56, -34, -64, -18); g.quadraticCurveTo(-34, -14, 0, 0); g.closePath();
+    ink(g, lg(g, 0, -84, 0, 0, [[0, '#ffffff'], [0.5, '#d3d9e6'], [1, '#8f98ad']]), 5);
+    g.lineWidth = 3; g.strokeStyle = 'rgba(120,130,150,.7)'; g.beginPath(); g.moveTo(-14, -6); g.quadraticCurveTo(-50, -40, -80, -62); g.stroke(); g.restore(); };
+  if (fly) wing(236, 150, 0.15, 1.15, 0.9); else wing(236, 152, 0.65, 0.75, 0.9);
+  // curly tail
+  g.lineWidth = 16; g.lineCap = 'round'; g.strokeStyle = OUT; g.beginPath(); g.moveTo(192, 176); g.quadraticCurveTo(150, 170, 156, 140); g.quadraticCurveTo(162, 120, 180, 132); g.stroke();
+  g.lineWidth = 9; g.strokeStyle = PINK; g.stroke();
+  // legs (running: alternate stride; flying: tucked)
+  const leg = (x, y, a) => { g.save(); g.translate(x, y); g.rotate(a); rr(g, -11, 0, 22, fly ? 26 : 40, 10); ink(g, lg(g, 0, 0, 0, 40, [[0, PINK], [1, PK]]), 5); g.beginPath(); g.ellipse(2, fly ? 26 : 40, 14, 9, 0, 0, 7); ink(g, '#ffd0e6', 4); g.restore(); };
+  const st = fly ? 0.9 : 0.35;
+  leg(214, 190, st); leg(300, 190, -st * 0.6); // far legs
+  // body
+  g.beginPath(); g.ellipse(258, 178, 74, 42, -0.05, 0, Math.PI * 2); ink(g, lg(g, 0, 136, 0, 220, [[0, '#ffb3d6'], [0.45, PINK], [1, PK]]), 6);
+  g.beginPath(); g.ellipse(282, 196, 34, 18, 0, 0, Math.PI * 2); g.fillStyle = 'rgba(255,240,246,.8)'; g.fill(); // belly
+  gloss(g, 210, 144, 90, 10, 0.5);
+  // harness
+  g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(244, 138); g.lineTo(232, 216); g.stroke(); g.lineWidth = 5; g.strokeStyle = '#c7cdd9'; g.stroke();
+  rr(g, 220, 134, 44, 22, 8); ink(g, lg(g, 0, 134, 0, 156, [[0, '#f4f6fb'], [1, '#9aa3b8']]), 4);
+  leg(236, 196, -st); leg(318, 196, st * 0.7); // near legs
+  // near wing
+  if (fly) wing(250, 146, -0.05, 1.3); else wing(250, 148, 0.45, 0.9);
+  // head
+  g.save(); g.translate(350, 132);
+  // far ear (amber patch side)
+  g.save(); g.translate(-30, -30); g.rotate(-0.4 + ear); g.beginPath(); g.ellipse(-8, 16, 15, 30, 0.2, 0, 7); ink(g, PK, 5); g.restore();
+  g.beginPath(); g.arc(0, 0, 54, 0, Math.PI * 2); ink(g, rgr(g, 0, 0, 6, 58, [[0, '#ffd0e6'], [0.5, PINK], [1, PK]], -16, -20), 6);
+  g.beginPath(); g.ellipse(-20, -6, 26, 30, 0, 0, 7); g.fillStyle = AMB; g.fill(); // amber ear patch over the eye side
+  g.beginPath(); g.ellipse(34, 20, 30, 22, 0.1, 0, Math.PI * 2); ink(g, '#fff6f2', 5); // white muzzle
+  g.beginPath(); g.ellipse(58, 12, 10, 8, 0, 0, 7); ink(g, '#2a2736', 3); // nose
+  g.beginPath(); g.arc(40, 30, 12, 0.3, Math.PI - 0.5); g.lineWidth = 4; g.strokeStyle = OUT; g.stroke(); // smile
+  // big friendly eye
+  g.beginPath(); g.ellipse(14, -10, 16, 19, 0, 0, 7); ink(g, '#fff', 4); g.beginPath(); g.ellipse(19, -8, 10, 12, 0, 0, 7); g.fillStyle = '#5a2d16'; g.fill();
+  g.beginPath(); g.arc(20, -8, 6, 0, 7); g.fillStyle = OUT; g.fill(); g.beginPath(); g.arc(23, -13, 3.2, 0, 7); g.fillStyle = '#fff'; g.fill();
+  g.fillStyle = 'rgba(255,120,150,.55)'; g.beginPath(); g.arc(-2, 22, 8, 0, 7); g.fill();
+  // goggles pushed up on the head
+  g.lineWidth = 10; g.strokeStyle = OUT; g.beginPath(); g.arc(0, 0, 50, -2.6, -0.9); g.stroke(); g.lineWidth = 6; g.strokeStyle = '#e0458e'; g.stroke();
+  [[-12, -48], [16, -50]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 13, 0, 7); ink(g, rgr(g, x, y, 1, 13, [[0, '#fff3c4'], [1, '#f29a2e']], -4, -4), 4); });
+  // near ear (flops)
+  g.save(); g.translate(-38, -26); g.rotate(-0.15 + ear * 1.3); g.beginPath(); g.ellipse(-10, 22, 16, 32, 0.35, 0, 7); ink(g, lg(g, 0, -8, 0, 52, [[0, PINK], [1, PK]]), 5); g.restore();
+  g.restore();
+  if (pose === 'celebrate') { sparkle(g, 410, 50, 16); sparkle(g, 180, 70, 12, '#ffd0e6'); }
+  g.restore();
+}
+// Chomp Rex: teal shark/dino-head monster truck; jaw closed (drive/fly) or wide open (special), same body scale and position.
+function rex(g, pose) {
+  const TEAL = '#1fb5b0', TD = '#0d6f73', TL = '#7fe6dc', HUB = '#2ec4b6';
+  g.save(); if (pose === 'celebrate') { g.translate(140, 236); g.rotate(-0.1); g.translate(-140, -236); }
+  const fly = pose === 'fly' || pose === 'celebrate', open = pose === 'special', drop = fly ? 10 : 0;
+  // far-side wheels
+  wheel(g, 176, 172 + drop, 50, TD, { tyre: '#24222c', chevron: true, rim: 0.46 }); wheel(g, 402, 172 + drop, 50, TD, { tyre: '#24222c', chevron: true, rim: 0.46 });
+  // open chassis frame
+  const tube = (pts, w, c) => { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = w + 8; g.strokeStyle = OUT; g.stroke(); g.lineWidth = w; g.strokeStyle = c || '#17666a'; g.stroke(); };
+  tube([[120, 150], [420, 150]], 10); tube([[150, 180 + drop], [210, 132], [350, 132], [390, 180 + drop]], 9); tube([[250, 132], [270, 160], [300, 132]], 7);
+  g.lineWidth = 9; g.strokeStyle = OUT; [[160, 176], [374, 176]].forEach(([x, y]) => { g.beginPath(); g.moveTo(x, y + drop); g.lineTo(x + (x < 300 ? 30 : -30), 128); g.stroke(); }); // shocks
+  g.lineWidth = 4; g.strokeStyle = '#ff9f1c'; [[160, 176], [374, 176]].forEach(([x, y]) => { g.beginPath(); g.moveTo(x, y + drop); g.lineTo(x + (x < 300 ? 30 : -30), 128); g.stroke(); });
+  // tail + rear fin
+  poly(g, [[96, 104], [40, 70], [56, 112], [98, 132]]); ink(g, lg(g, 0, 70, 0, 132, [[0, TL], [1, TD]]), 5);
+  // lower jaw (static)
+  const hinge = [150, 112];
+  poly(g, [[110, 118], [420, 122], [468, 128], [460, 146], [130, 146]]); ink(g, lg(g, 0, 118, 0, 146, [[0, TEAL], [1, TD]]), 6);
+  // lower teeth
+  g.fillStyle = '#fff3d6'; g.strokeStyle = OUT; g.lineWidth = 3; for (let x = 200; x < 456; x += 26) { g.beginPath(); g.moveTo(x, 124); g.lineTo(x + 9, open ? 104 : 112); g.lineTo(x + 18, 124); g.closePath(); g.fill(); g.stroke(); }
+  if (open) { // red tongue in the open mouth
+    g.beginPath(); g.moveTo(190, 122); g.quadraticCurveTo(300, 92, 420, 116); g.quadraticCurveTo(310, 132, 190, 122); ink(g, lg(g, 0, 96, 0, 128, [[0, '#ff7a8a'], [1, '#d7263d']]), 4);
+    g.beginPath(); g.moveTo(170, 116); g.lineTo(440, 118); g.lineTo(380, 60); g.lineTo(200, 60); g.closePath(); g.fillStyle = '#5a1630'; g.globalAlpha = 0.85; g.fill(); g.globalAlpha = 1; }
+  // upper jaw / head (rotates open around the hinge)
+  g.save(); if (open) { g.translate(hinge[0], hinge[1]); g.rotate(-0.42); g.translate(-hinge[0], -hinge[1]); }
+  poly(g, [[96, 112], [110, 70], [170, 46], [300, 40], [420, 56], [492, 92], [488, 116], [110, 118]], true);
+  ink(g, lg(g, 0, 40, 0, 118, [[0, TL], [0.35, TEAL], [1, TD]]), 6);
+  g.save(); poly(g, [[96, 112], [110, 70], [170, 46], [300, 40], [420, 56], [492, 92], [488, 116], [110, 118]], true); g.clip();
+  g.fillStyle = 'rgba(110,50,160,.75)'; const R0 = root.LeoSim ? root.LeoSim.rng(77) : Math.random; for (let i = 0; i < 46; i++) { const x = 170 + R0() * 230, y = 56 + R0() * 34; g.beginPath(); g.arc(x, y, 2 + R0() * 4, 0, 7); g.fill(); }
+  g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(90, 90, 410, 5); g.restore();
+  gloss(g, 160, 50, 200, 10, 0.4);
+  // orange ridge along the back + dorsal fin
+  g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(130, 60); g.quadraticCurveTo(250, 30, 380, 44); g.stroke(); g.lineWidth = 5; g.strokeStyle = '#ff9f1c'; g.stroke();
+  poly(g, [[150, 56], [126, 14], [196, 46]]); ink(g, lg(g, 0, 14, 0, 56, [[0, TL], [1, TEAL]]), 5);
+  // upper teeth (cream) along the jaw line
+  g.fillStyle = '#fff3d6'; g.strokeStyle = OUT; g.lineWidth = 3; for (let x = 188; x < 470; x += 26) { g.beginPath(); g.moveTo(x, 114); g.lineTo(x + 10, 134 - (x > 440 ? 6 : 0)); g.lineTo(x + 20, 114); g.closePath(); g.fill(); g.stroke(); }
+  // friendly eye + nostril
+  g.beginPath(); g.ellipse(390, 72, 20, 15, -0.15, 0, 7); ink(g, '#fff', 4); g.beginPath(); g.arc(396, 73, 8, 0, 7); g.fillStyle = OUT; g.fill(); g.beginPath(); g.arc(399, 70, 3, 0, 7); g.fillStyle = '#fff'; g.fill();
+  g.lineWidth = 6; g.strokeStyle = OUT; g.beginPath(); g.moveTo(368, 56); g.lineTo(410, 60); g.stroke();
+  g.beginPath(); g.ellipse(472, 90, 6, 4, 0.3, 0, 7); g.fillStyle = OUT; g.fill();
+  // side decal: simple teeth stripes (no text)
+  g.fillStyle = 'rgba(255,243,214,.85)'; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(206 + i * 22, 98); g.lineTo(216 + i * 22, 86); g.lineTo(226 + i * 22, 98); g.closePath(); g.fill(); }
+  g.restore();
+  if (fly) { // stubby fin-wings popped out from the sides
+    [[200, 140, 0.95], [330, 142, 1]].forEach(([x, y, s2]) => { g.save(); g.translate(x, y); g.scale(s2, s2); poly(g, [[0, 0], [70, -6], [40, 34], [-20, 36]]); ink(g, lg(g, 0, -6, 0, 36, [[0, TL], [1, TD]]), 5); g.fillStyle = '#ff9f1c'; g.fillRect(-8, 24, 40, 6); g.restore(); }); }
+  // near-side wheels
+  wheel(g, 150, 182 + drop, 54, HUB, { tyre: '#2a2830', chevron: true, rim: 0.46 }); wheel(g, 384, 182 + drop, 54, HUB, { tyre: '#2a2830', chevron: true, rim: 0.46 });
+  if (pose === 'celebrate') { sparkle(g, 300, 20, 16); sparkle(g, 440, 30, 12); }
+  g.restore();
+}
 function rival(g, col) {
   const D = shade(col, -0.35), Lt = shade(col, 0.35);
   g.beginPath(); g.ellipse(192, 176, 150, 10, 0, 0, 7); g.fillStyle = 'rgba(0,0,0,.0)'; g.fill();
@@ -328,7 +440,7 @@ function layer(track, role, W, H) {
 function sprite(name, size) {
   const [w, h] = size || [256, 256], c = cv(w, h), g = c.getContext('2d');
   const m = name.match(/^veh\.(\w+)\.(\w+)$/);
-  if (m) { g.save(); g.scale(w / 512, h / 256); ({ dragster, bibi, truck, sword, jet })[m[1]](g, m[2]); g.restore(); return c; }
+  if (m) { g.save(); g.scale(w / 512, h / 256); ({ dragster, bibi, truck, sword, jet, pup, rex })[m[1]](g, m[2]); g.restore(); return c; }
   const rv = name.match(/^rival\.(\w+)$/); if (rv) { g.save(); g.scale(w / 384, h / 192); rival(g, { orange: '#ff8a1f', green: '#27c46b', blue: '#2f8cff' }[rv[1]] || '#ff8a1f'); g.restore(); return c; }
   const db = name.match(/^debris\.(\w+)(?:\.\d+)?$/); if (db) { g.save(); g.scale(w / 64, h / 64); debris(g, db[1]); g.restore(); return c; }
   const base = name.replace(/\.\d+$/, ''), v = +(name.match(/\.(\d+)$/) || [0, 0])[1];
@@ -337,5 +449,8 @@ function sprite(name, size) {
   if (name === 'ui.star') { g.scale(w / 128, h / 128); SPR['item.star'](g); return c; }
   return c;
 }
-root.LeoProc = { sprite, layer, starPath, rr, lg, shade, BLOCKC };
+/* Picker idle frames for the interim pup (ears flop). Returns false when there is no interim drawing for that hero. */
+function heroFrame(c, id, pose, opts) { const g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); g.save(); g.scale(c.width / 512, c.height / 256);
+  if (id === 'pup') pup(g, pose, opts); else if (id === 'rex') rex(g, pose); else { g.restore(); return false; } g.restore(); return true; }
+root.LeoProc = { sprite, layer, starPath, rr, lg, shade, BLOCKC, heroFrame };
 })(window);
