@@ -107,12 +107,16 @@ function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   if (V.fly === 'always' || V.fly === 'hover' || P.z > floor + 25 || P.wing > 0.5) return 'veh.' + V.id + '.fly';
   return 'veh.' + V.id + '.drive'; }
 // shadow widths matched to the visible footprint of Muse's art (v1); the interim art uses the hitbox length
-const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 62, rex: 220 };
+const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220 };
+/* Race-only draw scale (the picker card keeps the manifest size). Whirly Pup's art is ~58 wu tall at wu 215;
+   x1.43 makes her ~83 wu, about 75% of the Bat Truck's ~111 wu visible height. Her hitbox stays len 105. */
+const RACE_SCALE = { pup: 1.43 };
+const raceWu = (R, name) => ART.get(name).wu * (RACE_SCALE[R.veh.id] || 1);
 /* Fly ceiling: the top of a flying vehicle stays at least 12% of the scene height below the HUD.
    camNeed = the camera lift that keeps it there; R.maxZ = the highest z the camera can still cover (sim clamps to it). */
 let hudBottom = 0;
 function measureHud() { const c = cv.getBoundingClientRect(); let b = 0; document.querySelectorAll('#hud .hud-score, #hud .hud-stars, #hud .hud-prog').forEach(el => { const r = el.getBoundingClientRect(); if (r.height && r.right > c.left && r.left < c.right) b = Math.max(b, r.bottom - c.top); }); if (b) hudBottom = b; }
-function vehTop(R) { const V = R.veh, a = ART.get('veh.' + V.id + '.fly'), d = ART.get('veh.' + V.id + '.drive'), top = sp => sp.wu * sp.h / sp.w * sp.ay + sp.wu * 0.08; // + tilt slack (at the ceiling vz = 0, so wing tilt is ~0)
+function vehTop(R) { const V = R.veh, a = ART.get('veh.' + V.id + '.fly'), d = ART.get('veh.' + V.id + '.drive'), rs = RACE_SCALE[V.id] || 1, top = sp => (sp.wu * sp.h / sp.w * sp.ay + sp.wu * 0.08) * rs; // + tilt slack (at the ceiling vz = 0, so wing tilt is ~0)
   return Math.max(top(a), top(d)) + 12; }
 function camNeed(R, z, lane) { const limit = (hudBottom || 70) + H * 0.12; return (limit - view.groundY - (lane - 1) * LANE_GAP * view.s) / view.s + (z + vehTop(R)) * kL(lane); }
 function setCeiling(R) { const cap = Math.max(240, (H - 10 - view.groundY) / view.s); let m = SIM.MAXZ;
@@ -123,7 +127,7 @@ function setCeiling(R) { const cap = Math.max(240, (H - 10 - view.groundY) / vie
     for (const o of R.tr.objs) { if (o.z0 == null) o.z0 = o.z; if (o.z0 > 0) o.z = Math.min(o.z0, o.star ? top - 30 : top - (SIM.KINDS[o.kind] ? 0 : 0)); } } }
 function drawPlayer(R, t) {
   const P = R.p, V = R.veh, sp = vehSprite(R);
-  shadow(P.x, P.laneF, P.z, (ART.get(sp).real && SHADOW_W[V.id]) || V.len * 1.05, 0.32);
+  shadow(P.x, P.laneF, P.z, (ART.get(sp).real && SHADOW_W[V.id]) || V.len * 1.05, 0.32); const dw = raceWu(R, sp);
   let rot = 0, sq = 0;
   if (V.fly === 'wings' || V.fly === 'bounce') rot = Math.max(-0.3, Math.min(0.3, -P.vz / 2400)) * (P.onGround ? 0 : 1);
   if (V.fly === 'always' || V.fly === 'hover') rot = Math.max(-0.15, Math.min(0.15, -P.vz / 3000)) + Math.sin(t * 3) * 0.03;
@@ -138,8 +142,8 @@ function drawPlayer(R, t) {
   if (R.finished) { bob += Math.abs(Math.sin(t * 6)) * 28; rot += Math.sin(t * 6) * 0.08; } // celebrate bounce (works with any art)
   // specials behind/around
   if (P.superT > 0) drawSpecial(R, t, true);
-  if (specialPose && V.special === 'whirl') drawSprite(sp, P.x, P.laneF, P.z + bob, { rot, pivot: ART.fx(sp).pivot || 0.633 }); // spin the ball around its middle, not its feet
-  else drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq, sc });
+  if (specialPose && V.special === 'whirl') drawSprite(sp, P.x, P.laneF, P.z + bob, { rot, pivot: ART.fx(sp).pivot || 0.633, wu: dw }); // spin the ball around its middle, not its feet
+  else drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq, sc, wu: dw });
   if (P.boostT > 0 && !ownBoostArt(V.id) && !ART.fx(sp).noFlame) boostFlame(R, sp, P.z + bob, rot, t);
   if (ART.fx(sp).fins && P.wing > 0.02) finWings(R, sp, P.z + bob, rot, sq);
   if (P.superT > 0) drawSpecial(R, t, false);
@@ -150,7 +154,7 @@ function ownBoostArt(id) { const S = ART.manifest.sprites, n = 'veh.' + id + '.'
   return ![n + 'drive', n + 'fly'].some(k => S[k] && S[k].src === b.src); }
 /* Chomp Rex's stubby fin-wings pop out in code on the fly pose (the art only hints at them), like the rocket wings on the others. */
 function finWings(R, name, z, rot, sq) {
-  const P = R.p, sp = ART.get(name), k = kL(P.laneF), w = sp.wu * view.s * k, h = w * sp.h / sp.w, e = P.wing, pop = e < 0.7 ? e / 0.7 * 1.15 : 1.15 - (e - 0.7) / 0.3 * 0.15; // ease out with a small overshoot
+  const P = R.p, sp = ART.get(name), k = kL(P.laneF), w = raceWu(R, name) * view.s * k, h = w * sp.h / sp.w, e = P.wing, pop = e < 0.7 ? e / 0.7 * 1.15 : 1.15 - (e - 0.7) / 0.3 * 0.15; // ease out with a small overshoot
   ctx.save(); ctx.translate(X(P.x), laneY(P.laneF) - z * view.s * k); ctx.rotate(rot || 0); if (sq) ctx.scale(1 + sq, 1 - sq);
   ART.fx(name).fins.forEach(([fx, fy], i) => { const x = (fx - sp.ax) * w, y = (fy - sp.ay) * h, L = w * 0.24 * pop, T = h * 0.17;
     ctx.save(); ctx.translate(x, y); ctx.rotate(0.28 + i * 0.08); ctx.lineJoin = 'round';
@@ -160,7 +164,7 @@ function finWings(R, name, z, rot, sq) {
     ctx.fillStyle = '#ff9f1c'; ctx.fillRect(-L * 0.1, T * 0.28, L * 0.65, Math.max(2, T * 0.14)); ctx.restore(); });
   ctx.restore(); }
 function boostFlame(R, name, z, rot, t) {
-  const P = R.p, sp = ART.get(name), k = kL(P.laneF), w = sp.wu * view.s * k, h = w * sp.h / sp.w, ex = ART.fx(name).exhaust || [0.08, 0.6];
+  const P = R.p, sp = ART.get(name), k = kL(P.laneF), w = raceWu(R, name) * view.s * k, h = w * sp.h / sp.w, ex = ART.fx(name).exhaust || [0.08, 0.6];
   const ox = (ex[0] - sp.ax) * w, oy = (ex[1] - sp.ay) * h, c = Math.cos(rot), s2 = Math.sin(rot);
   const x = X(P.x) + ox * c - oy * s2, y = laneY(P.laneF) - z * view.s * k + ox * s2 + oy * c, L = h * (0.9 + Math.random() * 0.35) * (P.superT > 0 ? 1.5 : 1), Hh = h * 0.32;
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
@@ -188,12 +192,14 @@ function drawWhirl(R, t, back) {
   ctx.save(); ctx.globalAlpha = Math.max(0, fade);
   if (reduced()) { if (back) { ctx.strokeStyle = 'rgba(255,150,200,.75)'; ctx.lineWidth = 10 * s; ctx.beginPath(); ctx.ellipse(x, y0 - Hh * 0.5, 95 * s, 26 * s, 0, 0, Math.PI * 2); ctx.stroke(); } ctx.restore(); return; }
   const bands = 4;
-  for (let i = 0; i < bands; i++) { const f = (i + 0.5) / bands, yy = y0 - Hh * f, rx = (34 + 72 * f) * s, ry = (10 + 16 * f) * s, a0 = t * (9 + i * 1.7) + i * 1.3, col = i % 2 ? 'rgba(255,255,255,' : 'rgba(255,128,190,';
+  for (let i = 0; i < bands; i++) { const f = (i + 0.5) / bands, yy = y0 - Hh * f, rx = (34 + 72 * f) * s, ry = (10 + 16 * f) * s, a0 = t * (9 + i * 1.7) + i * 1.3, col = i % 2 ? 'rgba(255,226,240,' : 'rgba(255,110,180,';
     ctx.lineWidth = (17 - i * 2) * s; ctx.lineCap = 'round';
     // a band is a partial ellipse arc; split it at the horizon line of the ellipse (sin = 0) into near (front) and far (back) parts
     for (let seg = 0; seg < 2; seg++) { const st = a0 + seg * Math.PI * 1.05, en = st + Math.PI * 0.8; // two swirling arcs per band
       for (let a = st; a < en; a += 0.18) { const a2 = Math.min(en, a + 0.2), mid = (a + a2) / 2, front = Math.sin(mid) > 0; if (front === back) continue;
-        ctx.strokeStyle = col + (front ? 0.88 : 0.5) + ')'; ctx.beginPath(); ctx.ellipse(x + Math.sin(t * 3 + i) * 6 * s, yy, rx, ry, 0, a, a2); ctx.stroke(); } } }
+        const ex = x + Math.sin(t * 3 + i) * 6 * s, lw = ctx.lineWidth; // thin white outline so the funnel reads on light tracks
+        ctx.strokeStyle = `rgba(255,255,255,${front ? 0.9 : 0.75})`; ctx.lineWidth = lw + 3 * s; ctx.beginPath(); ctx.ellipse(ex, yy, rx, ry, 0, a, a2); ctx.stroke(); ctx.lineWidth = lw;
+        ctx.strokeStyle = col + (front ? 0.78 : 0.72) + ')'; ctx.beginPath(); ctx.ellipse(ex, yy, rx, ry, 0, a, a2); ctx.stroke(); } } }
   if (back) { const g = ctx.createLinearGradient(0, y0 - Hh, 0, y0); g.addColorStop(0, 'rgba(255,190,225,.30)'); g.addColorStop(1, 'rgba(255,255,255,.10)'); ctx.fillStyle = g;
     ctx.beginPath(); ctx.moveTo(x - 110 * s, y0 - Hh); ctx.quadraticCurveTo(x, y0 - Hh - 18 * s, x + 110 * s, y0 - Hh); ctx.lineTo(x + 30 * s, y0); ctx.lineTo(x - 30 * s, y0); ctx.closePath(); ctx.fill(); }
   ctx.restore();
@@ -293,7 +299,7 @@ function handleEvents(R, live) {
     else if (e.type === 'land') { AU.play('land'); R.landT = Math.min(0.35, e.v / 3000); for (let i = 0; i < 6 && parts.length < 500; i++) parts.push({ kind: 'dust', x: R.p.x + rand(-60, 60), lane: R.p.laneF, z: 0, vx: rand(-200, 200), vz: rand(20, 120), life: 0.5, t: 0, r: rand(10, 20), c: '230,220,200' }); }
     else if (e.type === 'ramp') { AU.play('ramp'); popText('WHEEE!', R.p.x, R.p.laneF, 200, '#8de8ff'); }
     else if (e.type === 'boost') { AU.play('boost'); banner('BOOST!'); }
-    else if (e.type === 'super') { AU.play('super'); banner(R.veh.specialName + '!'); AU.say(R.veh.specialName + '!'); flash = reduced() ? 0.15 : 0.5;
+    else if (e.type === 'super') { AU.play('super'); banner(R.veh.specialName + '!', true); AU.say(R.veh.specialName + '!'); flash = reduced() ? 0.15 : 0.5;
       if (e.special === 'whirl') { AU.play('arf'); AU.play('whirr', 3.6); } else if (e.special === 'chomp') AU.play('growl'); }
     else if (e.type === 'pull') { AU.play('pull', e.n); for (let i = 0; i < 6 && parts.length < 500; i++) parts.push({ kind: 'spark', x: e.o.x, lane: e.o.lane, z: e.o.z + e.o.h * 0.5, vx: rand(-300, 300), vz: rand(-200, 400), life: 0.3, t: 0, r: 4, c: '255,160,210' }); }
     else if (e.type === 'chomp') { AU.play('chomp', 0.8 + Math.random() * 0.45); R.snapT = 0.2; const o = e.o;
@@ -314,7 +320,6 @@ function handleEvents(R, live) {
 const KIND_COL = { cone: ['#ff7a00', '#ffffff'], box: ['#d9a566', '#b47a3c'], crate: ['#d99a52', '#9a5a22'], block: ['#ff4d6d', '#4361ee', '#ffd23f', '#2ec4b6'], mega: ['#9b5cf0', '#ff9f1c', '#2ec4b6'], wall: ['#e06640', '#a8442a'], wallw: ['#e06640', '#a8442a'], barrel: ['#e53935', '#2f6fdf', '#2ec46b'], balloon: ['#ff4d6d', '#ffd23f', '#4cc9f0'], cloud: ['#ffffff', '#d6e4f7'], star: ['#ffd23f', '#fff3a8'] };
 function burp(R, e) {
   AU.play('burp'); banner('BUURP!'); const P = R.p, mx = P.x + R.veh.len * 0.45, mz = P.z + R.veh.h * 0.5, bag = e.bag.slice(-40), red = reduced();
-  popText('BUURP!', mx + 60, P.laneF, mz + 90, '#8ff5e8', true);
   bag.forEach((kind, i) => { if (i % (red ? 3 : 1)) return; const K = SIM.KINDS[kind];
     if (K && debris.length < CAP()) { const vars = ART.variants('debris.' + K.debris); debris.push({ spr: vars[Math.random() * vars.length | 0], x: mx, lane: P.laneF + rand(-0.4, 0.4), z: mz, vx: P.speed + rand(150, 700), vz: rand(350, 950), r: 0, vr: rand(-10, 10), life: rand(1.2, 1.9), t: 0, sz: rand(0.8, 1.3) }); }
     else if (kind === 'star' && debris.length < CAP()) debris.push({ spr: 'item.star', x: mx, lane: P.laneF, z: mz, vx: P.speed + rand(150, 600), vz: rand(400, 900), r: 0, vr: rand(-6, 6), life: 1.4, t: 0, sz: 1, wu: 30 });
@@ -322,7 +327,8 @@ function burp(R, e) {
   if (!bag.length) confetti(red ? 10 : 30, mx, P.laneF, mz);
   shake = Math.max(shake, red ? 0 : 6); }
 let bannerT = 0;
-function banner(t) { const b = $('#banner'); b.textContent = t; b.classList.remove('on'); void b.offsetWidth; b.classList.add('on'); clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('on'), 1100); }
+// special = a hero's special-move name: smaller, high up (~20% from the top) and fading out after ~0.9 s so the action and combo stay visible
+function banner(t, special) { const b = $('#banner'); b.textContent = t; b.classList.remove('on'); b.classList.toggle('sp', !!special); void b.offsetWidth; b.classList.add('on'); clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('on'), special ? 900 : 1100); }
 let comboT = 0;
 function comboShow(m) { const c = $('#combo'); c.textContent = 'x' + m; c.classList.remove('on'); void c.offsetWidth; c.classList.add('on'); clearTimeout(comboT); comboT = setTimeout(() => c.classList.remove('on'), 1200); }
 function bumpScore() { const s = $('.hud-score'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); }
@@ -589,7 +595,7 @@ mq.addEventListener && mq.addEventListener('change', e => { if (e.matches) { set
 applyReduced(); resize(); ART.decorate(); ART.onChange(() => { if (mode === 'pick') buildPick(); });
 showTitle(); requestAnimationFrame(frame);
 // test hooks (used by the screenshot/QA scripts; harmless for players)
-window.LEOGAME = { flyCheck() { const R = race; if (!R) return null; const P = R.p, sp = ART.get(vehSprite(R)), k = kL(P.laneF), w = sp.wu * view.s * k, h = w * sp.h / sp.w;
+window.LEOGAME = { flyCheck() { const R = race; if (!R) return null; const P = R.p, sp = ART.get(vehSprite(R)), k = kL(P.laneF), w = raceWu(R, vehSprite(R)) * view.s * k, h = w * sp.h / sp.w;
     const yA = laneY(P.laneF) - P.z * view.s * k, limit = (hudBottom || 70) + H * 0.12; return { z: Math.round(P.z), maxZ: Math.round(R.maxZ || 0), spriteTop: Math.round(yA - h * sp.ay), limit: Math.round(limit), hudBottom: Math.round(hudBottom), H, camZ: Math.round(camZ), roadY: Math.round(laneY(1)) }; },
   submitScore, get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
 if (QS.get('screen') === 'pick') showPick();
