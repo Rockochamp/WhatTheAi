@@ -1,5 +1,5 @@
 {
- "version": 4,
+ "version": 5,
  "changes_v4": [
   "ground layers replaced by Pixel round-2 road textures (all 4 tracks)",
   "sword -> hero-sword_fly_v3 (silver blade), same body scale, sparkle rings filled",
@@ -8,9 +8,9 @@
  "generated": "2026-10-17 (Europe/Zurich)",
  "by": "Muse",
  "spec": "/workspace/WhatTheAi/games/leo_smash_race/grokbot/art/ART_SPEC.md",
- "file_count": 66,
- "total_bytes": 1160688,
- "sprite_bytes": 290430,
+ "file_count": 72,
+ "total_bytes": 1238944,
+ "sprite_bytes": 368686,
  "track_bytes": {
   "toyroom": 176510,
   "desert": 337278,
@@ -27,7 +27,8 @@
  "pose_mapping": {
   "boost": "drive (no boost art)",
   "celebrate": "fly (no celebrate art)",
-  "sword": "all poses = fly"
+  "sword": "all poses = fly",
+  "pup/rex": "boost = special; celebrate = fly (pup) / special (rex)"
  },
  "not_provided": [
   "smash.box",
@@ -99,7 +100,17 @@
   "debris.cloud": "debris/cloud_1.webp",
   "debris.cloud.2": "debris/cloud_2.webp",
   "debris.cloud.3": "debris/cloud_3.webp",
-  "debris.cloud.4": "debris/cloud_4.webp"
+  "debris.cloud.4": "debris/cloud_4.webp",
+  "veh.pup.drive": "vehicles/pup_drive.webp",
+  "veh.pup.fly": "vehicles/pup_fly.webp",
+  "veh.pup.special": "vehicles/pup_special.webp",
+  "veh.rex.drive": "vehicles/rex_drive.webp",
+  "veh.rex.fly": "vehicles/rex_fly.webp",
+  "veh.rex.special": "vehicles/rex_special.webp",
+  "veh.pup.boost": "alias veh.pup.special",
+  "veh.rex.boost": "alias veh.rex.special",
+  "veh.pup.celebrate": "alias veh.pup.fly",
+  "veh.rex.celebrate": "alias veh.rex.special"
  },
  "files": [
   {
@@ -1474,6 +1485,180 @@
    "par": 1.25,
    "src_raw": "track_bat-city-night_foreground-props_v1.jpg",
    "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "vehicles/pup_drive.webp",
+   "type": "vehicle",
+   "id": "pup",
+   "pose": "drive",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    187,
+    97,
+    324,
+    235
+   ],
+   "scale_from_src": 0.2502,
+   "offset_px": [
+    98,
+    78
+   ],
+   "bytes": 7408,
+   "src_raw": "vehicle_whirly-pup_drive_v1.jpg"
+  },
+  {
+   "file": "vehicles/pup_fly.webp",
+   "type": "vehicle",
+   "id": "pup",
+   "pose": "fly",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    174,
+    105,
+    337,
+    235
+   ],
+   "scale_from_src": 0.2502,
+   "offset_px": [
+    91,
+    88
+   ],
+   "bytes": 7500,
+   "src_raw": "vehicle_whirly-pup_fly_v1.jpg"
+  },
+  {
+   "file": "vehicles/pup_special.webp",
+   "type": "vehicle",
+   "id": "pup",
+   "pose": "special",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    177,
+    104,
+    334,
+    237
+   ],
+   "scale_from_src": 0.2502,
+   "offset_px": [
+    95,
+    84
+   ],
+   "bytes": 7260,
+   "src_raw": "vehicle_whirly-pup_special_v1.jpg"
+  },
+  {
+   "file": "vehicles/rex_drive.webp",
+   "type": "vehicle",
+   "id": "rex",
+   "pose": "drive",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    48,
+    4,
+    463,
+    235
+   ],
+   "scale_from_src": 0.4304,
+   "offset_px": [
+    -13,
+    -42
+   ],
+   "bytes": 18870,
+   "src_raw": "vehicle_chomp-rex_drive_v1.jpg"
+  },
+  {
+   "file": "vehicles/rex_fly.webp",
+   "type": "vehicle",
+   "id": "rex",
+   "pose": "fly",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    67,
+    20,
+    446,
+    235
+   ],
+   "scale_from_src": 0.4304,
+   "offset_px": [
+    -19,
+    -21
+   ],
+   "bytes": 17542,
+   "src_raw": "vehicle_chomp-rex_fly_v1.jpg"
+  },
+  {
+   "file": "vehicles/rex_special.webp",
+   "type": "vehicle",
+   "id": "rex",
+   "pose": "special",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    48,
+    3,
+    461,
+    236
+   ],
+   "scale_from_src": 0.4304,
+   "offset_px": [
+    -13,
+    -42
+   ],
+   "bytes": 19676,
+   "src_raw": "vehicle_chomp-rex_special_v1.jpg"
   }
+ ],
+ "changes_v5": [
+  "added Addendum B heroes: vehicles/pup_{drive,fly,special}.webp, vehicles/rex_{drive,fly,special}.webp",
+  "pup: one shared scale (0.2502 of source), drive height = 60% of truck_drive (139 px), feet on the 0.92 baseline in every pose",
+  "rex: one shared scale (0.4304), as tall as the canvas allows (232 px, = truck height); rex_special uses the exact drive transform (offset -13,-42); tyre residual 1 px",
+  "manifest.js: boost -> special for both; celebrate -> fly (pup), -> special (rex)"
  ]
 }

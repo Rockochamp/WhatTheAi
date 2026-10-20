@@ -14,8 +14,15 @@ const VEHICLES = {
   truck:    { id: 'truck', name: 'Bat Truck', speed: 520, len: 205, h: 118, fly: 'wings', jumpV: 680, thrust: 2300, maxUp: 430, glide: -280, grav: 1800, bounce: 0.34, special: 'pound', specialName: 'Big Jump', stats: { speed: 2, smash: 3, fly: 2 }, horn: 'rumble' },
   sword:    { id: 'sword', name: 'Hero Sword', speed: 560, len: 225, h: 56, fly: 'always', hover: 34, jumpV: 420, thrust: 2400, maxUp: 470, glide: -170, grav: 1000, bounce: 0.2, special: 'spin', specialName: 'Spin Slash', stats: { speed: 2, smash: 2, fly: 3 }, horn: 'shing' },
   jet:      { id: 'jet', name: 'Sky Patroller', speed: 540, len: 195, h: 84, fly: 'hover', hover: 26, jumpV: 420, thrust: 2300, maxUp: 440, glide: -130, grav: 900, bounce: 0.2, special: 'beam', specialName: 'Rescue Beam', stats: { speed: 2, smash: 2, fly: 3 }, horn: 'rotor', optional: true },
+  /* Addendum B heroes. Optional per-hero fields (the first five keep the defaults):
+     laneT = seconds per lane change (default 1/7), accelT = seconds to reach cruise speed (default 1/1.4),
+     superMult = speed multiplier during the special (default 1.7), flatten = rams squash smashables flat. */
+  pup:      { id: 'pup', name: 'Whirly Pup', speed: 600, len: 105, h: 58, fly: 'wings', jumpV: 640, thrust: 2900, maxUp: 500, glide: -150, grav: 1300, bounce: 0.5, laneT: 0.12, superMult: 1.4, special: 'whirl', specialName: 'Whirlwind Spin', stats: { speed: 2, smash: 1, fly: 3 }, horn: 'yip' },
+  rex:      { id: 'rex', name: 'Chomp Rex', speed: 500, len: 215, h: 120, fly: 'wings', jumpV: 620, thrust: 2000, maxUp: 380, glide: -320, grav: 1900, bounce: 0.45, laneT: 0.22, accelT: 1.0, superMult: 1.3, flatten: true, special: 'chomp', specialName: 'Shark Chomp', stats: { speed: 2, smash: 3, fly: 1 }, horn: 'growl' },
 };
-const VEHICLE_ORDER = ['dragster', 'bibi', 'truck', 'sword', 'jet'];
+const VEHICLE_ORDER = ['dragster', 'bibi', 'truck', 'sword', 'jet', 'pup', 'rex'];
+const WHIRL = { reach: 260, back: 140, zReach: 320, orbit: 0.75, turns: 1.5, max: 28 };  // Whirly Pup's tornado
+const CHOMP = { reach: 130, bite: 0.07, zReach: 230, hop: 0.3 };                        // Chomp Rex's jaw
 
 /* Smashable kinds: points per smash group, world size, debris sprite and sound. */
 const KINDS = {
@@ -110,11 +117,12 @@ function buildTrack(track, veh, seed) {
 function createRace(opts) {
   const veh = VEHICLES[opts.vehicle] || VEHICLES.dragster, track = TRACKS.find(t => t.id === opts.track) || TRACKS[0];
   const tr = buildTrack(track, veh, opts.seed || (Date.now() & 0xffff));
-  const p = { x: 0, lane: 1, laneF: 1, z: veh.hover || 0, vz: 0, speed: 0, airJumps: veh.airJumps || 0, boostT: 0, boostMult: 1, superT: 0, wing: 0, pounding: false, celebrate: 0, onGround: true, lastLaneT: 0, assistT: 0 };
+  const p = { x: 0, lane: 1, laneF: 1, z: veh.hover || 0, vz: 0, speed: 0, airJumps: veh.airJumps || 0, boostT: 0, boostMult: 1, superT: 0, wing: 0, pounding: false, celebrate: 0, onGround: true, lastLaneT: 0, assistT: 0, hopT: -9 };
   const rivals = RIVALS.map((rv, i) => ({ id: rv.id, color: rv.color, f: rv.f, x: -120 - i * 150, lane: i === 1 ? 1 : (i === 0 ? 0 : 2), laneF: i === 1 ? 1 : (i === 0 ? 0 : 2), z: 0, speed: 0, fin: 0, bob: i }));
   return { veh, track, tr, p, rivals, t: 0, countdown: opts.countdown == null ? 2.4 : opts.countdown, assist: opts.assist !== false,
     score: 0, smashPts: 0, stars: 0, smashes: 0, chain: 0, mult: 1, bestMult: 1, lastSmash: -9, boost: opts.fullBoost ? 1 : 0.15,
-    events: [], queue: [], shots: [], idx: 0, finished: false, finT: 0, place: 0, slow: 0, specials: 0 };
+    events: [], queue: [], shots: [], idx: 0, finished: false, finT: 0, place: 0, slow: 0, specials: 0,
+    reduced: !!opts.reduced, captured: [], bag: [], biteT: 0, eaten: 0, pulled: 0 };
 }
 
 function emit(R, e) { R.events.push(e); }
@@ -136,7 +144,31 @@ function smashGroup(R, o, how) {
   if (R.mult >= 2) emit(R, { type: 'combo', mult: R.mult });
 }
 
-function collectStar(R, o) { o.alive = false; R.stars++; R.score += 20; R.boost = Math.min(1, R.boost + 0.01); emit(R, { type: 'star', o }); }
+function collectStar(R, o, how) { o.alive = false; R.stars++; R.score += 20; R.boost = Math.min(1, R.boost + 0.01); emit(R, { type: 'star', o, how }); }
+
+/* Chomp Rex: one bite eats one object (towers go bottom-up, one piece per bite); every bite adds to the combo.
+   Only the piece that carries the group's points scores, so eating a tower is worth the same as smashing it. */
+function chompOne(R, o) {
+  if (!o.alive) return;
+  const now = R.t;
+  if (now - R.lastSmash <= COMBO_WINDOW) R.chain++; else R.chain = 1;
+  R.lastSmash = now; R.mult = Math.min(5, R.chain); if (R.mult > R.bestMult) R.bestMult = R.mult;
+  o.alive = false; R.eaten++; R.bag.push(o.kind);
+  if (o.star) { R.stars++; R.score += 20; R.boost = Math.min(1, R.boost + 0.01); emit(R, { type: 'chomp', o, kind: 'star', pts: 0, mult: R.mult }); return; }
+  const pts = o.pts || 0, gained = pts * R.mult; R.basePts = (R.basePts || 0) + pts; R.smashPts += gained; R.score += gained; if (pts) R.smashes++;
+  if (pts) R.boost = Math.min(1, R.boost + (pts >= 300 ? 0.34 : pts >= 100 ? 0.18 : pts >= 50 ? 0.12 : 0.06));
+  emit(R, { type: 'chomp', o, kind: o.kind, pts: gained, mult: R.mult, snd: KINDS[o.kind].snd });
+  if (R.mult >= 2) emit(R, { type: 'combo', mult: R.mult });
+}
+/* Whirly Pup: capture a smashable (and the rest of its group) into the funnel; it orbits, then flies out. */
+function capture(R, o) {
+  const P = R.p, list = [o];
+  if (o.group) for (let i = Math.max(0, R.idx - 40); i < R.tr.objs.length; i++) { const q = R.tr.objs[i]; if (q.x > o.x + 600) break; if (q !== o && q.alive && !q.cap && q.group === o.group) list.push(q); }
+  list.forEach((q, i) => { const dx = q.x - P.x, dl = q.lane - P.laneF;
+    q.cap = { t: -i * 0.06, x0: dx, l0: dl, z0: q.z, a0: Math.atan2(dl * 120, dx), r0: Math.max(80, Math.hypot(dx, dl * 120)), lane0: q.lane }; R.captured.push(q); });
+  R.pulled += list.length; emit(R, { type: 'pull', o, n: list.length });
+}
+function releaseAll(R) { const list = R.captured.slice(); R.captured.length = 0; for (const q of list) if (q.alive) smashGroup(R, q, 'whirl'); }
 
 /* One fixed physics step. input = { jump: held, jumpPressed, boostPressed, lane: -1|0|1 (edge) } */
 function step(R, dt, input) {
@@ -148,27 +180,34 @@ function step(R, dt, input) {
   if (R.countdown > 0) { R.countdown -= dt; if (R.countdown <= 0) emit(R, { type: 'go' }); return; }
   // ---- speed and boost ----
   if (input.boostPressed && !R.finished) {
-    if (R.boost >= 0.999) { R.boost = 0; P.boostT = 3.6; P.boostMult = 1.7; P.superT = 3.6; R.specials++; emit(R, { type: 'super', special: V.special });
+    if (R.boost >= 0.999) { R.boost = 0; P.boostT = 3.6; P.boostMult = V.superMult || 1.7; P.superT = 3.6; R.specials++; emit(R, { type: 'super', special: V.special });
+      if (V.special === 'chomp') { R.bag.length = 0; R.biteT = 0; }
       if (V.special === 'pound') { P.vz = 1050; P.pounding = true; }
       if (V.special === 'toss') for (let i = 0; i < 6; i++) R.shots.push({ at: R.t + i * 0.22, x: 0, lane: i % 3, z: 0, vx: 0, vz: 0, live: false });
-    } else if (R.boost >= 0.3) { R.boost -= 0.3; P.boostT = Math.max(P.boostT, 1.3); P.boostMult = Math.max(1.35, P.superT > 0 ? 1.7 : 1.35); emit(R, { type: 'boost' }); }
+    } else if (R.boost >= 0.3) { R.boost -= 0.3; P.boostT = Math.max(P.boostT, 1.3); P.boostMult = Math.max(1.35, P.superT > 0 ? (V.superMult || 1.7) : 1.35); emit(R, { type: 'boost' }); }
     else emit(R, { type: 'nocharge' });
   }
   if (R.assist && !R.finished) R.boost = Math.min(1, R.boost + 0.018 * dt);
   if (P.boostT > 0) { P.boostT -= dt; if (P.boostT <= 0) P.boostMult = 1; }
-  if (P.superT > 0) P.superT -= dt;
+  if (P.superT > 0) { P.superT -= dt;
+    if (P.superT <= 0) { if (V.special === 'whirl') releaseAll(R); if (V.special === 'chomp') { emit(R, { type: 'burp', bag: R.bag.slice(), x: P.x, lane: P.laneF, z: P.z }); R.bag.length = 0; } } }
   const target = R.finished ? V.speed * 0.35 : V.speed * P.boostMult;
-  P.speed += Math.sign(target - P.speed) * Math.min(Math.abs(target - P.speed), V.speed * 1.4 * dt);
+  P.speed += Math.sign(target - P.speed) * Math.min(Math.abs(target - P.speed), V.speed / (V.accelT || 1 / 1.4) * dt);
   P.x += P.speed * dt;
   // ---- lanes (snap lanes, assist steers toward smashables) ----
   if (input.lane) { P.lane = Math.max(0, Math.min(2, P.lane + input.lane)); P.assistT = R.t + 1.6; }
-  if (R.assist && R.t > P.assistT && !R.finished) {
+  if (V.special === 'chomp' && P.superT > 0 && R.assist && R.t > P.assistT && !R.finished) { // hop toward the nearest cluster
+    const sc = [0, 0, 0];
+    for (let i = R.idx; i < objs.length; i++) { const o = objs[i], dx = o.x - P.x; if (dx > 800) break; if (dx < 40 || !o.alive || o.z > P.z + V.h + CHOMP.zReach) continue; sc[Math.round(o.lane)] += (o.star ? 0.5 : 1) / (1 + dx / 250); }
+    let bl = P.lane; for (let l = 0; l < 3; l++) if (sc[l] > sc[bl] * 1.15 + 0.05) bl = l;
+    if (bl !== P.lane && R.t - P.hopT > CHOMP.hop) { P.lane += Math.sign(bl - P.lane); P.hopT = R.t; P.lastLaneT = R.t; emit(R, { type: 'hop' }); }
+  } else if (R.assist && R.t > P.assistT && !R.finished) {
     let best = null, bd = 1e9;
     for (let i = R.idx; i < objs.length; i++) { const o = objs[i]; const dx = o.x - P.x; if (dx > 900) break; if (dx < 60 || !o.alive) continue;
       const reach = o.z < 60 + P.z + V.h; if (!reach) continue; const sc = dx - (o.pts || 30) * 0.6 + Math.abs(o.lane - P.lane) * 60; if (sc < bd) { bd = sc; best = o; } }
     if (best && best.lane !== P.lane && R.t - P.lastLaneT > 0.35) { P.lane += Math.sign(best.lane - P.lane); P.lastLaneT = R.t; }
   }
-  const dl = P.lane - P.laneF; P.laneF += Math.sign(dl) * Math.min(Math.abs(dl), 7 * dt);
+  const dl = P.lane - P.laneF; P.laneF += Math.sign(dl) * Math.min(Math.abs(dl), dt / (V.laneT || 1 / 7));
   // ---- vertical: jump / fly / glide / bounce ----
   const floor = V.hover || 0, onG = P.z <= floor + 1;
   if (input.jumpPressed) {
@@ -200,13 +239,29 @@ function step(R, dt, input) {
   // ---- smash and collect ----
   while (R.idx < objs.length && objs[R.idx].x < P.x - 500) R.idx++;
   const half = V.len * 0.5, sup = P.superT > 0, sp = V.special;
+  // Whirlwind Spin: captured pieces spiral around the funnel (1.5 turns, rising), then fly out as debris
+  if (R.captured.length) { const fr = Math.max(60, V.len * 0.7);
+    for (let i = R.captured.length - 1; i >= 0; i--) { const q = R.captured[i], c = q.cap; c.t += dt; const k = Math.max(0, Math.min(1, c.t / WHIRL.orbit));
+      if (!q.alive) { R.captured.splice(i, 1); continue; }
+      if (R.reduced) { q.x = P.x + c.x0 * (1 - k) + 10 * k; q.lane = P.laneF + c.l0 * (1 - k); q.z = c.z0 + (P.z + V.h * 0.6 - c.z0) * k; } // reduced motion: straight pull, no orbit
+      else { const a = c.a0 + k * WHIRL.turns * Math.PI * 2, r = c.r0 + (fr - c.r0) * Math.min(1, k * 2.2);
+        q.x = P.x + Math.cos(a) * r; q.lane = P.laneF + Math.sin(a) * 0.55 * Math.min(1, r / 120); q.z = c.z0 * (1 - k) + (P.z + 10 + k * V.h * 1.5) * k; }
+      if (c.t >= WHIRL.orbit) { R.captured.splice(i, 1); q.lane = Math.max(-0.4, Math.min(2.4, q.lane)); smashGroup(R, q, 'whirl'); } } }
   for (let i = R.idx; i < objs.length; i++) {
-    const o = objs[i], dx = o.x - P.x; if (dx > 800) break; if (!o.alive) continue;
+    const o = objs[i], dx = o.x - P.x; if (dx > 800) break; if (!o.alive || o.cap) continue;
     if (o.star) {
-      const magnet = sup && sp === 'beam' && dx > -100 && dx < 650;
+      const magnet = sup && ((sp === 'beam' && dx > -100 && dx < 650) || (sp === 'whirl' && dx > -WHIRL.back && dx < half + WHIRL.reach && o.z < P.z + WHIRL.zReach + 60));
       if (magnet) { o.x -= (o.x - P.x) * 6 * dt; o.z += (P.z + 30 - o.z) * 6 * dt; o.lane += (P.laneF - o.lane) * 6 * dt; }
-      if (Math.abs(dx) < half + 40 && Math.abs(o.lane - P.laneF) < 0.8 && o.z < P.z + V.h + 40 && o.z + 50 > P.z - 30) collectStar(R, o);
+      if (sup && sp === 'chomp' && dx > -half && dx < half + CHOMP.reach && Math.abs(o.lane - P.laneF) < 0.7 && o.z < P.z + V.h + CHOMP.zReach) { chompOne(R, o); continue; }
+      if (Math.abs(dx) < half + 40 && Math.abs(o.lane - P.laneF) < 0.8 && o.z < P.z + V.h + 40 && o.z + 50 > P.z - 30) collectStar(R, o, magnet ? sp : undefined);
       continue;
+    }
+    if (sup && sp === 'whirl') { if (dx > -WHIRL.back && dx < half + WHIRL.reach && o.z < P.z + WHIRL.zReach && R.captured.length < WHIRL.max) capture(R, o); continue; }
+    if (sup && sp === 'chomp') { // eat everything in the lane, lowest piece first, one bite every CHOMP.bite seconds
+      if (dx > -half && dx < half + CHOMP.reach && Math.abs(o.lane - P.laneF) < 0.7 && o.z < P.z + V.h + CHOMP.zReach) {
+        if (R.t >= R.biteT) { let low = o; for (let j = i + 1; j < objs.length; j++) { const q = objs[j]; if (q.x - P.x > half + CHOMP.reach) break; if (q.alive && !q.star && Math.abs(q.lane - P.laneF) < 0.7 && q.z < low.z && q.z < P.z + V.h + CHOMP.zReach) low = q; }
+          chompOne(R, low); R.biteT = R.t + CHOMP.bite; }
+        continue; }
     }
     let hit = Math.abs(dx) < (half + o.w * 0.5) * 0.92 && Math.abs(o.lane - P.laneF) < 0.7 && o.z < P.z + V.h && o.z + o.h > P.z;
     if (!hit && sup) {
@@ -215,7 +270,7 @@ function step(R, dt, input) {
       else if (sp === 'beam') hit = dx > -60 && dx < 520 && Math.abs(o.z - P.z) < 320;
       else if (sp === 'pound' || sp === 'toss') hit = Math.abs(dx) < half + o.w * 0.5 && Math.abs(o.lane - P.laneF) < 1.2 && o.z < P.z + V.h + 30 && o.z + o.h > P.z - 30;
     }
-    if (hit) smashGroup(R, o, sup ? sp : 'ram');
+    if (hit) smashGroup(R, o, sup ? sp : V.flatten ? 'flatten' : 'ram');
   }
   // Basket toss projectiles
   for (const s of R.shots) {
@@ -252,6 +307,6 @@ function step(R, dt, input) {
 
 function summary(R) { return { score: Math.round(R.score), smashPts: Math.round(R.smashPts), stars: R.stars, starPts: R.stars * 20, place: R.place, placeBonus: R.placeBonus || 0, award: R.award || 1, smashes: R.smashes, bestMult: R.bestMult, track: R.track.id, vehicle: R.veh.id, time: Math.round(R.finT) }; }
 
-const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, rng, buildTrack, createRace, step, smashGroup, summary };
+const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, rng, buildTrack, createRace, step, smashGroup, chompOne, summary };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LeoSim = API;
 })(typeof window !== 'undefined' ? window : globalThis);

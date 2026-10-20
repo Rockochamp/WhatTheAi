@@ -46,6 +46,13 @@ const SFX = {
   fanfare: () => { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, i === 5 ? 0.7 : 0.16, { type: 'square', vol: 0.12, at: i * 0.13 })); [262, 330, 392].forEach(f => tone(f, 1.3, { type: 'triangle', vol: 0.1, at: 0.65 })); },
   cheer: () => { for (let i = 0; i < 8; i++) noise(0.3, { f: 1500 + i * 300, filter: 'bandpass', q: 2, vol: 0.06, at: i * 0.05 }); },
   firework: () => { tone(400, 0.5, { type: 'sine', vol: 0.1, to: 1400 }); noise(0.5, { f: 2500, fTo: 400, vol: 0.3, at: 0.45 }); },
+  // Addendum B: Whirly Pup and Chomp Rex
+  arf: () => { tone(620, 0.09, { type: 'triangle', vol: 0.3, to: 980 }); tone(900, 0.12, { type: 'square', vol: 0.08, to: 700, at: 0.02 }); noise(0.07, { f: 2500, filter: 'bandpass', q: 2, vol: 0.18 }); },
+  whirr: (d) => whirr(d || 3.6),
+  pull: (n) => { const f = 900 + Math.random() * 500; tone(f, 0.08, { type: 'sine', vol: 0.22, to: f * 1.8 }); if ((n || 1) > 1) tone(f * 1.5, 0.08, { type: 'triangle', vol: 0.1, at: 0.05, to: f * 2.4 }); },
+  chomp: (k) => { k = k || 1; tone(130 * k, 0.14, { type: 'square', vol: 0.3, to: 55 * k }); noise(0.09, { f: 900 * k, vol: 0.32 }); tone(2200, 0.03, { type: 'square', vol: 0.06, at: 0.07 }); },
+  growl: () => { for (let i = 0; i < 6; i++) tone(58 + i * 4, 0.16, { type: 'sawtooth', vol: 0.22, at: i * 0.1, to: 70 + i * 4 }); noise(0.7, { f: 300, vol: 0.25 }); },
+  burp: () => { for (let i = 0; i < 7; i++) tone(150 - i * 9 + (i % 2) * 14, 0.11, { type: 'sawtooth', vol: 0.26, at: i * 0.075 }); noise(0.55, { f: 500, fTo: 200, filter: 'bandpass', q: 3, vol: 0.3 }); tone(900, 0.12, { type: 'sine', vol: 0.12, at: 0.6, to: 1500 }); },
   solve: () => { [523, 659, 784, 988, 1046].forEach((f, i) => tone(f, 0.25, { type: 'triangle', vol: 0.18, at: i * 0.09 })); },
 };
 const HORNS = {
@@ -53,17 +60,26 @@ const HORNS = {
   bell: () => { tone(1568, 0.25, { type: 'sine', vol: 0.25 }); tone(1568, 0.3, { type: 'sine', vol: 0.25, at: 0.28 }); tone(2350, 0.3, { type: 'sine', vol: 0.08, at: 0.28 }); },
   rumble: () => { tone(55, 1.0, { type: 'sawtooth', vol: 0.35, to: 75 }); tone(110, 0.6, { type: 'square', vol: 0.12, at: 0.2 }); },
   shing: () => { tone(2200, 0.7, { type: 'sine', vol: 0.18, to: 3300 }); tone(3300, 0.7, { type: 'sine', vol: 0.08, at: 0.05 }); noise(0.25, { f: 6000, filter: 'highpass', vol: 0.15 }); },
+  yip: () => { tone(880, 0.09, { type: 'triangle', vol: 0.3, to: 1400 }); tone(980, 0.1, { type: 'triangle', vol: 0.3, at: 0.17, to: 1560 }); noise(0.05, { f: 3000, filter: 'bandpass', q: 2, vol: 0.12, at: 0.17 }); },
+  growl: () => { tone(48, 0.8, { type: 'sawtooth', vol: 0.34, to: 82 }); tone(96, 0.5, { type: 'square', vol: 0.1, at: 0.15 }); noise(0.03, { f: 3500, filter: 'highpass', vol: 0.3, at: 0.82 }); noise(0.03, { f: 3500, filter: 'highpass', vol: 0.3, at: 0.92 }); }, // growl + tooth-clack
   rotor: () => { for (let i = 0; i < 8; i++) noise(0.07, { f: 300, vol: 0.35, at: i * 0.09 }); tone(660, 0.2, { type: 'square', vol: 0.08 }); tone(880, 0.3, { type: 'square', vol: 0.08, at: 0.22 }); },
 };
+/* Rising "whoosh-whirr" for Whirly Pup's tornado: a looping band-passed noise sweeping up, with a wobbling whistle. */
+function whirr(d) { if (!ctx || muted) return; const t = now(), s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), o = ctx.createOscillator(), og = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+  s.buffer = noiseBuf; s.loop = true; f.type = 'bandpass'; f.Q.value = 2.5; f.frequency.setValueAtTime(350, t); f.frequency.exponentialRampToValueAtTime(2600, t + d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.28, t + 0.25); g.gain.setValueAtTime(0.28, t + d - 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.type = 'triangle'; o.frequency.setValueAtTime(320, t); o.frequency.exponentialRampToValueAtTime(900, t + d); lfo.frequency.value = 7; lg.gain.value = 40; lfo.connect(lg); lg.connect(o.frequency);
+  og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.05, t + 0.3); og.gain.setValueAtTime(0.05, t + d - 0.3); og.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  s.connect(f); f.connect(g); g.connect(sfx); o.connect(og); og.connect(sfx); s.start(t); o.start(t); lfo.start(t); s.stop(t + d + 0.05); o.stop(t + d + 0.05); lfo.stop(t + d + 0.05); }
 function play(name, a) { if (!ctx || muted) return; const f = SFX[name]; if (f) try { f(a); } catch (e) {} }
 function horn(id) { unlock(); if (!ctx || muted) return; const f = HORNS[id]; if (f) try { f(); } catch (e) {} }
 /* Continuous engine voice, pitched by speed. */
 function engineStart(kind) { if (!ctx || engine) return; const o = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-  o.type = kind === 'shing' ? 'sine' : 'sawtooth'; o2.type = 'square'; f.type = 'lowpass'; f.frequency.value = kind === 'shing' ? 2000 : 520; g.gain.value = 0;
+  o.type = kind === 'shing' || kind === 'yip' ? 'sine' : 'sawtooth'; o2.type = kind === 'yip' ? 'triangle' : 'square'; f.type = 'lowpass'; f.frequency.value = kind === 'shing' ? 2000 : 520; g.gain.value = 0;
   o.connect(f); o2.connect(f); f.connect(g); g.connect(sfx); o.start(); o2.start(); engine = { o, o2, f, g, kind }; }
-function engineSet(speed, boost) { if (!engine || !ctx) return; const b = { roar: 55, bell: 140, rumble: 38, shing: 440, rotor: 48 }[engine.kind] || 50;
+function engineSet(speed, boost) { if (!engine || !ctx) return; const b = { roar: 55, bell: 140, rumble: 38, shing: 440, rotor: 48, yip: 120, growl: 34 }[engine.kind] || 50;
   const f = b * (1 + speed * 1.2 + (boost ? 0.5 : 0)); engine.o.frequency.setTargetAtTime(f, now(), 0.08); engine.o2.frequency.setTargetAtTime(f * 0.5, now(), 0.08);
-  engine.g.gain.setTargetAtTime(muted ? 0 : (engine.kind === 'shing' ? 0.025 : 0.05) * (0.5 + speed * 0.5), now(), 0.1); }
+  engine.g.gain.setTargetAtTime(muted ? 0 : (engine.kind === 'shing' || engine.kind === 'yip' ? 0.025 : 0.05) * (0.5 + speed * 0.5), now(), 0.1); }
 function engineStop() { if (!engine) return; const e = engine; engine = null; try { e.g.gain.setTargetAtTime(0, now(), 0.05); e.o.stop(now() + 0.3); e.o2.stop(now() + 0.3); } catch (x) {} }
 /* Bouncy chiptune-rock loop per track. */
 const SONGS = [
