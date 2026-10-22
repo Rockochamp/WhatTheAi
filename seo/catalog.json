@@ -248,7 +248,7 @@
     "hub": "/games/leo_smash_race/index.html",
     "category": "Racing game",
     "summary": "Designed by Leo, age 4: solve a chunky colour cube to fill your boost, then race, fly and smash your way to the finish.",
-    "intro": "Leo's Smash Race was designed by Leo, age 4. Pick a hero (the Flame Dragster, Bibi the balance bike, the Bat Truck, the Hero Sword or the Sky Patroller), warm up by solving a chunky 2x2 colour cube for a full boost, then race on one of four tracks: Toy Room Rally, Desert Demolition, Castle Sky Run and Bat City Night. Your hero drives by itself. Smash cones, crate towers, brick walls, barrel pyramids and sky balloons for points, chain smashes into combos up to x5, and fly up to reach the sky targets. There is no way to lose: every race ends with a party, stars and a place on the podium. Bests and stars are saved in your browser.",
+    "intro": "Leo's Smash Race was designed by Leo, age 4. Pick one of eight heroes (the Flame Dragster, Bibi the balance bike, the Bat Truck, the Hero Sword, the Sky Patroller, Whirly Pup, Chomp Rex or Comet 17), warm up by solving a chunky 2x2 colour cube for a full boost, then race on one of four tracks: Toy Room Rally, Desert Demolition, Castle Sky Run and Bat City Night. Your hero drives by itself. Smash cones, crate towers, brick walls, barrel pyramids and sky balloons for points, chain smashes into combos up to x5, and fly up to reach the sky targets. The newest heroes bring big specials: Whirly Pup's Whirlwind Spin tornado pulls in everything nearby, Chomp Rex's Shark Chomp eats its way down the lane, and Comet 17's Comet Dash turns into a fireball that meteor-skips along the road. There is no way to lose: every race ends with a party, stars and a place on the podium. Bests and stars are saved in your browser.",
     "controls": [
       "Tap PLAY, pick a hero and a track, then press GO. On the Cube Warm-up, tap the arrows (or swipe) to turn a row or column until every side is one colour. Help! appears after a few moves, and Race now skips the cube.",
       "In the race, hold the big FLY button (Space or the Up arrow) to jump and fly; let go to glide down. Bibi bounces instead, with up to three jumps in the air.",
@@ -263,10 +263,10 @@
       {
         "model": "Grokbot",
         "path": "/games/leo_smash_race/grokbot/game.html",
-        "detail": "Five heroes with their own special moves, a 2x2 Cube Warm-up with a 3x3 Pro option, four parallax tracks, combos, flying, assist mode, synth sound and an optional world board.",
+        "detail": "Eight heroes with their own special moves, including the Whirlwind Spin tornado, the Shark Chomp and the Comet Dash, a 2x2 Cube Warm-up with a 3x3 Pro option, four parallax tracks, combos, flying, assist mode, synth sound and an optional world board.",
         "description": "Play Leo's Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4."
       }
     ],
-    "image": "/images/leo_smash_race.webp?v=2"
+    "image": "/images/leo_smash_race.webp?v=3"
   }
 ]
