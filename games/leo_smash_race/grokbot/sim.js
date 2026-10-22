@@ -18,11 +18,15 @@ const VEHICLES = {
      laneT = seconds per lane change (default 1/7), accelT = seconds to reach cruise speed (default 1/1.4),
      superMult = speed multiplier during the special (default 1.7), flatten = rams squash smashables flat. */
   pup:      { id: 'pup', name: 'Whirly Pup', speed: 600, len: 105, h: 58, fly: 'wings', jumpV: 640, thrust: 2900, maxUp: 500, glide: -150, grav: 1300, bounce: 0.5, laneT: 0.12, superMult: 1.4, special: 'whirl', specialName: 'Whirlwind Spin', stats: { speed: 2, smash: 1, fly: 3 }, horn: 'yip' },
+  comet:    { id: 'comet', name: 'Comet 17', speed: 610, len: 210, h: 60, fly: 'wings', jumpV: 560, thrust: 2500, maxUp: 440, glide: -220, grav: 1650, bounce: 0.22, laneT: 0.13, accelT: 0.4, superMult: 1.6, special: 'comet', specialName: 'Comet Dash', stats: { speed: 3, smash: 1, fly: 2 }, horn: 'chirp' },
   rex:      { id: 'rex', name: 'Chomp Rex', speed: 500, len: 215, h: 120, fly: 'wings', jumpV: 620, thrust: 2000, maxUp: 380, glide: -320, grav: 1900, bounce: 0.45, laneT: 0.22, accelT: 1.0, superMult: 1.3, flatten: true, special: 'chomp', specialName: 'Shark Chomp', stats: { speed: 2, smash: 3, fly: 1 }, horn: 'growl' },
 };
-const VEHICLE_ORDER = ['dragster', 'bibi', 'truck', 'sword', 'jet', 'pup', 'rex'];
+const VEHICLE_ORDER = ['dragster', 'bibi', 'truck', 'sword', 'jet', 'pup', 'rex', 'comet'];
 const WHIRL = { reach: 260, back: 140, zReach: 320, orbit: 0.75, turns: 1.5, max: 28 };  // Whirly Pup's tornado
 const CHOMP = { reach: 130, bite: 0.07, zReach: 230, hop: 0.3 };                        // Chomp Rex's jaw
+/* Comet 17's Comet Dash (Addendum C): transform 0.3 s, lift 60, auto skip every 0.9 s (+ a skip per JUMP tap, 0.35 s apart),
+   180-wide impacts over 3 lanes, a 260-wide final impact over all lanes at 3.2 s, then the pop-out. */
+const COMET = { trans: 0.3, lift: 60, every: 0.9, gap: 0.35, dive: 0.12, hop: 0.45, hopH: 55, r: 180, rFinal: 260, finalAt: 3.2, burn: 40 };
 
 /* Smashable kinds: points per smash group, world size, debris sprite and sound. */
 const KINDS = {
@@ -160,6 +164,32 @@ function chompOne(R, o) {
   emit(R, { type: 'chomp', o, kind: o.kind, pts: gained, mult: R.mult, snd: KINDS[o.kind].snd });
   if (R.mult >= 2) emit(R, { type: 'combo', mult: R.mult });
 }
+/* Comet 17: one meteor-skip impact (or the big final one). Smashes and collects in range, sets everything on fire. */
+function cometImpact(R, final) {
+  const P = R.p, r = final ? COMET.rFinal : COMET.r, zMax = final ? 340 : 240; let n = 0;
+  for (let i = Math.max(0, R.idx - 20); i < R.tr.objs.length; i++) { const o = R.tr.objs[i], dx = o.x - P.x; if (dx > r + 120) break; if (!o.alive || o.cap) continue;
+    if (Math.abs(dx) > r + (o.w || 0) * 0.5 || o.z > zMax) continue; if (!final && Math.abs(o.lane - P.laneF) > 1.25) continue;
+    if (o.star) collectStar(R, o, 'comet'); else { smashGroup(R, o, 'comet'); n++; } }
+  R.comet.impacts++; emit(R, { type: 'impact', x: P.x, lane: P.laneF, final, r, n });
+}
+// auto skips stay on a fixed 0.9 s beat (scheduled times, no per-step drift); a tap skip restarts the beat
+function cometStep(R, input) {
+  const P = R.p, C = R.comet, c = R.t - C.t0, E = COMET, ease = k => 1 - Math.pow(1 - k, 3);
+  const lift = c < E.trans ? C.z0 + (E.lift - C.z0) * ease(c / E.trans) : E.lift;
+  if (c >= E.finalAt) { // final impact, then the shell cracks and the car pops out with a hop
+    if (!C.final) { C.final = true; C.dive = 0; cometImpact(R, true); }
+    const k = Math.min(1, (c - E.finalAt) / (3.6 - E.finalAt)); P.z = Math.max(0, Math.sin(k * Math.PI) * 85);
+    if (!C.popped && c >= E.finalAt + 0.08) { C.popped = true; emit(R, { type: 'cometPop', x: P.x, lane: P.laneF, z: P.z }); }
+  } else {
+    const canSkip = c >= E.trans && c < E.finalAt - E.dive && !C.dive, tap = input.jumpPressed && R.t - C.lastStart >= E.gap;
+    if (canSkip && (R.t >= C.next || tap)) { if (R.t < C.next) C.taps++; C.dive = (R.t >= C.next ? C.next : R.t) + E.dive; C.diveT0 = R.t; C.diveFrom = P.z; C.lastStart = R.t; emit(R, { type: 'skip', tap: R.t < C.next }); }
+    if (C.dive) { const k = Math.min(1, (R.t - C.diveT0) / (C.dive - C.diveT0)); P.z = C.diveFrom * (1 - k * k);
+      if (R.t >= C.dive - 1e-9) { C.next = C.dive + E.every - E.dive; C.dive = 0; C.last = R.t; P.z = 0; cometImpact(R, false); } }
+    else if (R.t - C.last < E.hop) { const k = (R.t - C.last) / E.hop; P.z = lift * k + Math.sin(k * Math.PI) * E.hopH; }
+    else P.z = lift;
+  }
+  P.vz = 0;
+}
 /* Whirly Pup: capture a smashable (and the rest of its group) into the funnel; it orbits, then flies out. */
 function capture(R, o) {
   const P = R.p, list = [o];
@@ -182,6 +212,7 @@ function step(R, dt, input) {
   if (input.boostPressed && !R.finished) {
     if (R.boost >= 0.999) { R.boost = 0; P.boostT = 3.6; P.boostMult = V.superMult || 1.7; P.superT = 3.6; R.specials++; emit(R, { type: 'super', special: V.special });
       if (V.special === 'chomp') { R.bag.length = 0; R.biteT = 0; }
+      if (V.special === 'comet') { R.comet = { t0: R.t, z0: P.z, next: R.t + COMET.every - COMET.dive, dive: 0, diveT0: 0, diveFrom: 0, last: -9, lastStart: -9, final: false, popped: false, impacts: 0, taps: 0 }; P.vz = 0; }
       if (V.special === 'pound') { P.vz = 1050; P.pounding = true; }
       if (V.special === 'toss') for (let i = 0; i < 6; i++) R.shots.push({ at: R.t + i * 0.22, x: 0, lane: i % 3, z: 0, vx: 0, vz: 0, live: false });
     } else if (R.boost >= 0.3) { R.boost -= 0.3; P.boostT = Math.max(P.boostT, 1.3); P.boostMult = Math.max(1.35, P.superT > 0 ? (V.superMult || 1.7) : 1.35); emit(R, { type: 'boost' }); }
@@ -190,7 +221,7 @@ function step(R, dt, input) {
   if (R.assist && !R.finished) R.boost = Math.min(1, R.boost + 0.018 * dt);
   if (P.boostT > 0) { P.boostT -= dt; if (P.boostT <= 0) P.boostMult = 1; }
   if (P.superT > 0) { P.superT -= dt;
-    if (P.superT <= 0) { if (V.special === 'whirl') releaseAll(R); if (V.special === 'chomp') { emit(R, { type: 'burp', bag: R.bag.slice(), x: P.x, lane: P.laneF, z: P.z }); R.bag.length = 0; } } }
+    if (P.superT <= 0) { if (V.special === 'whirl') releaseAll(R); if (V.special === 'comet' && R.comet) { R.comet = null; P.z = V.hover || 0; P.vz = 0; emit(R, { type: 'cometEnd' }); } if (V.special === 'chomp') { emit(R, { type: 'burp', bag: R.bag.slice(), x: P.x, lane: P.laneF, z: P.z }); R.bag.length = 0; } } }
   const target = R.finished ? V.speed * 0.35 : V.speed * P.boostMult;
   P.speed += Math.sign(target - P.speed) * Math.min(Math.abs(target - P.speed), V.speed / (V.accelT || 1 / 1.4) * dt);
   P.x += P.speed * dt;
@@ -210,6 +241,8 @@ function step(R, dt, input) {
   const dl = P.lane - P.laneF; P.laneF += Math.sign(dl) * Math.min(Math.abs(dl), dt / (V.laneT || 1 / 7));
   // ---- vertical: jump / fly / glide / bounce ----
   const floor = V.hover || 0, onG = P.z <= floor + 1;
+  if (R.comet && P.superT > 0) cometStep(R, input); // Comet Dash owns the vertical motion (JUMP taps become skips)
+  else {
   if (input.jumpPressed) {
     if (V.fly === 'bounce') { if (onG) { P.vz = V.jumpV; emit(R, { type: 'jump' }); } else if (P.airJumps > 0) { P.airJumps--; P.vz = V.airJumpV; emit(R, { type: 'jump', air: true }); } }
     else if (onG) { P.vz = V.jumpV; emit(R, { type: 'jump' }); }
@@ -232,6 +265,7 @@ function step(R, dt, input) {
     if (P.pounding) { P.pounding = false; emit(R, { type: 'pound' }); for (let i = R.idx; i < objs.length; i++) { const o = objs[i]; if (o.x - P.x > 700) break; if (o.alive && !o.star && Math.abs(o.x - P.x) < 700 && o.z < 260) smashGroup(R, o, 'pound'); } }
     if (impact > 300) { P.vz = impact * V.bounce; emit(R, { type: 'land', v: impact }); } else P.vz = 0;
     if (V.fly === 'bounce') P.airJumps = V.airJumps;
+  }
   }
   if (V.fly === 'always' || V.fly === 'hover') P.z += Math.sin(R.t * 4) * 0.25;
   P.onGround = P.z <= floor + 2;
@@ -256,6 +290,8 @@ function step(R, dt, input) {
       if (Math.abs(dx) < half + 40 && Math.abs(o.lane - P.laneF) < 0.8 && o.z < P.z + V.h + 40 && o.z + 50 > P.z - 30) collectStar(R, o, magnet ? sp : undefined);
       continue;
     }
+    if (sup && sp === 'comet' && R.comet) { // the fireball burns away whatever it touches in its lane, no slow-down
+      if (Math.abs(o.lane - P.laneF) < 0.7 && dx > -half && dx < half + COMET.burn && o.z < P.z + V.h + 60 && o.z + o.h > P.z - 40) { smashGroup(R, o, 'burn'); continue; } }
     if (sup && sp === 'whirl') { if (dx > -WHIRL.back && dx < half + WHIRL.reach && o.z < P.z + WHIRL.zReach && R.captured.length < WHIRL.max) capture(R, o); continue; }
     if (sup && sp === 'chomp') { // eat everything in the lane, lowest piece first, one bite every CHOMP.bite seconds
       if (dx > -half && dx < half + CHOMP.reach && Math.abs(o.lane - P.laneF) < 0.7 && o.z < P.z + V.h + CHOMP.zReach) {
@@ -307,6 +343,6 @@ function step(R, dt, input) {
 
 function summary(R) { return { score: Math.round(R.score), smashPts: Math.round(R.smashPts), stars: R.stars, starPts: R.stars * 20, place: R.place, placeBonus: R.placeBonus || 0, award: R.award || 1, smashes: R.smashes, bestMult: R.bestMult, track: R.track.id, vehicle: R.veh.id, time: Math.round(R.finT) }; }
 
-const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, rng, buildTrack, createRace, step, smashGroup, chompOne, summary };
+const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, COMET, rng, buildTrack, createRace, step, smashGroup, chompOne, summary };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LeoSim = API;
 })(typeof window !== 'undefined' ? window : globalThis);

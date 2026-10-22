@@ -47,6 +47,14 @@ window.LEO_MANIFEST = {
     'veh.rex.special':    { src: 'vehicles/rex_special.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 280 },
     'veh.rex.boost':      { alias: 'veh.rex.special' },
     'veh.rex.celebrate':  { alias: 'veh.rex.special' },
+    // Addendum C: Comet 17. src: null = interim code art (proc.js) until Muse's sprites land as vehicles/comet_drive.webp,
+    // comet_fly.webp and comet_special.webp (art/out format: 512x256, 0.92 baseline, one shared scale, ~55% of the Bat Truck's height).
+    // Then set the three src values and bump `version`. boost = special (hot comet form); celebrate = fly.
+    'veh.comet.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.10, 0.70], pivot: 0.72 } },
+    'veh.comet.fly':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265 },
+    'veh.comet.special':  { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.10, 0.70], pivot: 0.72 } },
+    'veh.comet.boost':    { alias: 'veh.comet.special' },
+    'veh.comet.celebrate': { alias: 'veh.comet.fly' },
     // Rivals: friendly smiley racers, drive pose only.
     'rival.orange': { src: 'rivals/rival_orange.webp', size: [384, 192], anchor: [0.5, 0.93], wu: 175 },
     'rival.green':  { src: 'rivals/rival_green.webp', size: [384, 192], anchor: [0.5, 0.93], wu: 175 },

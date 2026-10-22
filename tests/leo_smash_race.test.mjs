@@ -68,8 +68,8 @@ test("3x3 Pro cube: real shuffle, Help still solves it", () => {
 /* ---- Addendum B: Whirly Pup and Chomp Rex ---- */
 const go = (R, n, inp) => { for (let i = 0; i < n; i++) SIM.step(R, SIM.STEP, Object.assign({ jump: false, jumpPressed: false, boostPressed: false, lane: 0 }, inp && inp(i))); };
 
-test("7 heroes, new ones last, original five unchanged", () => {
-  assert.deepEqual(SIM.VEHICLE_ORDER, ["dragster", "bibi", "truck", "sword", "jet", "pup", "rex"]);
+test("8 heroes, new ones last, original five unchanged", () => {
+  assert.deepEqual(SIM.VEHICLE_ORDER, ["dragster", "bibi", "truck", "sword", "jet", "pup", "rex", "comet"]);
   const V = SIM.VEHICLES;
   assert.deepEqual([V.dragster.speed, V.bibi.speed, V.truck.speed, V.sword.speed, V.jet.speed], [640, 440, 520, 560, 540]);
   for (const id of ["dragster", "bibi", "truck", "sword", "jet"]) { assert.equal(V[id].laneT, undefined); assert.equal(V[id].accelT, undefined); assert.equal(V[id].superMult, undefined); }
@@ -179,6 +179,86 @@ test("art: real pup/rex sprites wired in; boost -> special, celebrate -> fly (pu
   for (const p of ["drive", "fly", "special"]) for (const id of ["pup", "rex"]) { const e = S[`veh.${id}.${p}`]; assert.ok(e, `${id}.${p}`); assert.deepEqual(e.size, [512, 256]); assert.deepEqual(e.anchor, [0.5, 0.92]); }
   for (const id of ["dragster", "bibi", "truck", "jet"]) assert.ok(/_drive\.webp$/.test(S[`veh.${id}.boost`].src));
   assert.equal(win.LEO_MANIFEST.poseAliases.boost, "drive");
+});
+
+/* ---- Addendum C: Comet 17 ---- */
+function cometRace(opts) {
+  const R = SIM.createRace(Object.assign({ vehicle: "comet", track: "toyroom", seed: 9, countdown: 0, assist: false, fullBoost: true }, opts));
+  go(R, 150); const x = R.p.x; R.tr.objs.forEach(o => { if (o.x > x - 300 && o.x < x + 6000) o.alive = false; }); R.idx = 0; return R;
+}
+const put = (R, list) => { R.tr.objs.push(...list); R.tr.objs.sort((p, q) => p.x - q.x); R.idx = 0; };
+const box = (x, lane, g) => ({ kind: "box", x, lane, z: 0, w: 76, h: 76, alive: true, pts: 10, group: g, lead: true });
+
+test("Comet 17: stats and feel (fast, quick accel and lanes, light glider)", () => {
+  const V = SIM.VEHICLES, c = V.comet;
+  assert.equal(c.name, "Comet 17"); assert.equal(c.special, "comet"); assert.equal(c.specialName, "Comet Dash"); assert.equal(c.fly, "wings"); assert.equal(c.horn, "chirp");
+  assert.equal(c.speed, 610); assert.equal(c.grav, 1650); assert.equal(c.bounce, 0.22); assert.equal(c.laneT, 0.13); assert.equal(c.accelT, 0.4);
+  assert.equal(c.maxUp, 440); assert.equal(c.glide, -220); assert.equal(c.h, 60); assert.equal(c.len, 210); assert.equal(c.superMult, 1.6);
+  assert.deepEqual(c.stats, { speed: 3, smash: 1, fly: 2 });
+  assert.ok(V.dragster.speed > c.speed && c.speed > V.pup.speed, "between the Dragster and the Pup");
+  const R = SIM.createRace({ vehicle: "comet", track: "toyroom", seed: 5, countdown: 0, assist: false }); let n = 0;
+  while (R.p.speed < c.speed - 1 && n < 1000) { go(R, 1); n++; } assert.ok(Math.abs(n * SIM.STEP - 0.4) < 0.03, `top speed in ${n * SIM.STEP}s`);
+  const L = SIM.createRace({ vehicle: "comet", track: "toyroom", seed: 5, countdown: 0, assist: false }); go(L, 1, () => ({ lane: 1 })); n = 0; while (Math.abs(L.p.laneF - 2) > 1e-6 && n < 500) { go(L, 1); n++; }
+  assert.ok(Math.abs((n + 1) * SIM.STEP - 0.13) < 0.02, "lane change ~0.13 s");
+  const txt = JSON.stringify(c).toLowerCase(); for (const bad of ["hot wheels", "mattel", "ferrari", "lamborghini", "mclaren"]) assert.ok(!txt.includes(bad), bad);
+});
+
+test("Comet Dash: lift + x1.6, lane burn, 4 auto meteor skips (180 over 3 lanes), final 260 over all lanes, pop-out back to normal", () => {
+  const R = cometRace(), P = R.p, x = P.x, lane = P.lane, far = lane === 0 ? 2 : 0, near = lane === 1 ? 0 : 1;
+  const ahead = box(x + 160, lane, 701);          // in the fireball's path
+  const side = box(x + 2.7 * 980, near, 702);     // next lane, near an impact point later on
+  const twoAway = box(x + 2.75 * 980, far, 703);   // two lanes away: only the final impact may reach it
+  const st = { kind: "star", x: x + 1.8 * 980, lane: near, z: 0, w: 50, h: 50, alive: true, star: true };
+  put(R, [ahead, side, twoAway, st]);
+  go(R, 1, () => ({ boostPressed: true }));
+  assert.equal(R.events.find(e => e.type === "super").special, "comet"); R.events.length = 0;
+  assert.ok(Math.abs(P.boostMult - 1.6) < 1e-9, "x1.6 speed");
+  const ev = []; let zAt03 = null, sp0 = null; const t0 = R.comet.t0;
+  for (let i = 0; i < 3.7 * 120; i++) { go(R, 1); ev.push(...R.events.map(e => Object.assign({ at: R.t - t0 }, e))); R.events.length = 0;
+    if (zAt03 == null && R.comet && R.t - t0 >= 0.3) zAt03 = P.z; if (R.comet && R.t - t0 > 0.5 && sp0 == null) sp0 = P.speed; }
+  assert.ok(Math.abs(zAt03 - 60) < 2, `lifted to ${zAt03}`); assert.ok(sp0 > SIM.VEHICLES.comet.speed * 1.55, "rushing at ~x1.6");
+  const burn = ev.find(e => e.type === "smash" && e.o === ahead); assert.ok(burn && burn.how === "burn", "lane burn");
+  const imp = ev.filter(e => e.type === "impact");
+  assert.equal(imp.length, 4, `impacts ${imp.map(e => e.at.toFixed(2))}`);
+  assert.deepEqual(imp.map(e => e.final), [false, false, false, true]);
+  imp.slice(0, 3).forEach((e, i) => { assert.ok(Math.abs(e.at - 0.9 * (i + 1)) < 0.02, `auto skip ${i} at ${e.at}`); assert.equal(e.r, 180); });
+  assert.ok(Math.abs(imp[3].at - 3.2) < 0.02); assert.equal(imp[3].r, 260);
+  assert.equal(side.alive, false); assert.equal(ev.find(e => e.type === "smash" && e.o === side).how, "comet");
+  assert.equal(st.alive, false, "star in range collected");
+  assert.ok(ev.some(e => e.type === "cometPop")); assert.ok(ev.some(e => e.type === "cometEnd"));
+  assert.equal(R.comet, null); assert.ok(P.z <= 0.01);
+  go(R, 120); assert.ok(Math.abs(P.speed - SIM.VEHICLES.comet.speed) < 1, "back to normal speed");
+});
+
+test("Comet Dash: skip impacts reach 1 lane each side, the final reaches all lanes", () => {
+  const R = cometRace(), P = R.p; while (P.lane !== 0) go(R, 1, () => ({ lane: -1 })); go(R, 60);
+  const x = P.x, sp = SIM.VEHICLES.comet.speed * 1.6, firstAt = x + sp * 0.9;
+  const l2 = box(firstAt + 20, 2, 801), l1 = box(firstAt + 20, 1, 802);
+  put(R, [l1, l2]); go(R, 1, () => ({ boostPressed: true }));
+  const hits = []; for (let i = 0; i < 1.1 * 120; i++) { go(R, 1); for (const e of R.events) if (e.type === "smash") hits.push(e.o); R.events.length = 0; }
+  assert.ok(hits.includes(l1), "neighbour lane smashed"); assert.ok(!hits.includes(l2), "two lanes away: not by a skip");
+});
+
+test("Comet Dash: JUMP taps add skips (min gap 0.35 s), lanes stay steerable", () => {
+  const imps = tap => { const R = cometRace(); go(R, 1, () => ({ boostPressed: true })); const out = []; const lanes = new Set();
+    for (let i = 0; i < 3.7 * 120; i++) { go(R, 1, () => ({ jumpPressed: tap && i % 6 === 0, lane: i === 200 ? (R.p.lane === 0 ? 1 : -1) : 0 })); for (const e of R.events) if (e.type === "impact") out.push(R.t); R.events.length = 0; lanes.add(R.p.lane); }
+    return { out, lanes }; };
+  const idle = imps(false), mash = imps(true);
+  assert.equal(idle.out.length, 4); assert.ok(mash.out.length >= 8, `taps -> ${mash.out.length} impacts`);
+  for (let i = 1; i < mash.out.length - 1; i++) assert.ok(mash.out[i] - mash.out[i - 1] >= 0.35 - 1e-6, "min gap");
+  assert.ok(mash.lanes.size >= 2, "steered during the dash");
+});
+
+test("Comet 17 art: interim code art until Muse's sprites land; boost -> special, celebrate -> fly", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/art/manifest.js", import.meta.url), "utf8");
+  const win = {}; new Function("window", src)(win); const S = win.LEO_MANIFEST.sprites;
+  assert.equal(S["veh.comet.boost"].alias, "veh.comet.special"); assert.equal(S["veh.comet.celebrate"].alias, "veh.comet.fly");
+  for (const p of ["drive", "fly", "special"]) { const e = S[`veh.comet.${p}`]; assert.equal(e.src, null); assert.deepEqual(e.size, [512, 256]); assert.deepEqual(e.anchor, [0.5, 0.92]); }
+  const proc = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/proc.js", import.meta.url), "utf8");
+  assert.ok(/function comet\(g, pose\)/.test(proc) && proc.includes("pup, rex, comet })"));
+  const audio = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/audio.js", import.meta.url), "utf8");
+  for (const k of ["fwoom:", "crackle:", "mboom:", "kaboom:", "ting:", "hiss:", "chirp:"]) assert.ok(audio.includes(k), k);
 });
 
 test("leaderboard collection unchanged", async () => {
