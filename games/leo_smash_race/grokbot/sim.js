@@ -42,6 +42,8 @@ const DASH = { v: 2000, chew: 0.3, back: 0.18, spin: 0.45, next: 300 };
    tests/leo_smash_race.test.mjs ("FIRE score balance"): holding FIRE all race scores about +20-35% over never firing, and a ram-first
    player who only fires at neighbouring lanes and blockers scores at least as much as the hold-fire player. */
 const SHARP = 25;     // flat Sharp Shot bonus, never multiplied, paid once per SHOT that hits (a splash / pierce / bounce with several kills still pays it once)
+const WORD_GAP = 0.6;  // the big popup word shows at most once per 0.6 s; other hits in that window get only the +points line (anti-spam)
+const RAPID = 0.5;     // a shot within 0.5 s of the previous one is 'rapid': its launch sound plays quieter with a random pitch
 const AIM_MIN = 240;  // auto-aim ignores IN-LANE targets closer than this (Leo rams those); neighbouring-lane targets count at any distance
 const WEAPONS = {
   dragster: { id: 'rocket',    name: 'Turbo Rocket',   word: 'BOOM!',    cd: 0.35, v: 1500, r: 22, range: 650, splash: 60, fx: 'firepop',  col: '#ff6a2a' },
@@ -154,7 +156,7 @@ function createRace(opts) {
   const rivals = RIVALS.map((rv, i) => ({ id: rv.id, color: rv.color, f: rv.f, x: -120 - i * 150, lane: i === 1 ? 1 : (i === 0 ? 0 : 2), laneF: i === 1 ? 1 : (i === 0 ? 0 : 2), z: 0, speed: 0, fin: 0, bob: i }));
   return { veh, track, tr, p, rivals, t: 0, countdown: opts.countdown == null ? 2.4 : opts.countdown, assist: opts.assist !== false,
     score: 0, smashPts: 0, stars: 0, smashes: 0, chain: 0, mult: 1, bestMult: 1, lastSmash: -9, boost: opts.fullBoost ? 1 : 0.15,
-    weapon: WEAPONS[veh.id] || WEAPONS.dragster, fireCd: 0, proj: [], dash: null, hits: 0, shotPts: 0, fired: 0,
+    weapon: WEAPONS[veh.id] || WEAPONS.dragster, fireCd: 0, proj: [], dash: null, hits: 0, shotPts: 0, fired: 0, spShots: 0, wordT: -9, lastFireT: -9,
     events: [], queue: [], shots: [], idx: 0, finished: false, finT: 0, place: 0, slow: 0, specials: 0,
     reduced: !!opts.reduced, captured: [], bag: [], biteT: 0, eaten: 0, pulled: 0 };
 }
@@ -245,17 +247,20 @@ function aimTarget(R, x0, lane0, range, skip, minIn) {
 function fireRange(R) { return Math.min(R.weapon.range, R.viewAhead || 1e9); }
 function fire(R) {
   const P = R.p, V = R.veh, W = R.weapon, x0 = P.x + V.len * 0.45, tgt = aimTarget(R, x0, P.laneF, fireRange(R), null);
-  R.fireCd = W.cd; R.fired++;
-  if (W.dash) { R.dash = { tgt, t: 0, ph: tgt ? 'go' : 'spin', x: P.x, lane: P.laneF, z: P.z, from: null }; emit(R, { type: 'fire', w: W.id, dash: true, miss: !tgt }); return; }
-  const s = { w: W, x: x0, lane: P.laneF, z: P.z + V.h * 0.55, vx: P.speed + W.v, t: 0, tgt, hits: 0, back: false, hitG: new Set(), xs: x0, zs: P.z + V.h * 0.55 };
-  R.proj.push(s); emit(R, { type: 'fire', w: W.id, s, miss: !tgt });
+  const rapid = R.t - R.lastFireT < RAPID, special = P.superT > 0; // FIRE stays live in a special, but those shots pay no Sharp Shot bonus
+  R.fireCd = W.cd; R.fired++; R.lastFireT = R.t;
+  if (W.dash) { R.dash = { tgt, t: 0, ph: tgt ? 'go' : 'spin', x: P.x, lane: P.laneF, z: P.z, from: null, special }; emit(R, { type: 'fire', w: W.id, dash: true, miss: !tgt, rapid, special }); return; }
+  const s = { w: W, x: x0, lane: P.laneF, z: P.z + V.h * 0.55, vx: P.speed + W.v, t: 0, tgt, hits: 0, back: false, hitG: new Set(), xs: x0, zs: P.z + V.h * 0.55, special };
+  R.proj.push(s); emit(R, { type: 'fire', w: W.id, s, miss: !tgt, rapid, special });
 }
 // every killed group scores its points x combo + the flat Sharp Shot bonus; one event (one popup) per shot
 function shotKills(R, list, W, x, lane, z, shot) {
   let pts = 0; const done = [];
   for (const o of list) { if (!o.alive) continue; const b = R.smashPts; smashGroup(R, o, 'shot'); pts += R.smashPts - b; done.push(o); }
-  if (done.length && !shot.paid) { shot.paid = true; pts += SHARP; R.hits++; R.shotPts += SHARP; R.score += SHARP; } // Sharp Shot: +25 flat, once per shot
-  if (done.length) emit(R, { type: 'shotHit', w: W.id, word: W.word, fx: W.fx, x, lane, z, pts, n: done.length, mult: R.mult, objs: done });
+  if (done.length && !shot.paid) { shot.paid = true; if (shot.special) R.spShots++; else { pts += SHARP; R.hits++; R.shotPts += SHARP; R.score += SHARP; } } // Sharp Shot: +25 flat, once per shot, none in a special
+  if (!done.length) return 0;
+  const big = R.t - R.wordT >= WORD_GAP; if (big) R.wordT = R.t; // anti-spam: one big word per 0.6 s
+  emit(R, { type: 'shotHit', w: W.id, word: W.word, fx: W.fx, x, lane, z, pts, n: done.length, mult: R.mult, objs: done, big, special: !!shot.special });
   return done.length;
 }
 function projHit(R, s, o) {
@@ -438,9 +443,9 @@ function step(R, dt, input) {
       if (Math.abs(o.x - s.x) < o.w * 0.6 + 20 && Math.abs(o.lane - s.lane) < 0.8 && s.z < o.z + o.h + 30 && s.z > o.z - 40) { smashGroup(R, o, 'toss'); s.live = false; R.stars++; R.score += 20; emit(R, { type: 'star', bonus: true, x: s.x, z: s.z, lane: s.lane }); break; } }
     if (s.x - P.x > 1400) s.live = false;
   }
-  // ---- FIRE: hold to repeat on the cooldown, disabled during a special (it is ready again right after) ----
+  // ---- FIRE: hold to repeat on the cooldown; live during specials too (no Sharp Shot bonus there; the special keeps its own effects) ----
   if (R.fireCd > 0) { R.fireCd -= dt; if (R.fireCd <= 0) { R.fireCd = 0; emit(R, { type: 'fireReady', held: !!input.fire }); } }
-  if ((input.fire || input.firePressed) && !R.finished) { if (P.superT > 0) { if (input.firePressed) emit(R, { type: 'fireOff' }); } else if (R.fireCd <= 0 && !R.dash) fire(R); }
+  if ((input.fire || input.firePressed) && !R.finished && R.fireCd <= 0 && !R.dash) fire(R);
   if (R.proj.length) stepProj(R, dt);
   if (R.dash) stepDash(R, dt);
   // ---- rivals: friendly racers, a bit faster than cruising so boosting earns 1st ----
@@ -468,6 +473,6 @@ function step(R, dt, input) {
 
 function summary(R) { return { score: Math.round(R.score), smashPts: Math.round(R.smashPts), stars: R.stars, starPts: R.stars * 20, place: R.place, placeBonus: R.placeBonus || 0, award: R.award || 1, smashes: R.smashes, shots: R.hits, shotPts: R.shotPts, bestMult: R.bestMult, track: R.track.id, vehicle: R.veh.id, time: Math.round(R.finT) }; }
 
-const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, COMET, LASER, TOOT, DASH, WEAPONS, SHARP, AIM_MIN, rng, buildTrack, createRace, step, smashGroup, aimTarget, fire, chompOne, summary };
+const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, COMET, LASER, TOOT, DASH, WEAPONS, SHARP, AIM_MIN, WORD_GAP, RAPID, rng, buildTrack, createRace, step, smashGroup, aimTarget, fire, chompOne, summary };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LeoSim = API;
 })(typeof window !== 'undefined' ? window : globalThis);

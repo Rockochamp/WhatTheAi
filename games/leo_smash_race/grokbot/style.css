@@ -219,3 +219,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible+span{outline:4px 
 @keyframes zoomie{0%{transform:rotate(0) scale(1)}60%{transform:rotate(720deg) scale(1.12)}100%{transform:rotate(720deg) scale(1)}}
 .breakdown li.sharp span{color:#c2410c}
 .breakdown li.sharp-medal{justify-content:center;border:0;color:#b45309;font-weight:700}
+
+/* a special's name banner pushes the combo number below it (no overlap) */
+#combo.below{top:37%;font-size:clamp(40px,10vw,80px)}
+.lay-landscape #combo.below{top:50%;font-size:clamp(40px,8vh,64px)}

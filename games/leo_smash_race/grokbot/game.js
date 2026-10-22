@@ -352,13 +352,14 @@ function hintArrow(R, t) { const P = R.p, o = SIM.aimTarget(R, P.x + R.veh.len *
   const k = kL(o.lane), x = X(o.x), y = laneY(o.lane) - (o.z + o.h + 30 + Math.abs(Math.sin(t * 6)) * 14) * view.s * k, s = Math.max(0.8, view.s);
   ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-16 * s, -20 * s); ctx.lineTo(-7 * s, -20 * s); ctx.lineTo(-7 * s, -40 * s); ctx.lineTo(7 * s, -40 * s); ctx.lineTo(7 * s, -20 * s); ctx.lineTo(16 * s, -20 * s); ctx.closePath();
   ctx.fillStyle = '#ffd23f'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#1d1a2e'; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore(); }
-function onFire(R, e) { const P = R.p, V = R.veh, W = R.weapon, c = hexRgb(W.col); AU.play('fire_' + e.w);
+function onFire(R, e) { const P = R.p, V = R.veh, W = R.weapon, c = hexRgb(W.col);
+  if (e.rapid && AU.playMod) AU.playMod('fire_' + e.w, 0.7, rand(0.88, 1.14)); else AU.play('fire_' + e.w); // anti-spam: rapid shots -30% and a random pitch
   if (R.hint) { R.hint = false; prog.fired = true; saveProg(); }
   if (e.dash) return;
   for (let i = 0; i < 6 && parts.length < 500; i++) parts.push(i < 3 ? { kind: 'dust', x: P.x + V.len * 0.5, lane: P.laneF, z: P.z + V.h * 0.55, vx: rand(100, 300), vz: rand(-40, 60), life: 0.22, t: 0, r: rand(6, 10), c: '255,255,255', a: 0.8 } // muzzle puff at the nose
     : { kind: 'spark', x: P.x + V.len * 0.5, lane: P.laneF, z: P.z + V.h * 0.55, vx: rand(200, 600), vz: rand(-200, 200), life: 0.18, t: 0, r: 4, c }); }
 function onShotHit(R, e) { const W = R.weapon; AU.play('hit_' + e.w); bumpScore();
-  popText(e.word, e.x, e.lane, e.z + 70, W.col, true, '+' + e.pts);
+  if (e.big !== false) popText(e.word, e.x, e.lane, e.z + 70, W.col, true, '+' + e.pts); else popText('+' + e.pts, e.x, e.lane, e.z + 40, '#fff'); // anti-spam: the big word at most once per 0.6 s
   hitFx.push({ spr: 'hitfx.' + e.fx, x: e.x, lane: e.lane, z: e.z, t: 0, tint: !!W.tint, rot: rand(-0.3, 0.3) }); if (hitFx.length > 10) hitFx.shift();
   if (e.w === 'zoomie') for (let i = 0; i < 14 && parts.length < 560; i++) parts.push({ kind: 'conf', x: e.x + rand(-40, 40), lane: e.lane + rand(-0.2, 0.2), z: e.z + rand(-20, 30), vx: rand(-300, 300), vz: rand(200, 600), life: rand(0.6, 1.1), t: 0, r: rand(3, 6), rot: rand(0, 6), c: ['#c98640', '#e8c69a', '#fff'][i % 3] }); // crumbs
   if (e.w === 'balloon') for (let i = 0; i < 12 && parts.length < 560; i++) parts.push({ kind: 'spark', x: e.x, lane: e.lane, z: e.z, vx: rand(-500, 500), vz: rand(0, 600), life: rand(0.3, 0.5), t: 0, r: rand(4, 7), c: i % 2 ? '140,215,255' : '255,255,255' });
@@ -583,7 +584,8 @@ function burp(R, e) {
   shake = Math.max(shake, red ? 0 : 6); }
 let bannerT = 0;
 // special = a hero's special-move name: smaller, high up (~20% from the top) and fading out after ~0.9 s so the action and combo stay visible
-function banner(t, special) { const b = $('#banner'); b.textContent = t; b.classList.remove('on'); b.classList.toggle('sp', !!special); void b.offsetWidth; b.classList.add('on'); clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('on'), special ? 900 : 1100); }
+function banner(t, special) { const b = $('#banner'), c = $('#combo'); b.textContent = t; b.classList.remove('on'); b.classList.toggle('sp', !!special); void b.offsetWidth; b.classList.add('on'); c.classList.toggle('below', !!special); // a special's name pushes the combo number below it
+  clearTimeout(bannerT); bannerT = setTimeout(() => { b.classList.remove('on'); c.classList.remove('below'); }, special ? 900 : 1100); }
 let comboT = 0;
 function comboShow(m) { const c = $('#combo'); c.textContent = 'x' + m; c.classList.remove('on'); void c.offsetWidth; c.classList.add('on'); clearTimeout(comboT); comboT = setTimeout(() => c.classList.remove('on'), 1200); }
 function bumpScore() { const s = $('.hud-score'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); }
@@ -624,7 +626,7 @@ function updateHud(dt) { const R = race; hudScore += (R.score - hudScore) * Math
   $('#hScore').textContent = Math.round(hudScore); if (hudStars !== R.stars) { hudStars = R.stars; $('#hStars').textContent = R.stars; }
   const L = R.tr.L, pct = x => Math.max(0, Math.min(100, x / L * 100)) + '%'; $('#prMe').style.left = pct(R.p.x); R.rivals.forEach((rv, i) => { $('#pr' + i).style.left = pct(rv.x); });
   $('#ringFg').style.strokeDashoffset = String(283 * (1 - R.boost)); $('#bBoost').classList.toggle('ready', R.boost >= 0.999);
-  fireFg.style.strokeDashoffset = String(283 * Math.min(1, R.fireCd / R.weapon.cd)); bF.classList.toggle('off', R.p.superT > 0); bF.classList.toggle('hint', !!R.hint && R.countdown <= 0);
+  fireFg.style.strokeDashoffset = String(283 * Math.min(1, R.fireCd / R.weapon.cd)); bF.classList.toggle('hint', !!R.hint && R.countdown <= 0);
   const V = R.veh, canFly = V.fly !== 'bounce' && (V.fly === 'always' || V.fly === 'hover' || !R.p.onGround);
   if (bJ.classList.contains('fly') !== canFly) { bJ.classList.toggle('fly', canFly); $('#bJump .lb').textContent = canFly ? 'FLY' : 'JUMP'; bJ.setAttribute('aria-label', canFly ? 'Fly. Hold to fly up.' : 'Jump'); } }
 

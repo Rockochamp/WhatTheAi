@@ -17,13 +17,14 @@ function init() {
 function unlock() { init(); if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {}); }
 function setMuted(m) { muted = !!m; try { localStorage.setItem(LS, muted ? '1' : '0'); } catch (e) {} if (master) master.gain.setTargetAtTime(muted ? 0 : 0.6, ctx.currentTime, 0.03); if (muted && root.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {} }
 const now = () => ctx.currentTime;
+let gVol = 1, gRate = 1; // playMod: scales volume / pitch of everything one SFX plays (anti-spam for rapid FIRE)
 function tone(f, d, o) { if (!ctx || muted) return; o = o || {}; const t = now() + (o.at || 0), os = ctx.createOscillator(), g = ctx.createGain();
-  os.type = o.type || 'sine'; os.frequency.setValueAtTime(f, t); if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + d);
-  const v = o.vol == null ? 0.3 : o.vol; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + (o.att || 0.008)); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  os.type = o.type || 'sine'; os.frequency.setValueAtTime(f * gRate, t); if (o.to) os.frequency.exponentialRampToValueAtTime(o.to * gRate, t + d);
+  const v = (o.vol == null ? 0.3 : o.vol) * gVol; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + (o.att || 0.008)); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
   os.connect(g); g.connect(o.dest || sfx); os.start(t); os.stop(t + d + 0.05); }
 function noise(d, o) { if (!ctx || muted) return; o = o || {}; const t = now() + (o.at || 0), s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-  s.buffer = noiseBuf; f.type = o.filter || 'lowpass'; f.frequency.setValueAtTime(o.f || 1200, t); if (o.fTo) f.frequency.exponentialRampToValueAtTime(o.fTo, t + d); f.Q.value = o.q || 0.8;
-  const v = o.vol == null ? 0.3 : o.vol; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  s.buffer = noiseBuf; f.type = o.filter || 'lowpass'; f.frequency.setValueAtTime((o.f || 1200) * gRate, t); if (o.fTo) f.frequency.exponentialRampToValueAtTime(o.fTo * gRate, t + d); f.Q.value = o.q || 0.8;
+  const v = (o.vol == null ? 0.3 : o.vol) * gVol; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
   s.connect(f); f.connect(g); g.connect(o.dest || sfx); s.start(t, Math.random() * 0.5); s.stop(t + d + 0.05); }
 const SFX = {
   tap: () => tone(660, 0.07, { type: 'triangle', vol: 0.2, to: 880 }),
@@ -132,6 +133,7 @@ function whirr(d) { if (!ctx || muted) return; const t = now(), s = ctx.createBu
   og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.05, t + 0.3); og.gain.setValueAtTime(0.05, t + d - 0.3); og.gain.exponentialRampToValueAtTime(0.0001, t + d);
   s.connect(f); f.connect(g); g.connect(sfx); o.connect(og); og.connect(sfx); s.start(t); o.start(t); lfo.start(t); s.stop(t + d + 0.05); o.stop(t + d + 0.05); lfo.stop(t + d + 0.05); }
 function play(name, a) { if (!ctx || muted) return; const f = SFX[name]; if (f) try { f(a); } catch (e) {} }
+function playMod(name, vol, rate) { gVol = vol; gRate = rate; try { play(name); } finally { gVol = 1; gRate = 1; } }
 function horn(id) { unlock(); if (!ctx || muted) return; const f = HORNS[id]; if (f) try { f(); } catch (e) {} }
 /* Continuous engine voice, pitched by speed. */
 function engineStart(kind) { if (!ctx || engine) return; const o = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -162,5 +164,5 @@ function musicStop() { if (music) clearInterval(music); music = null; }
 /* Tiny announcer via the browser voice, when there is one (no reading needed). */
 function say(t) { if (muted || !root.speechSynthesis) return; const n = Date.now(); if (n - lastSay < 1500) return; lastSay = n;
   try { const u = new SpeechSynthesisUtterance(t); u.rate = 1.1; u.pitch = 1.5; u.volume = 0.8; u.lang = 'en-US'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} }
-root.LeoAudio = { init, unlock, play, horn, engineStart, engineSet, engineStop, musicStart, musicStop, say, setMuted, get muted() { return muted; } };
+root.LeoAudio = { init, unlock, play, playMod, horn, engineStart, engineSet, engineStop, musicStart, musicStop, say, setMuted, get muted() { return muted; } };
 })(window);
