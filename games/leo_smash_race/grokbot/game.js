@@ -57,10 +57,19 @@ function drawSprite(name, x, lane, z, opts) {
   const sp = ART.get(name), k = kL(lane), w = (opts && opts.wu || sp.wu) * view.s * k, h = w * sp.h / sp.w;
   const sx = X(x), sy = laneY(lane) - z * view.s * k;
   if (sx < -w * 1.2 || sx > W + w * 1.2) return;
-  if (opts && opts.pivot) { ctx.save(); ctx.translate(sx, sy - (sp.ay - opts.pivot) * h); ctx.rotate(opts.rot || 0); ctx.drawImage(sp.img, -w * sp.ax, -h * opts.pivot, w, h); ctx.restore(); return; } // spin around an inner point
-  if (opts && (opts.rot || opts.sq || opts.sc)) { ctx.save(); ctx.translate(sx, sy); if (opts.rot) ctx.rotate(opts.rot); if (opts.sq) ctx.scale(1 + opts.sq, 1 - opts.sq); if (opts.sc) ctx.scale(opts.sc, opts.sc); if (opts.alpha != null) ctx.globalAlpha = opts.alpha; ctx.drawImage(sp.img, -w * sp.ax, -h * sp.ay, w, h); ctx.restore(); }
+  if (opts && opts.pivot) { ctx.save(); ctx.translate(sx, sy - (sp.ay - opts.pivot) * h); ctx.rotate(opts.rot || 0); if (opts.rim) rimPaint(sp, -w * sp.ax, -h * opts.pivot, w, h); ctx.drawImage(sp.img, -w * sp.ax, -h * opts.pivot, w, h); ctx.restore(); return; } // spin around an inner point
+  if (opts && (opts.rot || opts.sq || opts.sc)) { ctx.save(); ctx.translate(sx, sy); if (opts.rot) ctx.rotate(opts.rot); if (opts.sq) ctx.scale(1 + opts.sq, 1 - opts.sq); if (opts.sc) ctx.scale(opts.sc, opts.sc); if (opts.alpha != null) ctx.globalAlpha = opts.alpha; if (opts.rim) rimPaint(sp, -w * sp.ax, -h * sp.ay, w, h); ctx.drawImage(sp.img, -w * sp.ax, -h * sp.ay, w, h); ctx.restore(); }
   else { if (opts && opts.alpha != null) { ctx.globalAlpha = opts.alpha; } ctx.drawImage(sp.img, sx - w * sp.ax, sy - h * sp.ay, w, h); ctx.globalAlpha = 1; }
 }
+/* Comet form: a 2 px white rim + a soft ~6 px teal glow around the car's silhouette, so it reads against the orange fireball. */
+const silCache = new WeakMap();
+function silhouette(img) { let c = silCache.get(img); if (c) return c; c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d');
+  g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); silCache.set(img, c); return c; }
+function rimPaint(sp, x, y, w, h) { const sil = silhouette(sp.img); ctx.save();
+  ctx.shadowColor = 'rgba(70,235,220,.95)'; ctx.shadowBlur = 6 * DPR; ctx.globalAlpha = 0.9; ctx.drawImage(sil, x, y, w, h); ctx.drawImage(sil, x, y, w, h); // teal glow (twice = a bit stronger)
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; ctx.drawImage(sil, x + Math.cos(a) * 2, y + Math.sin(a) * 2, w, h); } // 2 px white rim
+  ctx.restore(); }
 function shadow(x, lane, z, wu, a) { const k = kL(lane), w = wu * view.s * k * Math.max(0.35, 1 - z / 700); ctx.fillStyle = `rgba(20,12,40,${(a || 0.28) * Math.max(0.2, 1 - z / 600)})`;
   ctx.beginPath(); ctx.ellipse(X(x), laneY(lane) + 2, w * 0.5, w * 0.1, 0, 0, Math.PI * 2); ctx.fill(); }
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -152,7 +161,7 @@ function drawPlayer(R, t) {
   if (P.superT > 0) drawSpecial(R, t, true);
   if (specialPose && V.special === 'whirl') drawSprite(sp, P.x, P.laneF, P.z + bob, { rot, pivot: ART.fx(sp).pivot || 0.633, wu: dw }); // spin the ball around its middle, not its feet
   else if (spin) drawSprite(sp, P.x, P.laneF, P.z + bob, { rot, pivot: ART.fx(sp).pivot || 0.72, wu: dw });
-  else drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq, sc, wu: dw });
+  else drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq, sc, wu: dw, rim: V.special === 'comet' && cometForm(R) });
   if (P.boostT > 0 && !R.comet && !ownBoostArt(V.id) && !ART.fx(sp).noFlame) boostFlame(R, sp, P.z + bob, rot, t);
   if (ART.fx(sp).fins && P.wing > 0.02) finWings(R, sp, P.z + bob, rot, sq);
   if (P.superT > 0) drawSpecial(R, t, false);
@@ -197,6 +206,9 @@ function drawSpecial(R, t, back) {
 /* Comet 17's Comet Dash (all code VFX): a fireball shell (radial gradient + wobbling flame tongues) that scales in over 0.3 s,
    a heat shimmer over the ember tail, and the shell cracking like an eggshell when the car pops out. */
 const cometC = R => R.comet ? R.t - R.comet.t0 : -1;
+const cometForm = R => !!R.comet && cometC(R) < SIM.COMET.finalAt + 0.08; // until the shell cracks
+// score pops in comet form float ~40 px above the car's top edge (car top ~68 wu over its z), not over the body
+const cometPopZ = R => R.p.z + 70 + 56 / Math.max(0.3, view.s); // pop text centre: 40 px gap + half the text height
 const COMET_TILT = { special: 6 * Math.PI / 180, fly: -8 * Math.PI / 180, tau: 0.05 }; // tau 0.05 s: ~95% of the way in 0.15 s
 function drawComet(R, t, back) {
   const P = R.p, V = R.veh, C = R.comet; if (!C) return;
@@ -223,15 +235,11 @@ function drawComet(R, t, back) {
     for (let i = 0; i < 9; i++) { const a = Math.PI * (0.55 + i * 0.1), bx = cx + Math.cos(a) * rx * 0.92, by = cy + Math.sin(a) * ry * 0.92;
       const L = rx * (0.55 + 0.3 * Math.sin(t * 13 * wob + i * 1.7)) * grow, wdt = ry * 0.24, tipY = by + Math.sin(t * 17 * wob + i) * wdt * 0.8 - wdt * 0.3;
       [['rgba(255,90,10,.75)', 1], ['rgba(255,190,60,.85)', 0.6]].forEach(([col, q]) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(bx + 4 * s, by - wdt * q); ctx.quadraticCurveTo(bx - L * q * 0.5, by - wdt * q * 1.2, bx - L * q, tipY); ctx.quadraticCurveTo(bx - L * q * 0.5, by + wdt * q * 1.1, bx + 4 * s, by + wdt * q); ctx.fill(); }); }
-  } else {
-    // front: a bright rim with a wobbling edge and a white-hot nose, additive so the car stays readable inside
-    ctx.globalCompositeOperation = 'lighter';
-    const g = ctx.createRadialGradient(cx + rx * 0.6, cy + ry * 0.15, 2, cx + rx * 0.6, cy + ry * 0.15, rx * 0.55); g.addColorStop(0, 'rgba(255,245,210,.6)'); g.addColorStop(1, 'rgba(255,170,60,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx + rx * 0.6, cy + ry * 0.15, rx * 0.55, 0, 7); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,200,90,.55)'; ctx.lineWidth = 5 * s; ctx.beginPath();
-    for (let i = 0; i <= 48; i++) { const a = i / 48 * Math.PI * 2, f = 1 + 0.05 * Math.sin(a * 7 + t * 24 * wob) + 0.03 * Math.sin(a * 13 - t * 31 * wob); ctx.lineTo(cx + Math.cos(a) * rx * f, cy + Math.sin(a) * ry * f); }
-    ctx.closePath(); ctx.stroke();
-  }
+    // a ring of short tongues licking out around the halo's top and bottom edge (still behind the car)
+    for (let i = 0; i < 10; i++) { const a = (i % 2 ? -1 : 1) * Math.PI * (0.22 + (i >> 1) * 0.13), bx = cx + Math.cos(a) * rx * 1.02, by = cy + Math.sin(a) * ry * 1.02;
+      const L = ry * (0.35 + 0.18 * Math.sin(t * 15 * wob + i * 2.1)) * grow, nx = Math.cos(a), ny = Math.sin(a), w2 = ry * 0.13;
+      ctx.fillStyle = i % 3 ? 'rgba(255,150,40,.7)' : 'rgba(255,210,90,.75)'; ctx.beginPath(); ctx.moveTo(bx - ny * w2, by + nx * w2); ctx.quadraticCurveTo(bx + nx * L * 0.6 - ny * w2, by + ny * L * 0.6 + nx * w2, bx + nx * L - L * 0.35, by + ny * L); ctx.quadraticCurveTo(bx + nx * L * 0.5 + ny * w2, by + ny * L * 0.5 - nx * w2, bx + ny * w2, by - nx * w2); ctx.fill(); }
+  } // front: nothing. The fireball is a halo behind the car; no shape is ever drawn over the body.
   ctx.restore();
 }
 /* Whirly Pup's tornado: 4 rotating translucent pink/white bands, wider at the top. Back halves are drawn behind her, front halves in front.
@@ -270,14 +278,16 @@ const CAP = () => reduced() ? 90 : 240;
 function burst(o, R, how) {
   const K = SIM.KINDS[o.kind], n = Math.round(K.chunks * (reduced() ? 0.5 : 1)), sp = R ? R.p.speed : 400;
   const vars = ART.variants('debris.' + K.debris);
-  const fl = how === 'whirl' ? 1.5 : 1, fire = how === 'comet' || how === 'burn'; // the tornado flings pieces up and out; Comet 17 sets them on fire
-  for (let i = 0; i < n && debris.length < CAP(); i++) debris.push({ spr: vars[Math.random() * vars.length | 0], x: o.x + rand(-o.w * 0.4, o.w * 0.4), lane: o.lane + rand(-0.25, 0.25), z: o.z + rand(0.1, 0.9) * o.h, vx: sp * 0.5 + rand(-200, 600) * fl, vz: rand(250, 900) * (fire && how === 'comet' ? 1.25 : fl), r: rand(0, 6), vr: rand(-12, 12) * fl, life: rand(1.1, 1.8), t: 0, sz: rand(0.7, 1.3), fire });
+  const fl = how === 'whirl' ? 1.5 : 1, fireHow = how === 'comet' || how === 'burn'; let lit = fireHow ? debris.reduce((n, d) => n + (d.fire ? 1 : 0), 0) : 0; // the tornado flings pieces up and out; Comet 17 sets them on fire
+  for (let i = 0; i < n && debris.length < CAP(); i++) debris.push({ spr: vars[Math.random() * vars.length | 0], x: o.x + rand(-o.w * 0.4, o.w * 0.4), lane: o.lane + rand(-0.25, 0.25), z: o.z + rand(0.1, 0.9) * o.h, vx: sp * 0.5 + rand(-200, 600) * fl, vz: rand(250, 900) * (how === 'comet' ? 1.25 : fl), r: rand(0, 6), vr: rand(-12, 12) * fl, life: rand(1.1, 1.8), t: 0, sz: rand(0.7, 1.3), fire: fireHow && lit++ < FIRE_CAP });
   if (how === 'flatten' && o.z < 10) debris.push({ spr: objSprite(o), x: o.x, lane: o.lane, z: 0, vx: 0, vz: 0, r: 0, vr: 0, life: 0.45, t: 0, sz: 1, flat: true }); // Chomp Rex squashes it flat
-  const pc = reduced() ? 4 : 10;
-  for (let i = 0; i < pc && parts.length < 500; i++) parts.push({ kind: 'dust', x: o.x, lane: o.lane, z: o.z + o.h * 0.4, vx: rand(-200, 300), vz: rand(-50, 250), life: rand(0.4, 0.8), t: 0, r: rand(10, 24), c: K.sky ? '255,255,255' : '230,220,200' });
+  const pc = reduced() ? 4 : 10, dc = fireHow ? pc >> 1 : pc; // Comet 17: half the smoke, lower alpha, kept low
+  for (let i = 0; i < dc && parts.length < 500; i++) parts.push(fireHow ? { kind: 'dust', x: o.x, lane: o.lane, z: o.z + o.h * 0.15, vx: rand(-200, 200), vz: rand(-20, 60), life: rand(0.35, 0.6), t: 0, r: rand(8, 16), c: K.sky ? '255,255,255' : '230,220,200', a: 0.5 }
+    : { kind: 'dust', x: o.x, lane: o.lane, z: o.z + o.h * 0.4, vx: rand(-200, 300), vz: rand(-50, 250), life: rand(0.4, 0.8), t: 0, r: rand(10, 24), c: K.sky ? '255,255,255' : '230,220,200' });
   for (let i = 0; i < pc && parts.length < 500; i++) parts.push({ kind: 'spark', x: o.x, lane: o.lane, z: o.z + o.h * 0.5, vx: rand(-600, 900), vz: rand(-400, 800), life: rand(0.25, 0.5), t: 0, r: rand(3, 6), c: ['255,210,63', '255,255,255', '255,120,80'][i % 3] });
 }
-function topple(o, R, how) { debris.push({ fire: how === 'comet' || how === 'burn', spr: objSprite(o), x: o.x, lane: o.lane, z: o.z, vx: (R ? R.p.speed : 400) * 0.6 + rand(100, 400), vz: rand(200, 600), r: 0, vr: rand(-5, 5), life: 2, t: 0, sz: 1, whole: o, burstOnLand: true }); }
+const FIRE_CAP = 12; // Comet 17: at most ~12 burning pieces on screen
+function topple(o, R, how) { debris.push({ fire: (how === 'comet' || how === 'burn') && debris.reduce((n, d) => n + (d.fire ? 1 : 0), 0) < FIRE_CAP, spr: objSprite(o), x: o.x, lane: o.lane, z: o.z, vx: (R ? R.p.speed : 400) * 0.6 + rand(100, 400), vz: rand(200, 600), r: 0, vr: rand(-5, 5), life: 2, t: 0, sz: 1, whole: o, burstOnLand: true }); }
 function confetti(n, x, lane, z) { for (let i = 0; i < n && parts.length < 600; i++) parts.push({ kind: 'conf', x: x + rand(-200, 200), lane: lane + rand(-0.5, 0.5), z: z + rand(0, 200), vx: rand(-300, 300), vz: rand(200, 900), life: rand(1.5, 2.6), t: 0, r: rand(5, 9), rot: rand(0, 6), c: ['#ff4d6d', '#ffd23f', '#2ec4b6', '#4361ee', '#9b5cf0', '#ff9f1c'][i % 6] }); }
 function popText(text, x, lane, z, col, big) { if (pops.length > 24) pops.shift(); pops.push({ text, x, lane, z, t: 0, col: col || '#fff', big: !!big }); }
 function updateFx(dt, R) {
@@ -306,20 +316,28 @@ function heroFx(R, dt) {
     parts.push({ kind: 'dust', x: P.x - V.len * 0.4 + rand(-20, 20), lane: P.laneF + rand(-0.15, 0.15), z: P.z + rand(0, H0 * 0.5), vx: -rand(40, 140), vz: rand(-10, 40), life: rand(0.45, 0.8), t: 0, r: rand(10, 20), c: Math.random() < 0.6 ? '255,170,215' : '255,255,255' }); // pink cloud trail
     if (!red && Math.random() < 0.5) { const a = rand(0, 6.28), f = Math.random(); parts.push({ kind: 'spark', x: P.x + Math.cos(a) * (40 + 70 * f), lane: P.laneF + Math.sin(a) * 0.5, z: P.z + f * H0, vx: P.speed * 0.9 + rand(-200, 200), vz: rand(100, 400), life: rand(0.2, 0.4), t: 0, r: rand(3, 5), c: Math.random() < 0.5 ? '255,255,255' : '255,140,200' }); } }
 }
-function drawFx() {
+/* layer: undefined = everything (all heroes, as before). Comet form splits it so the car stays readable:
+   'back' = debris, dust, smoke, embers, rings (drawn before the car), 'front' = only the few sparks flagged `front` + the score pops. */
+function drawFx(layer) {
+  const back = layer !== 'front', front = layer !== 'back';
+  if (back) {
   for (const d of debris) { const a = Math.min(1, (d.life - d.t) / 0.4); if (d.flat) { drawSprite(d.spr, d.x, d.lane, 0, { sq: 0.75, alpha: a, rot: 0.0001 }); continue; } drawSprite(d.spr, d.x, d.lane, d.z, { rot: d.r || 0.0001, alpha: a, wu: d.wu || ART.get(d.spr).wu * d.sz });
     if (d.fire) { const wu = d.wu || ART.get(d.spr).wu * d.sz, r = Math.max(8, wu * 0.45 * view.s), x = X(d.x), y = laneY(d.lane) - (d.z + wu * 0.2) * view.s; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * 0.75; // burning: orange tint + glow
       const g = ctx.createRadialGradient(x, y, 1, x, y, r); g.addColorStop(0, 'rgba(255,170,60,.9)'); g.addColorStop(1, 'rgba(255,80,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); } }
+  }
   ctx.globalAlpha = 1; const Rn = scene();
-  for (const p of parts) { const a = Math.max(0, 1 - p.t / p.life), x = X(p.x), y = laneY(p.lane) - p.z * view.s;
-    if (p.kind === 'dust') { ctx.fillStyle = `rgba(${p.c},${a * 0.6})`; ctx.beginPath(); ctx.arc(x, y, p.r * view.s * (1 + p.t * 2), 0, 7); ctx.fill(); }
+  for (const p of parts) { if (layer && (layer === 'front') !== !!p.front) continue; const a = Math.max(0, 1 - p.t / p.life), x = X(p.x), y = laneY(p.lane) - p.z * view.s;
+    if (p.kind === 'dust') { ctx.fillStyle = `rgba(${p.c},${a * 0.6 * (p.a || 1)})`; ctx.beginPath(); ctx.arc(x, y, p.r * view.s * (1 + p.t * 2), 0, 7); ctx.fill(); }
     else if (p.kind === 'ember') { const q = p.t / p.life, teal = Math.min(1, q * (Rn && Rn.track.id === 'city' ? 1.9 : 1.25)); // orange -> teal (more teal on the night track)
       ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(${255 - 215 * teal | 0},${150 + 70 * teal | 0},${40 + 170 * teal | 0},${a * 0.85})`; ctx.beginPath(); ctx.arc(x, y, p.r * view.s * (1 - q * 0.6), 0, 7); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
     else if (p.kind === 'spark') { ctx.strokeStyle = `rgba(${p.c},${a})`; ctx.lineWidth = p.r * view.s * 0.6; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - p.vx * 0.03 * view.s, y + p.vz * 0.03 * view.s); ctx.stroke(); }
     else { ctx.save(); ctx.globalAlpha = Math.min(1, a * 2); ctx.translate(x, y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.r * view.s, -p.r * 0.5 * view.s, p.r * 2 * view.s, p.r * view.s); ctx.restore(); } }
+  if (back) {
   const Rg = scene(); if (Rg && gulps.length) for (const q of gulps) { const k = Math.min(1, q.t / 0.2), P = Rg.p, mx = P.x + Rg.veh.len * 0.42, mz = P.z + Rg.veh.h * 0.45; // shrinks into the mouth
     drawSprite(q.spr, q.x + (mx - q.x) * k, q.lane + (P.laneF - q.lane) * k, q.z + (mz - q.z) * k, { sc: Math.max(0.05, 1 - k * 0.95), rot: 0.0001 + k * 0.6, wu: q.wu }); }
   for (const r of rings) { const L = r.life || 0.7, k = r.t / L, e = r.fixed ? 0.75 : k; ctx.strokeStyle = `rgba(${r.col || '255,230,120'},${(1 - k) * (r.a || 1)})`; ctx.lineWidth = 12 * (1 - k) + 2; ctx.beginPath(); ctx.ellipse(X(r.x), laneY(r.lane == null ? 1 : r.lane), r.r * e * view.s, r.r * e * 0.25 * view.s, 0, 0, 7); ctx.stroke(); } // fixed = reduced motion: no expanding
+  }
+  if (!front) return;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   for (const p of pops) { const k = Math.min(1, p.t * 6), a = Math.min(1, (1.1 - p.t) * 3), x = X(p.x), y = laneY(p.lane) - (p.z + p.t * 120) * view.s;
     const fs = Math.round((p.big ? 46 : 30) * Math.max(0.75, view.s) * (0.6 + 0.4 * k + (p.big ? Math.sin(p.t * 20) * 0.04 : 0)));
@@ -339,10 +357,10 @@ function render(t) {
   for (let lane = 0; lane < 3; lane++) {
     for (let i = Math.max(0, R.idx - 40); i < objs.length; i++) { const o = objs[i]; if (o.x > x1) break; if (o.x < x0 || !o.alive) continue; if (Math.round(o.lane) === lane) drawObj(o, t); }
     for (const rv of R.rivals) if (Math.round(rv.laneF) === lane && rv.x > x0 && rv.x < x1) drawRival(rv, t);
-    if (Math.round(R.p.laneF) === lane) drawPlayer(R, t);
+    if (Math.round(R.p.laneF) === lane) { if (cometForm(R)) drawFx('back'); drawPlayer(R, t); } // comet form: dust/smoke/chunks go behind the car
   }
   for (const s of R.shots) if (s.live) drawSprite('item.shot', s.x, s.lane, s.z, { rot: t * 10 });
-  drawFx();
+  drawFx(cometForm(R) ? 'front' : undefined);
   for (const L of ART.layers(R.track.id)) if (L.role === 'front' && L.img) { const h = view.frontH; drawLayer(L, H - h + camZ * view.s, h, L.par, camX()); }
   if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.5})`; ctx.fillRect(0, 0, W, H); }
   if (mode === 'title' || mode === 'pick' || mode === 'cube') { ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, 0, W, H); }
@@ -353,7 +371,8 @@ function handleEvents(R, live) {
   for (const e of R.events) {
     if (e.type === 'smash') { if (e.chain) topple(e.o, R, e.how); else burst(e.o, R, e.how);
       if (!live) continue;
-      if (e.first) { AU.play(e.snd, 1 + Math.random() * 0.3); popText('+' + e.pts, e.o.x, e.o.lane, e.o.z + e.o.h + 20, e.mult >= 2 ? '#ffd23f' : '#fff', e.pts >= 300);
+      if (e.first) { AU.play(e.snd, 1 + Math.random() * 0.3); if (cometForm(R)) popText('+' + e.pts, Math.max(e.o.x, R.p.x + 60), R.p.laneF, Math.max(e.o.z + e.o.h + 20, cometPopZ(R)), e.mult >= 2 ? '#ffd23f' : '#fff', e.pts >= 300); // up and out, above the car
+        else popText('+' + e.pts, e.o.x, e.o.lane, e.o.z + e.o.h + 20, e.mult >= 2 ? '#ffd23f' : '#fff', e.pts >= 300);
         shake = Math.max(shake, reduced() ? 0 : (e.big ? 14 : e.pts >= 100 ? 6 : 3)); bumpScore(); if (e.big) { flash = reduced() ? 0.2 : 0.7; banner(['MEGA SMASH!', 'KABOOM!', 'SUPER!'][Math.random() * 3 | 0]); AU.say('Super!'); } } }
     else if (!live) continue;
     else if (e.type === 'star') { AU.play('star'); if (e.o) { for (let i = 0; i < 5 && parts.length < 500; i++) parts.push({ kind: 'spark', x: e.o.x, lane: e.o.lane, z: e.o.z + 26, vx: rand(-300, 300), vz: rand(-300, 300), life: 0.35, t: 0, r: 4, c: '255,220,80' }); } }
@@ -390,10 +409,10 @@ function cometImpact(R, e) { const red = reduced(), P = R.p, main = Math.round(e
     if (m) scorch.push({ x: e.x, lane: l, r: e.final ? 170 : 120, t: 0 }); }
   if (scorch.length > 12) scorch.splice(0, scorch.length - 12);
   const n = red ? 8 : e.final ? 30 : 16;
-  for (let i = 0; i < n && parts.length < 520; i++) parts.push(i % 2 ? { kind: 'spark', x: e.x + rand(-40, 40), lane: e.lane + rand(-0.3, 0.3), z: 6, vx: rand(-500, 900), vz: rand(200, 900), life: rand(0.25, 0.5), t: 0, r: rand(3, 6), c: ['255,200,80', '255,120,40', '255,255,255'][i % 3] }
-    : i % 4 ? { kind: 'ember', x: e.x + rand(-120, 120), lane: e.lane + rand(-0.4, 0.4), z: rand(0, 30), vx: rand(-150, 250), vz: rand(150, 500), life: rand(0.4, 0.7), t: 0, r: rand(5, 9) }
-    : { kind: 'dust', x: e.x + rand(-90, 90), lane: e.lane + rand(-0.4, 0.4), z: 0, vx: rand(-150, 200), vz: rand(20, 100), life: rand(0.35, 0.6), t: 0, r: rand(10, 18), c: '110,85,70' });
-  popText(e.final ? 'KA-BOOM!' : 'BOOM!', e.x + 40, e.lane, P.z + R.veh.h + 60, '#ffb347', e.final);
+  for (let i = 0; i < n && parts.length < 520; i++) parts.push(i % 2 ? { kind: 'spark', x: e.x + rand(-40, 40), lane: e.lane + rand(-0.3, 0.3), z: 6, vx: rand(-500, 900), vz: rand(200, 900), life: rand(0.25, 0.5), t: 0, r: rand(3, 6), c: ['255,200,80', '255,120,40', '255,255,255'][i % 3], front: i % 6 === 1 } // only a few sparks cross in front of the car
+    : i % 8 ? { kind: 'ember', x: e.x + rand(-120, 120), lane: e.lane + rand(-0.4, 0.4), z: rand(0, 30), vx: rand(-150, 250), vz: rand(150, 500), life: rand(0.4, 0.7), t: 0, r: rand(5, 9) }
+    : { kind: 'dust', x: e.x + rand(-90, 90), lane: e.lane + rand(-0.4, 0.4), z: 0, vx: rand(-150, 200), vz: rand(0, 40), life: rand(0.3, 0.5), t: 0, r: rand(8, 14), c: '110,85,70', a: 0.5 });
+  popText(e.final ? 'KA-BOOM!' : 'BOOM!', e.x + 40, e.lane, cometPopZ(R) + 30 / Math.max(0.3, view.s), '#ffb347', e.final);
   if (e.final) { shake = Math.max(shake, red ? 0 : 7); flash = Math.max(flash, red ? 0.1 : 0.35); }
   if (e.n) bumpScore(); }
 function cometPop(R, e) { AU.play('ting'); AU.play('hiss'); const red = reduced();
