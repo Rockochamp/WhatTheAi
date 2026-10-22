@@ -294,6 +294,45 @@ function rex(g, pose) {
   if (pose === 'celebrate') { sparkle(g, 300, 20, 16); sparkle(g, 440, 30, 12); }
   g.restore();
 }
+// Comet 17 (Addendum C): low white wedge racer, teal intakes/wing/hubs, yellow-tinted canopy, pink/yellow/navy stripes, a big navy 17.
+// drive = wing up; fly = wheels dropped, wing flat as a glider, nose up ~8 deg; special = nose down ~6 deg, panels white-hot (fireball drawn in code).
+function comet(g, pose) {
+  const TEAL = '#22c3b6', TD = '#0f7f78', NAVY = '#1d2f7a', hot = pose === 'special', fly = pose === 'fly' || pose === 'celebrate';
+  g.save();
+  if (fly) { g.translate(270, 196); g.rotate(-0.14); g.translate(-270, -196); }
+  if (hot) { g.translate(270, 206); g.rotate(0.1); g.translate(-270, -206); }
+  const drop = fly ? 10 : 0;
+  const tyre = (x, y, r) => wheel(g, x, y, r, TEAL, { tyre: '#1f1d27', rim: 0.6 });
+  tyre(150, 200 + drop * 0.6, 26); tyre(392, 204 + drop * 0.6, 23); // far side
+  // rear wing: up on two struts (drive/special) or tilted flat like a glider (fly)
+  if (fly) { g.lineWidth = 8; g.strokeStyle = OUT; g.beginPath(); g.moveTo(96, 146); g.lineTo(86, 126); g.moveTo(126, 142); g.lineTo(118, 124); g.stroke();
+    rr(g, 18, 112, 150, 14, 7); ink(g, lg(g, 0, 112, 0, 126, [[0, '#8ff0e6'], [1, TD]]), 5); }
+  else { g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(90, 146); g.lineTo(80, 108); g.moveTo(124, 140); g.lineTo(116, 106); g.stroke(); g.lineWidth = 4; g.strokeStyle = TEAL; g.stroke();
+    poly(g, [[34, 100], [150, 94], [156, 110], [40, 116]]); ink(g, lg(g, 0, 94, 0, 116, [[0, '#8ff0e6'], [0.5, TEAL], [1, TD]]), 5); rr(g, 28, 92, 14, 30, 5); ink(g, TD, 4); }
+  // body: low wedge
+  const body = [[56, 202], [58, 160], [96, 140], [210, 128], [300, 130], [380, 156], [470, 182], [500, 198], [492, 214], [420, 220], [70, 218]];
+  poly(g, body); ink(g, hot ? lg(g, 0, 128, 0, 220, [[0, '#ffffff'], [0.45, '#fff2a8'], [0.85, '#ffb347'], [1, '#ff6a1a']]) : lg(g, 0, 128, 0, 220, [[0, '#ffffff'], [0.6, '#eef1f6'], [1, '#b9c1d0']]), 6);
+  g.save(); poly(g, body); g.clip();
+  // diagonal livery stripes sweeping back across the cockpit side
+  [['#ff4fa0', 0], ['#ffd23f', 16], [NAVY, 32]].forEach(([c, o]) => { g.fillStyle = hot ? 'rgba(255,190,90,.75)' : c; g.beginPath(); g.moveTo(178 + o, 222); g.lineTo(196 + o, 222); g.lineTo(316 + o, 126); g.lineTo(298 + o, 126); g.closePath(); g.fill(); });
+  g.fillStyle = hot ? 'rgba(255,120,30,.35)' : 'rgba(30,40,80,.08)'; g.fillRect(56, 206, 450, 20);
+  g.restore();
+  if (hot) { g.save(); g.shadowColor = '#ff8a1f'; g.shadowBlur = 26; poly(g, body); g.lineWidth = 5; g.strokeStyle = '#ff7a1a'; g.stroke(); g.restore(); }
+  gloss(g, 110, 136, 220, 9, 0.5);
+  // bubble cockpit, yellow-tinted
+  g.beginPath(); g.moveTo(222, 132); g.quadraticCurveTo(262, 92, 330, 116); g.quadraticCurveTo(352, 128, 360, 146); g.lineTo(236, 138); g.closePath();
+  ink(g, hot ? lg(g, 0, 96, 0, 146, [[0, '#ffffff'], [1, '#ffe066']]) : lg(g, 0, 96, 0, 146, [[0, '#fff7a6'], [0.6, '#e8d22a'], [1, '#8f8a12']]), 5);
+  g.save(); g.globalAlpha = 0.75; g.fillStyle = '#fff'; g.beginPath(); g.ellipse(272, 112, 20, 6, -0.25, 0, 7); g.fill(); g.restore();
+  // teal front intakes on the nose
+  poly(g, [[430, 196], [492, 200], [488, 216], [438, 214]]); ink(g, lg(g, 0, 196, 0, 216, [[0, '#8ff0e6'], [1, TD]]), 4);
+  g.fillStyle = 'rgba(10,40,40,.55)'; rr(g, 446, 202, 34, 7, 3); g.fill();
+  // the only marking: a big navy 17 on the nose
+  g.save(); g.translate(402, 186); g.rotate(0.22); g.font = '800 34px Fredoka, Arial Black, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.lineWidth = 6; g.strokeStyle = '#fff'; g.strokeText('17', 0, 0); g.fillStyle = hot ? '#b2400a' : NAVY; g.fillText('17', 0, 0); g.restore();
+  tyre(122, 210 + drop, 28); tyre(420, 212 + drop, 25); // near side
+  if (pose === 'celebrate') { sparkle(g, 300, 60, 16); sparkle(g, 430, 100, 12); }
+  g.restore();
+}
 function rival(g, col) {
   const D = shade(col, -0.35), Lt = shade(col, 0.35);
   g.beginPath(); g.ellipse(192, 176, 150, 10, 0, 0, 7); g.fillStyle = 'rgba(0,0,0,.0)'; g.fill();
@@ -440,7 +479,7 @@ function layer(track, role, W, H) {
 function sprite(name, size) {
   const [w, h] = size || [256, 256], c = cv(w, h), g = c.getContext('2d');
   const m = name.match(/^veh\.(\w+)\.(\w+)$/);
-  if (m) { g.save(); g.scale(w / 512, h / 256); ({ dragster, bibi, truck, sword, jet, pup, rex })[m[1]](g, m[2]); g.restore(); return c; }
+  if (m) { g.save(); g.scale(w / 512, h / 256); ({ dragster, bibi, truck, sword, jet, pup, rex, comet })[m[1]](g, m[2]); g.restore(); return c; }
   const rv = name.match(/^rival\.(\w+)$/); if (rv) { g.save(); g.scale(w / 384, h / 192); rival(g, { orange: '#ff8a1f', green: '#27c46b', blue: '#2f8cff' }[rv[1]] || '#ff8a1f'); g.restore(); return c; }
   const db = name.match(/^debris\.(\w+)(?:\.\d+)?$/); if (db) { g.save(); g.scale(w / 64, h / 64); debris(g, db[1]); g.restore(); return c; }
   const base = name.replace(/\.\d+$/, ''), v = +(name.match(/\.(\d+)$/) || [0, 0])[1];
