@@ -21,12 +21,21 @@ function resize() {
   const VW = innerWidth, VH = innerHeight, portrait = VH > VW * 1.05, racing = mode === 'race';
   document.body.classList.toggle('lay-portrait', portrait); document.body.classList.toggle('lay-landscape', !portrait);
   // thumb zones: the playfield (canvas) never sits under a button
-  const lane = 80, btn = portrait ? Math.round(Math.max(96, Math.min(140, (VW - lane - 16 * 2 - 28) / 2))) : (VH <= 520 ? 104 : 128);
-  const gut = btn + 24, strip = Math.round(Math.max(btn + 40, lane * 2 + 16 + 36, VH * 0.4));
-  const ctl = $('#controls'); ctl.style.setProperty('--btn', btn + 'px'); ctl.style.setProperty('--gut', gut + 'px'); ctl.style.setProperty('--strip', strip + 'px'); ctl.style.setProperty('--lane', lane + 'px');
-  document.documentElement.style.setProperty('--gut', gut + 'px');
+  const lane = portrait || VH > 420 ? 80 : 72, btn = portrait ? Math.round(Math.max(96, Math.min(140, (VW - lane - 16 * 2 - 28) / 2))) : (VH <= 520 ? 104 : 128);
+  /* Addendum D layout: FIRE is the big primary (same size as JUMP), BOOST (>= 64 px) sits above it.
+     Portrait: JUMP left, lanes in the middle, a right-hand column BOOST over FIRE, all on the floor strip under the road.
+     Landscape: JUMP in the left gutter; the right gutter holds the lane arrows next to the BOOST-over-FIRE column. */
+  const fire = btn, boostS = Math.max(64, Math.round(btn * 0.66));
+  const gut = btn + 24, gutR = portrait ? gut : 12 + lane + 12 + fire + 12;
+  const strip = Math.round(Math.max(btn + 40, lane * 2 + 16 + 36, VH * 0.4, boostS + 26 + fire + 44));
+  const colB = Math.round((strip - (boostS + 26 + fire)) / 2);
+  const ctl = $('#controls'), sv = (k, v) => ctl.style.setProperty(k, v + 'px');
+  sv('--btn', btn); sv('--gut', gut); sv('--gutR', gutR); sv('--strip', strip); sv('--lane', lane); sv('--fire', fire); sv('--boostS', boostS);
+  sv('--fireB', colB); sv('--boostB', colB + fire + 26); sv('--jumpB', colB + Math.round((fire - btn) / 2)); sv('--laneX', Math.round((14 + btn + VW - 14 - fire - 9) / 2));
+  document.documentElement.style.setProperty('--gut', gut + 'px'); document.documentElement.style.setProperty('--gutR', gutR + 'px');
   let L = 0, CW = VW, CH = VH;
-  if (racing) { if (portrait) CH = VH - strip; else { L = gut; CW = VW - gut * 2; } }
+  if (racing) { if (portrait) CH = VH - strip; else { L = gut; CW = VW - gut - gutR; } }
+  document.documentElement.style.setProperty('--cx', (racing && !portrait ? L + CW / 2 : VW / 2) + 'px');
   cv.style.left = L + 'px'; cv.style.top = '0px'; cv.style.width = CW + 'px'; cv.style.height = CH + 'px';
   W = CW; H = CH; DPR = Math.min(window.devicePixelRatio || 1, 2);
   if (W * H * DPR * DPR > 3.2e6) DPR = Math.max(1, Math.sqrt(3.2e6 / (W * H)));
@@ -43,7 +52,8 @@ addEventListener('resize', resize);
 /* ---------------- state ---------------- */
 let mode = 'title', race = null, demo = null, paused = false, acc = 0, lastT = 0, camZ = 0, shake = 0, flash = 0, hudScore = 0;
 const debris = [], parts = [], pops = [], rings = [], gulps = [], scorch = [];
-const input = { jump: false, jumpPressed: false, boostPressed: false, lane: 0 };
+const hitFx = [], burns = [], toots = [], pellets = []; // Addendum D: shot bursts, laser burn marks, Ira's toot clouds and toy pellets
+const input = { jump: false, jumpPressed: false, boostPressed: false, fire: false, firePressed: false, lane: 0 };
 let cubeState = null;
 const reduced = () => settings.reduced;
 
@@ -112,12 +122,17 @@ function drawWorldBack(R) {
 /* ---------------- entity rendering ---------------- */
 function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   if (P.celebrate && R.finished) return 'veh.' + V.id + '.celebrate';
+  if (V.runner) { // Ira runs: run-a / run-b alternate; the surprised look back opens Turbo Toot; leaps use the fly pose
+    if (R.tootFx && R.tootFx.t < 0.45) return 'veh.' + V.id + '.special';
+    if (P.z > floor + 18) return 'veh.' + V.id + '.fly';
+    return 'veh.' + V.id + ((R.runPh | 0) % 2 ? '.runb' : '.drive'); }
   if (R.comet) return 'veh.' + V.id + (cometC(R) >= SIM.COMET.finalAt + 0.08 ? '.drive' : '.boost'); // Comet 17: hot form in the shell, plain car after the pop-out
-  if (P.boostT > 0) { if (V.special === 'chomp' && P.superT > 0 && R.snapT > 0.1) return 'veh.' + V.id + '.drive'; return 'veh.' + V.id + '.boost'; } // Chomp Rex: jaw snaps shut on each bite (frames line up)
+  if (V.special === 'laser') { if (P.superT > 0) return 'veh.' + V.id + '.special'; } // Laser Racer: hot pose only in Laser Drive; a small boost keeps the normal car + flame
+  else if (P.boostT > 0) { if (V.special === 'chomp' && P.superT > 0 && R.snapT > 0.1) return 'veh.' + V.id + '.drive'; return 'veh.' + V.id + '.boost'; } // Chomp Rex: jaw snaps shut on each bite (frames line up)
   if (V.fly === 'always' || V.fly === 'hover' || P.z > floor + 25 || P.wing > 0.5) return 'veh.' + V.id + '.fly';
   return 'veh.' + V.id + '.drive'; }
 // shadow widths matched to the visible footprint of Muse's art (v1); the interim art uses the hitbox length
-const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220, comet: 150 };
+const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220, comet: 150, laser: 170, ira: 150 };
 /* Race-only draw scale (the picker card keeps the manifest size). Whirly Pup's art is ~58 wu tall at wu 215;
    x1.43 makes her ~83 wu, about 75% of the Bat Truck's ~111 wu visible height. Her hitbox stays len 105. */
 const RACE_SCALE = { pup: 1.43 };
@@ -137,6 +152,7 @@ function setCeiling(R) { const cap = Math.max(240, (H - 10 - view.groundY) / vie
     for (const o of R.tr.objs) { if (o.z0 == null) o.z0 = o.z; if (o.z0 > 0) o.z = Math.min(o.z0, o.star ? top - 30 : top - (SIM.KINDS[o.kind] ? 0 : 0)); } } }
 function drawPlayer(R, t) {
   const P = R.p, V = R.veh, sp = vehSprite(R);
+  if (R.dash) { drawZoomie(R, t); return; } // Ira's body is inside the whirlwind
   shadow(P.x, P.laneF, P.z, (ART.get(sp).real && SHADOW_W[V.id]) || V.len * 1.05, 0.32); const dw = raceWu(R, sp);
   let rot = 0, sq = 0;
   if (V.fly === 'wings' || V.fly === 'bounce') rot = Math.max(-0.3, Math.min(0.3, -P.vz / 2400)) * (P.onGround ? 0 : 1);
@@ -156,13 +172,16 @@ function drawPlayer(R, t) {
   if (R.snapT > 0 && V.special === 'chomp') sq += Math.sin((1 - R.snapT / 0.2) * Math.PI) * 0.07; // ...and a suspension dip on every chomp
   let sc = 0; if (R.snapT > 0) { const k = 1 - R.snapT / 0.2; sc = k < 0.35 ? 1 - 0.08 * (k / 0.35) : k < 0.7 ? 0.92 + 0.13 * ((k - 0.35) / 0.35) : 1.05 - 0.05 * ((k - 0.7) / 0.3); } // jaw snap 1.0 -> 0.92 -> 1.05 -> 1.0
   let bob = P.onGround && V.fly !== 'always' && V.fly !== 'hover' ? Math.abs(Math.sin(t * 18)) * 2 : 0;
+  if (V.runner) { bob = P.onGround ? Math.abs(Math.sin((R.runPh || 0) * Math.PI)) * 4 / Math.max(0.3, view.s) : 0; if (R.wagT > 0) rot += Math.sin(t * 28) * 0.06; } // 4 px gallop bob; the end-of-toot wag
   if (R.finished) { bob += Math.abs(Math.sin(t * 6)) * 28; rot += Math.sin(t * 6) * 0.08; } // celebrate bounce (works with any art)
   // specials behind/around
   if (P.superT > 0) drawSpecial(R, t, true);
+  if (V.special === 'laser' && R.laser) laserBack(R, t, sp, P.z + bob, rot || 0); // jet flame + twin lasers, all behind the car
   if (specialPose && V.special === 'whirl') drawSprite(sp, P.x, P.laneF, P.z + bob, { rot, pivot: ART.fx(sp).pivot || 0.633, wu: dw }); // spin the ball around its middle, not its feet
   else if (spin) drawSprite(sp, P.x, P.laneF, P.z + bob, { rot, pivot: ART.fx(sp).pivot || 0.72, wu: dw });
   else drawSprite(sp, P.x, P.laneF, P.z + bob, { rot: rot || 0.0001, sq, sc, wu: dw, rim: V.special === 'comet' && cometForm(R) });
-  if (P.boostT > 0 && !R.comet && !ownBoostArt(V.id) && !ART.fx(sp).noFlame) boostFlame(R, sp, P.z + bob, rot, t);
+  if (P.boostT > 0 && !R.comet && !V.runner && !R.laser && !ownBoostArt(V.id) && !ART.fx(sp).noFlame) boostFlame(R, sp, P.z + bob, rot, t);
+  if (R.dizzyT > 0) dizzyStars(R, P.x, P.laneF, P.z + vehTop(R) * 0.75, t);
   if (ART.fx(sp).fins && P.wing > 0.02) finWings(R, sp, P.z + bob, rot, sq);
   if (P.superT > 0) drawSpecial(R, t, false);
   if (P.boostT > 0 && !reduced()) { ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { const y = laneY(P.laneF) - (P.z + 10 + i * 14) * view.s, x = X(P.x) - V.len * 0.6 * view.s - ((t * 900 + i * 137) % 220); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 60, y); ctx.stroke(); } }
@@ -264,6 +283,86 @@ function drawWhirl(R, t, back) {
 }
 // funnel height = 1.6x her sprite height (the 512x256 canvas at her drawn width), so it stays right when Pixel's art lands
 function whirlH(R) { const sp = ART.get('veh.' + R.veh.id + '.drive'); return 1.6 * sp.wu * sp.h / sp.w; }
+/* ---------------- Addendum D: FIRE, Laser Drive, Ira ---------------- */
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return `${n >> 16 & 255},${n >> 8 & 255},${n & 255}`; };
+const AIM_ROT = { rocket: 1, meteor: 1, bolt: 1, wave: 1 };
+function drawProj(R, t) {
+  for (const s of R.proj) { const W = s.w, name = 'proj.' + W.id, wu = ART.get(name).wu; let z = s.z, rot = 0.0001, sc = 1;
+    if (W.id === 'ball') { z += Math.abs(Math.sin(s.t * 13)) * 22; rot = s.t * 12; }
+    else if (W.id === 'teeth') { z += Math.abs(Math.sin(s.t * 11)) * 14; sc = 1 + Math.sin(s.t * 40) * 0.07; } // chattering hop
+    else if (W.id === 'boomerang') rot = s.t * 22;
+    else if (W.id === 'gust') { rot = -s.t * 14; sc = 1 + s.t * 0.8; }
+    else if (W.id === 'balloon') rot = Math.sin(s.t * 9) * 0.15;
+    else if (AIM_ROT[W.id] && s.tgt) { const tg = s.tgt; rot = Math.max(-0.7, Math.min(0.7, -Math.atan2((tg.z + tg.h * 0.5 - s.z), Math.max(40, tg.x - s.x)))) || 0.0001; }
+    drawSprite(name, s.x, s.lane, z, { rot, sc, wu }); } }
+function drawHitFx() { for (const h of hitFx) { const k = h.t / 0.42, e = 1 - Math.pow(1 - Math.min(1, k * 1.6), 3);
+    if (h.tint) ctx.filter = 'sepia(.5) saturate(2) hue-rotate(-12deg)';
+    drawSprite(h.spr, h.x, h.lane, h.z, { sc: 0.35 + 0.9 * e, alpha: Math.max(0, 1 - k * k), rot: h.rot || 0.0001 }); if (h.tint) ctx.filter = 'none'; } }
+function drawBurns() { if (!burns.length) return; ctx.save(); ctx.lineCap = 'round';
+  for (const d of [-1, 1]) { let prev = null; for (const b of burns) { if (b.d !== d) continue; const p2 = [X(b.x), laneY(b.lane)];
+      if (prev && Math.abs(prev[0] - p2[0]) < 120 * view.s) { const a = Math.max(0, 1 - b.t / 1.6), hot = Math.max(0, 1 - b.t / 0.5); ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p2[0], p2[1]); // a dark scorch line that glows hot first
+        ctx.strokeStyle = `rgba(45,28,20,${a * 0.42})`; ctx.lineWidth = 8 * view.s; ctx.stroke(); ctx.strokeStyle = `rgba(255,140,60,${hot * 0.6})`; ctx.lineWidth = 4 * view.s; ctx.stroke(); ctx.strokeStyle = `rgba(255,240,200,${hot * 0.9})`; ctx.lineWidth = 1.6 * view.s; ctx.stroke(); } prev = p2; } }
+  ctx.restore(); }
+// Laser Drive: a big blue-white jet flame with an orange core (~1.5 car lengths) at the nozzles, and two sweeping lasers from the nose
+function laserBack(R, t, sp, z, rot) {
+  const P = R.p, V = R.veh, c = R.t - R.laser.t0, s0 = ART.get(sp), k = kL(P.laneF), w = raceWu(R, sp) * view.s * k, h = w * s0.h / s0.w, F = ART.fx(sp), cs = Math.cos(rot), sn = Math.sin(rot);
+  const pt = q => { const ox = (q[0] - s0.ax) * w, oy = (q[1] - s0.ay) * h; return [X(P.x) + ox * cs - oy * sn, laneY(P.laneF) - z * view.s * k + ox * sn + oy * cs]; };
+  const [jx, jy] = pt(F.nozzle || [0.09, 0.8]), L = V.len * 1.5 * view.s * k * (0.85 + Math.random() * 0.3) * Math.min(1, c / 0.12), Hh = h * 0.34;
+  ctx.save(); ctx.translate(jx, jy); ctx.rotate(rot);
+  [['rgba(60,140,255,.55)', 1], ['rgba(150,215,255,.85)', 0.74], ['#ffffff', 0.5], ['#ffa040', 0.3]].forEach(([col, q]) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(4, -Hh * q / 2);
+    ctx.quadraticCurveTo(-L * q * 0.5, -Hh * q * 0.8, -L * q, Math.sin(t * 40) * Hh * 0.1); ctx.quadraticCurveTo(-L * q * 0.5, Hh * q * 0.8, 4, Hh * q / 2); ctx.fill(); });
+  ctx.restore();
+  const [nx, ny] = pt(F.nose || [0.94, 0.76]), reach = SIM.LASER.reach * Math.min(1, c / SIM.LASER.sweep), red = reduced();
+  ctx.save(); ctx.lineCap = 'round';
+  for (const d of [-1, 1]) { const sw = red ? 0.6 : Math.abs(Math.sin(t * 5 + (d > 0 ? 1.3 : 0))), el = Math.max(-0.3, Math.min(2.3, P.laneF + d * SIM.LASER.lanes * (0.2 + 0.8 * sw)));
+    const exw = P.x + V.len * 0.5 + reach, ex = X(exw), ey = laneY(el) - (P.z + V.h * 0.45) * view.s * kL(el), pu = 0.75 + 0.25 * Math.sin(t * 38 + d);
+    [['rgba(70,170,255,.32)', 16], ['rgba(130,215,255,.85)', 6.5], ['#ffffff', 2.6]].forEach(([col, lw]) => { ctx.strokeStyle = col; ctx.lineWidth = lw * view.s * pu + 1; ctx.beginPath(); ctx.moveTo(nx, ny + d * 2); ctx.lineTo(ex, ey); ctx.stroke(); });
+    ctx.fillStyle = 'rgba(220,245,255,.9)'; ctx.beginPath(); ctx.arc(ex, ey, 7 * view.s * pu + 2, 0, 7); ctx.fill();
+    if (mode === 'race' && reach > 60) { burns.push({ x: exw, lane: el, t: 0, d }); if (burns.length > 220) burns.splice(0, burns.length - 220); } }
+  ctx.fillStyle = 'rgba(200,240,255,.95)'; ctx.beginPath(); ctx.arc(nx, ny, 6 * view.s + 2, 0, 7); ctx.fill();
+  ctx.restore(); }
+// a sliced half: the object's sprite clipped to its top or bottom half, with a glowing blue cut edge
+function drawHalf(d) { const sp = ART.get(d.spr), k = kL(d.lane), w = sp.wu * view.s * k, h = w * sp.h / sp.w, a = Math.min(1, (d.life - d.t) / 0.2);
+  const sx = X(d.x), cy = laneY(d.lane) - d.z * view.s * k - h * sp.ay + h * 0.5;
+  ctx.save(); ctx.translate(sx, cy); ctx.rotate(d.r); ctx.globalAlpha = a; ctx.beginPath(); ctx.rect(-w, d.half < 0 ? -h : 0, w * 2, h); ctx.clip();
+  ctx.drawImage(sp.img, -w * sp.ax, -h * 0.5, w, h); ctx.restore();
+  ctx.save(); ctx.translate(sx, cy); ctx.rotate(d.r); ctx.globalAlpha = a; ctx.strokeStyle = 'rgba(120,220,255,.95)'; ctx.lineWidth = 4; ctx.shadowColor = '#7fd4ff'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(-w * 0.45, 0); ctx.lineTo(w * 0.45, 0); ctx.stroke(); ctx.restore(); }
+function slice(o, R) { const sp = R ? R.p.speed : 400; AU.play('sizzle');
+  [-1, 1].forEach(hf => debris.push({ half: hf, spr: objSprite(o), whole: o, x: o.x, lane: o.lane, z: o.z, vx: sp * 0.55 + (hf < 0 ? 260 : 80), vz: hf < 0 ? 520 : 120, r: 0, vr: hf < 0 ? 3.5 : -2, life: 0.42, t: 0, sz: 1 }));
+  for (let i = 0; i < 8 && parts.length < 500; i++) parts.push({ kind: 'spark', x: o.x, lane: o.lane, z: o.z + o.h * 0.5, vx: rand(-300, 700), vz: rand(-200, 500), life: rand(0.2, 0.4), t: 0, r: rand(3, 5), c: i % 2 ? '255,255,255' : '120,210,255' }); }
+// Ira's Zoomie Chomp: a tan-and-white dust whirlwind with her spin pose flickering in the middle
+function drawZoomie(R, t) { const D = R.dash, V = R.veh, k = kL(D.lane), s = view.s * k, x = X(D.x), y0 = laneY(D.lane) - D.z * view.s * k, Hh = 120 * s, red = reduced();
+  shadow(D.x, D.lane, D.z, 140, 0.3);
+  const bands = (front) => { for (let i = 0; i < 4; i++) { const f = (i + 0.5) / 4, yy = y0 - Hh * f, rx = (46 + 40 * f) * s, ry = (12 + 10 * f) * s, a0 = t * (16 + i * 2) + i;
+      ctx.lineWidth = (13 - i * 2) * s; ctx.lineCap = 'round'; ctx.strokeStyle = i % 2 ? 'rgba(251,246,239,.85)' : 'rgba(200,115,58,.8)';
+      for (let a = a0; a < a0 + Math.PI * 1.5; a += 0.25) { const fr = Math.sin(a + 0.125) > 0; if (fr !== front) continue; ctx.beginPath(); ctx.ellipse(x, yy, rx, ry, 0, a, a + 0.27); ctx.stroke(); } } };
+  ctx.save(); if (!red) bands(false);
+  const sp = ART.get('veh.' + V.id + '.spin'), w = sp.wu * view.s * k * 0.62, h = w * sp.h / sp.w; ctx.save(); ctx.translate(x, y0 - Hh * 0.45); ctx.rotate(red ? 0 : t * 22); if (!red && (t * 14 | 0) % 2) ctx.scale(-1, 1);
+  ctx.drawImage(sp.img, -w / 2, -h / 2, w, h); ctx.restore();
+  if (!red) bands(true); else { ctx.strokeStyle = 'rgba(200,115,58,.8)'; ctx.lineWidth = 8 * s; ctx.beginPath(); ctx.ellipse(x, y0 - Hh * 0.45, 80 * s, 24 * s, 0, 0, 7); ctx.stroke(); }
+  ctx.restore();
+  if (!red && Math.random() < 0.5 && parts.length < 480) parts.push({ kind: 'dust', x: D.x + rand(-60, 60), lane: D.lane + rand(-0.1, 0.1), z: D.z + rand(0, 20), vx: rand(-200, 100), vz: rand(20, 120), life: rand(0.3, 0.5), t: 0, r: rand(8, 16), c: '230,205,170' }); }
+function dizzyStars(R, x, lane, z, t) { const k = kL(lane), cx = X(x), cy = laneY(lane) - z * view.s * k; ctx.save(); ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1d1a2e'; ctx.lineWidth = 2;
+  for (let i = 0; i < 2; i++) { const a = t * 7 + i * Math.PI; window.LeoProc.starPath(ctx, cx + Math.cos(a) * 34 * view.s, cy + Math.sin(a) * 9 * view.s, 10 * view.s + 3, 4 * view.s + 1.4); ctx.fill(); ctx.stroke(); } ctx.restore(); }
+function drawToots(t) { for (const c of toots) { const L = c.big ? 1.25 : 1, k = c.t / L, g = c.big ? Math.min(1, c.t / 0.25) : 1;
+    drawSprite('fx.toot', c.x, c.lane, c.z, { sc: (c.big ? 0.4 + 1.1 * g : 0.38) * (1 + k * 0.3), alpha: Math.max(0, 1 - k * k), rot: 0.0001 + Math.sin(c.t * 3) * 0.05 }); }
+  for (const p of pellets) { const a = Math.max(0, 1 - p.t); drawSprite('fx.pellet', p.x, p.lane, p.z, { alpha: a, sq: p.sq || 0, rot: 0.0001 });
+    const tw = Math.max(0, Math.sin(p.t * 9)); if (tw > 0.3) { ctx.save(); ctx.globalAlpha = a * tw; ctx.fillStyle = '#fff8c4'; window.LeoProc.starPath(ctx, X(p.x) + 9 * view.s, laneY(p.lane) - (p.z + 16) * view.s, 6 * view.s + 2, 2 * view.s + 0.8); ctx.fill(); ctx.restore(); } } }
+function hintArrow(R, t) { const P = R.p, o = SIM.aimTarget(R, P.x + R.veh.len * 0.45, P.laneF, Math.min(R.weapon.range, R.viewAhead || 650), null); if (!o) return;
+  const k = kL(o.lane), x = X(o.x), y = laneY(o.lane) - (o.z + o.h + 30 + Math.abs(Math.sin(t * 6)) * 14) * view.s * k, s = Math.max(0.8, view.s);
+  ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-16 * s, -20 * s); ctx.lineTo(-7 * s, -20 * s); ctx.lineTo(-7 * s, -40 * s); ctx.lineTo(7 * s, -40 * s); ctx.lineTo(7 * s, -20 * s); ctx.lineTo(16 * s, -20 * s); ctx.closePath();
+  ctx.fillStyle = '#ffd23f'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#1d1a2e'; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore(); }
+function onFire(R, e) { const P = R.p, V = R.veh, W = R.weapon, c = hexRgb(W.col); AU.play('fire_' + e.w);
+  if (R.hint) { R.hint = false; prog.fired = true; saveProg(); }
+  if (e.dash) return;
+  for (let i = 0; i < 6 && parts.length < 500; i++) parts.push(i < 3 ? { kind: 'dust', x: P.x + V.len * 0.5, lane: P.laneF, z: P.z + V.h * 0.55, vx: rand(100, 300), vz: rand(-40, 60), life: 0.22, t: 0, r: rand(6, 10), c: '255,255,255', a: 0.8 } // muzzle puff at the nose
+    : { kind: 'spark', x: P.x + V.len * 0.5, lane: P.laneF, z: P.z + V.h * 0.55, vx: rand(200, 600), vz: rand(-200, 200), life: 0.18, t: 0, r: 4, c }); }
+function onShotHit(R, e) { const W = R.weapon; AU.play('hit_' + e.w); bumpScore();
+  popText(e.word, e.x, e.lane, e.z + 70, W.col, true, '+' + e.pts);
+  hitFx.push({ spr: 'hitfx.' + e.fx, x: e.x, lane: e.lane, z: e.z, t: 0, tint: !!W.tint, rot: rand(-0.3, 0.3) }); if (hitFx.length > 10) hitFx.shift();
+  if (e.w === 'zoomie') for (let i = 0; i < 14 && parts.length < 560; i++) parts.push({ kind: 'conf', x: e.x + rand(-40, 40), lane: e.lane + rand(-0.2, 0.2), z: e.z + rand(-20, 30), vx: rand(-300, 300), vz: rand(200, 600), life: rand(0.6, 1.1), t: 0, r: rand(3, 6), rot: rand(0, 6), c: ['#c98640', '#e8c69a', '#fff'][i % 3] }); // crumbs
+  if (e.w === 'balloon') for (let i = 0; i < 12 && parts.length < 560; i++) parts.push({ kind: 'spark', x: e.x, lane: e.lane, z: e.z, vx: rand(-500, 500), vz: rand(0, 600), life: rand(0.3, 0.5), t: 0, r: rand(4, 7), c: i % 2 ? '140,215,255' : '255,255,255' });
+  shake = Math.max(shake, reduced() ? 0 : 2); } // reduced motion: shots never shake the screen
 function drawRival(rv, t) { shadow(rv.x, rv.laneF, 0, 170, 0.26); drawSprite('rival.' + rv.id, rv.x, rv.laneF, Math.abs(Math.sin(t * 16 + rv.bob)) * 2); }
 function objSprite(o) { const k = o.kind; if (k === 'block' || k === 'mega') return 'smash.' + k + '.' + ((o.x / 7 | 0) % 6); if (k === 'balloon') return 'smash.balloon.' + ((o.x / 11 | 0) % 4); if (k === 'barrel') return 'smash.barrel.' + ((o.x / 13 | 0) % 3); return 'smash.' + k; }
 function drawObj(o, t) {
@@ -289,9 +388,10 @@ function burst(o, R, how) {
 const FIRE_CAP = 12; // Comet 17: at most ~12 burning pieces on screen
 function topple(o, R, how) { debris.push({ fire: (how === 'comet' || how === 'burn') && debris.reduce((n, d) => n + (d.fire ? 1 : 0), 0) < FIRE_CAP, spr: objSprite(o), x: o.x, lane: o.lane, z: o.z, vx: (R ? R.p.speed : 400) * 0.6 + rand(100, 400), vz: rand(200, 600), r: 0, vr: rand(-5, 5), life: 2, t: 0, sz: 1, whole: o, burstOnLand: true }); }
 function confetti(n, x, lane, z) { for (let i = 0; i < n && parts.length < 600; i++) parts.push({ kind: 'conf', x: x + rand(-200, 200), lane: lane + rand(-0.5, 0.5), z: z + rand(0, 200), vx: rand(-300, 300), vz: rand(200, 900), life: rand(1.5, 2.6), t: 0, r: rand(5, 9), rot: rand(0, 6), c: ['#ff4d6d', '#ffd23f', '#2ec4b6', '#4361ee', '#9b5cf0', '#ff9f1c'][i % 6] }); }
-function popText(text, x, lane, z, col, big) { if (pops.length > 24) pops.shift(); pops.push({ text, x, lane, z, t: 0, col: col || '#fff', big: !!big }); }
+function popText(text, x, lane, z, col, big, sub) { if (pops.length > 24) pops.shift(); pops.push({ text, x, lane, z, t: 0, col: col || '#fff', big: !!big, sub }); }
 function updateFx(dt, R) {
-  for (let i = debris.length - 1; i >= 0; i--) { const d = debris[i]; d.t += dt; d.vz -= 1900 * dt; d.x += d.vx * dt; d.z += d.vz * dt; d.r += d.vr * dt;
+  for (let i = debris.length - 1; i >= 0; i--) { const d = debris[i]; d.t += dt; d.vz -= 1900 * dt; d.x += d.vx * dt; d.z += d.vz * dt; d.r += d.vr * dt; if (d.vl) d.lane += d.vl * dt;
+    if (d.half) { if (d.z < 0) { d.z = 0; d.vz = 0; } if (d.t > d.life) { if (d.half > 0) burst(d.whole, R); debris.splice(i, 1); } continue; } // sliced halves part, then pop
     if (d.z < 0) { d.z = 0; if (d.burstOnLand) { burst(d.whole, R, d.fire ? 'burn' : undefined); debris.splice(i, 1); continue; } d.vz = -d.vz * 0.38; d.vx *= 0.7; d.vr *= 0.6; }
     if (d.fire && parts.length < 480 && Math.random() < dt * (reduced() ? 8 : 22)) parts.push({ kind: 'ember', x: d.x, lane: d.lane, z: d.z + 10, vx: rand(-40, 40), vz: rand(20, 80), life: rand(0.3, 0.5), t: 0, r: rand(4, 7) }); // ember trail
     if (d.t > d.life) debris.splice(i, 1); }
@@ -300,11 +400,20 @@ function updateFx(dt, R) {
   for (let i = rings.length - 1; i >= 0; i--) { rings[i].t += dt; if (rings[i].t > (rings[i].life || 0.7)) rings.splice(i, 1); }
   for (let i = scorch.length - 1; i >= 0; i--) { scorch[i].t += dt; if (scorch[i].t > 1.5) scorch.splice(i, 1); }
   for (let i = gulps.length - 1; i >= 0; i--) { gulps[i].t += dt; if (gulps[i].t > 0.2) gulps.splice(i, 1); }
+  for (let i = hitFx.length - 1; i >= 0; i--) { hitFx[i].t += dt; if (hitFx[i].t > 0.42) hitFx.splice(i, 1); }
+  for (let i = burns.length - 1; i >= 0; i--) { burns[i].t += dt; if (burns[i].t > 1.6) burns.splice(i, 1); }
+  for (let i = toots.length - 1; i >= 0; i--) { const c = toots[i]; c.t += dt; c.z += dt * 18; if (c.rel != null && R) { c.rel -= dt * 100; c.x = R.p.x + c.rel; } if (c.t > (c.big ? 1.25 : 1)) toots.splice(i, 1); }
+  for (let i = pellets.length - 1; i >= 0; i--) { const p = pellets[i]; p.t += dt; p.vz -= 1400 * dt; p.x += p.vx * dt; p.z += p.vz * dt; p.sq = Math.max(0, (p.sq || 0) - dt * 3);
+    if (p.z < 0) { p.z = 0; if (!p.bounced) { p.bounced = true; p.vz = 160; p.sq = 0.35; AU.play('boing'); } else { p.vz = 0; p.vx *= 0.5; } } if (p.t > 1) pellets.splice(i, 1); }
+  if (R && R.proj.length && !reduced()) for (const s of R.proj) if (parts.length < 470 && s.w.id !== 'wave' && s.w.id !== 'bolt') parts.push({ kind: 'dust', x: s.x - 20, lane: s.lane, z: s.z, vx: -60, vz: 0, life: 0.28, t: 0, r: 6, c: hexRgb(s.w.col), a: 0.7 }); // tiny trails in the hero's colour
   if (R) heroFx(R, dt);
 }
 /* Per-frame FX for the Addendum B specials: tornado sparkles, cloud puffs and a short pink cloud trail. */
 function heroFx(R, dt) {
   const P = R.p, V = R.veh; if (R.snapT > 0) R.snapT -= dt;
+  if (R.dizzyT > 0) R.dizzyT -= dt; if (R.wagT > 0) R.wagT -= dt;
+  if (V.special === 'laser') laserFx(R, dt);
+  if (V.runner) iraFx(R, dt);
   if (R.comet && cometC(R) < SIM.COMET.finalAt) { // Comet 17's ember tail, ~3 car lengths (embers hang in the air as the car rushes on)
     R.trailAcc = (R.trailAcc || 0) + dt * (reduced() ? 30 : 70);
     while (R.trailAcc >= 1 && parts.length < 480) { R.trailAcc -= 1; parts.push({ kind: 'ember', tail: true, x: P.x - V.len * 0.45 + rand(-30, 20), lane: P.laneF + rand(-0.12, 0.12), z: P.z + V.h * 0.55 + rand(-28, 28), vx: rand(-60, 80), vz: rand(10, 80), life: rand(0.5, 0.7), t: 0, r: rand(6, 12) }); }
@@ -316,12 +425,32 @@ function heroFx(R, dt) {
     parts.push({ kind: 'dust', x: P.x - V.len * 0.4 + rand(-20, 20), lane: P.laneF + rand(-0.15, 0.15), z: P.z + rand(0, H0 * 0.5), vx: -rand(40, 140), vz: rand(-10, 40), life: rand(0.45, 0.8), t: 0, r: rand(10, 20), c: Math.random() < 0.6 ? '255,170,215' : '255,255,255' }); // pink cloud trail
     if (!red && Math.random() < 0.5) { const a = rand(0, 6.28), f = Math.random(); parts.push({ kind: 'spark', x: P.x + Math.cos(a) * (40 + 70 * f), lane: P.laneF + Math.sin(a) * 0.5, z: P.z + f * H0, vx: P.speed * 0.9 + rand(-200, 200), vz: rand(100, 400), life: rand(0.2, 0.4), t: 0, r: rand(3, 5), c: Math.random() < 0.5 ? '255,255,255' : '255,140,200' }); } }
 }
+function laserFx(R, dt) { const P = R.p, V = R.veh;
+  if (R.laser) { R.pewT = (R.pewT || 0) - dt; if (R.pewT <= 0 && mode === 'race') { R.pewT = 0.28; AU.play('pew'); } }
+  if (R.sputter) { const S = R.sputter; S.t += dt; while (S.n < 3 && S.t >= S.n * 0.15) { S.n++; // the thruster sputters out with 3 puffs
+      for (let i = 0; i < 5 && parts.length < 500; i++) parts.push({ kind: 'dust', x: P.x - V.len * 0.5, lane: P.laneF, z: P.z + V.h * 0.35, vx: rand(-220, -60), vz: rand(10, 80), life: rand(0.4, 0.6), t: 0, r: rand(10, 18), c: i % 2 ? '200,225,255' : '235,240,250' }); }
+    if (S.t > 0.5) R.sputter = null; } }
+function iraFx(R, dt) { const P = R.p, V = R.veh, red = reduced(), live = mode === 'race';
+  // run cycle: ~6 Hz at cruise, 9 Hz in Turbo Toot; a paw-dust puff + a soft footstep on every other frame swap
+  if (P.onGround && !R.dash) { const hz = P.superT > 0 ? 9 : 6 * Math.min(1.25, Math.max(0.2, P.speed / V.speed)), was = R.runPh | 0; R.runPh = (R.runPh || 0) + dt * hz * 2;
+    if ((R.runPh | 0) !== was) { if ((R.runPh | 0) % 2 === 0 && live) AU.play('paw'); if (parts.length < 480) parts.push({ kind: 'dust', x: P.x - V.len * 0.35 + rand(-10, 10), lane: P.laneF, z: 2, vx: -rand(40, 120), vz: rand(10, 50), life: rand(0.25, 0.4), t: 0, r: rand(5, 9), c: '230,215,190', a: 0.7 }); } }
+  // lane change: a tiny skid overshoot (~8 px past, then back) and a paw-dust puff
+  const dl = P.lane - P.laneF; if (Math.abs(dl) > 1e-3) R.laneMove = Math.sign(dl);
+  else if (R.laneMove) { R.skid = { t: 0, d: R.laneMove }; R.laneMove = 0; if (live) AU.play('skid'); for (let i = 0; i < (red ? 2 : 5) && parts.length < 490; i++) parts.push({ kind: 'dust', x: P.x + rand(-50, 40), lane: P.laneF, z: 0, vx: rand(-120, 60), vz: rand(20, 90), life: rand(0.3, 0.5), t: 0, r: rand(8, 14), c: '230,215,190' }); }
+  if (R.skid) { R.skid.t += dt; if (R.skid.t > 0.2) R.skid = null; }
+  // Turbo Toot: PFRRRT after the look back, a green puff every 0.25 s (0.5 s with reduced motion), 5 toy pellets across the boost
+  const T = R.tootFx; if (T) { T.t += dt;
+    if (!T.pf && T.t >= SIM.TOOT.look) { T.pf = true; if (live) { AU.play('pfrrt'); banner('PFRRRT!'); } toots.push({ big: true, x: P.x - V.len * 0.55, rel: -V.len * 0.55, lane: P.laneF, z: P.z + V.h * 0.4, t: 0 }); shake = Math.max(shake, red ? 0 : 5); }
+    if (T.pf && T.t >= T.next && P.superT > 0) { T.next += red ? 0.5 : 0.25; toots.push({ x: P.x - V.len * 0.6, lane: P.laneF + rand(-0.08, 0.08), z: P.z + V.h * 0.4 + rand(-8, 8), t: 0 }); if (toots.length > 24) toots.shift(); if (live) AU.play('toot'); }
+    while (T.pel.length && T.t >= T.pel[0]) { T.pel.shift(); pellets.push({ x: P.x - V.len * 0.45, lane: P.laneF + rand(-0.08, 0.08), z: P.z + V.h * 0.3, vx: P.speed * 0.15, vz: 140, t: 0 }); }
+    if (P.superT <= 0) R.tootFx = null; }
+  const E = R.tootEnd; if (E) { E.t += dt; if (E.n === 0 && E.t > 0.3) { E.n = 1; if (live) AU.play('sniff'); } if (E.n === 1 && E.t > 0.7) { E.n = 2; if (live) AU.play('bark'); R.wagT = 0.9; R.tootEnd = null; } } }
 /* layer: undefined = everything (all heroes, as before). Comet form splits it so the car stays readable:
    'back' = debris, dust, smoke, embers, rings (drawn before the car), 'front' = only the few sparks flagged `front` + the score pops. */
 function drawFx(layer) {
   const back = layer !== 'front', front = layer !== 'back';
   if (back) {
-  for (const d of debris) { const a = Math.min(1, (d.life - d.t) / 0.4); if (d.flat) { drawSprite(d.spr, d.x, d.lane, 0, { sq: 0.75, alpha: a, rot: 0.0001 }); continue; } drawSprite(d.spr, d.x, d.lane, d.z, { rot: d.r || 0.0001, alpha: a, wu: d.wu || ART.get(d.spr).wu * d.sz });
+  for (const d of debris) { if (d.half) { drawHalf(d); continue; } const a = Math.min(1, (d.life - d.t) / 0.4); if (d.flat) { drawSprite(d.spr, d.x, d.lane, 0, { sq: 0.75, alpha: a, rot: 0.0001 }); continue; } drawSprite(d.spr, d.x, d.lane, d.z, { rot: d.r || 0.0001, alpha: a, wu: d.wu || ART.get(d.spr).wu * d.sz });
     if (d.fire) { const wu = d.wu || ART.get(d.spr).wu * d.sz, r = Math.max(8, wu * 0.45 * view.s), x = X(d.x), y = laneY(d.lane) - (d.z + wu * 0.2) * view.s; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * 0.75; // burning: orange tint + glow
       const g = ctx.createRadialGradient(x, y, 1, x, y, r); g.addColorStop(0, 'rgba(255,170,60,.9)'); g.addColorStop(1, 'rgba(255,80,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); } }
   }
@@ -339,7 +468,12 @@ function drawFx(layer) {
   }
   if (!front) return;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  for (const p of pops) { const k = Math.min(1, p.t * 6), a = Math.min(1, (1.1 - p.t) * 3), x = X(p.x), y = laneY(p.lane) - (p.z + p.t * 120) * view.s;
+  for (const p of pops) { const k = Math.min(1, p.t * 6), a = Math.min(1, (1.1 - p.t) * 3); let x = X(p.x); const y = laneY(p.lane) - (p.z + p.t * 120) * view.s;
+    if (p.sub != null) { // Sharp Shot: the weapon word in the hero's colour, big and bouncy, with the points under it; kept inside the canvas
+      const fs = Math.round(36 * Math.max(0.8, view.s) * (1 + Math.sin(Math.min(1, p.t * 4) * Math.PI) * 0.28)), fs2 = Math.round(fs * 0.66);
+      ctx.font = `700 ${fs}px Fredoka, "Baloo 2", system-ui, sans-serif`; const hw = ctx.measureText(p.text).width / 2 + 6; x = Math.max(hw, Math.min(W - hw, x));
+      ctx.globalAlpha = a; ctx.lineWidth = fs * 0.2; ctx.strokeStyle = '#1d1a2e'; ctx.strokeText(p.text, x, y); ctx.fillStyle = p.col; ctx.fillText(p.text, x, y);
+      ctx.font = `700 ${fs2}px Fredoka, "Baloo 2", system-ui, sans-serif`; ctx.lineWidth = fs2 * 0.2; ctx.strokeText(p.sub, x, y + fs * 0.8); ctx.fillStyle = '#fff'; ctx.fillText(p.sub, x, y + fs * 0.8); ctx.globalAlpha = 1; continue; }
     const fs = Math.round((p.big ? 46 : 30) * Math.max(0.75, view.s) * (0.6 + 0.4 * k + (p.big ? Math.sin(p.t * 20) * 0.04 : 0)));
     ctx.font = `700 ${fs}px Fredoka, "Baloo 2", system-ui, sans-serif`; ctx.globalAlpha = a; ctx.lineWidth = fs * 0.18; ctx.strokeStyle = '#1d1a2e'; ctx.strokeText(p.text, x, y); ctx.fillStyle = p.col; ctx.fillText(p.text, x, y); ctx.globalAlpha = 1; }
 }
@@ -352,14 +486,19 @@ function render(t) {
   for (const d of scorch) { const a = 1 - d.t / 1.5, x = X(d.x), y = laneY(d.lane), rx = d.r * view.s * kL(d.lane), ry = rx * 0.24; // Comet 17 crater scorch, fades in 1.5 s
     ctx.fillStyle = `rgba(40,22,14,${a * 0.55})`; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill();
     if (d.t < 0.5) { ctx.strokeStyle = `rgba(255,130,40,${(1 - d.t / 0.5) * 0.8})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y, rx * 0.7, ry * 0.7, 0, 0, 7); ctx.stroke(); } }
+  drawBurns();
   const objs = R.tr.objs, cx = camX(), x0 = cx - view.anchorX / view.s - 300, x1 = cx + (W - view.anchorX) / view.s + 300;
   // painter order: back lane to front lane; within a lane, ground pieces bottom-up
   for (let lane = 0; lane < 3; lane++) {
     for (let i = Math.max(0, R.idx - 40); i < objs.length; i++) { const o = objs[i]; if (o.x > x1) break; if (o.x < x0 || !o.alive) continue; if (Math.round(o.lane) === lane) drawObj(o, t); }
     for (const rv of R.rivals) if (Math.round(rv.laneF) === lane && rv.x > x0 && rv.x < x1) drawRival(rv, t);
-    if (Math.round(R.p.laneF) === lane) { if (cometForm(R)) drawFx('back'); drawPlayer(R, t); } // comet form: dust/smoke/chunks go behind the car
+    if (Math.round(R.p.laneF) === lane) { if (cometForm(R)) drawFx('back'); if (toots.length || pellets.length) drawToots(t);
+      if (R.skid) { const k = R.skid.t / 0.2; ctx.save(); ctx.translate(0, R.skid.d * 8 * Math.sin(k * Math.PI) * (1 - k * 0.5)); drawPlayer(R, t); ctx.restore(); } else drawPlayer(R, t); } // comet form: dust/smoke/chunks go behind the car
   }
   for (const s of R.shots) if (s.live) drawSprite('item.shot', s.x, s.lane, s.z, { rot: t * 10 });
+  if (R.proj.length) drawProj(R, t);
+  if (hitFx.length) drawHitFx();
+  if (R.hint && mode === 'race' && R.countdown <= 0) hintArrow(R, t);
   drawFx(cometForm(R) ? 'front' : undefined);
   for (const L of ART.layers(R.track.id)) if (L.role === 'front' && L.img) { const h = view.frontH; drawLayer(L, H - h + camZ * view.s, h, L.par, camX()); }
   if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.5})`; ctx.fillRect(0, 0, W, H); }
@@ -369,8 +508,11 @@ function render(t) {
 /* ---------------- events -> juice ---------------- */
 function handleEvents(R, live) {
   for (const e of R.events) {
-    if (e.type === 'smash') { if (e.chain) topple(e.o, R, e.how); else burst(e.o, R, e.how);
+    if (e.type === 'smash') { if (e.how === 'laser') slice(e.o, R); // Laser Drive cuts things in half
+      else if (e.how === 'toot' || (e.how === 'shot' && R.weapon.id === 'gust' && e.first)) { topple(e.o, R, e.how); const d = debris[debris.length - 1]; if (d && d.whole === e.o) { d.vr = rand(-12, 12); if (e.how === 'shot') { d.vl = (e.o.lane >= 1 ? 1 : -1) * rand(2.5, 4); d.vz = 700; } } } // comic tumble / blown off the road
+      else if (e.chain) topple(e.o, R, e.how); else burst(e.o, R, e.how);
       if (!live) continue;
+      if (e.first && e.how === 'shot') continue; // the shotHit event makes one popup for the group + bonus
       if (e.first) { AU.play(e.snd, 1 + Math.random() * 0.3); if (cometForm(R)) popText('+' + e.pts, Math.max(e.o.x, R.p.x + 60), R.p.laneF, Math.max(e.o.z + e.o.h + 20, cometPopZ(R)), e.mult >= 2 ? '#ffd23f' : '#fff', e.pts >= 300); // up and out, above the car
         else popText('+' + e.pts, e.o.x, e.o.lane, e.o.z + e.o.h + 20, e.mult >= 2 ? '#ffd23f' : '#fff', e.pts >= 300);
         shake = Math.max(shake, reduced() ? 0 : (e.big ? 14 : e.pts >= 100 ? 6 : 3)); bumpScore(); if (e.big) { flash = reduced() ? 0.2 : 0.7; banner(['MEGA SMASH!', 'KABOOM!', 'SUPER!'][Math.random() * 3 | 0]); AU.say('Super!'); } } }
@@ -383,7 +525,9 @@ function handleEvents(R, live) {
     else if (e.type === 'boost') { AU.play('boost'); banner('BOOST!'); }
     else if (e.type === 'super') { AU.play('super'); banner(R.veh.specialName + '!', true); AU.say(R.veh.specialName + '!'); flash = reduced() ? 0.15 : 0.5;
       if (e.special === 'whirl') { AU.play('arf'); AU.play('whirr', 3.6); } else if (e.special === 'chomp') AU.play('growl');
-      else if (e.special === 'comet') { AU.play('fwoom'); AU.play('crackle', 3.6); flash = reduced() ? 0.3 : 0.9; } }
+      else if (e.special === 'comet') { AU.play('fwoom'); AU.play('crackle', 3.6); flash = reduced() ? 0.3 : 0.9; }
+      else if (e.special === 'laser') { AU.play('vwoom'); AU.play('jet', 3.6); R.pewT = 0.2; }
+      else if (e.special === 'toot') { const pel = [], n = 5; for (let i = 0; i < n; i++) pel.push(0.6 + i * 0.6 + rand(-0.15, 0.15)); R.tootFx = { t: 0, pf: false, next: SIM.TOOT.look + 0.25, pel }; } }
     else if (e.type === 'impact') cometImpact(R, e);
     else if (e.type === 'cometPop') cometPop(R, e);
     else if (e.type === 'pull') { AU.play('pull', e.n); for (let i = 0; i < 6 && parts.length < 500; i++) parts.push({ kind: 'spark', x: e.o.x, lane: e.o.lane, z: e.o.z + e.o.h * 0.5, vx: rand(-300, 300), vz: rand(-200, 400), life: 0.3, t: 0, r: 4, c: '255,160,210' }); }
@@ -394,6 +538,15 @@ function handleEvents(R, live) {
       if (e.pts) { bumpScore(); shake = Math.max(shake, reduced() ? 0 : (e.pts >= 300 ? 8 : 3)); } }
     else if (e.type === 'burp') burp(R, e);
     else if (e.type === 'nocharge') AU.play('nocharge');
+    else if (e.type === 'fire') onFire(R, e);
+    else if (e.type === 'shotHit') onShotHit(R, e);
+    else if (e.type === 'projEnd') { if (e.fizzle) { AU.play('fizzle'); for (let i = 0; i < 5 && parts.length < 500; i++) parts.push({ kind: 'dust', x: e.s.x, lane: e.s.lane, z: e.s.z, vx: rand(-80, 80), vz: rand(-30, 60), life: 0.35, t: 0, r: rand(8, 14), c: '255,255,255', a: 0.8 }); } }
+    else if (e.type === 'bounce') AU.play('fire_ball');
+    else if (e.type === 'fireReady') { if (!e.held) { AU.play('ready'); bF.classList.remove('pulse'); void bF.offsetWidth; bF.classList.add('pulse'); } }
+    else if (e.type === 'fireOff') AU.play('fireOff');
+    else if (e.type === 'dizzy') R.dizzyT = 0.9;
+    else if (e.type === 'laserEnd') { R.sputter = { t: 0, n: 0 }; AU.play('pewdown'); }
+    else if (e.type === 'tootEnd') { R.tootEnd = { t: 0, n: 0 }; AU.play('pft'); toots.push({ x: R.p.x - R.veh.len * 0.6, lane: R.p.laneF, z: R.p.z + R.veh.h * 0.4, t: 0 }); }
     else if (e.type === 'pound') { AU.play('pound'); rings.push({ x: R.p.x, r: 1400, t: 0 }); shake = reduced() ? 0 : 18; }
     else if (e.type === 'toss') AU.play('tap');
     else if (e.type === 'go') { AU.play('count', true); countdown('GO!'); AU.say('Go!'); }
@@ -449,14 +602,14 @@ function frame(ts) {
   const t = ts / 1000; let dt = Math.min(0.1, lastT ? t - lastT : 0); lastT = t;
   if (mode === 'race' && !paused && race) {
     const ts2 = race.slow > 0 && !reduced() ? 0.35 : 1; acc += dt * ts2;
-    while (acc >= SIM.STEP) { SIM.step(race, SIM.STEP, input); input.jumpPressed = false; input.boostPressed = false; input.lane = 0; acc -= SIM.STEP; handleEvents(race, true); }
+    while (acc >= SIM.STEP) { SIM.step(race, SIM.STEP, input); input.jumpPressed = false; input.boostPressed = false; input.firePressed = false; input.lane = 0; acc -= SIM.STEP; handleEvents(race, true); }
     if (race.countdown > 0) countdown(String(Math.ceil(race.countdown / 0.8)));
     if (race.landT > 0) race.landT -= dt;
     updateFx(dt * ts2, race); updateHud(dt);
     AU.engineSet(race.p.speed / race.veh.speed, race.p.boostT > 0);
   } else if (mode === 'party' && race) { acc = 0; SIM.step(race, dt, { jump: false, jumpPressed: false, boostPressed: false, lane: 0 }); handleEvents(race, false); updateFx(dt, race); }
   else if (demo && (mode === 'title' || mode === 'pick' || mode === 'cube')) { acc += dt; while (acc >= SIM.STEP) { SIM.step(demo, SIM.STEP, demoInput(demo)); acc -= SIM.STEP; handleEvents(demo, false); } if (demo.finished) newDemo(); updateFx(dt, demo); }
-  if (race && mode === 'race') { if (!hudBottom) measureHud(); setCeiling(race); }
+  if (race && mode === 'race') { if (!hudBottom) measureHud(); setCeiling(race); race.viewAhead = Math.max(300, (W - view.anchorX) / view.s - 40); } // auto-aim only at what Leo can see
   const R = scene(); if (R) { const room = (view.groundY - 150) / view.s; const target = Math.min(240, Math.max(0, R.p.z - room * 0.7)); camZ += (target - camZ) * Math.min(1, dt * 4);
     camZ = Math.max(camZ, camNeed(R, R.p.z, R.p.laneF)); }
   shake = Math.max(0, shake - dt * 40); flash = Math.max(0, flash - dt * 2.5);
@@ -471,6 +624,7 @@ function updateHud(dt) { const R = race; hudScore += (R.score - hudScore) * Math
   $('#hScore').textContent = Math.round(hudScore); if (hudStars !== R.stars) { hudStars = R.stars; $('#hStars').textContent = R.stars; }
   const L = R.tr.L, pct = x => Math.max(0, Math.min(100, x / L * 100)) + '%'; $('#prMe').style.left = pct(R.p.x); R.rivals.forEach((rv, i) => { $('#pr' + i).style.left = pct(rv.x); });
   $('#ringFg').style.strokeDashoffset = String(283 * (1 - R.boost)); $('#bBoost').classList.toggle('ready', R.boost >= 0.999);
+  fireFg.style.strokeDashoffset = String(283 * Math.min(1, R.fireCd / R.weapon.cd)); bF.classList.toggle('off', R.p.superT > 0); bF.classList.toggle('hint', !!R.hint && R.countdown <= 0);
   const V = R.veh, canFly = V.fly !== 'bounce' && (V.fly === 'always' || V.fly === 'hover' || !R.p.onGround);
   if (bJ.classList.contains('fly') !== canFly) { bJ.classList.toggle('fly', canFly); $('#bJump .lb').textContent = canFly ? 'FLY' : 'JUMP'; bJ.setAttribute('aria-label', canFly ? 'Fly. Hold to fly up.' : 'Jump'); } }
 
@@ -485,17 +639,23 @@ bB.addEventListener('pointerdown', e => { e.preventDefault(); AU.unlock(); input
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(n => bB.addEventListener(n, () => press(bB, false)));
 $('#bUp').addEventListener('pointerdown', e => { e.preventDefault(); input.lane = -1; AU.play('tap'); });
 $('#bDown').addEventListener('pointerdown', e => { e.preventDefault(); input.lane = 1; AU.play('tap'); });
-[bJ, bB, $('#bUp'), $('#bDown')].forEach(b => b.addEventListener('contextmenu', e => e.preventDefault()));
+const bF = $('#bFire'), fireFg = $('#fireFg');
+function fireDown() { AU.unlock(); if (!input.fire) input.firePressed = true; input.fire = true; press(bF, true); }
+function fireUp() { input.fire = false; press(bF, false); }
+bF.addEventListener('pointerdown', e => { e.preventDefault(); bF.setPointerCapture && bF.setPointerCapture(e.pointerId); fireDown(); });
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(n => bF.addEventListener(n, fireUp));
+[bJ, bB, bF, $('#bUp'), $('#bDown')].forEach(b => b.addEventListener('contextmenu', e => e.preventDefault()));
 // canvas: hold = fly, vertical swipe = lane
 let sw = null;
 cv.addEventListener('pointerdown', e => { if (mode !== 'race') return; sw = { y: e.clientY, x: e.clientX, id: e.pointerId, used: false }; jumpDown(); });
 cv.addEventListener('pointermove', e => { if (!sw || sw.id !== e.pointerId || sw.used) return; const dy = e.clientY - sw.y; if (Math.abs(dy) > 45) { input.lane = dy > 0 ? 1 : -1; sw.used = true; } });
 ['pointerup', 'pointercancel'].forEach(n => cv.addEventListener(n, () => { sw = null; jumpUp(); }));
-const KJ = ['Space', 'ArrowUp', 'KeyW'], KB = ['Enter', 'ShiftLeft', 'ShiftRight', 'KeyB', 'KeyX', 'NumpadEnter'];
+const KJ = ['Space', 'ArrowUp', 'KeyW'], KB = ['Enter', 'ShiftLeft', 'ShiftRight', 'KeyB', 'KeyX', 'NumpadEnter'], KF = ['KeyF', 'KeyZ', 'KeyJ'];
 addEventListener('keydown', e => {
   if (e.target && e.target.tagName === 'INPUT') return;
   if (mode === 'race' && !paused) {
     if (KJ.includes(e.code)) { e.preventDefault(); if (!e.repeat) jumpDown(); }
+    else if (KF.includes(e.code)) { e.preventDefault(); if (!e.repeat) fireDown(); }
     else if (KB.includes(e.code)) { e.preventDefault(); if (!e.repeat) { AU.unlock(); input.boostPressed = true; press(bB, true); setTimeout(() => press(bB, false), 120); } }
     else if (['ArrowLeft', 'KeyA'].includes(e.code)) { e.preventDefault(); input.lane = -1; }
     else if (['ArrowRight', 'KeyD', 'ArrowDown', 'KeyS'].includes(e.code)) { e.preventDefault(); input.lane = 1; }
@@ -504,8 +664,8 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyM') toggleMute();
   if (e.code === 'Escape' && !$('#rankModal').classList.contains('hidden')) $('#rankModal').classList.add('hidden');
 });
-addEventListener('keyup', e => { if (KJ.includes(e.code)) jumpUp(); });
-addEventListener('blur', () => { jumpUp(); if (mode === 'race' && race && !race.finished) setPause(true); });
+addEventListener('keyup', e => { if (KJ.includes(e.code)) jumpUp(); if (KF.includes(e.code)) fireUp(); });
+addEventListener('blur', () => { jumpUp(); fireUp(); if (mode === 'race' && race && !race.finished) setPause(true); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'race' && race && !race.finished) setPause(true); });
 
 /* ---------------- screens ---------------- */
@@ -544,7 +704,9 @@ function buildPick() {
   const hb = $('#heroes'); hb.innerHTML = '';
   SIM.VEHICLE_ORDER.forEach(id => { const V = SIM.VEHICLES[id], b = document.createElement('button'); b.type = 'button'; b.className = 'hero' + (settings.vehicle === id ? ' sel' : ''); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(settings.vehicle === id)); b.setAttribute('aria-label', V.name);
     const dots = n => [0, 1, 2].map(i => `<b class="pip${i < n ? ' on' : ''}"></b>`).join('');
-    b.innerHTML = `<canvas width="440" height="220"></canvas><span class="nm">${V.name}</span><span class="stats"><span title="Speed" aria-label="Speed ${V.stats.speed} of 3">⚡${dots(V.stats.speed)}</span><span title="Smash" aria-label="Smash ${V.stats.smash} of 3">💥${dots(V.stats.smash)}</span><span title="Fly" aria-label="Fly ${V.stats.fly} of 3">🪽${dots(V.stats.fly)}</span></span><span class="sp">${V.specialName}</span>`;
+    const Wp = SIM.WEAPONS[id];
+    b.innerHTML = `<canvas class="pv" width="440" height="220"></canvas><span class="nm">${V.name}${V.runner ? '<span class="paw" aria-hidden="true">🐾</span>' : ''}</span><span class="stats"><span title="Speed" aria-label="Speed ${V.stats.speed} of 3">⚡${dots(V.stats.speed)}</span><span title="Smash" aria-label="Smash ${V.stats.smash} of 3">💥${dots(V.stats.smash)}</span><span title="Fly" aria-label="Fly ${V.stats.fly} of 3">🪽${dots(V.stats.fly)}</span></span><span class="wp"><canvas class="wpi" width="44" height="44" aria-hidden="true"></canvas><span>${Wp.name}</span></span><span class="sp">${V.specialName}</span>`;
+    b.setAttribute('aria-label', `${V.name}, weapon ${Wp.name}`); { const ic = b.querySelector('.wpi'), sp = ART.get('proj.' + Wp.id); ic.getContext('2d').drawImage(sp.img, 0, 0, 44, 44); }
     drawPreview(b.querySelector('canvas'), 'veh.' + id + (V.fly === 'always' || V.fly === 'hover' ? '.fly' : '.drive'));
     if (id === 'pup') pupCard = b.querySelector('canvas');
     b.onclick = () => { settings.vehicle = id; saveSettings(); AU.horn(V.horn); $$('.hero').forEach(x => { x.classList.remove('sel'); x.setAttribute('aria-checked', 'false'); }); b.classList.add('sel', 'cheer'); b.setAttribute('aria-checked', 'true');
@@ -555,6 +717,11 @@ function buildPick() {
         b._t = setTimeout(() => { b.classList.remove('cheer'); drawPreview(c, rest); }, 1000);
       } else if (V.special === 'comet') { // Comet 17 flares into her hot form: glow pulse + FWOOM
         b.classList.remove('glow'); void b.offsetWidth; b.classList.add('glow'); drawPreview(c, 'veh.' + id + '.special'); b._seq = [setTimeout(() => AU.play('fwoom'), 380)];
+        b._t = setTimeout(() => { b.classList.remove('cheer', 'glow'); drawPreview(c, rest); }, 1000);
+      } else if (V.runner) { // Ira: a happy zoomie spin and a bark
+        b.classList.remove('zoom'); void b.offsetWidth; b.classList.add('zoom'); drawPreview(c, 'veh.' + id + '.spin'); b._seq = [setTimeout(() => AU.play('bark'), 420)];
+        b._t = setTimeout(() => { b.classList.remove('cheer', 'zoom'); drawPreview(c, rest); }, 950);
+      } else if (V.special === 'laser') { b.classList.remove('glow'); void b.offsetWidth; b.classList.add('glow'); drawPreview(c, 'veh.' + id + '.special'); b._seq = [setTimeout(() => AU.play('vwoom'), 380)];
         b._t = setTimeout(() => { b.classList.remove('cheer', 'glow'); drawPreview(c, rest); }, 1000);
       } else { pupHold = id === 'pup' ? 900 : pupHold; drawPreview(c, 'veh.' + id + '.celebrate'); b._t = setTimeout(() => { b.classList.remove('cheer'); drawPreview(c, rest); }, 900); }
       newDemo(); };
@@ -643,13 +810,14 @@ function startRace(fullBoost) {
   if (cubeState) clearTimeout(cubeState.auto); cubeState = null;
   const seed = QS.get('seed') ? +QS.get('seed') : (Date.now() & 0xffff);
   race = SIM.createRace({ vehicle: settings.vehicle, track: settings.track, seed, assist: settings.assist, fullBoost, reduced: settings.reduced });
-  debris.length = parts.length = pops.length = rings.length = gulps.length = scorch.length = 0; hudScore = 0; hudStars = -1; camZ = 0; acc = 0; paused = false;
+  debris.length = parts.length = pops.length = rings.length = gulps.length = scorch.length = 0; hitFx.length = burns.length = toots.length = pellets.length = 0; hudScore = 0;
+  race.hint = !prog.fired; input.fire = input.firePressed = false; press(bF, false); $('#controls').style.setProperty('--hero', race.weapon.col); // first race: FIRE glows + an arrow points at the first target hudStars = -1; camZ = 0; acc = 0; paused = false;
   setMode('race'); show('race'); $('#pause').classList.add('hidden'); $('#bMute').textContent = AU.muted ? '🔇' : '🔊';
-  AU.unlock(); AU.engineStart(race.veh.horn); AU.musicStart(race.track.music); AU.play('count'); setTimeout(() => mode === 'race' && AU.play('count'), 800); setTimeout(() => mode === 'race' && AU.play('count'), 1600);
+  AU.unlock(); if (!race.veh.runner) AU.engineStart(race.veh.horn); // Ira runs: footsteps, no engine AU.musicStart(race.track.music); AU.play('count'); setTimeout(() => mode === 'race' && AU.play('count'), 800); setTimeout(() => mode === 'race' && AU.play('count'), 1600);
   if (fullBoost) setTimeout(() => mode === 'race' && banner('⚡ FULL BOOST!'), 200);
-  ART.preload(['veh.' + race.veh.id + '.drive', 'veh.' + race.veh.id + '.fly', 'veh.' + race.veh.id + '.boost', 'veh.' + race.veh.id + '.celebrate']);
+  ART.preload(['veh.' + race.veh.id + '.drive', 'veh.' + race.veh.id + '.fly', 'veh.' + race.veh.id + '.boost', 'veh.' + race.veh.id + '.celebrate', 'proj.' + race.weapon.id].concat(race.veh.runner ? ['veh.ira.runb', 'veh.ira.spin', 'fx.toot', 'fx.pellet'] : []));
 }
-function setPause(p) { if (mode !== 'race') return; paused = p; $('#pause').classList.toggle('hidden', !p); $('#pAssist').checked = settings.assist; $('#pMotion').checked = settings.reduced; jumpUp(); if (p) { AU.engineSet(0, false); setTimeout(() => $('#bResume').focus(), 30); } }
+function setPause(p) { if (mode !== 'race') return; paused = p; $('#pause').classList.toggle('hidden', !p); $('#pAssist').checked = settings.assist; $('#pMotion').checked = settings.reduced; jumpUp(); fireUp(); if (p) { AU.engineSet(0, false); setTimeout(() => $('#bResume').focus(), 30); } }
 $('#bPause').onclick = () => setPause(true);
 $('#bResume').onclick = () => setPause(false);
 $('#pAssist').onchange = e => { settings.assist = e.target.checked; if (race) race.assist = settings.assist; saveSettings(); };
@@ -663,7 +831,7 @@ function showParty() {
   const newBest = S.score > (prog.best[S.track] || 0); if (newBest) prog.best[S.track] = S.score; prog.stars += S.award; prog.races++; saveProg();
   $('#pMedal').textContent = ['🥇', '🥈', '🥉'][S.place - 1] || '🏅';
   $('#pTitle').textContent = settings.name ? `You did it, ${settings.name}!` : 'You did it!';
-  $('#pBreak').innerHTML = `<li><span>💥 Smash points</span><b>${S.smashPts}</b></li><li><span>⭐ Stars ${S.stars} × 20</span><b>${S.starPts}</b></li><li><span>🏁 ${['1st', '2nd', '3rd'][S.place - 1]} place</span><b>${S.placeBonus}</b></li><li><span>🔨 ${S.smashes} smashes · best combo x${S.bestMult}</span><b></b></li><li class="tot"><span>Total</span><b>${S.score}</b></li>`;
+  $('#pBreak').innerHTML = `<li><span>💥 Smash points</span><b>${S.smashPts}</b></li><li><span>⭐ Stars ${S.stars} × 20</span><b>${S.starPts}</b></li><li class="sharp"><span>🎯 Sharp Shots ${S.shots} × 25</span><b>${S.shotPts}</b></li>${S.shots >= 10 ? '<li class="sharp-medal"><span>🏅 Sharp Shooter!</span><b></b></li>' : ''}<li><span>🏁 ${['1st', '2nd', '3rd'][S.place - 1]} place</span><b>${S.placeBonus}</b></li><li><span>🔨 ${S.smashes} smashes · best combo x${S.bestMult}</span><b></b></li><li class="tot"><span>Total</span><b>${S.score}</b></li>`;
   $('#pBest').textContent = newBest ? '🏆 New best on ' + race.track.name + '!' : 'Best on ' + race.track.name + ': ' + prog.best[S.track];
   const st = $$('#pAward .st'); st.forEach(s => s.classList.remove('on'));
   st.forEach((s, i) => { if (i < S.award) setTimeout(() => { s.classList.add('on'); AU.play('star'); }, 450 + i * 420); });
@@ -702,6 +870,6 @@ showTitle(); requestAnimationFrame(frame);
 // test hooks (used by the screenshot/QA scripts; harmless for players)
 window.LEOGAME = { flyCheck() { const R = race; if (!R) return null; const P = R.p, sp = ART.get(vehSprite(R)), k = kL(P.laneF), w = raceWu(R, vehSprite(R)) * view.s * k, h = w * sp.h / sp.w;
     const yA = laneY(P.laneF) - P.z * view.s * k, limit = (hudBottom || 70) + H * 0.12; return { z: Math.round(P.z), maxZ: Math.round(R.maxZ || 0), spriteTop: Math.round(yA - h * sp.ay), limit: Math.round(limit), hudBottom: Math.round(hudBottom), H, camZ: Math.round(camZ), roadY: Math.round(laneY(1)) }; },
-  submitScore, get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
+  submitScore, fireDown, fireUp, get view() { return view; }, get mode() { return mode; }, get race() { return race; }, settings, prog, startRace, showCube, showPick, showTitle, showParty, cubeMove, get cube() { return cubeState; }, input, setPause };
 if (QS.get('screen') === 'pick') showPick();
 })();

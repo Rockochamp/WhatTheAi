@@ -56,6 +56,25 @@ window.LEO_MANIFEST = {
     'veh.comet.special':  { src: 'vehicles/comet_special.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.24, 0.74], pivot: 0.66 } },
     'veh.comet.boost':    { alias: 'veh.comet.special' },
     'veh.comet.celebrate': { alias: 'veh.comet.fly' },
+    // Addendum D1: Laser Racer. src: null = interim code art (proc.js) until Pixel's cut lands. To swap in the real art, set
+    // src to 'vehicles/laser_drive.webp' / 'laser_fly.webp' / 'laser_special.webp' (512x256, 0.92 baseline, one shared scale), bump `version`,
+    // and re-measure fx.nozzle / fx.nose (0..1 of the canvas) plus len/h in sim.js from the cut. boost = special (glowing nozzles + nose emitters), celebrate = fly.
+    // fx.nozzle = where the Laser Drive jet flame starts, fx.nose = where the twin lasers start; fx.exhaust = the normal boost flame.
+    'veh.laser.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.086, 0.80], nozzle: [0.086, 0.80], nose: [0.94, 0.76], pivot: 0.66 } },
+    'veh.laser.fly':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.086, 0.82], nozzle: [0.086, 0.82], nose: [0.94, 0.79], pivot: 0.66 } },
+    'veh.laser.special':  { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.086, 0.80], nozzle: [0.086, 0.80], nose: [0.94, 0.76], pivot: 0.66, noFlame: true } },
+    'veh.laser.boost':    { alias: 'veh.laser.special' },
+    'veh.laser.celebrate': { alias: 'veh.laser.fly' },
+    // Addendum D6: Ira (she runs). drive = run-a and runb = run-b (the game alternates them), special = toot surprise, spin = Zoomie Chomp,
+    // boost = special, celebrate = fly. Real files later: vehicles/ira_run-a.webp -> drive, ira_run-b.webp -> runb, ira_fly / ira_special / ira_spin.webp.
+    // noFlame: a dog gets paw dust, never boost flames. Drawn at ~70% of the Bat Truck's height.
+    'veh.ira.drive':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { noFlame: true, pivot: 0.6 } },
+    'veh.ira.runb':       { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { noFlame: true, pivot: 0.6 } },
+    'veh.ira.fly':        { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { noFlame: true, pivot: 0.6 } },
+    'veh.ira.special':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { noFlame: true, pivot: 0.6 } },
+    'veh.ira.spin':       { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 235, fx: { noFlame: true, pivot: 0.6 } },
+    'veh.ira.boost':      { alias: 'veh.ira.special' },
+    'veh.ira.celebrate':  { alias: 'veh.ira.fly' },
     // Rivals: friendly smiley racers, drive pose only.
     'rival.orange': { src: 'rivals/rival_orange.webp', size: [384, 192], anchor: [0.5, 0.93], wu: 175 },
     'rival.green':  { src: 'rivals/rival_green.webp', size: [384, 192], anchor: [0.5, 0.93], wu: 175 },
@@ -111,6 +130,27 @@ window.LEO_MANIFEST = {
     'item.ramp':   { src: null, size: [320, 160], anchor: [0.5, 0.97], wu: 190 },
     'item.finish': { src: null, size: [256, 512], anchor: [0.5, 0.98], wu: 150 },
     'item.shot':   { src: null, size: [96, 96], anchor: [0.5, 0.5], wu: 44 },
+    // FIRE (Addendum D3). Projectiles: 128x128, centred, facing right. Hit FX: 256x256 single bursts (the game scales them up and fades).
+    // src: null = interim code art. Pixel's cut: proj/<file>.webp and hitfx/<file>.webp (names below). Sword Wave, Laser Bolt and Zoomie are code-only.
+    'proj.rocket':    { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 54 },  // proj/turbo-rocket.webp
+    'proj.ball':      { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 46 },  // proj/bouncy-ball.webp
+    'proj.boomerang': { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 56 },  // proj/wing-boomerang.webp
+    'proj.wave':      { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 80 },  // code-only
+    'proj.balloon':   { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 50 },  // proj/water-balloon.webp
+    'proj.gust':      { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 52 },  // proj/puppy-gust.webp (swirl core; the code adds the swirl)
+    'proj.teeth':     { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 50 },  // proj/chatter-teeth.webp
+    'proj.meteor':    { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 54 },  // proj/mini-meteor.webp
+    'proj.bolt':      { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 60 },  // code-only
+    'proj.zoomie':    { src: null, size: [128, 128], anchor: [0.5, 0.5], wu: 50 },  // picker icon only (Ira dashes herself)
+    'hitfx.firepop':  { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 150 }, // hitfx/fire-pop.webp (Dragster; Comet tinted orange)
+    'hitfx.confetti': { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 150 }, // hitfx/confetti.webp
+    'hitfx.spark':    { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 140 }, // hitfx/spark.webp (Bat Truck + Sword)
+    'hitfx.splash':   { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 160 }, // hitfx/splash.webp
+    'hitfx.puff':     { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 140 }, // hitfx/puff.webp
+    'hitfx.bite':     { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 140 }, // hitfx/bite.webp (Rex + Ira)
+    'hitfx.zap':      { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 140 }, // hitfx/zap.webp
+    'fx.toot':        { src: null, size: [256, 256], anchor: [0.5, 0.5], wu: 150 }, // fx/toot-cloud.webp (Ira's Turbo Toot)
+    'fx.pellet':      { src: null, size: [64, 64], anchor: [0.5, 0.75], wu: 16 },   // fx/poop-pellet.webp
     // UI (HTML <img> overrides; square, transparent)
     'ui.fly':    { src: null, size: [256, 256] },
     'ui.boost':  { src: null, size: [256, 256] },

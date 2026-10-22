@@ -68,8 +68,8 @@ test("3x3 Pro cube: real shuffle, Help still solves it", () => {
 /* ---- Addendum B: Whirly Pup and Chomp Rex ---- */
 const go = (R, n, inp) => { for (let i = 0; i < n; i++) SIM.step(R, SIM.STEP, Object.assign({ jump: false, jumpPressed: false, boostPressed: false, lane: 0 }, inp && inp(i))); };
 
-test("8 heroes, new ones last, original five unchanged", () => {
-  assert.deepEqual(SIM.VEHICLE_ORDER, ["dragster", "bibi", "truck", "sword", "jet", "pup", "rex", "comet"]);
+test("10 heroes, new ones last, original five unchanged", () => {
+  assert.deepEqual(SIM.VEHICLE_ORDER, ["dragster", "bibi", "truck", "sword", "jet", "pup", "rex", "comet", "laser", "ira"]);
   const V = SIM.VEHICLES;
   assert.deepEqual([V.dragster.speed, V.bibi.speed, V.truck.speed, V.sword.speed, V.jet.speed], [640, 440, 520, 560, 540]);
   for (const id of ["dragster", "bibi", "truck", "sword", "jet"]) { assert.equal(V[id].laneT, undefined); assert.equal(V[id].accelT, undefined); assert.equal(V[id].superMult, undefined); }
@@ -272,4 +272,136 @@ test("leaderboard collection unchanged", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/rank.js", import.meta.url), "utf8");
   assert.ok(src.includes('COLLECTION="leaderboard_leo_smash_race_grokbot_v1"'));
+});
+
+/* ---------------- Addendum D: FIRE, Laser Racer, Ira ---------------- */
+// an empty stretch of road ahead of the hero, then hand-placed objects
+function darena(v, opts) {
+  const R = SIM.createRace(Object.assign({ vehicle: v, track: "toyroom", seed: 5, countdown: 0, assist: false }, opts));
+  go(R, 120); R.tr.objs.forEach(o => { if (o.x > R.p.x - 400) o.alive = false; }); R.boost = 0; R.events.length = 0;
+  return R;
+}
+let GID = 90000;
+function dput(R, kind, dx, lane, extra) {
+  const k = SIM.KINDS[kind], o = Object.assign({ kind, x: R.p.x + dx, lane, z: 0, w: k.w, h: k.h, alive: true, pts: 10, group: ++GID, lead: true }, extra);
+  R.tr.objs.push(o); R.tr.objs.sort((a, b) => a.x - b.x); R.idx = 0; return o;
+}
+const evs = (R, type) => R.events.filter(e => e.type === type);
+
+test("Laser Racer + Ira: D1/D6 stats and feel, look-alike names only", () => {
+  const L = SIM.VEHICLES.laser, I = SIM.VEHICLES.ira;
+  assert.equal(L.name, "Laser Racer"); assert.equal(L.specialName, "Laser Drive"); assert.equal(L.fly, "wings");
+  assert.deepEqual([L.speed, L.accelT, L.grav, L.bounce, L.laneT, L.maxUp, L.glide, L.superMult], [590, 0.5, 1500, 0.25, 0.15, 470, -180, 1.8]);
+  assert.deepEqual(L.stats, { speed: 2, smash: 2, fly: 3 });
+  assert.equal(I.name, "Ira"); assert.equal(I.specialName, "Turbo Toot"); assert.equal(I.fly, "bounce"); assert.ok(I.runner);
+  assert.deepEqual([I.speed, I.accelT, I.laneT, I.grav, I.bounce, I.jumpV, I.airJumpV, I.airJumps, I.superMult], [560, 0.25, 0.11, 1600, 0.4, 700, 620, 2, 1.7]);
+  assert.deepEqual(I.stats, { speed: 2, smash: 2, fly: 1 });
+  const txt = JSON.stringify([L, I, SIM.WEAPONS]).toLowerCase();
+  for (const bad of ["hot wheels", "mattel", "lightning", "mcqueen", "pixar", "disney", "nerf", "marvel", "paw patrol"]) assert.ok(!txt.includes(bad), bad);
+});
+
+test("Laser Drive: x1.8, slices everything ~520 px ahead in its lane and both neighbours, nothing beyond", () => {
+  const R = darena("laser"); const V = R.veh, nose = () => R.p.x + V.len / 2;
+  R.p.lane = 1; R.p.laneF = 1; R.boost = 1;
+  const near = [0, 1, 2].map(l => dput(R, "box", V.len / 2 + 300, l)); // three lanes, inside the reach
+  go(R, 1, () => ({ boostPressed: true })); assert.ok(R.laser, "laser drive on");
+  const far = dput(R, "box", V.len / 2 + 1400, 1);
+  go(R, 36); // the beams sweep out to full reach over LASER.sweep (0.25 s)
+  for (const o of near) assert.equal(o.alive, false, `lane ${o.lane} sliced`);
+  assert.ok(far.alive && far.x - nose() > SIM.LASER.reach, "out of reach stays");
+  go(R, 240); assert.ok(Math.abs(R.p.speed - V.speed * 1.8) < 5, `speed ${R.p.speed}`);
+  go(R, 240); assert.equal(R.laser, null, "ends after 3.6 s");
+});
+
+test("Turbo Toot: look back, x1.7, rams through its own lane like Nitro", () => {
+  const R = darena("ira"); const V = R.veh; R.p.lane = 1; R.p.laneF = 1; R.boost = 1;
+  go(R, 1, () => ({ boostPressed: true })); assert.ok(R.toot);
+  go(R, 12); assert.ok(R.p.speed < V.speed, "slows for the surprised look back");
+  go(R, 150); assert.ok(Math.abs(R.p.speed - V.speed * 1.7) < 5, `speed ${R.p.speed}`);
+  const mine = dput(R, "box", 400, 1), side = dput(R, "box", 400, 0); go(R, 60);
+  assert.equal(mine.alive, false, "own lane rammed"); assert.equal(side.alive, true, "neighbour lane untouched");
+  let ended = false; for (let i = 0; i < 400 && !ended; i++) { SIM.step(R, SIM.STEP, { lane: 0 }); ended = R.events.some(e => e.type === "tootEnd"); R.events.length = 0; }
+  assert.ok(ended && !R.toot);
+});
+
+test("FIRE: aims own lane first, then a neighbour; stars and rivals are never targets", () => {
+  const R = darena("dragster"); R.p.lane = 1; R.p.laneF = 1; const x0 = R.p.x;
+  const star = dput(R, "box", 150, 1, { star: true });
+  const side = dput(R, "box", 200, 0), mine = dput(R, "box", 450, 1);
+  assert.equal(SIM.aimTarget(R, x0, 1, 650, null), mine, "own lane beats a closer neighbour");
+  mine.alive = false; assert.equal(SIM.aimTarget(R, x0, 1, 650, null), side, "then the neighbour lane");
+  side.alive = false; assert.equal(SIM.aimTarget(R, x0, 1, 650, null), null, "a star alone is not a target");
+  dput(R, "box", 300, 2 + 1); // two lanes away does not count (lane 3 does not exist; here it is just |dl| = 2)
+  assert.equal(SIM.aimTarget(R, x0, 1, 650, null), null);
+  assert.ok(star.alive);
+  for (const rv of R.rivals || []) assert.ok(!R.tr.objs.includes(rv), "rivals are not track objects");
+});
+
+test("FIRE: one hit destroys one whole group; points x combo + 25 Sharp Shot, half the ram boost; summary has shots/shotPts", () => {
+  const R = darena("truck"); R.p.lane = 1; R.p.laneF = 1;
+  const G = ++GID; const tower = [0, 1, 2].map(k => dput(R, "crate", 500, 1, { group: G, z: k * 81, pts: k ? 0 : 50, lead: !k }));
+  const s0 = R.score;
+  go(R, 1, () => ({ firePressed: true })); assert.equal(R.fired, 1);
+  let hit = null; for (let i = 0; i < 240 && !hit; i++) { SIM.step(R, SIM.STEP, { lane: 0 }); hit = R.events.find(e => e.type === "shotHit"); R.events.length = 0; }
+  assert.ok(hit, "hit"); assert.equal(hit.word, SIM.WEAPONS.truck.word);
+  for (const o of tower) assert.equal(o.alive, false);
+  assert.equal(R.hits, 1); assert.ok(R.score - s0 >= 50 + SIM.SHARP, `score +${R.score - s0}`); assert.equal(hit.pts, R.score - s0);
+  const sum = SIM.summary(R); assert.equal(sum.shots, 1); assert.ok(sum.shotPts >= SIM.SHARP);
+  // boost: a shot fills half of what a ram does
+  const A = darena("truck"), B = darena("truck"); const oa = dput(A, "box", 300, 1), ob = dput(B, "box", 300, 1);
+  SIM.smashGroup(A, oa, "ram"); SIM.smashGroup(B, ob, "shot");
+  assert.ok(A.boost > 0 && Math.abs(B.boost - A.boost / 2) < 1e-9, `ram ${A.boost} shot ${B.boost}`);
+});
+
+test("FIRE: hold repeats on the cooldown; a miss fizzles; disabled during a special", () => {
+  const R = darena("laser"); const cd = R.weapon.cd;
+  go(R, Math.round(2 / SIM.STEP), () => ({ fire: true }));
+  assert.equal(R.fired, Math.floor(2 / cd) + 1, `fired ${R.fired} with cd ${cd}`);
+  const F = darena("dragster"); let fizz = false;
+  go(F, 1, () => ({ firePressed: true }));
+  for (let i = 0; i < 600 && !fizz; i++) { SIM.step(F, SIM.STEP, { lane: 0 }); fizz = F.events.some(e => e.type === "projEnd" && e.fizzle); F.events.length = 0; }
+  assert.ok(fizz, "nothing to hit: it fizzles"); assert.equal(F.hits, 0);
+  const S = darena("dragster"); S.boost = 1; go(S, 1, () => ({ boostPressed: true })); S.events.length = 0;
+  SIM.step(S, SIM.STEP, { lane: 0, fire: true, firePressed: true });
+  assert.equal(S.fired, 0); assert.ok(S.events.some(e => e.type === "fireOff"));
+});
+
+test("Zoomie Chomp: dashes to the target, eats the group + the next object behind it, pops back; a miss spins and goes dizzy", () => {
+  const R = darena("ira"); R.p.lane = 1; R.p.laneF = 1;
+  assert.equal(R.weapon.word, "CHOMP-CHOMP!"); assert.equal(R.weapon.cd, 1.1); assert.ok(R.weapon.dash);
+  const a = dput(R, "box", 350, 1), b = dput(R, "box", 350 + 220, 1), c = dput(R, "box", 350 + 220 + 400, 1);
+  go(R, 1, () => ({ firePressed: true })); assert.ok(R.dash && R.dash.ph === "go");
+  let hit = null; for (let i = 0; i < 240 && R.dash; i++) { SIM.step(R, SIM.STEP, { lane: 0 }); hit = hit || R.events.find(e => e.type === "shotHit"); R.events.length = 0; }
+  assert.ok(hit && hit.n === 2 && hit.word === "CHOMP-CHOMP!");
+  assert.equal(a.alive, false); assert.equal(b.alive, false); assert.equal(c.alive, true, "only the next one behind");
+  assert.equal(R.dash, null, "popped back");
+  const M = darena("ira"); let dizzy = false; go(M, 1, () => ({ firePressed: true })); assert.equal(M.dash.ph, "spin");
+  for (let i = 0; i < 120 && !dizzy; i++) { SIM.step(M, SIM.STEP, { lane: 0 }); dizzy = M.events.some(e => e.type === "dizzy"); M.events.length = 0; }
+  assert.ok(dizzy);
+});
+
+test("FIRE balance: time-to-kill within +-15% across all 10 heroes; cooldowns 0.6-1.2 s", () => {
+  function bench(v, seed) {
+    const R = darena(v); const x = R.p.x, S = R.veh.speed; let r = SIM.rng(seed);
+    for (let t = 0.6, i = 0; t < 22; t += 0.3, i++) { const X = t * S, lane = r() < 0.5 ? 0 : 2, p = i % 4;
+      if (p === 1) { dput(R, "cone", X, lane); dput(R, "cone", X + 70, lane); }
+      else if (p === 2) { const G = ++GID; for (let k = 0; k < 3; k++) dput(R, "crate", X, lane, { group: G, z: k * 81, pts: k ? 0 : 50, lead: !k }); }
+      else dput(R, "box", X, lane); }
+    R.p.lane = 1; R.p.laneF = 1; void x;
+    go(R, Math.round(20 / SIM.STEP), () => ({ fire: true }));
+    return 20 / R.hits;
+  }
+  const spk = {}; for (const v of SIM.VEHICLE_ORDER) { spk[v] = [1, 2, 3].reduce((t, s) => t + bench(v, s), 0) / 3; const cd = SIM.WEAPONS[v].cd; assert.ok(cd >= 0.6 && cd <= 1.2, `${v} cd ${cd}`); }
+  const m = Object.values(spk).reduce((a, b) => a + b, 0) / 10;
+  for (const v in spk) assert.ok(Math.abs(spk[v] / m - 1) <= 0.15, `${v} ${spk[v].toFixed(3)} vs mean ${m.toFixed(3)}`);
+});
+
+test("Addendum D art wiring: placeholders with src:null, boost -> special, celebrate -> fly; proc artists exist", async () => {
+  const fs = await import("node:fs");
+  const man = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/art/manifest.js", import.meta.url), "utf8");
+  for (const k of ["veh.laser.drive", "veh.laser.special", "veh.ira.drive", "veh.ira.runb", "veh.ira.spin", "veh.ira.special", "fx.toot", "fx.pellet", "proj.zoomie", "proj.bolt"]) assert.ok(man.includes(`'${k}'`), k);
+  const proc = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/proc.js", import.meta.url), "utf8");
+  assert.ok(/laser\s*\(g, pose\)/.test(proc) && /ira\s*\(g, pose\)/.test(proc));
+  const html = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/game.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="bFire"') && /sim\.js\?v=8/.test(html) && /game\.js\?v=12/.test(html));
 });
