@@ -108,17 +108,17 @@ function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   if (V.fly === 'always' || V.fly === 'hover' || P.z > floor + 25 || P.wing > 0.5) return 'veh.' + V.id + '.fly';
   return 'veh.' + V.id + '.drive'; }
 // shadow widths matched to the visible footprint of Muse's art (v1); the interim art uses the hitbox length
-const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220, comet: 205 };
+const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220, comet: 150 };
 /* Race-only draw scale (the picker card keeps the manifest size). Whirly Pup's art is ~58 wu tall at wu 215;
    x1.43 makes her ~83 wu, about 75% of the Bat Truck's ~111 wu visible height. Her hitbox stays len 105. */
 const RACE_SCALE = { pup: 1.43 };
-const raceWu = (R, name) => ART.get(name).wu * (RACE_SCALE[R.veh.id] || 1);
+const raceWu = (R, name) => ART.get(name).wu * (RACE_SCALE[R.veh.id] || 1) * (ART.fx(name).scale || 1); // fx.scale: a pose drawn smaller in its frame (Comet 17's fly)
 /* Fly ceiling: the top of a flying vehicle stays at least 12% of the scene height below the HUD.
    camNeed = the camera lift that keeps it there; R.maxZ = the highest z the camera can still cover (sim clamps to it). */
 let hudBottom = 0;
 function measureHud() { const c = cv.getBoundingClientRect(); let b = 0; document.querySelectorAll('#hud .hud-score, #hud .hud-stars, #hud .hud-prog').forEach(el => { const r = el.getBoundingClientRect(); if (r.height && r.right > c.left && r.left < c.right) b = Math.max(b, r.bottom - c.top); }); if (b) hudBottom = b; }
-function vehTop(R) { const V = R.veh, a = ART.get('veh.' + V.id + '.fly'), d = ART.get('veh.' + V.id + '.drive'), rs = RACE_SCALE[V.id] || 1, top = sp => (sp.wu * sp.h / sp.w * sp.ay + sp.wu * 0.08) * rs; // + tilt slack (at the ceiling vz = 0, so wing tilt is ~0)
-  return Math.max(top(a), top(d)) + 12; }
+function vehTop(R) { const V = R.veh, a = ART.get('veh.' + V.id + '.fly'), d = ART.get('veh.' + V.id + '.drive'), rs = RACE_SCALE[V.id] || 1, fs = n => ART.fx('veh.' + V.id + '.' + n).scale || 1, top = (sp, k) => (sp.wu * sp.h / sp.w * sp.ay + sp.wu * 0.08) * rs * k; // + tilt slack (at the ceiling vz = 0, so wing tilt is ~0)
+  return Math.max(top(a, fs('fly')), top(d, fs('drive'))) + 12; }
 function camNeed(R, z, lane) { const limit = (hudBottom || 70) + H * 0.12; return (limit - view.groundY - (lane - 1) * LANE_GAP * view.s) / view.s + (z + vehTop(R)) * kL(lane); }
 function setCeiling(R) { const cap = Math.max(240, (H - 10 - view.groundY) / view.s); let m = SIM.MAXZ;
   for (const l of [0, 1, 2]) { const limit = (hudBottom || 70) + H * 0.12, base = (limit - view.groundY - (l - 1) * LANE_GAP * view.s) / view.s; m = Math.min(m, (cap - base) / kL(l) - vehTop(R)); }
@@ -137,9 +137,12 @@ function drawPlayer(R, t) {
   const specialPose = /\.special$/.test(ART.resolve(sp));
   if (specialPose && V.special === 'whirl') rot = reduced() ? 0.0001 : ART.get(sp).real ? Math.sin(t * 9) * 0.12 : (t * 16) % (Math.PI * 2); // real ring pose wobbles; the interim ball spins
   let spin = false;
-  if (R.comet) { const c = cometC(R), E = SIM.COMET; // nose-down lean in the shell (deeper on each meteor dive), then a 360 on the pop-out
-    if (c < E.finalAt) rot = 0.06 * Math.min(1, c / E.trans) + (R.comet.dive ? 0.14 : 0);
-    else { const k = (c - E.finalAt - 0.08) / 0.3; rot = k <= 0 ? 0.1 : k >= 1 ? 0.0001 : -k * Math.PI * 2; spin = k > 0 && k < 1 && !reduced(); if (reduced() && k > 0) rot = 0.0001; } }
+  if (V.special === 'comet') { // Comet 17: the sprites are not tilted, so tilt in code: 6 deg nose-down in comet form, 8 deg nose-up in the fly pose,
+    // eased over ~0.15 s (this replaces the wing/vz tilt for her, so nothing stacks); a 360 on the pop-out
+    const c = cometC(R), E = SIM.COMET, inForm = R.comet && c < E.finalAt, target = inForm ? COMET_TILT.special : /\.fly$/.test(ART.resolve(sp)) ? COMET_TILT.fly : 0;
+    const dt = Math.min(0.05, Math.max(0, t - (R.tiltT == null ? t : R.tiltT))); R.tiltT = t; R.tilt = (R.tilt || 0) + (target - (R.tilt || 0)) * (1 - Math.exp(-dt / COMET_TILT.tau));
+    rot = R.tilt + (P.onGround ? Math.sin(t * 30) * 0.004 * P.speed / V.speed : 0);
+    if (R.comet && !inForm) { const k = (c - E.finalAt - 0.08) / 0.3; if (k > 0 && k < 1 && !reduced()) { spin = true; rot = -k * Math.PI * 2; R.tilt = 0; } } }
   if (R.landT > 0) sq = R.landT * (V.id === 'rex' ? 0.75 : 0.4); // Chomp Rex: big suspension squash
   if (R.snapT > 0 && V.special === 'chomp') sq += Math.sin((1 - R.snapT / 0.2) * Math.PI) * 0.07; // ...and a suspension dip on every chomp
   let sc = 0; if (R.snapT > 0) { const k = 1 - R.snapT / 0.2; sc = k < 0.35 ? 1 - 0.08 * (k / 0.35) : k < 0.7 ? 0.92 + 0.13 * ((k - 0.35) / 0.35) : 1.05 - 0.05 * ((k - 0.7) / 0.3); } // jaw snap 1.0 -> 0.92 -> 1.05 -> 1.0
@@ -194,12 +197,13 @@ function drawSpecial(R, t, back) {
 /* Comet 17's Comet Dash (all code VFX): a fireball shell (radial gradient + wobbling flame tongues) that scales in over 0.3 s,
    a heat shimmer over the ember tail, and the shell cracking like an eggshell when the car pops out. */
 const cometC = R => R.comet ? R.t - R.comet.t0 : -1;
+const COMET_TILT = { special: 6 * Math.PI / 180, fly: -8 * Math.PI / 180, tau: 0.05 }; // tau 0.05 s: ~95% of the way in 0.15 s
 function drawComet(R, t, back) {
   const P = R.p, V = R.veh, C = R.comet; if (!C) return;
   const E = SIM.COMET, c = R.t - C.t0, k = kL(P.laneF), s = view.s * k, red = reduced();
   const cx = X(P.x) + V.len * 0.04 * s, cy = laneY(P.laneF) - (P.z + V.h * 0.55) * s;
   const grow = c < E.trans ? Math.sin(Math.min(1, c / E.trans) * Math.PI * 0.62) / Math.sin(Math.PI * 0.62) : 1; // ease out with a small overshoot
-  const rx = V.len * 0.66 * s * grow, ry = V.h * 1.12 * s * grow;
+  const rx = 140 * s * grow, ry = 67 * s * grow; // sized to the visible car (~147 x 68 wu), not the hitbox
   ctx.save();
   if (c >= E.finalAt) { // the shell cracks into two halves that tumble away and fade
     const q = (c - E.finalAt) / 0.38; if (q >= 1 || !back) { ctx.restore(); return; }

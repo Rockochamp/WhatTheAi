@@ -295,19 +295,15 @@ function rex(g, pose) {
   g.restore();
 }
 // Comet 17 (Addendum C): low white wedge racer, teal intakes/wing/hubs, yellow-tinted canopy, pink/yellow/navy stripes, a big navy 17.
-// drive = wing up; fly = wheels dropped, wing flat as a glider, nose up ~8 deg; special = nose down ~6 deg, panels white-hot (fireball drawn in code).
+// drive = wing on its struts; fly = same wing, wheels dropped; special = panels white-hot (fireball drawn in code). No tilt baked in: the game tilts in code.
 function comet(g, pose) {
   const TEAL = '#22c3b6', TD = '#0f7f78', NAVY = '#1d2f7a', hot = pose === 'special', fly = pose === 'fly' || pose === 'celebrate';
   g.save();
-  if (fly) { g.translate(270, 196); g.rotate(-0.14); g.translate(-270, -196); }
-  if (hot) { g.translate(270, 206); g.rotate(0.1); g.translate(-270, -206); }
   const drop = fly ? 10 : 0;
   const tyre = (x, y, r) => wheel(g, x, y, r, TEAL, { tyre: '#1f1d27', rim: 0.6 });
   tyre(150, 200 + drop * 0.6, 26); tyre(392, 204 + drop * 0.6, 23); // far side
-  // rear wing: up on two struts (drive/special) or tilted flat like a glider (fly)
-  if (fly) { g.lineWidth = 8; g.strokeStyle = OUT; g.beginPath(); g.moveTo(96, 146); g.lineTo(86, 126); g.moveTo(126, 142); g.lineTo(118, 124); g.stroke();
-    rr(g, 18, 112, 150, 14, 7); ink(g, lg(g, 0, 112, 0, 126, [[0, '#8ff0e6'], [1, TD]]), 5); }
-  else { g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(90, 146); g.lineTo(80, 108); g.moveTo(124, 140); g.lineTo(116, 106); g.stroke(); g.lineWidth = 4; g.strokeStyle = TEAL; g.stroke();
+  // rear wing: always up on its two struts
+  { g.lineWidth = 9; g.strokeStyle = OUT; g.beginPath(); g.moveTo(90, 146); g.lineTo(80, 108); g.moveTo(124, 140); g.lineTo(116, 106); g.stroke(); g.lineWidth = 4; g.strokeStyle = TEAL; g.stroke();
     poly(g, [[34, 100], [150, 94], [156, 110], [40, 116]]); ink(g, lg(g, 0, 94, 0, 116, [[0, '#8ff0e6'], [0.5, TEAL], [1, TD]]), 5); rr(g, 28, 92, 14, 30, 5); ink(g, TD, 4); }
   // body: low wedge
   const body = [[56, 202], [58, 160], [96, 140], [210, 128], [300, 130], [380, 156], [470, 182], [500, 198], [492, 214], [420, 220], [70, 218]];

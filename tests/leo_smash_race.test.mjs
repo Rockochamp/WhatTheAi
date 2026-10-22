@@ -193,7 +193,7 @@ test("Comet 17: stats and feel (fast, quick accel and lanes, light glider)", () 
   const V = SIM.VEHICLES, c = V.comet;
   assert.equal(c.name, "Comet 17"); assert.equal(c.special, "comet"); assert.equal(c.specialName, "Comet Dash"); assert.equal(c.fly, "wings"); assert.equal(c.horn, "chirp");
   assert.equal(c.speed, 610); assert.equal(c.grav, 1650); assert.equal(c.bounce, 0.22); assert.equal(c.laneT, 0.13); assert.equal(c.accelT, 0.4);
-  assert.equal(c.maxUp, 440); assert.equal(c.glide, -220); assert.equal(c.h, 60); assert.equal(c.len, 210); assert.equal(c.superMult, 1.6);
+  assert.equal(c.maxUp, 440); assert.equal(c.glide, -220); assert.equal(c.h, 66); assert.equal(c.len, 145); // hitbox = the visible car assert.equal(c.superMult, 1.6);
   assert.deepEqual(c.stats, { speed: 3, smash: 1, fly: 2 });
   assert.ok(V.dragster.speed > c.speed && c.speed > V.pup.speed, "between the Dragster and the Pup");
   const R = SIM.createRace({ vehicle: "comet", track: "toyroom", seed: 5, countdown: 0, assist: false }); let n = 0;
@@ -249,14 +249,21 @@ test("Comet Dash: JUMP taps add skips (min gap 0.35 s), lanes stay steerable", (
   assert.ok(mash.lanes.size >= 2, "steered during the dash");
 });
 
-test("Comet 17 art: interim code art until Muse's sprites land; boost -> special, celebrate -> fly", async () => {
+test("Comet 17 art: Muse's sprites wired in (manifest v8); boost -> special, celebrate -> fly; fly drawn x1.1", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/art/manifest.js", import.meta.url), "utf8");
   const win = {}; new Function("window", src)(win); const S = win.LEO_MANIFEST.sprites;
   assert.equal(S["veh.comet.boost"].alias, "veh.comet.special"); assert.equal(S["veh.comet.celebrate"].alias, "veh.comet.fly");
-  for (const p of ["drive", "fly", "special"]) { const e = S[`veh.comet.${p}`]; assert.equal(e.src, null); assert.deepEqual(e.size, [512, 256]); assert.deepEqual(e.anchor, [0.5, 0.92]); }
+  for (const p of ["drive", "fly", "special"]) { const e = S[`veh.comet.${p}`]; assert.equal(e.src, `vehicles/comet_${p}.webp`); assert.deepEqual(e.size, [512, 256]); assert.deepEqual(e.anchor, [0.5, 0.92]); assert.equal(e.wu, 265);
+    assert.ok(fs.existsSync(new URL(`../games/leo_smash_race/grokbot/art/vehicles/comet_${p}.webp`, import.meta.url))); }
+  assert.equal(S["veh.comet.fly"].fx.scale, 1.1); assert.ok(win.LEO_MANIFEST.version >= 8, "cache bust for the comet art");
   const proc = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/proc.js", import.meta.url), "utf8");
   assert.ok(/function comet\(g, pose\)/.test(proc) && proc.includes("pup, rex, comet })"));
+  const body = proc.slice(proc.indexOf("function comet(g, pose)"), proc.indexOf("function rival("));
+  assert.ok(!/g\.rotate\(/.test(body.split("// the only marking")[0]), "no tilt baked into the interim art (the game tilts in code)");
+  assert.ok(!/if \(fly\) \{ g\.lineWidth/.test(body), "no wing flip: the wing stays on its struts in fly");
+  const game = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/game.js", import.meta.url), "utf8");
+  assert.ok(/COMET_TILT = \{ special: 6 \* Math\.PI \/ 180, fly: -8 \* Math\.PI \/ 180/.test(game), "tilts in code: 6 deg down / 8 deg up");
   const audio = fs.readFileSync(new URL("../games/leo_smash_race/grokbot/audio.js", import.meta.url), "utf8");
   for (const k of ["fwoom:", "crackle:", "mboom:", "kaboom:", "ting:", "hiss:", "chirp:"]) assert.ok(audio.includes(k), k);
 });

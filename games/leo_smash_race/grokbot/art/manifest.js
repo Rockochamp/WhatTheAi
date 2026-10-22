@@ -7,7 +7,7 @@
    - alias: 'other.name' reuses another sprite; fx.exhaust: [x, y] (0..1 of the drive canvas) is where boost flames come out.
    A missing or broken file silently falls back to the interim art, so partial drops are safe. */
 window.LEO_MANIFEST = {
-  version: 5,  // Muse art drop 3: Addendum B heroes pup + rex (drive/fly/special); v4 was drop 2 (road grounds, sword v3, truck v3)
+  version: 8,  // Muse art drop 4: Addendum C hero Comet 17 (drive/fly/special); 8 not 7 so no URL cached before this drop can match; v5 was drop 3 (pup + rex)
   base: 'art/',
   // Vehicle poses without their own file borrow another pose; the game adds the boost flames and the celebrate bounce in code.
   poseAliases: { boost: 'drive', celebrate: 'fly' },
@@ -47,12 +47,13 @@ window.LEO_MANIFEST = {
     'veh.rex.special':    { src: 'vehicles/rex_special.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 280 },
     'veh.rex.boost':      { alias: 'veh.rex.special' },
     'veh.rex.celebrate':  { alias: 'veh.rex.special' },
-    // Addendum C: Comet 17. src: null = interim code art (proc.js) until Muse's sprites land as vehicles/comet_drive.webp,
-    // comet_fly.webp and comet_special.webp (art/out format: 512x256, 0.92 baseline, one shared scale, ~55% of the Bat Truck's height).
-    // Then set the three src values and bump `version`. boost = special (hot comet form); celebrate = fly.
-    'veh.comet.drive':    { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.10, 0.70], pivot: 0.72 } },
-    'veh.comet.fly':      { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265 },
-    'veh.comet.special':  { src: null, size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.10, 0.70], pivot: 0.72 } },
+    // Addendum C: Comet 17 (Muse drop 4). 512x256, 0.92 baseline, one shared scale (0.2774 of source), drive visible height 128 px = 55% of truck_drive's 231 px.
+    // boost = special (hot comet form); celebrate = fly. Sprites are not tilted: the game tilts in code (special 6 deg nose-down, fly 8 deg nose-up).
+    // fx.scale: the fly pose is drawn smaller in its frame (111 px vs drive 128), so the game draws it x1.1 and the car keeps its size on takeoff.
+    // fx.pivot = middle of the car (pop-out spin); fx.exhaust = rear of the body.
+    'veh.comet.drive':    { src: 'vehicles/comet_drive.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.25, 0.74], pivot: 0.66 } },
+    'veh.comet.fly':      { src: 'vehicles/comet_fly.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { scale: 1.1, exhaust: [0.27, 0.72], pivot: 0.66 } },
+    'veh.comet.special':  { src: 'vehicles/comet_special.webp', size: [512, 256], anchor: [0.5, 0.92], wu: 265, fx: { exhaust: [0.24, 0.74], pivot: 0.66 } },
     'veh.comet.boost':    { alias: 'veh.comet.special' },
     'veh.comet.celebrate': { alias: 'veh.comet.fly' },
     // Rivals: friendly smiley racers, drive pose only.

@@ -18,7 +18,7 @@ const VEHICLES = {
      laneT = seconds per lane change (default 1/7), accelT = seconds to reach cruise speed (default 1/1.4),
      superMult = speed multiplier during the special (default 1.7), flatten = rams squash smashables flat. */
   pup:      { id: 'pup', name: 'Whirly Pup', speed: 600, len: 105, h: 58, fly: 'wings', jumpV: 640, thrust: 2900, maxUp: 500, glide: -150, grav: 1300, bounce: 0.5, laneT: 0.12, superMult: 1.4, special: 'whirl', specialName: 'Whirlwind Spin', stats: { speed: 2, smash: 1, fly: 3 }, horn: 'yip' },
-  comet:    { id: 'comet', name: 'Comet 17', speed: 610, len: 210, h: 60, fly: 'wings', jumpV: 560, thrust: 2500, maxUp: 440, glide: -220, grav: 1650, bounce: 0.22, laneT: 0.13, accelT: 0.4, superMult: 1.6, special: 'comet', specialName: 'Comet Dash', stats: { speed: 3, smash: 1, fly: 2 }, horn: 'chirp' },
+  comet:    { id: 'comet', name: 'Comet 17', speed: 610, len: 145, h: 66, fly: 'wings', jumpV: 560, thrust: 2500, maxUp: 440, glide: -220, grav: 1650, bounce: 0.22, laneT: 0.13, accelT: 0.4, superMult: 1.6, special: 'comet', specialName: 'Comet Dash', stats: { speed: 3, smash: 1, fly: 2 }, horn: 'chirp' },
   rex:      { id: 'rex', name: 'Chomp Rex', speed: 500, len: 215, h: 120, fly: 'wings', jumpV: 620, thrust: 2000, maxUp: 380, glide: -320, grav: 1900, bounce: 0.45, laneT: 0.22, accelT: 1.0, superMult: 1.3, flatten: true, special: 'chomp', specialName: 'Shark Chomp', stats: { speed: 2, smash: 3, fly: 1 }, horn: 'growl' },
 };
 const VEHICLE_ORDER = ['dragster', 'bibi', 'truck', 'sword', 'jet', 'pup', 'rex', 'comet'];
