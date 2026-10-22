@@ -5,7 +5,7 @@ The game ships with **interim vector art drawn in code** (`proc.js`). Every spri
 file falls back to the interim art, so you can drop art in a bit at a time.
 
 ## How to drop art in
-1. Put the file under `games/leo_smash_race/grokbot/art/<folder>/` (folders: `vehicles/`, `rivals/`, `smash/`, `debris/`, `items/`, `layers/`, `ui/`).
+1. Put the file under `games/leo_smash_race/grokbot/art/<folder>/` (folders: `vehicles/`, `rivals/`, `smash/`, `debris/`, `items/`, `layers/`, `ui/`, `fx/`; `fx/` holds the FIRE projectiles `proj_*`, hit bursts `hitfx_*` and Ira's `toot_cloud` / `poop_pellet`).
 2. In `art/manifest.js`, set the entry's `src` to the path relative to `art/`, e.g. `src: 'vehicles/dragster_drive.webp'`.
 3. **Bump `version`** at the top of the manifest (or give the entry its own `v: 2`). The CDN caches each URL for 30 days, so a changed file needs a new `?v=`.
    Also bump `?v=` on `art/manifest.js` in `game.html` when the manifest itself changes.
@@ -31,6 +31,8 @@ World scale: the screen shows about 600-1200 world units across, so 100 wu is ro
 | Vehicles | `veh.<id>.drive`, `.fly`, `.boost`, `.celebrate` for ids `dragster`, `bibi`, `truck`, `sword`, `jet` (20 images) | 512×256 (2:1) | 0.5, 0.92 (sword 0.5, 0.80) | dragster 235, bibi 190, truck 245, sword 250, jet 235 |
 | Vehicles (Addendum B) | `veh.pup.drive`, `.fly`, `.special`; `veh.rex.drive`, `.fly`, `.special` (boost = special; celebrate = fly for pup, special for rex) | 512×256 (2:1) | 0.5, 0.92 | pup 215, rex 280 |
 | Vehicles (Addendum C) | `veh.comet.drive`, `.fly`, `.special` → `vehicles/comet_{drive,fly,special}.webp` (boost = special, the white-hot comet form; celebrate = fly). Delivered in Muse drop 4 (manifest v8). Not tilted: the game tilts in code (special 6° nose-down, fly 8° nose-up). No wing flip: the wing stays on its struts in fly. The fly pose is drawn x1.1 (`fx.scale`), since it sits smaller in its frame. Hitbox = the visible car, 145×66 wu. Look-alike only, no logos, the only marking is a big 17 | 512×256 (2:1) | 0.5, 0.92 | 265 (one shared scale; body ≈ 55% of the Bat Truck’s height) |
+| Vehicles (Addendum D) | `veh.laser.drive`, `.fly`, `.special` → `vehicles/laser_{drive,fly,special}.webp` (boost = special, celebrate = fly; fx.nozzle [0.165, 0.73] = Laser Drive jet, fx.nose [0.85, 0.755] = lasers; hitbox 190×66 wu). `veh.ira.drive` (frames `ira_run_a` / `ira_run_b`), `.runb`, `.fly`, `.special` (the take: surprised look at the camera, no cloud), `.spin` (fire = spin) → `vehicles/ira_*.webp`. In run_b her paws sit 6 px above the baseline on purpose. Muse drop 5 (manifest v9) | 512×256 (2:1) | 0.5, 0.92 | 265 (laser), 235 (Ira) |
+| FIRE FX (Addendum D) | `proj.*` → `fx/proj_*.webp` (128×128, centred, facing right; Sword Wave, Laser Bolt and Zoomie stay code-drawn), `hitfx.*` → `fx/hitfx_*.webp` (256×256 single bursts), `fx.toot` → `fx/toot_cloud.webp`, `fx.pellet` → `fx/poop_pellet.webp` (64×64, bottom at 0.75) | see sizes | 0.5, 0.5 (pellet 0.5, 0.75) | see manifest |
 | Rivals | `rival.orange`, `rival.green`, `rival.blue` | 384×192 | 0.5, 0.93 | 175 |
 | Smashables | `smash.cone` 128×160, `smash.box` 160×160, `smash.crate` 160×160, `smash.block` 160×160, `smash.mega` 160×160, `smash.barrel` 160×192, `smash.wall` 192×384, `smash.balloon` 160×256, `smash.cloud` 256×176 | as listed | bottom centre (balloon 0.5, 0.60) | 66-132 |
 | Debris | `debris.cone`, `.card`, `.wood`, `.block`, `.brick`, `.barrel`, `.balloon`, `.cloud` | 64×64 | centre | 24-40 |

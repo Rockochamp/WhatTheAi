@@ -329,6 +329,98 @@ function comet(g, pose) {
   if (pose === 'celebrate') { sparkle(g, 300, 60, 16); sparkle(g, 430, 100, 12); }
   g.restore();
 }
+// Laser Racer (Addendum D1, interim art until Pixel's cut): sleek white hypercar, long pointed nose, big orange bubble canopy,
+// angular blue/orange side panels, tall white rear wing, blue diffuser with an orange tail light + twin nozzles, orange rims. No text.
+// special = nozzles + tail light glow hot, two glowing emitters on the nose (the code draws the jet flame and the beams).
+function laser(g, pose) {
+  const BL = '#2f6fe0', BD = '#173f8f', OR = '#ff7a1a', hot = pose === 'special', fly = pose === 'fly' || pose === 'celebrate', drop = fly ? 10 : 0;
+  const tyre = (x, y, r) => wheel(g, x, y, r, OR, { tyre: '#1f1d27', rim: 0.62 });
+  g.save();
+  tyre(152, 204 + drop * 0.6, 24); tyre(384, 206 + drop * 0.6, 22); // far side
+  // tall white rear wing on one pylon
+  g.lineWidth = 11; g.strokeStyle = OUT; g.beginPath(); g.moveTo(100, 152); g.lineTo(86, 98); g.stroke(); g.lineWidth = 5; g.strokeStyle = '#e9eef6'; g.stroke();
+  poly(g, [[28, 90], [142, 80], [150, 98], [34, 108]]); ink(g, lg(g, 0, 80, 0, 108, [[0, '#ffffff'], [1, '#c9d2e0']]), 5);
+  rr(g, 20, 78, 15, 36, 5); ink(g, BL, 4);
+  const body = [[46, 202], [50, 166], [92, 146], [196, 134], [304, 138], [404, 160], [486, 188], [508, 202], [496, 214], [420, 220], [62, 218]];
+  poly(g, body); ink(g, lg(g, 0, 134, 0, 220, [[0, '#ffffff'], [0.6, '#eef1f6'], [1, '#b9c1d0']]), 6);
+  g.save(); poly(g, body); g.clip();
+  g.fillStyle = BL; g.beginPath(); g.moveTo(40, 168); g.lineTo(140, 150); g.lineTo(176, 222); g.lineTo(40, 222); g.closePath(); g.fill(); // blue rear panel
+  g.fillStyle = OR; g.beginPath(); g.moveTo(170, 214); g.lineTo(318, 186); g.lineTo(330, 196); g.lineTo(184, 222); g.closePath(); g.fill(); // orange angular slash
+  g.fillStyle = BL; g.beginPath(); g.moveTo(250, 222); g.lineTo(350, 200); g.lineTo(430, 214); g.lineTo(420, 224); g.closePath(); g.fill(); // blue lower panel
+  g.fillStyle = 'rgba(20,24,40,.85)'; g.fillRect(40, 211, 480, 14); // black sill
+  g.restore();
+  poly(g, body); g.lineWidth = 6; g.strokeStyle = OUT; g.stroke();
+  gloss(g, 120, 140, 210, 8, 0.5);
+  // diffuser, tail light and twin nozzles at the rear
+  poly(g, [[36, 186], [62, 182], [64, 220], [40, 222]]); ink(g, BD, 4);
+  rr(g, 50, 166, 12, 14, 4); if (hot) { g.save(); g.shadowColor = '#ff9a3a'; g.shadowBlur = 18; } ink(g, hot ? '#ffd27a' : OR, 3); if (hot) g.restore();
+  [[44, 196], [44, 210]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 6.5, 0, 7); if (hot) { g.save(); g.shadowColor = '#7fd4ff'; g.shadowBlur = 16; ink(g, rgr(g, x, y, 1, 7, [[0, '#ffffff'], [0.5, '#9fe2ff'], [1, '#2f8cff']]), 3); g.restore(); } else ink(g, '#39405a', 3); });
+  // long orange bubble canopy
+  g.beginPath(); g.moveTo(204, 138); g.quadraticCurveTo(262, 84, 356, 118); g.quadraticCurveTo(396, 136, 414, 160); g.lineTo(224, 146); g.closePath();
+  ink(g, lg(g, 0, 88, 0, 150, hot ? [[0, '#ffe0b8'], [0.55, '#ff8a3a'], [1, '#d2500c']] : [[0, '#ffb27a'], [0.55, '#ff6a1a'], [1, '#b8400a']]), 5);
+  g.save(); g.globalAlpha = 0.75; g.fillStyle = '#fff'; g.beginPath(); g.ellipse(276, 110, 24, 6, -0.25, 0, 7); g.fill(); g.restore();
+  g.strokeStyle = 'rgba(120,30,0,.5)'; g.lineWidth = 3; g.beginPath(); g.moveTo(240, 132); g.quadraticCurveTo(310, 112, 396, 150); g.stroke(); // canopy spine
+  // two emitters on the nose
+  [[468, 190], [488, 198]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 5, 0, 7); if (hot) { g.save(); g.shadowColor = '#7fd4ff'; g.shadowBlur = 14; ink(g, '#c8f0ff', 2.5); g.restore(); } else ink(g, '#8a93a8', 2.5); });
+  tyre(124, 212 + drop, 26); tyre(414, 213 + drop, 24); // near side
+  if (pose === 'celebrate') { sparkle(g, 300, 60, 16); sparkle(g, 430, 100, 12); }
+  g.restore();
+}
+// Ira (D6, interim art): RC's Mini Bull Terrier as a glossy toy figure. Red-tan coat, white blaze, chest and front paws,
+// egg-shaped head with a long Roman nose, black nose on a pink muzzle, small dark triangle eyes, folded tan ears, a big tongue-out grin.
+// drive = run-a (extended gallop), runb = gathered, fly = superhero leap, special = the take (surprised look at the camera; the code-art fallback still turns the head), spin = curled chomp spin.
+function ira(g, pose) {
+  const TAN = '#c8733a', TD = '#8f4a1f', TL = '#e39a5c', WH = '#fbf6ef', PINK = '#f2a0a8';
+  const fly = pose === 'fly' || pose === 'celebrate';
+  g.save();
+  if (pose === 'spin') { // curled sideways mid-spin, mouth wide open, paws flailing
+    g.translate(256, 150); g.rotate(-0.5);
+    [[-1.9, 1], [-0.6, 0], [0.9, 1], [2.3, 0]].forEach(([a, w]) => { g.save(); g.rotate(a); rr(g, 50, -11, 46, 22, 11); ink(g, w ? WH : TAN, 5); g.restore(); });
+    g.beginPath(); g.arc(0, 0, 62, 0, 7); ink(g, rgr(g, 0, 0, 10, 62, [[0, TL], [0.7, TAN], [1, TD]], -18, -20), 6);
+    g.beginPath(); g.ellipse(18, 8, 30, 36, 0.3, 0, 7); g.fillStyle = WH; g.fill();
+    g.save(); g.rotate(0.4); g.beginPath(); g.ellipse(48, -6, 40, 26, 0, 0, 7); ink(g, WH, 5); // snout
+    g.beginPath(); g.ellipse(70, 6, 22, 16, 0, 0, Math.PI); ink(g, '#c2324a', 4); rr(g, 54, 4, 8, 7, 2); g.fillStyle = '#fff'; g.fill(); rr(g, 72, 4, 8, 7, 2); g.fill();
+    g.beginPath(); g.ellipse(86, -14, 8, 6, 0, 0, 7); ink(g, '#1d1a2e', 3); g.restore();
+    g.beginPath(); g.moveTo(-10, -30); g.lineTo(6, -40); g.lineTo(4, -26); g.closePath(); ink(g, '#1d1a2e', 2);
+    g.beginPath(); g.moveTo(-30, -52); g.quadraticCurveTo(-46, -86, -12, -74); g.closePath(); ink(g, TAN, 4);
+    g.restore(); return; }
+  const lift = fly ? -8 : 0, by = 150 + lift;
+  // legs: [hipX, hipY, angle (0 = straight down, + = forward), white paw]
+  const LEGS = pose === 'runb' ? [[190, by + 10, -0.15, 0], [215, by + 12, 0.35, 0], [318, by + 8, -0.45, 1], [340, by + 10, -0.1, 1]]
+    : fly ? [[176, by + 6, -1.35, 0], [196, by + 8, -1.15, 0], [334, by + 2, 1.3, 1], [352, by + 4, 1.1, 1]]
+    : [[180, by + 8, -0.75, 0], [204, by + 10, -0.45, 0], [330, by + 6, 0.6, 1], [350, by + 8, 0.85, 1]];
+  const leg = ([x, y, a, wp], far) => { g.save(); g.translate(x, y); g.rotate(-a); rr(g, -12, -6, 24, 76, 12); ink(g, far ? TD : TAN, 5);
+    g.beginPath(); g.ellipse(0, 72, 15, 10, 0, 0, 7); ink(g, wp ? WH : (far ? TD : TL), 4); g.restore(); };
+  leg(LEGS[1], true); leg(LEGS[3], true); // far legs
+  // short tail
+  g.save(); g.translate(150, by - 22); g.rotate(fly ? -1.1 : -0.7); rr(g, -6, -40, 12, 42, 6); ink(g, TAN, 4); g.restore();
+  // stocky body
+  g.beginPath(); g.ellipse(262, by, 118, 48, fly ? -0.06 : 0, 0, 7); ink(g, rgr(g, 262, by, 20, 120, [[0, TL], [0.6, TAN], [1, TD]], -30, -30), 6);
+  g.save(); g.beginPath(); g.ellipse(262, by, 118, 48, 0, 0, 7); g.clip(); g.fillStyle = WH; g.beginPath(); g.ellipse(360, by + 22, 52, 40, 0.3, 0, 7); g.fill(); g.restore(); // white chest
+  g.beginPath(); g.ellipse(262, by, 118, 48, 0, 0, 7); g.lineWidth = 6; g.strokeStyle = OUT; g.stroke();
+  gloss(g, 190, by - 40, 120, 10, 0.4);
+  leg(LEGS[0]); leg(LEGS[2]); // near legs
+  // head: egg shape with a long Roman nose (dir -1 = looking back over her shoulder)
+  const back = pose === 'special', hx = back ? 352 : 392, hy = by - 52 + (fly ? -6 : 0);
+  g.save(); g.translate(hx, hy); if (back) g.scale(-1, 1); g.rotate(back ? -0.15 : 0.32);
+  const egg = () => { g.beginPath(); g.moveTo(-34, -18); g.quadraticCurveTo(-30, -50, 6, -46); g.quadraticCurveTo(70, -36, 96, 10); g.quadraticCurveTo(100, 32, 78, 36); g.quadraticCurveTo(20, 44, -26, 26); g.quadraticCurveTo(-44, 8, -34, -18); g.closePath(); };
+  egg(); ink(g, TAN, 6);
+  g.save(); egg(); g.clip(); g.fillStyle = WH; g.beginPath(); g.moveTo(-6, -50); g.quadraticCurveTo(10, -20, 40, -6); g.quadraticCurveTo(80, 4, 104, 20); g.lineTo(104, 60); g.lineTo(-10, 60); g.quadraticCurveTo(12, 20, -6, -50); g.fill(); // white blaze + muzzle
+  g.fillStyle = PINK; g.beginPath(); g.ellipse(80, 22, 22, 13, 0.2, 0, 7); g.fill(); g.restore();
+  egg(); g.lineWidth = 6; g.strokeStyle = OUT; g.stroke();
+  g.beginPath(); g.ellipse(96, 12, 9, 7, 0.3, 0, 7); ink(g, '#1d1a2e', 3); // black nose
+  if (back) { [[18, -16], [34, -12]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 7, 0, 7); ink(g, '#fff', 3); g.beginPath(); g.arc(x + 1, y, 3, 0, 7); g.fillStyle = OUT; g.fill(); }); // wide surprised eyes
+    g.beginPath(); g.ellipse(64, 34, 8, 9, 0, 0, 7); ink(g, '#c2324a', 3); }
+  else { g.beginPath(); g.moveTo(14, -18); g.lineTo(30, -24); g.lineTo(26, -12); g.closePath(); ink(g, '#1d1a2e', 2); // small dark triangle eye
+    g.beginPath(); g.moveTo(40, 30); g.quadraticCurveTo(70, 52, 90, 30); g.closePath(); ink(g, '#c2324a', 4); // open grin
+    g.beginPath(); g.ellipse(62, 48, 10, 16, 0.25, 0, 7); ink(g, '#ff7a90', 3); } // tongue out
+  // folded tan ears tipped forward (flying back when she leaps)
+  g.save(); g.translate(-16, -38); g.rotate(fly ? -1.0 : 0.25); g.beginPath(); g.moveTo(-10, 4); g.lineTo(6, -34); g.quadraticCurveTo(26, -30, 22, -8); g.closePath(); ink(g, TAN, 5);
+  g.beginPath(); g.moveTo(4, -24); g.quadraticCurveTo(18, -22, 22, -8); g.lineWidth = 3; g.strokeStyle = TD; g.stroke(); g.restore();
+  g.restore();
+  if (pose === 'celebrate') { sparkle(g, 300, 40, 16); sparkle(g, 440, 70, 12); }
+  g.restore();
+}
 function rival(g, col) {
   const D = shade(col, -0.35), Lt = shade(col, 0.35);
   g.beginPath(); g.ellipse(192, 176, 150, 10, 0, 0, 7); g.fillStyle = 'rgba(0,0,0,.0)'; g.fill();
@@ -400,6 +492,43 @@ def('item.ramp', (g) => { poly(g, [[8, 154], [312, 154], [312, 40]]); ink(g, lg(
 def('item.finish', (g) => { [[30, 0], [210, 0]].forEach(([x]) => { rr(g, x, 40, 18, 466, 8); ink(g, lg(g, x, 0, x + 18, 0, [[0, '#fff'], [1, '#9aa3b8']]), 4); });
   rr(g, 14, 30, 228, 96, 14); ink(g, '#fff', 6); g.save(); rr(g, 14, 30, 228, 96, 14); g.clip(); for (let r = 0; r < 4; r++) for (let c = 0; c < 10; c++) if ((r + c) % 2) { g.fillStyle = OUT; g.fillRect(14 + c * 24, 30 + r * 24, 24, 24); } g.restore();
   rr(g, 14, 30, 228, 96, 14); g.lineWidth = 6; g.strokeStyle = OUT; g.stroke(); });
+/* ---------------- FIRE projectiles (128x128, facing right) and hit FX (256x256): interim code art until Pixel's cut ---------------- */
+def('proj.rocket', (g) => { flame(g, 30, 64, 30, 22); poly(g, [[30, 52], [92, 52], [118, 64], [92, 76], [30, 76]]); ink(g, lg(g, 0, 52, 0, 76, [[0, '#ff8a7a'], [0.5, '#e53935'], [1, '#9a1b1b']]), 4);
+  poly(g, [[34, 52], [22, 38], [48, 52]]); ink(g, '#ffd23f', 3); poly(g, [[34, 76], [22, 90], [48, 76]]); ink(g, '#ffd23f', 3); g.beginPath(); g.arc(78, 64, 6, 0, 7); ink(g, '#cff4ff', 3); });
+def('proj.ball', (g) => { const C = ['#ff4d6d', '#fff', '#2f8cff', '#fff', '#ffd23f', '#fff']; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(64, 64); g.arc(64, 64, 44, i * Math.PI / 3, (i + 1) * Math.PI / 3); g.closePath(); g.fillStyle = C[i]; g.fill(); }
+  g.beginPath(); g.arc(64, 64, 44, 0, 7); g.lineWidth = 5; g.strokeStyle = OUT; g.stroke(); g.beginPath(); g.arc(64, 64, 9, 0, 7); ink(g, '#fff', 3); gloss(g, 40, 32, 34, 10, 0.6); });
+def('proj.boomerang', (g) => { g.beginPath(); g.moveTo(14, 40); g.quadraticCurveTo(64, 56, 114, 40); g.quadraticCurveTo(96, 62, 64, 96); g.quadraticCurveTo(32, 62, 14, 40); g.closePath();
+  ink(g, lg(g, 0, 40, 0, 96, [[0, '#4a4660'], [1, '#1b1928']]), 5); g.strokeStyle = '#ffd23f'; g.lineWidth = 3; g.beginPath(); g.moveTo(26, 46); g.quadraticCurveTo(64, 60, 102, 46); g.stroke(); });
+def('proj.wave', (g) => { g.save(); g.shadowColor = '#d8c4ff'; g.shadowBlur = 16; g.beginPath(); g.arc(40, 64, 50, -1.05, 1.05); g.arc(28, 64, 44, 0.95, -0.95, true); g.closePath();
+  g.fillStyle = lg(g, 40, 0, 96, 0, [[0, 'rgba(180,140,255,.4)'], [0.7, '#e8dcff'], [1, '#ffffff']]); g.fill(); g.restore(); });
+def('proj.balloon', (g) => { g.beginPath(); g.ellipse(70, 60, 40, 34, 0, 0, 7); ink(g, rgr(g, 70, 60, 4, 42, [[0, '#bfeaff'], [0.6, '#3aa0ff'], [1, '#1a5fd0']], -14, -12), 5);
+  poly(g, [[30, 60], [20, 52], [20, 68]]); ink(g, '#1a5fd0', 3); gloss(g, 52, 34, 30, 9, 0.7); });
+def('proj.gust', (g) => { g.lineCap = 'round'; [['#fff', 14], ['#ff8fc8', 8]].forEach(([c, w]) => { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); for (let a = 0; a < 11; a += 0.2) { const r = 6 + a * 4; g.lineTo(64 + Math.cos(a) * r, 64 + Math.sin(a) * r * 0.8); } g.stroke(); });
+  g.beginPath(); g.arc(64, 64, 10, 0, 7); ink(g, '#ff5fae', 3); });
+def('proj.teeth', (g) => { rr(g, 18, 40, 92, 26, 12); ink(g, '#ff7a90', 4); rr(g, 18, 66, 92, 26, 12); ink(g, '#ff7a90', 4);
+  for (let i = 0; i < 6; i++) { rr(g, 26 + i * 13, 52, 11, 15, 3); ink(g, '#fff', 2); rr(g, 26 + i * 13, 66, 11, 15, 3); ink(g, '#fff', 2); }
+  g.lineWidth = 5; g.strokeStyle = OUT; g.beginPath(); g.moveTo(64, 40); g.lineTo(64, 26); g.stroke(); rr(g, 50, 16, 28, 12, 6); ink(g, '#ffd23f', 3);
+  [[36, 98], [88, 98]].forEach(([x, y]) => { rr(g, x - 9, y - 4, 18, 10, 5); ink(g, '#ff9f1c', 3); }); });
+def('proj.meteor', (g) => { [[22, 'rgba(255,90,10,.5)'], [14, 'rgba(255,190,60,.7)']].forEach(([w, c]) => { g.fillStyle = c; g.beginPath(); g.moveTo(70, 64 - w); g.quadraticCurveTo(30, 64 - w * 0.6, 6, 64); g.quadraticCurveTo(30, 64 + w * 0.6, 70, 64 + w); g.fill(); });
+  poly(g, [[60, 40], [92, 36], [110, 60], [100, 88], [70, 92], [52, 70]], true); ink(g, rgr(g, 82, 64, 4, 38, [[0, '#ffe08a'], [0.4, '#ff8a2a'], [1, '#7a3a1a']], -6, -8), 5); });
+def('proj.bolt', (g) => { g.save(); g.shadowColor = '#7fd4ff'; g.shadowBlur = 14; g.lineCap = 'round'; [46, 82].forEach(y => { g.strokeStyle = '#46b4ff'; g.lineWidth = 12; g.beginPath(); g.moveTo(18, y); g.lineTo(110, y); g.stroke(); g.strokeStyle = '#fff'; g.lineWidth = 5; g.beginPath(); g.moveTo(26, y); g.lineTo(112, y); g.stroke(); }); g.restore(); });
+def('proj.zoomie', (g) => { g.lineCap = 'round'; [['#fbf6ef', 12, 0], ['#c8733a', 8, 1.6]].forEach(([c, w, o]) => { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); for (let a = 0; a < 9; a += 0.2) { const r = 8 + a * 5; g.lineTo(64 + Math.cos(a + o) * r, 64 + Math.sin(a + o) * r * 0.7); } g.stroke(); });
+  for (let i = 0; i < 4; i++) { rr(g, 52 + i * 7, 58, 6, 10, 2); ink(g, '#fff', 2); } });
+const burstRays = (g, n, r0, r1, cols, w) => { for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + (i % 2) * 0.15, r = i % 2 ? r1 * 0.7 : r1; g.beginPath(); g.moveTo(128 + Math.cos(a - w) * r0, 128 + Math.sin(a - w) * r0); g.lineTo(128 + Math.cos(a) * r, 128 + Math.sin(a) * r); g.lineTo(128 + Math.cos(a + w) * r0, 128 + Math.sin(a + w) * r0); g.closePath(); g.fillStyle = cols[i % cols.length]; g.fill(); } };
+def('hitfx.firepop', (g) => { burstRays(g, 14, 40, 120, ['#ff3d00', '#ff9800'], 0.22); g.beginPath(); g.arc(128, 128, 56, 0, 7); g.fillStyle = rgr(g, 128, 128, 4, 56, [[0, '#fff'], [0.4, '#ffe066'], [1, '#ff8a00']]); g.fill(); });
+def('hitfx.confetti', (g) => { const C = ['#ff4d6d', '#ffd23f', '#2ec4b6', '#4361ee', '#9b5cf0', '#ff9f1c']; for (let i = 0; i < 26; i++) { const a = i * 2.4, r = 40 + (i * 37) % 80; g.save(); g.translate(128 + Math.cos(a) * r, 128 + Math.sin(a) * r); g.rotate(a); g.fillStyle = C[i % 6]; g.fillRect(-9, -5, 18, 10); g.restore(); } });
+def('hitfx.spark', (g) => { burstRays(g, 8, 18, 124, ['#fff6b0', '#ffd23f'], 0.12); g.beginPath(); g.arc(128, 128, 26, 0, 7); g.fillStyle = '#fff'; g.fill(); });
+def('hitfx.splash', (g) => { for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, x = 128 + Math.cos(a) * 82, y = 128 + Math.sin(a) * 70; g.beginPath(); g.ellipse(x, y, 16, 22, a + Math.PI / 2, 0, 7); g.fillStyle = i % 2 ? '#8fd8ff' : '#2f8cff'; g.fill(); }
+  g.beginPath(); g.ellipse(128, 128, 54, 44, 0, 0, 7); g.fillStyle = 'rgba(140,215,255,.8)'; g.fill(); });
+def('hitfx.puff', (g) => { [[128, 128, 60], [80, 110, 42], [176, 112, 44], [100, 168, 40], [160, 166, 42]].forEach(([x, y, r], i) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fillStyle = i % 2 ? '#ffd0e8' : '#ffffff'; g.fill(); }); });
+def('hitfx.bite', (g) => { g.lineCap = 'round'; [[-1, '#fff'], [1, '#fff']].forEach(([d]) => { g.lineWidth = 10; g.strokeStyle = '#1d1a2e'; g.beginPath(); g.arc(128, 128 + d * 20, 80, d < 0 ? 0.3 : Math.PI + 0.3, d < 0 ? Math.PI - 0.3 : Math.PI * 2 - 0.3); g.stroke();
+    for (let i = 0; i < 6; i++) { const a = (d < 0 ? 0.45 : Math.PI + 0.45) + i * 0.42, x = 128 + Math.cos(a) * 80, y = 128 + d * 20 + Math.sin(a) * 80; g.beginPath(); g.moveTo(x - 9, y); g.lineTo(x + 9, y); g.lineTo(x - d * 0, y - d * 26); g.closePath(); ink(g, '#fff', 4); } }); });
+def('hitfx.zap', (g) => { burstRays(g, 10, 20, 120, ['#bfe9ff', '#46b4ff'], 0.1); g.beginPath(); g.arc(128, 128, 30, 0, 7); g.fillStyle = '#ffffff'; g.fill(); });
+// Ira's Turbo Toot cloud (always bright cartoon green, no face) and the tiny toy pellet (with a shine)
+def('fx.toot', (g) => { [[128, 136, 70], [74, 128, 48], [182, 126, 52], [104, 92, 46], [156, 90, 46], [128, 176, 46]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fillStyle = '#4fe36a'; g.fill(); g.lineWidth = 6; g.strokeStyle = '#1f9e3a'; g.stroke(); });
+  [[128, 136, 66], [74, 128, 44], [182, 126, 48], [104, 92, 42], [156, 90, 42], [128, 176, 42]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fillStyle = '#5ff07a'; g.fill(); });
+  g.save(); g.globalAlpha = 0.6; g.fillStyle = '#d6ffd9'; g.beginPath(); g.ellipse(104, 82, 22, 10, -0.4, 0, 7); g.fill(); g.restore(); });
+def('fx.pellet', (g) => { g.beginPath(); g.arc(32, 36, 16, 0, 7); ink(g, rgr(g, 32, 36, 2, 17, [[0, '#a8724a'], [1, '#5a3418']], -5, -6), 3); g.beginPath(); g.arc(26, 30, 4.5, 0, 7); g.fillStyle = 'rgba(255,255,255,.85)'; g.fill(); });
 function debris(g, kind) { const c = { cone: ['#ff7a00', '#fff'], card: ['#d9a566', '#b47a3c'], wood: ['#d99a52', '#9a5a22'], block: ['#ff4d6d', '#4361ee'], brick: ['#e06640', '#a8442a'], barrel: ['#e53935', '#b9c2d6'], balloon: ['#ff4d6d', '#ffd23f'], cloud: ['#ffffff', '#d6e4f7'] }[kind] || ['#ccc', '#999'];
   if (kind === 'cloud') { g.beginPath(); g.arc(24, 34, 16, 0, 7); g.arc(40, 30, 18, 0, 7); g.fillStyle = '#fff'; g.fill(); return; }
   if (kind === 'brick') { rr(g, 8, 18, 48, 26, 5); ink(g, lg(g, 0, 18, 0, 44, [[0, c[0]], [1, c[1]]]), 4); return; }
@@ -475,7 +604,7 @@ function layer(track, role, W, H) {
 function sprite(name, size) {
   const [w, h] = size || [256, 256], c = cv(w, h), g = c.getContext('2d');
   const m = name.match(/^veh\.(\w+)\.(\w+)$/);
-  if (m) { g.save(); g.scale(w / 512, h / 256); ({ dragster, bibi, truck, sword, jet, pup, rex, comet })[m[1]](g, m[2]); g.restore(); return c; }
+  if (m) { g.save(); g.scale(w / 512, h / 256); ({ laser, ira, dragster, bibi, truck, sword, jet, pup, rex, comet })[m[1]](g, m[2]); g.restore(); return c; }
   const rv = name.match(/^rival\.(\w+)$/); if (rv) { g.save(); g.scale(w / 384, h / 192); rival(g, { orange: '#ff8a1f', green: '#27c46b', blue: '#2f8cff' }[rv[1]] || '#ff8a1f'); g.restore(); return c; }
   const db = name.match(/^debris\.(\w+)(?:\.\d+)?$/); if (db) { g.save(); g.scale(w / 64, h / 64); debris(g, db[1]); g.restore(); return c; }
   const base = name.replace(/\.\d+$/, ''), v = +(name.match(/\.(\d+)$/) || [0, 0])[1];
