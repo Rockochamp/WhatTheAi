@@ -368,7 +368,7 @@ function laser(g, pose) {
 }
 // Ira (D6, interim art): RC's Mini Bull Terrier as a glossy toy figure. Red-tan coat, white blaze, chest and front paws,
 // egg-shaped head with a long Roman nose, black nose on a pink muzzle, small dark triangle eyes, folded tan ears, a big tongue-out grin.
-// drive = run-a (extended gallop), runb = gathered, fly = superhero leap, special = surprised look back, spin = curled chomp spin.
+// drive = run-a (extended gallop), runb = gathered, fly = superhero leap, special = the take (surprised look at the camera; the code-art fallback still turns the head), spin = curled chomp spin.
 function ira(g, pose) {
   const TAN = '#c8733a', TD = '#8f4a1f', TL = '#e39a5c', WH = '#fbf6ef', PINK = '#f2a0a8';
   const fly = pose === 'fly' || pose === 'celebrate';

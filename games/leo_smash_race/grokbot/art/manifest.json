@@ -1,5 +1,5 @@
 {
- "version": 5,
+ "version": 9,
  "changes_v4": [
   "ground layers replaced by Pixel round-2 road textures (all 4 tracks)",
   "sword -> hero-sword_fly_v3 (silver blade), same body scale, sparkle rings filled",
@@ -8,9 +8,9 @@
  "generated": "2026-10-17 (Europe/Zurich)",
  "by": "Muse",
  "spec": "/workspace/WhatTheAi/games/leo_smash_race/grokbot/art/ART_SPEC.md",
- "file_count": 72,
- "total_bytes": 1238944,
- "sprite_bytes": 368686,
+ "file_count": 99,
+ "total_bytes": 1605586,
+ "sprite_bytes": 735328,
  "track_bytes": {
   "toyroom": 176510,
   "desert": 337278,
@@ -28,7 +28,9 @@
   "boost": "drive (no boost art)",
   "celebrate": "fly (no celebrate art)",
   "sword": "all poses = fly",
-  "pup/rex": "boost = special; celebrate = fly (pup) / special (rex)"
+  "pup/rex": "boost = special; celebrate = fly (pup) / special (rex)",
+  "laser": "boost = special; celebrate = fly",
+  "ira": "drive = frames [run_a, run_b]; boost = special; celebrate = fly; fire = spin"
  },
  "not_provided": [
   "smash.box",
@@ -110,443 +112,480 @@
   "veh.pup.boost": "alias veh.pup.special",
   "veh.rex.boost": "alias veh.rex.special",
   "veh.pup.celebrate": "alias veh.pup.fly",
-  "veh.rex.celebrate": "alias veh.rex.special"
+  "veh.rex.celebrate": "alias veh.rex.special",
+  "veh.laser.drive": "vehicles/laser_drive.webp",
+  "veh.laser.fly": "vehicles/laser_fly.webp",
+  "veh.laser.special": "vehicles/laser_special.webp",
+  "veh.laser.boost": "alias veh.laser.special",
+  "veh.laser.celebrate": "alias veh.laser.fly",
+  "veh.ira.drive": "frames vehicles/ira_run_a.webp, vehicles/ira_run_b.webp",
+  "veh.ira.runb": "vehicles/ira_run_b.webp",
+  "veh.ira.fly": "vehicles/ira_fly.webp",
+  "veh.ira.special": "vehicles/ira_special.webp",
+  "veh.ira.spin": "vehicles/ira_spin.webp",
+  "veh.ira.boost": "alias veh.ira.special",
+  "veh.ira.celebrate": "alias veh.ira.fly",
+  "veh.ira.fire": "alias veh.ira.spin",
+  "veh.comet.drive": "vehicles/comet_drive.webp",
+  "veh.comet.fly": "vehicles/comet_fly.webp",
+  "veh.comet.special": "vehicles/comet_special.webp",
+  "proj.rocket": "fx/proj_turbo_rocket.webp",
+  "proj.ball": "fx/proj_bouncy_ball.webp",
+  "proj.boomerang": "fx/proj_wing_boomerang.webp",
+  "proj.balloon": "fx/proj_water_balloon.webp",
+  "proj.gust": "fx/proj_puppy_gust.webp",
+  "proj.teeth": "fx/proj_chatter_teeth.webp",
+  "proj.meteor": "fx/proj_mini_meteor.webp",
+  "hitfx.firepop": "fx/hitfx_fire_pop.webp",
+  "hitfx.confetti": "fx/hitfx_confetti.webp",
+  "hitfx.spark": "fx/hitfx_spark.webp",
+  "hitfx.splash": "fx/hitfx_splash.webp",
+  "hitfx.puff": "fx/hitfx_puff.webp",
+  "hitfx.bite": "fx/hitfx_bite.webp",
+  "hitfx.zap": "fx/hitfx_zap.webp",
+  "fx.toot": "fx/toot_cloud.webp",
+  "fx.pellet": "fx/poop_pellet.webp"
  },
  "files": [
   {
-   "file": "vehicles/dragster_drive.webp",
+   "file": "debris/balloon_1.webp",
    "size": [
-    512,
-    256
+    64,
+    64
    ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
+   "bytes": 1600,
    "content_bbox": [
-    6,
-    15,
-    505,
-    236
-   ],
-   "scale_from_cut": 0.4719,
-   "bytes": 21966,
-   "type": "vehicle",
-   "id": "dragster",
-   "pose": "drive",
-   "src_raw": "vehicle_flame-dragster_drive_v3.jpg"
-  },
-  {
-   "file": "vehicles/dragster_fly.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    6,
-    23,
-    492,
-    236
-   ],
-   "scale_from_cut": 0.4719,
-   "bytes": 23188,
-   "type": "vehicle",
-   "id": "dragster",
-   "pose": "fly",
-   "src_raw": "vehicle_flame-dragster_fly_v3.jpg"
-  },
-  {
-   "file": "vehicles/truck_drive.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    63,
-    5,
-    448,
-    235
-   ],
-   "scale_from_cut": 0.415,
-   "bytes": 18326,
-   "type": "vehicle",
-   "id": "truck",
-   "pose": "drive",
-   "src_raw": "vehicle_bat-truck_drive_v3.jpg"
-  },
-  {
-   "file": "vehicles/truck_fly.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    50,
-    19,
-    461,
-    235
-   ],
-   "scale_from_cut": 0.415,
-   "bytes": 19020,
-   "type": "vehicle",
-   "id": "truck",
-   "pose": "fly",
-   "src_raw": "vehicle_bat-truck_fly_v3.jpg"
-  },
-  {
-   "file": "vehicles/bibi_drive.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    101,
     8,
-    411,
-    234
-   ],
-   "scale_from_cut": 0.4305,
-   "bytes": 13726,
-   "type": "vehicle",
-   "id": "bibi",
-   "pose": "drive",
-   "src_raw": "vehicle_bibi_drive_v2.jpg"
-  },
-  {
-   "file": "vehicles/bibi_fly.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    94,
     5,
-    415,
-    235
-   ],
-   "scale_from_cut": 0.4649,
-   "bytes": 15666,
-   "type": "vehicle",
-   "id": "bibi",
-   "pose": "fly",
-   "src_raw": "vehicle_bibi_fly_v2.jpg"
-  },
-  {
-   "file": "vehicles/jet_drive.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    102,
-    5,
-    412,
-    235
-   ],
-   "scale_from_cut": 0.4158,
-   "bytes": 16830,
-   "type": "vehicle",
-   "id": "jet",
-   "pose": "drive",
-   "src_raw": "vehicle_sky-patroller_drive_v1.jpg"
-  },
-  {
-   "file": "vehicles/jet_fly.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.92
-   ],
-   "baseline_y_px": 236,
-   "content_bbox": [
-    96,
-    39,
-    417,
-    235
-   ],
-   "scale_from_cut": 0.4324,
-   "bytes": 16982,
-   "type": "vehicle",
-   "id": "jet",
-   "pose": "fly",
-   "src_raw": "vehicle_sky-patroller_fly_v1.jpg"
-  },
-  {
-   "file": "vehicles/sword_fly.webp",
-   "size": [
-    512,
-    256
-   ],
-   "anchor": [
-    0.5,
-    0.8
-   ],
-   "baseline_y_px": 205,
-   "content_bbox": [
-    23,
-    62,
-    420,
-    204
-   ],
-   "scale_from_cut": 0.3591,
-   "bytes": 11274,
-   "type": "vehicle",
-   "id": "sword",
-   "pose": "fly",
-   "src_raw": "vehicle_hero-sword_fly_v3.jpg"
-  },
-  {
-   "file": "rivals/rival_orange.webp",
-   "size": [
-    384,
-    192
-   ],
-   "anchor": [
-    0.5,
-    0.93
-   ],
-   "baseline_y_px": 179,
-   "content_bbox": [
     56,
-    5,
-    326,
-    178
+    59
    ],
-   "scale_from_cut": 0.3418,
-   "bytes": 11330,
-   "type": "rival",
-   "id": "orange",
-   "src_raw": "rival_orange_drive_v1.jpg"
-  },
-  {
-   "file": "rivals/rival_green.webp",
-   "size": [
-    384,
-    192
-   ],
-   "anchor": [
-    0.5,
-    0.93
-   ],
-   "baseline_y_px": 179,
-   "content_bbox": [
-    40,
-    5,
-    345,
-    178
-   ],
-   "scale_from_cut": 0.3601,
-   "bytes": 12468,
-   "type": "rival",
-   "id": "green",
-   "src_raw": "rival_green_drive_v1.jpg"
-  },
-  {
-   "file": "rivals/rival_blue.webp",
-   "size": [
-    384,
-    192
-   ],
-   "anchor": [
-    0.5,
-    0.93
-   ],
-   "baseline_y_px": 179,
-   "content_bbox": [
-    32,
-    5,
-    352,
-    178
-   ],
-   "scale_from_cut": 0.3352,
-   "bytes": 12806,
-   "type": "rival",
-   "id": "blue",
-   "src_raw": "rival_blue_drive_v1.jpg"
-  },
-  {
-   "file": "smash/cone.webp",
-   "size": [
-    128,
-    160
-   ],
-   "bytes": 3842,
-   "content_bbox": [
-    4,
-    30,
-    123,
-    154
-   ],
-   "type": "smashable",
-   "id": "cone",
-   "anchor": [
-    0.5,
-    0.97
-   ],
-   "src_raw": "smash_cone_intact_v1.jpg"
-  },
-  {
-   "file": "smash/crate.webp",
-   "size": [
-    160,
-    160
-   ],
-   "bytes": 5064,
-   "content_bbox": [
-    4,
-    15,
-    155,
-    154
-   ],
-   "type": "smashable",
-   "id": "crate",
-   "anchor": [
-    0.5,
-    0.97
-   ],
-   "src_raw": "smash_crate_intact_v1.jpg"
-  },
-  {
-   "file": "smash/balloon.webp",
-   "size": [
-    160,
-    256
-   ],
-   "bytes": 5808,
-   "content_bbox": [
-    5,
-    39,
-    154,
-    250
-   ],
-   "type": "smashable",
+   "type": "debris",
    "id": "balloon",
+   "variant": 1,
    "anchor": [
     0.5,
-    0.6
+    0.5
    ],
-   "src_raw": "smash_balloon_intact_v1.jpg"
+   "src_raw": "smash_balloon_chunks_v1.jpg"
   },
   {
-   "file": "smash/cloud.webp",
+   "file": "debris/balloon_2.webp",
    "size": [
-    256,
-    176
+    64,
+    64
    ],
-   "bytes": 5420,
+   "bytes": 1572,
    "content_bbox": [
+    4,
+    5,
+    59,
+    57
+   ],
+   "type": "debris",
+   "id": "balloon",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/balloon_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1502,
+   "content_bbox": [
+    5,
     9,
-    5,
-    246,
-    170
+    58,
+    53
    ],
-   "type": "smashable",
-   "id": "cloud",
+   "type": "debris",
+   "id": "balloon",
+   "variant": 3,
    "anchor": [
     0.5,
-    0.92
+    0.5
    ],
-   "src_raw": "smash_cloud-block_intact_v2.jpg"
+   "src_raw": "smash_balloon_chunks_v1.jpg"
   },
   {
-   "file": "smash/wall.webp",
+   "file": "debris/balloon_4.webp",
    "size": [
-    192,
-    384
+    64,
+    64
    ],
-   "bytes": 8632,
+   "bytes": 1794,
    "content_bbox": [
     5,
-    104,
-    186,
-    372
+    8,
+    58,
+    54
    ],
-   "type": "smashable",
-   "id": "wall",
+   "type": "debris",
+   "id": "balloon",
+   "variant": 4,
    "anchor": [
     0.5,
-    0.98
+    0.5
    ],
-   "src_raw": "smash_brick-wall_intact_v1.jpg",
-   "note": "right 2 brick columns of the 5x4 wall, cut at a mortar line"
+   "src_raw": "smash_balloon_chunks_v1.jpg"
   },
   {
-   "file": "smash/wall_wide.webp",
+   "file": "debris/balloon_5.webp",
    "size": [
-    384,
-    256
+    64,
+    64
    ],
-   "bytes": 15266,
+   "bytes": 1812,
    "content_bbox": [
-    22,
     5,
-    360,
-    249
+    5,
+    57,
+    58
    ],
-   "type": "smashable",
-   "id": "wall_wide",
+   "type": "debris",
+   "id": "balloon",
+   "variant": 5,
    "anchor": [
     0.5,
-    0.97
+    0.5
    ],
-   "src_raw": "smash_brick-wall_intact_v1.jpg",
-   "note": "OPTIONAL full 5x4 wall; needs its own manifest size and a wider KINDS box"
+   "src_raw": "smash_balloon_chunks_v1.jpg"
   },
   {
-   "file": "smash/barrel.webp",
+   "file": "debris/balloon_6.webp",
    "size": [
-    160,
-    192
+    64,
+    64
    ],
-   "bytes": 5138,
+   "bytes": 1330,
    "content_bbox": [
-    5,
-    75,
-    154,
-    183
+    4,
+    13,
+    59,
+    50
    ],
-   "type": "smashable",
+   "type": "debris",
+   "id": "balloon",
+   "variant": 6,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_balloon_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1156,
+   "content_bbox": [
+    4,
+    14,
+    59,
+    49
+   ],
+   "type": "debris",
    "id": "barrel",
+   "variant": 1,
    "anchor": [
     0.5,
-    0.97
+    0.5
    ],
-   "src_raw": "smash_barrel-pyramid_intact_v1.jpg",
-   "note": "front barrel cut from the pyramid (GrabCut); code stacks pyramids"
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1576,
+   "content_bbox": [
+    5,
+    4,
+    58,
+    58
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1490,
+   "content_bbox": [
+    4,
+    12,
+    59,
+    50
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1706,
+   "content_bbox": [
+    4,
+    7,
+    59,
+    56
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_5.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1372,
+   "content_bbox": [
+    5,
+    11,
+    59,
+    52
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 5,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/barrel_6.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1726,
+   "content_bbox": [
+    4,
+    7,
+    59,
+    55
+   ],
+   "type": "debris",
+   "id": "barrel",
+   "variant": 6,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1440,
+   "content_bbox": [
+    4,
+    9,
+    59,
+    53
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1284,
+   "content_bbox": [
+    4,
+    9,
+    59,
+    53
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1258,
+   "content_bbox": [
+    4,
+    12,
+    59,
+    51
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/brick_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1466,
+   "content_bbox": [
+    4,
+    10,
+    59,
+    53
+   ],
+   "type": "debris",
+   "id": "brick",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_brick-wall_chunks_v1.jpg"
+  },
+  {
+   "file": "debris/cloud_1.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1454,
+   "content_bbox": [
+    4,
+    8,
+    59,
+    55
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 1,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "debris/cloud_2.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1450,
+   "content_bbox": [
+    4,
+    6,
+    59,
+    56
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 2,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "debris/cloud_3.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1446,
+   "content_bbox": [
+    4,
+    8,
+    59,
+    54
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 3,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
+  },
+  {
+   "file": "debris/cloud_4.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1426,
+   "content_bbox": [
+    4,
+    7,
+    58,
+    54
+   ],
+   "type": "debris",
+   "id": "cloud",
+   "variant": 4,
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "src_raw": "smash_cloud-block_chunks_v2.jpg"
   },
   {
    "file": "debris/cone_1.webp",
@@ -791,588 +830,33 @@
    "src_raw": "smash_crate_chunks_v1.jpg"
   },
   {
-   "file": "debris/brick_1.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1440,
-   "content_bbox": [
-    4,
-    9,
-    59,
-    53
-   ],
-   "type": "debris",
-   "id": "brick",
-   "variant": 1,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_brick-wall_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/brick_2.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1284,
-   "content_bbox": [
-    4,
-    9,
-    59,
-    53
-   ],
-   "type": "debris",
-   "id": "brick",
-   "variant": 2,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_brick-wall_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/brick_3.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1258,
-   "content_bbox": [
-    4,
-    12,
-    59,
-    51
-   ],
-   "type": "debris",
-   "id": "brick",
-   "variant": 3,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_brick-wall_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/brick_4.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1466,
-   "content_bbox": [
-    4,
-    10,
-    59,
-    53
-   ],
-   "type": "debris",
-   "id": "brick",
-   "variant": 4,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_brick-wall_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/barrel_1.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1156,
-   "content_bbox": [
-    4,
-    14,
-    59,
-    49
-   ],
-   "type": "debris",
-   "id": "barrel",
-   "variant": 1,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/barrel_2.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1576,
-   "content_bbox": [
-    5,
-    4,
-    58,
-    58
-   ],
-   "type": "debris",
-   "id": "barrel",
-   "variant": 2,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/barrel_3.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1490,
-   "content_bbox": [
-    4,
-    12,
-    59,
-    50
-   ],
-   "type": "debris",
-   "id": "barrel",
-   "variant": 3,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/barrel_4.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1706,
-   "content_bbox": [
-    4,
-    7,
-    59,
-    56
-   ],
-   "type": "debris",
-   "id": "barrel",
-   "variant": 4,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/barrel_5.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1372,
-   "content_bbox": [
-    5,
-    11,
-    59,
-    52
-   ],
-   "type": "debris",
-   "id": "barrel",
-   "variant": 5,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/barrel_6.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1726,
-   "content_bbox": [
-    4,
-    7,
-    59,
-    55
-   ],
-   "type": "debris",
-   "id": "barrel",
-   "variant": 6,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_barrel-pyramid_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/balloon_1.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1600,
-   "content_bbox": [
-    8,
-    5,
-    56,
-    59
-   ],
-   "type": "debris",
-   "id": "balloon",
-   "variant": 1,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_balloon_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/balloon_2.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1572,
-   "content_bbox": [
-    4,
-    5,
-    59,
-    57
-   ],
-   "type": "debris",
-   "id": "balloon",
-   "variant": 2,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_balloon_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/balloon_3.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1502,
-   "content_bbox": [
-    5,
-    9,
-    58,
-    53
-   ],
-   "type": "debris",
-   "id": "balloon",
-   "variant": 3,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_balloon_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/balloon_4.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1794,
-   "content_bbox": [
-    5,
-    8,
-    58,
-    54
-   ],
-   "type": "debris",
-   "id": "balloon",
-   "variant": 4,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_balloon_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/balloon_5.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1812,
-   "content_bbox": [
-    5,
-    5,
-    57,
-    58
-   ],
-   "type": "debris",
-   "id": "balloon",
-   "variant": 5,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_balloon_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/balloon_6.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1330,
-   "content_bbox": [
-    4,
-    13,
-    59,
-    50
-   ],
-   "type": "debris",
-   "id": "balloon",
-   "variant": 6,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_balloon_chunks_v1.jpg"
-  },
-  {
-   "file": "debris/cloud_1.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1454,
-   "content_bbox": [
-    4,
-    8,
-    59,
-    55
-   ],
-   "type": "debris",
-   "id": "cloud",
-   "variant": 1,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_cloud-block_chunks_v2.jpg"
-  },
-  {
-   "file": "debris/cloud_2.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1450,
-   "content_bbox": [
-    4,
-    6,
-    59,
-    56
-   ],
-   "type": "debris",
-   "id": "cloud",
-   "variant": 2,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_cloud-block_chunks_v2.jpg"
-  },
-  {
-   "file": "debris/cloud_3.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1446,
-   "content_bbox": [
-    4,
-    8,
-    59,
-    54
-   ],
-   "type": "debris",
-   "id": "cloud",
-   "variant": 3,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_cloud-block_chunks_v2.jpg"
-  },
-  {
-   "file": "debris/cloud_4.webp",
-   "size": [
-    64,
-    64
-   ],
-   "bytes": 1426,
-   "content_bbox": [
-    4,
-    7,
-    58,
-    54
-   ],
-   "type": "debris",
-   "id": "cloud",
-   "variant": 4,
-   "anchor": [
-    0.5,
-    0.5
-   ],
-   "src_raw": "smash_cloud-block_chunks_v2.jpg"
-  },
-  {
-   "file": "layers/toyroom_sky.webp",
-   "size": [
-    1920,
-    1080
-   ],
-   "bytes": 51508,
-   "track": "toyroom",
-   "role": "sky",
-   "par": 0.04,
-   "src_raw": "track_toy-room-rally_far-sky_v2.jpg",
-   "note": "wallpaper cropped to 2 pattern periods (484 px) + 16 px xfade",
-   "seam": [
-    0.9804535508155823,
-    0.8404545783996582
-   ]
-  },
-  {
-   "file": "layers/toyroom_mid.webp",
-   "size": [
-    1920,
-    720
-   ],
-   "bytes": 74900,
-   "track": "toyroom",
-   "role": "mid",
-   "par": 0.35,
-   "src_raw": "track_toy-room-rally_mid-scenery_v2.jpg",
-   "note": "wrap at 1278px; sky keyed out, level-matched (+13.5), repeats 1x per 1920 px, content top row 245",
-   "seam": [
-    11.306658744812012,
-    5.322919845581055
-   ]
-  },
-  {
-   "file": "layers/toyroom_ground.webp",
-   "size": [
-    1920,
-    540
-   ],
-   "bytes": 25006,
-   "track": "toyroom",
-   "role": "ground",
-   "par": 1,
-   "src_raw": "track_toy-room-rally_road_v1.jpg",
-   "note": "rows 413-716, best-match wrap at 1113px, 64px crossfade, level-matched (+0.2); x/y scale 1.830/1.782",
-   "seam": [
-    0.46663475036621094,
-    0.5083242654800415
-   ]
-  },
-  {
-   "file": "layers/toyroom_front.webp",
+   "file": "layers/castle_front.webp",
    "size": [
     1920,
     300
    ],
-   "bytes": 25096,
-   "track": "toyroom",
-   "role": "front",
-   "par": 1.25,
-   "src_raw": "track_toy-room-rally_foreground-props_v1.jpg",
-   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
-  },
-  {
-   "file": "layers/desert_sky.webp",
-   "size": [
-    1920,
-    1080
-   ],
-   "bytes": 24646,
-   "track": "desert",
-   "role": "sky",
-   "par": 0.04,
-   "src_raw": "track_desert-demolition_far-sky_v1.jpg",
-   "note": "level-matched (-3.7), best-match wrap at 1192px + 96 px crossfade",
-   "seam": [
-    0.555934488773346,
-    0.531208336353302
-   ]
-  },
-  {
-   "file": "layers/desert_mid.webp",
-   "size": [
-    1920,
-    720
-   ],
-   "bytes": 135034,
-   "track": "desert",
-   "role": "mid",
-   "par": 0.35,
-   "src_raw": "track_desert-demolition_mid-scenery_v1.jpg",
-   "note": "wrap at 1230px; sky keyed out, level-matched (+2.2), repeats 1x per 1920 px, content top row 253",
-   "seam": [
-    2.9808804988861084,
-    2.9581995010375977
-   ]
-  },
-  {
-   "file": "layers/desert_ground.webp",
-   "size": [
-    1920,
-    540
-   ],
-   "bytes": 156868,
-   "track": "desert",
-   "role": "ground",
-   "par": 1,
-   "src_raw": "track_desert-demolition_road_v1.jpg",
-   "note": "rows 364-718, best-match wrap at 1267px, 64px crossfade, level-matched (+2.0); x/y scale 1.596/1.525",
-   "seam": [
-    3.8527543544769287,
-    5.011909484863281
-   ]
-  },
-  {
-   "file": "layers/desert_front.webp",
-   "size": [
-    1920,
-    300
-   ],
-   "bytes": 20730,
-   "track": "desert",
-   "role": "front",
-   "par": 1.25,
-   "src_raw": "track_desert-demolition_foreground-props_v1.jpg",
-   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
-  },
-  {
-   "file": "layers/castle_sky.webp",
-   "size": [
-    1920,
-    1080
-   ],
-   "bytes": 38378,
+   "bytes": 16830,
    "track": "castle",
-   "role": "sky",
-   "par": 0.04,
-   "src_raw": "track_castle-sky-run_far-sky_v1.jpg",
-   "note": "level-matched (+2.3), best-match wrap at 1228px + 96 px crossfade",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_castle-sky-run_foreground-props_v2.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/castle_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 24004,
+   "track": "castle",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_castle-sky-run_road_v1.jpg",
+   "note": "rows 372-704, cut at stone joints x=52..1241 (6 stones, period ~198 px), 12px joint crossfade, level-matched (+2.0); x/y scale 1.615/1.627",
    "seam": [
-    0.26268067955970764,
-    0.2720569670200348
+    9.19001579284668,
+    3.146021604537964
    ]
   },
   {
@@ -1393,50 +877,50 @@
    ]
   },
   {
-   "file": "layers/castle_ground.webp",
-   "size": [
-    1920,
-    540
-   ],
-   "bytes": 24004,
-   "track": "castle",
-   "role": "ground",
-   "par": 1,
-   "src_raw": "track_castle-sky-run_road_v1.jpg",
-   "note": "rows 372-704, cut at stone joints x=52..1241 (6 stones, period ~198 px), 12px joint crossfade, level-matched (+2.0); x/y scale 1.615/1.627",
-   "seam": [
-    9.19001579284668,
-    3.146021604537964
-   ]
-  },
-  {
-   "file": "layers/castle_front.webp",
-   "size": [
-    1920,
-    300
-   ],
-   "bytes": 16830,
-   "track": "castle",
-   "role": "front",
-   "par": 1.25,
-   "src_raw": "track_castle-sky-run_foreground-props_v2.jpg",
-   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
-  },
-  {
-   "file": "layers/city_sky.webp",
+   "file": "layers/castle_sky.webp",
    "size": [
     1920,
     1080
    ],
-   "bytes": 48812,
-   "track": "city",
+   "bytes": 38378,
+   "track": "castle",
    "role": "sky",
    "par": 0.04,
-   "src_raw": "track_bat-city-night_far-sky_v1.jpg",
-   "note": "level-matched (-0.6), best-match wrap at 1280px + 96 px crossfade",
+   "src_raw": "track_castle-sky-run_far-sky_v1.jpg",
+   "note": "level-matched (+2.3), best-match wrap at 1228px + 96 px crossfade",
    "seam": [
-    1.5601922273635864,
-    1.2186323404312134
+    0.26268067955970764,
+    0.2720569670200348
+   ]
+  },
+  {
+   "file": "layers/city_front.webp",
+   "size": [
+    1920,
+    300
+   ],
+   "bytes": 22464,
+   "track": "city",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_bat-city-night_foreground-props_v1.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/city_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 4414,
+   "track": "city",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_bat-city-night_road_v1.jpg",
+   "note": "rows 363-718, best-match wrap at 1248px, 24px crossfade, level-matched (+2.7); x/y scale 1.569/1.521",
+   "seam": [
+    0.38379743695259094,
+    0.2850329875946045
    ]
   },
   {
@@ -1457,34 +941,560 @@
    ]
   },
   {
-   "file": "layers/city_ground.webp",
+   "file": "layers/city_sky.webp",
    "size": [
     1920,
-    540
+    1080
    ],
-   "bytes": 4414,
+   "bytes": 48812,
    "track": "city",
-   "role": "ground",
-   "par": 1,
-   "src_raw": "track_bat-city-night_road_v1.jpg",
-   "note": "rows 363-718, best-match wrap at 1248px, 24px crossfade, level-matched (+2.7); x/y scale 1.569/1.521",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_bat-city-night_far-sky_v1.jpg",
+   "note": "level-matched (-0.6), best-match wrap at 1280px + 96 px crossfade",
    "seam": [
-    0.38379743695259094,
-    0.2850329875946045
+    1.5601922273635864,
+    1.2186323404312134
    ]
   },
   {
-   "file": "layers/city_front.webp",
+   "file": "layers/desert_front.webp",
    "size": [
     1920,
     300
    ],
-   "bytes": 22464,
-   "track": "city",
+   "bytes": 20730,
+   "track": "desert",
    "role": "front",
    "par": 1.25,
-   "src_raw": "track_bat-city-night_foreground-props_v1.jpg",
+   "src_raw": "track_desert-demolition_foreground-props_v1.jpg",
    "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/desert_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 156868,
+   "track": "desert",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_desert-demolition_road_v1.jpg",
+   "note": "rows 364-718, best-match wrap at 1267px, 64px crossfade, level-matched (+2.0); x/y scale 1.596/1.525",
+   "seam": [
+    3.8527543544769287,
+    5.011909484863281
+   ]
+  },
+  {
+   "file": "layers/desert_mid.webp",
+   "size": [
+    1920,
+    720
+   ],
+   "bytes": 135034,
+   "track": "desert",
+   "role": "mid",
+   "par": 0.35,
+   "src_raw": "track_desert-demolition_mid-scenery_v1.jpg",
+   "note": "wrap at 1230px; sky keyed out, level-matched (+2.2), repeats 1x per 1920 px, content top row 253",
+   "seam": [
+    2.9808804988861084,
+    2.9581995010375977
+   ]
+  },
+  {
+   "file": "layers/desert_sky.webp",
+   "size": [
+    1920,
+    1080
+   ],
+   "bytes": 24646,
+   "track": "desert",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_desert-demolition_far-sky_v1.jpg",
+   "note": "level-matched (-3.7), best-match wrap at 1192px + 96 px crossfade",
+   "seam": [
+    0.555934488773346,
+    0.531208336353302
+   ]
+  },
+  {
+   "file": "layers/toyroom_front.webp",
+   "size": [
+    1920,
+    300
+   ],
+   "bytes": 25096,
+   "track": "toyroom",
+   "role": "front",
+   "par": 1.25,
+   "src_raw": "track_toy-room-rally_foreground-props_v1.jpg",
+   "note": "5 props, max 190 px tall, bottoms at y=296, ends transparent"
+  },
+  {
+   "file": "layers/toyroom_ground.webp",
+   "size": [
+    1920,
+    540
+   ],
+   "bytes": 25006,
+   "track": "toyroom",
+   "role": "ground",
+   "par": 1,
+   "src_raw": "track_toy-room-rally_road_v1.jpg",
+   "note": "rows 413-716, best-match wrap at 1113px, 64px crossfade, level-matched (+0.2); x/y scale 1.830/1.782",
+   "seam": [
+    0.46663475036621094,
+    0.5083242654800415
+   ]
+  },
+  {
+   "file": "layers/toyroom_mid.webp",
+   "size": [
+    1920,
+    720
+   ],
+   "bytes": 74900,
+   "track": "toyroom",
+   "role": "mid",
+   "par": 0.35,
+   "src_raw": "track_toy-room-rally_mid-scenery_v2.jpg",
+   "note": "wrap at 1278px; sky keyed out, level-matched (+13.5), repeats 1x per 1920 px, content top row 245",
+   "seam": [
+    11.306658744812012,
+    5.322919845581055
+   ]
+  },
+  {
+   "file": "layers/toyroom_sky.webp",
+   "size": [
+    1920,
+    1080
+   ],
+   "bytes": 51508,
+   "track": "toyroom",
+   "role": "sky",
+   "par": 0.04,
+   "src_raw": "track_toy-room-rally_far-sky_v2.jpg",
+   "note": "wallpaper cropped to 2 pattern periods (484 px) + 16 px xfade",
+   "seam": [
+    0.9804535508155823,
+    0.8404545783996582
+   ]
+  },
+  {
+   "file": "rivals/rival_blue.webp",
+   "size": [
+    384,
+    192
+   ],
+   "anchor": [
+    0.5,
+    0.93
+   ],
+   "baseline_y_px": 179,
+   "content_bbox": [
+    32,
+    5,
+    352,
+    178
+   ],
+   "scale_from_cut": 0.3352,
+   "bytes": 12806,
+   "type": "rival",
+   "id": "blue",
+   "src_raw": "rival_blue_drive_v1.jpg"
+  },
+  {
+   "file": "rivals/rival_green.webp",
+   "size": [
+    384,
+    192
+   ],
+   "anchor": [
+    0.5,
+    0.93
+   ],
+   "baseline_y_px": 179,
+   "content_bbox": [
+    40,
+    5,
+    345,
+    178
+   ],
+   "scale_from_cut": 0.3601,
+   "bytes": 12468,
+   "type": "rival",
+   "id": "green",
+   "src_raw": "rival_green_drive_v1.jpg"
+  },
+  {
+   "file": "rivals/rival_orange.webp",
+   "size": [
+    384,
+    192
+   ],
+   "anchor": [
+    0.5,
+    0.93
+   ],
+   "baseline_y_px": 179,
+   "content_bbox": [
+    56,
+    5,
+    326,
+    178
+   ],
+   "scale_from_cut": 0.3418,
+   "bytes": 11330,
+   "type": "rival",
+   "id": "orange",
+   "src_raw": "rival_orange_drive_v1.jpg"
+  },
+  {
+   "file": "smash/balloon.webp",
+   "size": [
+    160,
+    256
+   ],
+   "bytes": 5808,
+   "content_bbox": [
+    5,
+    39,
+    154,
+    250
+   ],
+   "type": "smashable",
+   "id": "balloon",
+   "anchor": [
+    0.5,
+    0.6
+   ],
+   "src_raw": "smash_balloon_intact_v1.jpg"
+  },
+  {
+   "file": "smash/barrel.webp",
+   "size": [
+    160,
+    192
+   ],
+   "bytes": 17712,
+   "content_bbox": [
+    5,
+    75,
+    154,
+    183
+   ],
+   "type": "smashable",
+   "id": "barrel",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_barrel-pyramid_intact_v1.jpg",
+   "note": "front barrel cut from the pyramid (GrabCut); code stacks pyramids"
+  },
+  {
+   "file": "smash/cloud.webp",
+   "size": [
+    256,
+    176
+   ],
+   "bytes": 5420,
+   "content_bbox": [
+    9,
+    5,
+    246,
+    170
+   ],
+   "type": "smashable",
+   "id": "cloud",
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "src_raw": "smash_cloud-block_intact_v2.jpg"
+  },
+  {
+   "file": "smash/cone.webp",
+   "size": [
+    128,
+    160
+   ],
+   "bytes": 3842,
+   "content_bbox": [
+    4,
+    30,
+    123,
+    154
+   ],
+   "type": "smashable",
+   "id": "cone",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_cone_intact_v1.jpg"
+  },
+  {
+   "file": "smash/crate.webp",
+   "size": [
+    160,
+    160
+   ],
+   "bytes": 5064,
+   "content_bbox": [
+    4,
+    15,
+    155,
+    154
+   ],
+   "type": "smashable",
+   "id": "crate",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_crate_intact_v1.jpg"
+  },
+  {
+   "file": "smash/wall.webp",
+   "size": [
+    192,
+    384
+   ],
+   "bytes": 8632,
+   "content_bbox": [
+    5,
+    104,
+    186,
+    372
+   ],
+   "type": "smashable",
+   "id": "wall",
+   "anchor": [
+    0.5,
+    0.98
+   ],
+   "src_raw": "smash_brick-wall_intact_v1.jpg",
+   "note": "right 2 brick columns of the 5x4 wall, cut at a mortar line"
+  },
+  {
+   "file": "smash/wall_wide.webp",
+   "size": [
+    384,
+    256
+   ],
+   "bytes": 15266,
+   "content_bbox": [
+    22,
+    5,
+    360,
+    249
+   ],
+   "type": "smashable",
+   "id": "wall_wide",
+   "anchor": [
+    0.5,
+    0.97
+   ],
+   "src_raw": "smash_brick-wall_intact_v1.jpg",
+   "note": "OPTIONAL full 5x4 wall; needs its own manifest size and a wider KINDS box"
+  },
+  {
+   "file": "vehicles/bibi_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    101,
+    8,
+    411,
+    234
+   ],
+   "scale_from_cut": 0.4305,
+   "bytes": 13726,
+   "type": "vehicle",
+   "id": "bibi",
+   "pose": "drive",
+   "src_raw": "vehicle_bibi_drive_v2.jpg"
+  },
+  {
+   "file": "vehicles/bibi_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    94,
+    5,
+    415,
+    235
+   ],
+   "scale_from_cut": 0.4649,
+   "bytes": 15666,
+   "type": "vehicle",
+   "id": "bibi",
+   "pose": "fly",
+   "src_raw": "vehicle_bibi_fly_v2.jpg"
+  },
+  {
+   "file": "vehicles/comet_drive.webp",
+   "type": "vehicles",
+   "note": "live file without v5 json metadata (added in a later drop)",
+   "bytes": 11994,
+   "size": [
+    512,
+    256
+   ],
+   "content_bbox": [
+    116,
+    109,
+    395,
+    236
+   ]
+  },
+  {
+   "file": "vehicles/comet_fly.webp",
+   "type": "vehicles",
+   "note": "live file without v5 json metadata (added in a later drop)",
+   "bytes": 10150,
+   "size": [
+    512,
+    256
+   ],
+   "content_bbox": [
+    128,
+    126,
+    383,
+    236
+   ]
+  },
+  {
+   "file": "vehicles/comet_special.webp",
+   "type": "vehicles",
+   "note": "live file without v5 json metadata (added in a later drop)",
+   "bytes": 15112,
+   "size": [
+    512,
+    256
+   ],
+   "content_bbox": [
+    112,
+    108,
+    407,
+    236
+   ]
+  },
+  {
+   "file": "vehicles/dragster_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    6,
+    15,
+    505,
+    236
+   ],
+   "scale_from_cut": 0.4719,
+   "bytes": 21966,
+   "type": "vehicle",
+   "id": "dragster",
+   "pose": "drive",
+   "src_raw": "vehicle_flame-dragster_drive_v3.jpg"
+  },
+  {
+   "file": "vehicles/dragster_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    6,
+    23,
+    492,
+    236
+   ],
+   "scale_from_cut": 0.4719,
+   "bytes": 23188,
+   "type": "vehicle",
+   "id": "dragster",
+   "pose": "fly",
+   "src_raw": "vehicle_flame-dragster_fly_v3.jpg"
+  },
+  {
+   "file": "vehicles/jet_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    102,
+    5,
+    412,
+    235
+   ],
+   "scale_from_cut": 0.4158,
+   "bytes": 16830,
+   "type": "vehicle",
+   "id": "jet",
+   "pose": "drive",
+   "src_raw": "vehicle_sky-patroller_drive_v1.jpg"
+  },
+  {
+   "file": "vehicles/jet_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    96,
+    39,
+    417,
+    235
+   ],
+   "scale_from_cut": 0.4324,
+   "bytes": 16982,
+   "type": "vehicle",
+   "id": "jet",
+   "pose": "fly",
+   "src_raw": "vehicle_sky-patroller_fly_v1.jpg"
   },
   {
    "file": "vehicles/pup_drive.webp",
@@ -1653,6 +1663,715 @@
    ],
    "bytes": 19676,
    "src_raw": "vehicle_chomp-rex_special_v1.jpg"
+  },
+  {
+   "file": "vehicles/sword_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.8
+   ],
+   "baseline_y_px": 205,
+   "content_bbox": [
+    23,
+    62,
+    420,
+    204
+   ],
+   "scale_from_cut": 0.3591,
+   "bytes": 11274,
+   "type": "vehicle",
+   "id": "sword",
+   "pose": "fly",
+   "src_raw": "vehicle_hero-sword_fly_v3.jpg"
+  },
+  {
+   "file": "vehicles/truck_drive.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    63,
+    5,
+    448,
+    235
+   ],
+   "scale_from_cut": 0.415,
+   "bytes": 18326,
+   "type": "vehicle",
+   "id": "truck",
+   "pose": "drive",
+   "src_raw": "vehicle_bat-truck_drive_v3.jpg"
+  },
+  {
+   "file": "vehicles/truck_fly.webp",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    50,
+    19,
+    461,
+    235
+   ],
+   "scale_from_cut": 0.415,
+   "bytes": 19020,
+   "type": "vehicle",
+   "id": "truck",
+   "pose": "fly",
+   "src_raw": "vehicle_bat-truck_fly_v3.jpg"
+  },
+  {
+   "file": "vehicles/laser_drive.webp",
+   "type": "vehicle",
+   "id": "laser",
+   "pose": "drive",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    72,
+    109,
+    439,
+    236
+   ],
+   "visible_h_px": 128,
+   "scale_from_src": 0.3283,
+   "offset_px": [
+    40.97,
+    48.54
+   ],
+   "contact_src_y": 571,
+   "bytes": 13002,
+   "src_raw": "vehicle_laser-racer_drive_v1.jpg"
+  },
+  {
+   "file": "vehicles/laser_fly.webp",
+   "type": "vehicle",
+   "id": "laser",
+   "pose": "fly",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    79,
+    108,
+    432,
+    236
+   ],
+   "visible_h_px": 129,
+   "scale_from_src": 0.3283,
+   "offset_px": [
+    40.31,
+    63.65
+   ],
+   "contact_src_y": 525,
+   "bytes": 13222,
+   "src_raw": "vehicle_laser-racer_fly_v1.jpg"
+  },
+  {
+   "file": "vehicles/laser_special.webp",
+   "type": "vehicle",
+   "id": "laser",
+   "pose": "special",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    71,
+    109,
+    441,
+    236
+   ],
+   "visible_h_px": 128,
+   "scale_from_src": 0.3283,
+   "offset_px": [
+    40.97,
+    48.54
+   ],
+   "contact_src_y": 571,
+   "bytes": 13432,
+   "src_raw": "vehicle_laser-racer_special_v1.jpg"
+  },
+  {
+   "file": "vehicles/ira_run_a.webp",
+   "type": "vehicle",
+   "id": "ira",
+   "pose": "run_a",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    144,
+    74,
+    367,
+    236
+   ],
+   "visible_h_px": 163,
+   "scale_from_src": 0.324,
+   "offset_px": [
+    58.65,
+    39.3
+   ],
+   "contact_src_y": 607,
+   "bytes": 11770,
+   "src_raw": "vehicle_ira_run-a_v1.jpg"
+  },
+  {
+   "file": "vehicles/ira_run_b.webp",
+   "type": "vehicle",
+   "id": "ira",
+   "pose": "run_b",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    174,
+    74,
+    359,
+    230
+   ],
+   "visible_h_px": 157,
+   "scale_from_src": 0.324,
+   "offset_px": [
+    58.65,
+    39.3
+   ],
+   "contact_src_y": null,
+   "bytes": 9730,
+   "src_raw": "vehicle_ira_run-b_v1.jpg"
+  },
+  {
+   "file": "vehicles/ira_fly.webp",
+   "type": "vehicle",
+   "id": "ira",
+   "pose": "fly",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    131,
+    92,
+    381,
+    236
+   ],
+   "visible_h_px": 145,
+   "scale_from_src": 0.324,
+   "offset_px": [
+    49.26,
+    57.13
+   ],
+   "contact_src_y": 552,
+   "bytes": 10780,
+   "src_raw": "vehicle_ira_fly_v1.jpg"
+  },
+  {
+   "file": "vehicles/ira_special.webp",
+   "type": "vehicle",
+   "id": "ira",
+   "pose": "special",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    144,
+    73,
+    368,
+    235
+   ],
+   "visible_h_px": 163,
+   "scale_from_src": 0.324,
+   "offset_px": [
+    58.17,
+    39.63
+   ],
+   "contact_src_y": 606,
+   "bytes": 11792,
+   "src_raw": "vehicle_ira_special_v1.jpg"
+  },
+  {
+   "file": "vehicles/ira_spin.webp",
+   "type": "vehicle",
+   "id": "ira",
+   "pose": "spin",
+   "size": [
+    512,
+    256
+   ],
+   "anchor": [
+    0.5,
+    0.92
+   ],
+   "baseline_y_px": 236,
+   "content_bbox": [
+    140,
+    53,
+    371,
+    235
+   ],
+   "visible_h_px": 183,
+   "scale_from_src": 0.324,
+   "offset_px": [
+    41.97,
+    26.02
+   ],
+   "contact_src_y": 648,
+   "bytes": 12802,
+   "src_raw": "vehicle_ira_spin_v1.jpg"
+  },
+  {
+   "file": "fx/proj_turbo_rocket.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 3026,
+   "content_bbox": [
+    4,
+    44,
+    123,
+    82
+   ],
+   "scale_from_src": 0.1213,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_turbo-rocket_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/proj_bouncy_ball.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 4764,
+   "content_bbox": [
+    4,
+    4,
+    123,
+    123
+   ],
+   "scale_from_src": 0.2091,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_bouncy-ball_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/proj_wing_boomerang.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 4496,
+   "content_bbox": [
+    4,
+    22,
+    123,
+    106
+   ],
+   "scale_from_src": 0.1639,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_wing-boomerang_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/proj_water_balloon.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 5934,
+   "content_bbox": [
+    4,
+    26,
+    123,
+    101
+   ],
+   "scale_from_src": 0.1521,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_water-balloon_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/proj_puppy_gust.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 6346,
+   "content_bbox": [
+    4,
+    16,
+    123,
+    110
+   ],
+   "scale_from_src": 0.1807,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_puppy-gust_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/proj_chatter_teeth.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 6608,
+   "content_bbox": [
+    4,
+    18,
+    123,
+    108
+   ],
+   "scale_from_src": 0.1747,
+   "holes_kept_open_px": [
+    917,
+    911
+   ],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_chatter-teeth_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/proj_mini_meteor.webp",
+   "size": [
+    128,
+    128
+   ],
+   "bytes": 4148,
+   "content_bbox": [
+    4,
+    36,
+    123,
+    91
+   ],
+   "scale_from_src": 0.1587,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "proj_mini-meteor_v1.jpg",
+   "type": "projectile",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_fire_pop.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 17582,
+   "content_bbox": [
+    5,
+    28,
+    250,
+    226
+   ],
+   "scale_from_src": 0.3412,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 8171,
+   "src_raw": "hitfx_fire-pop_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_confetti.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 38324,
+   "content_bbox": [
+    5,
+    30,
+    250,
+    225
+   ],
+   "scale_from_src": 0.3102,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 4071,
+   "haze_px_removed": 3932,
+   "src_raw": "hitfx_confetti_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_spark.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 27140,
+   "content_bbox": [
+    5,
+    22,
+    250,
+    233
+   ],
+   "scale_from_src": 0.3224,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 30405,
+   "src_raw": "hitfx_spark_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_splash.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 23244,
+   "content_bbox": [
+    5,
+    44,
+    250,
+    211
+   ],
+   "scale_from_src": 0.287,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 43014,
+   "src_raw": "hitfx_splash_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_puff.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 22018,
+   "content_bbox": [
+    5,
+    34,
+    250,
+    220
+   ],
+   "scale_from_src": 0.3306,
+   "holes_kept_open_px": [
+    1898
+   ],
+   "holes_filled_px": 53,
+   "haze_px_removed": 33586,
+   "src_raw": "hitfx_puff_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_bite.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 20042,
+   "content_bbox": [
+    5,
+    40,
+    250,
+    214
+   ],
+   "scale_from_src": 0.2742,
+   "holes_kept_open_px": [
+    27432
+   ],
+   "holes_filled_px": 0,
+   "haze_px_removed": 2412,
+   "src_raw": "hitfx_bite_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/hitfx_zap.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 24968,
+   "content_bbox": [
+    5,
+    14,
+    250,
+    242
+   ],
+   "scale_from_src": 0.3398,
+   "holes_kept_open_px": [
+    55,
+    875,
+    390,
+    2180,
+    100
+   ],
+   "holes_filled_px": 28,
+   "haze_px_removed": 55102,
+   "src_raw": "hitfx_zap_v1.jpg",
+   "type": "hitfx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/toot_cloud.webp",
+   "size": [
+    256,
+    256
+   ],
+   "bytes": 10004,
+   "content_bbox": [
+    5,
+    39,
+    250,
+    216
+   ],
+   "scale_from_src": 0.3426,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "fx_toot-cloud_v1.jpg",
+   "type": "fx",
+   "anchor": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "file": "fx/poop_pellet.webp",
+   "size": [
+    64,
+    64
+   ],
+   "bytes": 1638,
+   "content_bbox": [
+    10,
+    3,
+    59,
+    47
+   ],
+   "scale_from_src": 0.1568,
+   "holes_kept_open_px": [],
+   "holes_filled_px": 0,
+   "haze_px_removed": 0,
+   "src_raw": "fx_poop-pellet_v1.jpg",
+   "type": "fx",
+   "anchor": [
+    0.5,
+    0.75
+   ]
   }
  ],
  "changes_v5": [
@@ -1660,5 +2379,14 @@
   "pup: one shared scale (0.2502 of source), drive height = 60% of truck_drive (139 px), feet on the 0.92 baseline in every pose",
   "rex: one shared scale (0.4304), as tall as the canvas allows (232 px, = truck height); rex_special uses the exact drive transform (offset -13,-42); tyre residual 1 px",
   "manifest.js: boost -> special for both; celebrate -> fly (pup), -> special (rex)"
+ ],
+ "changes_v9": [
+  "added Addendum D1 Laser Racer: vehicles/laser_{drive,fly,special}.webp; one shared scale 0.3283; drive visible h 128 px = 55.4% of truck_drive (231 px); tyre contact src y 571/525/571",
+  "laser_special uses the drive transform; measured special-drive offset on the canvas {'whole': [0.01, -0.05], 'tyres': [0.07, -0.01], 'wing': [-0.05, 0.04]} px",
+  "added Addendum D6 Ira: vehicles/ira_{run_a,run_b,fly,special,spin}.webp; one shared scale 0.324; run_a visible h 163 px = 70.6% of truck_drive; paw contact on the baseline (run_b: 6 px above, head-locked to run_a)",
+  "ira run_b vs run_a head offset {'head': [0.09, -0.02], 'head+neck': [0.47, -0.02]} px; ground shadows removed in every pose",
+  "added FIRE art: fx/proj_*.webp (7, 128x128), fx/hitfx_*.webp (7, 256x256), fx/toot_cloud.webp (256), fx/poop_pellet.webp (64, anchor 0.5,0.75)",
+  "manifest.js: laser boost->special, celebrate->fly; ira drive = frames [run_a, run_b] (+ runb key kept), boost->special, celebrate->fly, fire->spin",
+  "files list rebuilt from the real files on main + this drop (the committed v9 json was still v5 and lacked comet_*)"
  ]
 }

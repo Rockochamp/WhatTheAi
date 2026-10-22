@@ -20,7 +20,7 @@ const VEHICLES = {
   pup:      { id: 'pup', name: 'Whirly Pup', speed: 600, len: 105, h: 58, fly: 'wings', jumpV: 640, thrust: 2900, maxUp: 500, glide: -150, grav: 1300, bounce: 0.5, laneT: 0.12, superMult: 1.4, special: 'whirl', specialName: 'Whirlwind Spin', stats: { speed: 2, smash: 1, fly: 3 }, horn: 'yip' },
   comet:    { id: 'comet', name: 'Comet 17', speed: 610, len: 145, h: 66, fly: 'wings', jumpV: 560, thrust: 2500, maxUp: 440, glide: -220, grav: 1650, bounce: 0.22, laneT: 0.13, accelT: 0.4, superMult: 1.6, special: 'comet', specialName: 'Comet Dash', stats: { speed: 3, smash: 1, fly: 2 }, horn: 'chirp' },
   /* Addendum D heroes. laser: the high-tech glider (best flyer among the cars). ira: RC's Mini Bull Terrier, she runs (runner: paws, no engine). */
-  laser:    { id: 'laser', name: 'Laser Racer', speed: 590, len: 165, h: 62, fly: 'wings', jumpV: 560, thrust: 2600, maxUp: 470, glide: -180, grav: 1500, bounce: 0.25, laneT: 0.15, accelT: 0.5, superMult: 1.8, special: 'laser', specialName: 'Laser Drive', stats: { speed: 2, smash: 2, fly: 3 }, horn: 'vwee' },
+  laser:    { id: 'laser', name: 'Laser Racer', speed: 590, len: 190, h: 66, fly: 'wings', jumpV: 560, thrust: 2600, maxUp: 470, glide: -180, grav: 1500, bounce: 0.25, laneT: 0.15, accelT: 0.5, superMult: 1.8, special: 'laser', specialName: 'Laser Drive', stats: { speed: 2, smash: 2, fly: 3 }, horn: 'vwee' },
   ira:      { id: 'ira', name: 'Ira', speed: 560, len: 150, h: 80, fly: 'bounce', jumpV: 700, airJumpV: 620, airJumps: 2, grav: 1600, bounce: 0.4, laneT: 0.11, accelT: 0.25, superMult: 1.7, special: 'toot', specialName: 'Turbo Toot', stats: { speed: 2, smash: 2, fly: 1 }, horn: 'woof', runner: true },
   rex:      { id: 'rex', name: 'Chomp Rex', speed: 500, len: 215, h: 120, fly: 'wings', jumpV: 620, thrust: 2000, maxUp: 380, glide: -320, grav: 1900, bounce: 0.45, laneT: 0.22, accelT: 1.0, superMult: 1.3, flatten: true, special: 'chomp', specialName: 'Shark Chomp', stats: { speed: 2, smash: 3, fly: 1 }, horn: 'growl' },
 };
@@ -31,27 +31,29 @@ const CHOMP = { reach: 130, bite: 0.07, zReach: 230, hop: 0.3 };                
    180-wide impacts over 3 lanes, a 260-wide final impact over all lanes at 3.2 s, then the pop-out. */
 /* Laser Racer's Laser Drive (D1): twin lasers sweep out to 520 ahead over 0.25 s, slicing in its lane and both neighbours. */
 const LASER = { reach: 520, lanes: 1.25, sweep: 0.25, zUp: 260, zDown: 60 };
-/* Ira's Turbo Toot (D6): a 0.22 s surprised look back (she slows), then PFRRRT and x1.7, ramming through her lane like Nitro. */
-const TOOT = { look: 0.22, slow: 0.35, reach: 130 };
+/* Ira's Turbo Toot (D6): a 0.22 s 'take' (she slows and gives the camera a surprised wide-eyed look), then PFRRRT and x1.7, ramming through her lane like Nitro. */
+const TOOT = { take: 0.22, slow: 0.35, reach: 130 };
 /* Ira's Zoomie Chomp dash: whirl out at 2000 wu/s (relative), chew 0.3 s, whirl back in 0.18 s; a miss spins 0.45 s in place.
    It eats the target group plus the next object up to 300 wu behind it in the same lane. */
 const DASH = { v: 2000, chew: 0.3, back: 0.18, spin: 0.45, next: 300 };
 /* FIRE (Addendum D2/D3). One weapon per hero; cd = cooldown (s), v = projectile speed relative to the car (wu/s), r = hit radius,
    range = auto-aim / fizzle distance, hits = targets per shot, splash = extra radius, bounce = re-aims after a hit, ret = out and back,
-   arc = lob height, dash = Ira runs there herself. Cooldowns are balanced so the time per kill in the hold-to-fire benchmark
-   (tests/leo_smash_race.test.mjs, "FIRE balance") sits within +-15% across all heroes. */
-const SHARP = 25; // flat Sharp Shot bonus per shot kill
+   arc = lob height, dash = Ira runs there herself. Cooldowns (Muse review of PR #24) are tuned on the score bots in
+   tests/leo_smash_race.test.mjs ("FIRE score balance"): holding FIRE all race scores about +20-35% over never firing, and a ram-first
+   player who only fires at neighbouring lanes and blockers scores at least as much as the hold-fire player. */
+const SHARP = 25;     // flat Sharp Shot bonus, never multiplied, paid once per SHOT that hits (a splash / pierce / bounce with several kills still pays it once)
+const AIM_MIN = 240;  // auto-aim ignores IN-LANE targets closer than this (Leo rams those); neighbouring-lane targets count at any distance
 const WEAPONS = {
-  dragster: { id: 'rocket',    name: 'Turbo Rocket',   word: 'BOOM!',    cd: 0.75, v: 1500, r: 22, range: 650, splash: 60, fx: 'firepop',  col: '#ff6a2a' },
-  bibi:     { id: 'ball',      name: 'Bouncy Ball',    word: 'BOING!',   cd: 1.2, v: 950,  r: 26, range: 650, hits: 2, bounce: true, range2: 420, fx: 'confetti', col: '#7df0b8' },
-  truck:    { id: 'boomerang', name: 'Wing Boomerang', word: 'WHACK!',   cd: 0.7,  v: 1150, r: 26, range: 650, hits: 2, ret: true, fx: 'spark', col: '#ffd23f' },
-  sword:    { id: 'wave',      name: 'Sword Wave',     word: 'SLASH!',   cd: 1.2,  v: 1300, r: 30, range: 650, hits: 2, fx: 'spark', col: '#c9a6ff' },
-  jet:      { id: 'balloon',   name: 'Water Balloon',  word: 'SPLASH!',  cd: 0.65,  v: 950,  r: 26, range: 650, arc: 140, fx: 'splash', col: '#5cc8ff' },
-  pup:      { id: 'gust',      name: 'Puppy Gust',     word: 'WHOOSH!',  cd: 0.65, v: 1800, r: 26, range: 450, fx: 'puff', col: '#ff8fc8' },
-  rex:      { id: 'teeth',     name: 'Chatter Teeth',  word: 'CHOMP!',   cd: 0.65,  v: 650,  r: 30, range: 650, fx: 'bite', col: '#3fe0d0' },
-  comet:    { id: 'meteor',    name: 'Mini Meteor',    word: 'KA-POW!',  cd: 0.9,  v: 1250, r: 24, range: 650, splash: 80, fx: 'firepop', tint: 'orange', col: '#ffa53a' },
-  laser:    { id: 'bolt',      name: 'Laser Bolt',     word: 'ZAP!',     cd: 0.6,  v: 2400, r: 20, range: 650, fx: 'zap', col: '#46b4ff' },
-  ira:      { id: 'zoomie',    name: 'Zoomie Chomp',   word: 'CHOMP-CHOMP!', cd: 1.1, v: DASH.v, r: 30, range: 420, dash: true, fx: 'bite', col: '#f0a05a' },
+  dragster: { id: 'rocket',    name: 'Turbo Rocket',   word: 'BOOM!',    cd: 0.35, v: 1500, r: 22, range: 650, splash: 60, fx: 'firepop',  col: '#ff6a2a' },
+  bibi:     { id: 'ball',      name: 'Bouncy Ball',    word: 'BOING!',   cd: 0.65, v: 950,  r: 26, range: 650, hits: 2, bounce: true, range2: 420, fx: 'confetti', col: '#7df0b8' },
+  truck:    { id: 'boomerang', name: 'Wing Boomerang', word: 'WHACK!',   cd: 0.35,  v: 1150, r: 26, range: 650, hits: 2, ret: true, fx: 'spark', col: '#ffd23f' },
+  sword:    { id: 'wave',      name: 'Sword Wave',     word: 'SLASH!',   cd: 0.5,  v: 1300, r: 30, range: 650, hits: 2, fx: 'spark', col: '#c9a6ff' },
+  jet:      { id: 'balloon',   name: 'Water Balloon',  word: 'SPLASH!',  cd: 0.5,  v: 950,  r: 26, range: 650, arc: 140, fx: 'splash', col: '#5cc8ff' },
+  pup:      { id: 'gust',      name: 'Puppy Gust',     word: 'WHOOSH!',  cd: 0.35, v: 1800, r: 26, range: 450, fx: 'puff', col: '#ff8fc8' },
+  rex:      { id: 'teeth',     name: 'Chatter Teeth',  word: 'CHOMP!',   cd: 0.6,  v: 650,  r: 30, range: 650, fx: 'bite', col: '#3fe0d0' },
+  comet:    { id: 'meteor',    name: 'Mini Meteor',    word: 'KA-POW!',  cd: 0.35,  v: 1250, r: 24, range: 650, splash: 80, fx: 'firepop', tint: 'orange', col: '#ffa53a' },
+  laser:    { id: 'bolt',      name: 'Laser Bolt',     word: 'ZAP!',     cd: 0.35,  v: 2400, r: 20, range: 650, fx: 'zap', col: '#46b4ff' },
+  ira:      { id: 'zoomie',    name: 'Zoomie Chomp',   word: 'CHOMP-CHOMP!', cd: 0.5, v: DASH.v, r: 30, range: 420, dash: true, fx: 'bite', col: '#f0a05a' },
 };
 const COMET = { trans: 0.3, lift: 60, every: 0.9, gap: 0.35, dive: 0.12, hop: 0.45, hopH: 55, r: 180, rFinal: 260, finalAt: 3.2, burn: 40 };
 
@@ -161,20 +163,21 @@ function emit(R, e) { R.events.push(e); }
 
 function smashGroup(R, o, how) {
   if (!o.alive) return;
-  const g = o.group, now = R.t;
-  if (now - R.lastSmash <= COMBO_WINDOW) R.chain++; else R.chain = 1;
-  R.lastSmash = now; R.mult = Math.min(5, R.chain); if (R.mult > R.bestMult) R.bestMult = R.mult;
+  const g = o.group, now = R.t, shot = how === 'shot';
+  if (shot) { if (now - R.lastSmash > COMBO_WINDOW) { R.chain = 0; R.mult = 1; } } // a shot keeps the combo alive but never adds a step
+  else { if (now - R.lastSmash <= COMBO_WINDOW) R.chain++; else R.chain = 1; R.mult = Math.min(5, R.chain); if (R.mult > R.bestMult) R.bestMult = R.mult; }
+  R.lastSmash = now;
   let pts = 0, members = [o];
   if (g) for (let i = Math.max(0, R.idx - 40); i < R.tr.objs.length; i++) { const q = R.tr.objs[i]; if (q.x > o.x + 400) break; if (q !== o && q.alive && q.group === g) members.push(q); }
   members.forEach(m => pts += m.pts || 0);
   const gained = pts * R.mult; R.basePts = (R.basePts || 0) + pts; R.smashPts += gained; R.score += gained; R.smashes++;
-  const k = KINDS[o.kind], bk = how === 'shot' ? 0.5 : 1; // a shot kill fills the boost at half the ram rate
+  const k = KINDS[o.kind], bk = shot ? 0.5 : 1; // a shot kill fills the boost at half the ram rate
   R.boost = Math.min(1, R.boost + (pts >= 300 ? 0.34 : pts >= 100 ? 0.18 : pts >= 50 ? 0.12 : 0.06) * bk);
   members.sort((a, b) => a.z - b.z);
   members.forEach((m, i) => { if (i === 0) { m.alive = false; emit(R, { type: 'smash', o: m, kind: m.kind, how, first: true, pts: gained, mult: R.mult, big: pts >= 300, snd: k.snd }); }
     else { m.alive = false; R.queue.push({ at: now + i * 0.05, o: m, how }); } });
   if (pts >= 300) { R.slow = 0.55; emit(R, { type: 'big', x: o.x }); }
-  if (R.mult >= 2) emit(R, { type: 'combo', mult: R.mult });
+  if (R.mult >= 2 && !shot) emit(R, { type: 'combo', mult: R.mult });
 }
 
 function collectStar(R, o, how) { o.alive = false; R.stars++; R.score += 20; R.boost = Math.min(1, R.boost + 0.01); emit(R, { type: 'star', o, how }); }
@@ -231,11 +234,12 @@ function releaseAll(R) { const list = R.captured.slice(); R.captured.length = 0;
 
 /* ---------------- FIRE (Addendum D) ---------------- */
 // nearest target ahead within range: own lane first, then a neighbouring lane. Stars, captured pieces and rivals are never targets.
-function aimTarget(R, x0, lane0, range, skip) {
+function aimTarget(R, x0, lane0, range, skip, minIn) {
+  const mi = minIn == null ? AIM_MIN : minIn;
   let best = null, bd = 1e9, side = null, sd = 1e9; const objs = R.tr.objs;
   for (let i = R.idx; i < objs.length; i++) { const o = objs[i], dx = o.x - x0; if (dx > range) break; if (dx < -10 || !o.alive || o.star || o.cap) continue;
     if (skip && skip.has(o.group || o)) continue; const dl = Math.abs(o.lane - lane0);
-    if (dl < 0.5) { if (dx < bd) { bd = dx; best = o; } } else if (dl < 1.5 && dx < sd) { sd = dx; side = o; } }
+    if (dl < 0.5) { if (dx >= mi && dx < bd) { bd = dx; best = o; } } else if (dl < 1.5 && dx < sd) { sd = dx; side = o; } }
   return best || side;
 }
 function fireRange(R) { return Math.min(R.weapon.range, R.viewAhead || 1e9); }
@@ -247,9 +251,10 @@ function fire(R) {
   R.proj.push(s); emit(R, { type: 'fire', w: W.id, s, miss: !tgt });
 }
 // every killed group scores its points x combo + the flat Sharp Shot bonus; one event (one popup) per shot
-function shotKills(R, list, W, x, lane, z) {
+function shotKills(R, list, W, x, lane, z, shot) {
   let pts = 0; const done = [];
-  for (const o of list) { if (!o.alive) continue; const b = R.smashPts; smashGroup(R, o, 'shot'); pts += R.smashPts - b + SHARP; R.hits++; R.shotPts += SHARP; R.score += SHARP; done.push(o); }
+  for (const o of list) { if (!o.alive) continue; const b = R.smashPts; smashGroup(R, o, 'shot'); pts += R.smashPts - b; done.push(o); }
+  if (done.length && !shot.paid) { shot.paid = true; pts += SHARP; R.hits++; R.shotPts += SHARP; R.score += SHARP; } // Sharp Shot: +25 flat, once per shot
   if (done.length) emit(R, { type: 'shotHit', w: W.id, word: W.word, fx: W.fx, x, lane, z, pts, n: done.length, mult: R.mult, objs: done });
   return done.length;
 }
@@ -258,7 +263,7 @@ function projHit(R, s, o) {
   if (W.splash) for (let j = Math.max(0, R.idx - 10); j < objs.length; j++) { const q = objs[j]; if (q.x - s.x > W.splash + 120) break;
     if (!q.alive || q.star || q.cap || s.hitG.has(q.group || q)) continue;
     if (Math.abs(q.x - s.x) < W.splash + q.w * 0.5 && Math.abs(q.lane - o.lane) < 0.6 && q.z < s.z + W.splash + 60 && q.z + q.h > s.z - W.splash - 60) { s.hitG.add(q.group || q); list.push(q); } }
-  shotKills(R, list, W, s.x, s.lane, s.z);
+  shotKills(R, list, W, s.x, s.lane, s.z, s);
 }
 function stepProj(R, dt) {
   const P = R.p, V = R.veh, objs = R.tr.objs;
@@ -273,10 +278,11 @@ function stepProj(R, dt) {
     s.x += s.vx * dt;
     let hitO = null;
     for (let j = Math.max(0, R.idx - 10); j < objs.length; j++) { const o = objs[j]; if (o.x - s.x > 160) break; if (s.x - o.x > 160 || !o.alive || o.star || o.cap || s.hitG.has(o.group || o)) continue;
+      if (o !== s.tgt && Math.abs(o.lane - P.laneF) < 0.5 && o.x - P.x - V.len * 0.45 < AIM_MIN) continue; // shots fly past what Leo is about to ram
       if (Math.abs(o.x - s.x) < o.w * 0.5 + W.r && Math.abs(o.lane - s.lane) < 0.45 && s.z > o.z - W.r && s.z < o.z + o.h + W.r) { hitO = o; break; } }
     if (hitO) { projHit(R, s, hitO);
       if (s.hits >= (W.hits || 1)) { R.proj.splice(i, 1); emit(R, { type: 'projEnd', s, hit: true }); continue; }
-      if (W.bounce) { s.tgt = aimTarget(R, s.x + 10, s.lane, W.range2 || 400, s.hitG); s.xs = s.x; s.zs = s.z; emit(R, { type: 'bounce', s }); }
+      if (W.bounce) { s.tgt = aimTarget(R, s.x + 10, s.lane, W.range2 || 400, s.hitG, 0); s.xs = s.x; s.zs = s.z; emit(R, { type: 'bounce', s }); }
       else if (W.ret) s.back = true; else s.tgt = null; } // the sword wave pierces on along its line
     const rel = s.x - P.x;
     if (W.ret && !s.back && rel > W.range * 0.9) s.back = true;
@@ -302,7 +308,7 @@ function chewKill(R, D) {
   let next = null; // greedy: the next object right behind the group, same lane
   for (let i = R.idx; i < objs.length; i++) { const q = objs[i]; if (q.x > maxX + DASH.next) break; if (q.x <= maxX + 1 || !q.alive || q.star || q.cap || (g.group && q.group === g.group)) continue;
     if (Math.abs(q.lane - g.lane) < 0.6) { next = q; break; } }
-  shotKills(R, next ? [g, next] : [g], R.weapon, g.x, g.lane, g.z + g.h * 0.5);
+  shotKills(R, next ? [g, next] : [g], R.weapon, g.x, g.lane, g.z + g.h * 0.5, D);
 }
 
 /* One fixed physics step. input = { jump: held, jumpPressed, boostPressed, fire: held, firePressed, lane: -1|0|1 (edge) } */
@@ -332,7 +338,7 @@ function step(R, dt, input) {
     if (P.superT <= 0) { if (V.special === 'whirl') releaseAll(R); if (V.special === 'comet' && R.comet) { R.comet = null; P.z = V.hover || 0; P.vz = 0; emit(R, { type: 'cometEnd' }); } if (V.special === 'chomp') { emit(R, { type: 'burp', bag: R.bag.slice(), x: P.x, lane: P.laneF, z: P.z }); R.bag.length = 0; }
       if (R.laser) { emit(R, { type: 'laserEnd', slices: R.laser.slices }); R.laser = null; } if (R.toot) { emit(R, { type: 'tootEnd' }); R.toot = null; } } }
   let target = R.finished ? V.speed * 0.35 : V.speed * P.boostMult;
-  if (R.toot && R.t - R.toot.t0 < TOOT.look && !R.finished) target = V.speed * TOOT.slow; // the surprised look back
+  if (R.toot && R.t - R.toot.t0 < TOOT.take && !R.finished) target = V.speed * TOOT.slow; // the take: a surprised look at the camera
   P.speed += Math.sign(target - P.speed) * Math.min(Math.abs(target - P.speed), V.speed / (V.accelT || 1 / 1.4) * dt);
   P.x += P.speed * dt;
   // ---- lanes (snap lanes, assist steers toward smashables) ----
@@ -462,6 +468,6 @@ function step(R, dt, input) {
 
 function summary(R) { return { score: Math.round(R.score), smashPts: Math.round(R.smashPts), stars: R.stars, starPts: R.stars * 20, place: R.place, placeBonus: R.placeBonus || 0, award: R.award || 1, smashes: R.smashes, shots: R.hits, shotPts: R.shotPts, bestMult: R.bestMult, track: R.track.id, vehicle: R.veh.id, time: Math.round(R.finT) }; }
 
-const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, COMET, LASER, TOOT, DASH, WEAPONS, SHARP, rng, buildTrack, createRace, step, smashGroup, aimTarget, fire, chompOne, summary };
+const API = { STEP, MAXZ, COMBO_WINDOW, RACE_SECONDS, VEHICLES, VEHICLE_ORDER, KINDS, TRACKS, RIVALS, PLACE_BONUS, WHIRL, CHOMP, COMET, LASER, TOOT, DASH, WEAPONS, SHARP, AIM_MIN, rng, buildTrack, createRace, step, smashGroup, aimTarget, fire, chompOne, summary };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.LeoSim = API;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -122,8 +122,8 @@ function drawWorldBack(R) {
 /* ---------------- entity rendering ---------------- */
 function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   if (P.celebrate && R.finished) return 'veh.' + V.id + '.celebrate';
-  if (V.runner) { // Ira runs: run-a / run-b alternate; the surprised look back opens Turbo Toot; leaps use the fly pose
-    if (R.tootFx && R.tootFx.t < 0.45) return 'veh.' + V.id + '.special';
+  if (V.runner) { // Ira runs: run-a / run-b alternate; the take (a surprised look at the camera) opens Turbo Toot; leaps use the fly pose
+    if (R.tootFx && R.tootFx.t < 0.45) return 'veh.' + V.id + '.special'; // the take holds for 0.45 s (0.22 s slow-down + the PFRRRT burst)
     if (P.z > floor + 18) return 'veh.' + V.id + '.fly';
     return 'veh.' + V.id + ((R.runPh | 0) % 2 ? '.runb' : '.drive'); }
   if (R.comet) return 'veh.' + V.id + (cometC(R) >= SIM.COMET.finalAt + 0.08 ? '.drive' : '.boost'); // Comet 17: hot form in the shell, plain car after the pop-out
@@ -132,7 +132,7 @@ function vehSprite(R) { const P = R.p, V = R.veh, floor = V.hover || 0;
   if (V.fly === 'always' || V.fly === 'hover' || P.z > floor + 25 || P.wing > 0.5) return 'veh.' + V.id + '.fly';
   return 'veh.' + V.id + '.drive'; }
 // shadow widths matched to the visible footprint of Muse's art (v1); the interim art uses the hitbox length
-const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220, comet: 150, laser: 170, ira: 150 };
+const SHADOW_W = { dragster: 215, bibi: 125, truck: 195, sword: 185, jet: 150, pup: 89, rex: 220, comet: 150, laser: 185, ira: 125 };
 /* Race-only draw scale (the picker card keeps the manifest size). Whirly Pup's art is ~58 wu tall at wu 215;
    x1.43 makes her ~83 wu, about 75% of the Bat Truck's ~111 wu visible height. Her hitbox stays len 105. */
 const RACE_SCALE = { pup: 1.43 };
@@ -337,7 +337,7 @@ function drawZoomie(R, t) { const D = R.dash, V = R.veh, k = kL(D.lane), s = vie
       ctx.lineWidth = (13 - i * 2) * s; ctx.lineCap = 'round'; ctx.strokeStyle = i % 2 ? 'rgba(251,246,239,.85)' : 'rgba(200,115,58,.8)';
       for (let a = a0; a < a0 + Math.PI * 1.5; a += 0.25) { const fr = Math.sin(a + 0.125) > 0; if (fr !== front) continue; ctx.beginPath(); ctx.ellipse(x, yy, rx, ry, 0, a, a + 0.27); ctx.stroke(); } } };
   ctx.save(); if (!red) bands(false);
-  const sp = ART.get('veh.' + V.id + '.spin'), w = sp.wu * view.s * k * 0.62, h = w * sp.h / sp.w; ctx.save(); ctx.translate(x, y0 - Hh * 0.45); ctx.rotate(red ? 0 : t * 22); if (!red && (t * 14 | 0) % 2) ctx.scale(-1, 1);
+  const sp = ART.get('veh.' + V.id + '.fire'), w = sp.wu * view.s * k * 0.62, h = w * sp.h / sp.w; ctx.save(); ctx.translate(x, y0 - Hh * 0.45); ctx.rotate(red ? 0 : t * 22); if (!red && (t * 14 | 0) % 2) ctx.scale(-1, 1);
   ctx.drawImage(sp.img, -w / 2, -h / 2, w, h); ctx.restore();
   if (!red) bands(true); else { ctx.strokeStyle = 'rgba(200,115,58,.8)'; ctx.lineWidth = 8 * s; ctx.beginPath(); ctx.ellipse(x, y0 - Hh * 0.45, 80 * s, 24 * s, 0, 0, 7); ctx.stroke(); }
   ctx.restore();
@@ -438,9 +438,9 @@ function iraFx(R, dt) { const P = R.p, V = R.veh, red = reduced(), live = mode =
   const dl = P.lane - P.laneF; if (Math.abs(dl) > 1e-3) R.laneMove = Math.sign(dl);
   else if (R.laneMove) { R.skid = { t: 0, d: R.laneMove }; R.laneMove = 0; if (live) AU.play('skid'); for (let i = 0; i < (red ? 2 : 5) && parts.length < 490; i++) parts.push({ kind: 'dust', x: P.x + rand(-50, 40), lane: P.laneF, z: 0, vx: rand(-120, 60), vz: rand(20, 90), life: rand(0.3, 0.5), t: 0, r: rand(8, 14), c: '230,215,190' }); }
   if (R.skid) { R.skid.t += dt; if (R.skid.t > 0.2) R.skid = null; }
-  // Turbo Toot: PFRRRT after the look back, a green puff every 0.25 s (0.5 s with reduced motion), 5 toy pellets across the boost
+  // Turbo Toot: PFRRRT after the take, a green puff every 0.25 s (0.5 s with reduced motion), 5 toy pellets across the boost
   const T = R.tootFx; if (T) { T.t += dt;
-    if (!T.pf && T.t >= SIM.TOOT.look) { T.pf = true; if (live) { AU.play('pfrrt'); banner('PFRRRT!'); } toots.push({ big: true, x: P.x - V.len * 0.55, rel: -V.len * 0.55, lane: P.laneF, z: P.z + V.h * 0.4, t: 0 }); shake = Math.max(shake, red ? 0 : 5); }
+    if (!T.pf && T.t >= SIM.TOOT.take) { T.pf = true; if (live) { AU.play('pfrrt'); banner('PFRRRT!'); } toots.push({ big: true, x: P.x - V.len * 0.55, rel: -V.len * 0.55, lane: P.laneF, z: P.z + V.h * 0.4, t: 0 }); shake = Math.max(shake, red ? 0 : 5); }
     if (T.pf && T.t >= T.next && P.superT > 0) { T.next += red ? 0.5 : 0.25; toots.push({ x: P.x - V.len * 0.6, lane: P.laneF + rand(-0.08, 0.08), z: P.z + V.h * 0.4 + rand(-8, 8), t: 0 }); if (toots.length > 24) toots.shift(); if (live) AU.play('toot'); }
     while (T.pel.length && T.t >= T.pel[0]) { T.pel.shift(); pellets.push({ x: P.x - V.len * 0.45, lane: P.laneF + rand(-0.08, 0.08), z: P.z + V.h * 0.3, vx: P.speed * 0.15, vz: 140, t: 0 }); }
     if (P.superT <= 0) R.tootFx = null; }
@@ -455,7 +455,7 @@ function drawFx(layer) {
       const g = ctx.createRadialGradient(x, y, 1, x, y, r); g.addColorStop(0, 'rgba(255,170,60,.9)'); g.addColorStop(1, 'rgba(255,80,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); } }
   }
   ctx.globalAlpha = 1; const Rn = scene();
-  for (const p of parts) { if (layer && (layer === 'front') !== !!p.front) continue; const a = Math.max(0, 1 - p.t / p.life), x = X(p.x), y = laneY(p.lane) - p.z * view.s;
+  for (const p of parts) { if (layer && (layer === 'front') !== !!(p.front || p.kind === 'spark')) continue; const a = Math.max(0, 1 - p.t / p.life), x = X(p.x), y = laneY(p.lane) - p.z * view.s;
     if (p.kind === 'dust') { ctx.fillStyle = `rgba(${p.c},${a * 0.6 * (p.a || 1)})`; ctx.beginPath(); ctx.arc(x, y, p.r * view.s * (1 + p.t * 2), 0, 7); ctx.fill(); }
     else if (p.kind === 'ember') { const q = p.t / p.life, teal = Math.min(1, q * (Rn && Rn.track.id === 'city' ? 1.9 : 1.25)); // orange -> teal (more teal on the night track)
       ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(${255 - 215 * teal | 0},${150 + 70 * teal | 0},${40 + 170 * teal | 0},${a * 0.85})`; ctx.beginPath(); ctx.arc(x, y, p.r * view.s * (1 - q * 0.6), 0, 7); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
@@ -470,10 +470,10 @@ function drawFx(layer) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   for (const p of pops) { const k = Math.min(1, p.t * 6), a = Math.min(1, (1.1 - p.t) * 3); let x = X(p.x); const y = laneY(p.lane) - (p.z + p.t * 120) * view.s;
     if (p.sub != null) { // Sharp Shot: the weapon word in the hero's colour, big and bouncy, with the points under it; kept inside the canvas
-      const fs = Math.round(36 * Math.max(0.8, view.s) * (1 + Math.sin(Math.min(1, p.t * 4) * Math.PI) * 0.28)), fs2 = Math.round(fs * 0.66);
+      const fs = Math.round(34.5 * Math.max(0.8, view.s) * (1 + Math.sin(Math.min(1, p.t * 4) * Math.PI) * 0.28)), fs2 = Math.round(fs / 1.15); // the word is ~15% bigger than the +points line
       ctx.font = `700 ${fs}px Fredoka, "Baloo 2", system-ui, sans-serif`; const hw = ctx.measureText(p.text).width / 2 + 6; x = Math.max(hw, Math.min(W - hw, x));
       ctx.globalAlpha = a; ctx.lineWidth = fs * 0.2; ctx.strokeStyle = '#1d1a2e'; ctx.strokeText(p.text, x, y); ctx.fillStyle = p.col; ctx.fillText(p.text, x, y);
-      ctx.font = `700 ${fs2}px Fredoka, "Baloo 2", system-ui, sans-serif`; ctx.lineWidth = fs2 * 0.2; ctx.strokeText(p.sub, x, y + fs * 0.8); ctx.fillStyle = '#fff'; ctx.fillText(p.sub, x, y + fs * 0.8); ctx.globalAlpha = 1; continue; }
+      ctx.font = `700 ${fs2}px Fredoka, "Baloo 2", system-ui, sans-serif`; ctx.lineWidth = fs2 * 0.2; ctx.strokeText(p.sub, x, y + fs * 0.95); ctx.fillStyle = '#fff'; ctx.fillText(p.sub, x, y + fs * 0.95); ctx.globalAlpha = 1; continue; }
     const fs = Math.round((p.big ? 46 : 30) * Math.max(0.75, view.s) * (0.6 + 0.4 * k + (p.big ? Math.sin(p.t * 20) * 0.04 : 0)));
     ctx.font = `700 ${fs}px Fredoka, "Baloo 2", system-ui, sans-serif`; ctx.globalAlpha = a; ctx.lineWidth = fs * 0.18; ctx.strokeStyle = '#1d1a2e'; ctx.strokeText(p.text, x, y); ctx.fillStyle = p.col; ctx.fillText(p.text, x, y); ctx.globalAlpha = 1; }
 }
@@ -492,14 +492,14 @@ function render(t) {
   for (let lane = 0; lane < 3; lane++) {
     for (let i = Math.max(0, R.idx - 40); i < objs.length; i++) { const o = objs[i]; if (o.x > x1) break; if (o.x < x0 || !o.alive) continue; if (Math.round(o.lane) === lane) drawObj(o, t); }
     for (const rv of R.rivals) if (Math.round(rv.laneF) === lane && rv.x > x0 && rv.x < x1) drawRival(rv, t);
-    if (Math.round(R.p.laneF) === lane) { if (cometForm(R)) drawFx('back'); if (toots.length || pellets.length) drawToots(t);
-      if (R.skid) { const k = R.skid.t / 0.2; ctx.save(); ctx.translate(0, R.skid.d * 8 * Math.sin(k * Math.PI) * (1 - k * 0.5)); drawPlayer(R, t); ctx.restore(); } else drawPlayer(R, t); } // comet form: dust/smoke/chunks go behind the car
+    if (Math.round(R.p.laneF) === lane) { drawFx('back'); if (toots.length || pellets.length) drawToots(t);
+      if (R.skid) { const k = R.skid.t / 0.2; ctx.save(); ctx.translate(0, R.skid.d * 8 * Math.sin(k * Math.PI) * (1 - k * 0.5)); drawPlayer(R, t); ctx.restore(); } else drawPlayer(R, t); } // every hero: debris, dust and smoke go behind the sprite (sparks stay in front)
   }
   for (const s of R.shots) if (s.live) drawSprite('item.shot', s.x, s.lane, s.z, { rot: t * 10 });
   if (R.proj.length) drawProj(R, t);
   if (hitFx.length) drawHitFx();
   if (R.hint && mode === 'race' && R.countdown <= 0) hintArrow(R, t);
-  drawFx(cometForm(R) ? 'front' : undefined);
+  drawFx('front');
   for (const L of ART.layers(R.track.id)) if (L.role === 'front' && L.img) { const h = view.frontH; drawLayer(L, H - h + camZ * view.s, h, L.par, camX()); }
   if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.5})`; ctx.fillRect(0, 0, W, H); }
   if (mode === 'title' || mode === 'pick' || mode === 'cube') { ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, 0, W, H); }
@@ -527,7 +527,7 @@ function handleEvents(R, live) {
       if (e.special === 'whirl') { AU.play('arf'); AU.play('whirr', 3.6); } else if (e.special === 'chomp') AU.play('growl');
       else if (e.special === 'comet') { AU.play('fwoom'); AU.play('crackle', 3.6); flash = reduced() ? 0.3 : 0.9; }
       else if (e.special === 'laser') { AU.play('vwoom'); AU.play('jet', 3.6); R.pewT = 0.2; }
-      else if (e.special === 'toot') { const pel = [], n = 5; for (let i = 0; i < n; i++) pel.push(0.6 + i * 0.6 + rand(-0.15, 0.15)); R.tootFx = { t: 0, pf: false, next: SIM.TOOT.look + 0.25, pel }; } }
+      else if (e.special === 'toot') { const pel = [], n = 5; for (let i = 0; i < n; i++) pel.push(0.6 + i * 0.6 + rand(-0.15, 0.15)); R.tootFx = { t: 0, pf: false, next: SIM.TOOT.take + 0.25, pel }; } }
     else if (e.type === 'impact') cometImpact(R, e);
     else if (e.type === 'cometPop') cometPop(R, e);
     else if (e.type === 'pull') { AU.play('pull', e.n); for (let i = 0; i < 6 && parts.length < 500; i++) parts.push({ kind: 'spark', x: e.o.x, lane: e.o.lane, z: e.o.z + e.o.h * 0.5, vx: rand(-300, 300), vz: rand(-200, 400), life: 0.3, t: 0, r: 4, c: '255,160,210' }); }
@@ -719,7 +719,7 @@ function buildPick() {
         b.classList.remove('glow'); void b.offsetWidth; b.classList.add('glow'); drawPreview(c, 'veh.' + id + '.special'); b._seq = [setTimeout(() => AU.play('fwoom'), 380)];
         b._t = setTimeout(() => { b.classList.remove('cheer', 'glow'); drawPreview(c, rest); }, 1000);
       } else if (V.runner) { // Ira: a happy zoomie spin and a bark
-        b.classList.remove('zoom'); void b.offsetWidth; b.classList.add('zoom'); drawPreview(c, 'veh.' + id + '.spin'); b._seq = [setTimeout(() => AU.play('bark'), 420)];
+        b.classList.remove('zoom'); void b.offsetWidth; b.classList.add('zoom'); drawPreview(c, 'veh.' + id + '.fire'); b._seq = [setTimeout(() => AU.play('bark'), 420)];
         b._t = setTimeout(() => { b.classList.remove('cheer', 'zoom'); drawPreview(c, rest); }, 950);
       } else if (V.special === 'laser') { b.classList.remove('glow'); void b.offsetWidth; b.classList.add('glow'); drawPreview(c, 'veh.' + id + '.special'); b._seq = [setTimeout(() => AU.play('vwoom'), 380)];
         b._t = setTimeout(() => { b.classList.remove('cheer', 'glow'); drawPreview(c, rest); }, 1000);
@@ -815,7 +815,7 @@ function startRace(fullBoost) {
   setMode('race'); show('race'); $('#pause').classList.add('hidden'); $('#bMute').textContent = AU.muted ? '🔇' : '🔊';
   AU.unlock(); if (!race.veh.runner) AU.engineStart(race.veh.horn); // Ira runs: footsteps, no engine AU.musicStart(race.track.music); AU.play('count'); setTimeout(() => mode === 'race' && AU.play('count'), 800); setTimeout(() => mode === 'race' && AU.play('count'), 1600);
   if (fullBoost) setTimeout(() => mode === 'race' && banner('⚡ FULL BOOST!'), 200);
-  ART.preload(['veh.' + race.veh.id + '.drive', 'veh.' + race.veh.id + '.fly', 'veh.' + race.veh.id + '.boost', 'veh.' + race.veh.id + '.celebrate', 'proj.' + race.weapon.id].concat(race.veh.runner ? ['veh.ira.runb', 'veh.ira.spin', 'fx.toot', 'fx.pellet'] : []));
+  ART.preload(['veh.' + race.veh.id + '.drive', 'veh.' + race.veh.id + '.fly', 'veh.' + race.veh.id + '.boost', 'veh.' + race.veh.id + '.celebrate', 'proj.' + race.weapon.id].concat(race.veh.runner ? ['veh.ira.runb', 'veh.ira.fire', 'fx.toot', 'fx.pellet'] : []));
 }
 function setPause(p) { if (mode !== 'race') return; paused = p; $('#pause').classList.toggle('hidden', !p); $('#pAssist').checked = settings.assist; $('#pMotion').checked = settings.reduced; jumpUp(); fireUp(); if (p) { AU.engineSet(0, false); setTimeout(() => $('#bResume').focus(), 30); } }
 $('#bPause').onclick = () => setPause(true);
