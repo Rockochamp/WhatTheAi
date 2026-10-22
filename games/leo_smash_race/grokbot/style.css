@@ -40,7 +40,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible+span{outline:4px 
 .pick-head,.cube-head{display:flex;align-items:center;gap:10px;justify-content:space-between}
 .pick-head h2,.cube-head h2{margin:0;font-size:clamp(24px,5.5vw,36px);flex:1;text-align:center}
 .totstars{font-weight:700;font-size:20px;min-width:48px;text-align:right}
-.heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.heroes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0} /* 8 heroes: 4 x 2 */
 .hero{position:relative;min-width:0;overflow:hidden;border:4px solid var(--ink);border-radius:22px;background:linear-gradient(#e8f6ff,#bfe3ff);padding:6px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:140px;perspective:600px}
 .hero canvas{width:100%;max-width:220px;aspect-ratio:2/1;animation:bob 1.6s ease-in-out infinite}
 .hero.sel{background:linear-gradient(#fff3b0,#ffd23f);box-shadow:0 6px 0 var(--ink);transform:translateY(-3px)}
@@ -66,7 +66,11 @@ button:focus-visible,summary:focus-visible,input:focus-visible+span{outline:4px 
 #pick .pick-card{display:flex;flex-direction:column;max-height:100%;min-height:0}
 .pick-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:0 2px}
 #pick .pick-go{flex:none;position:static;margin-top:8px;background:none}
-@media (max-width:600px){.hero .stats{font-size:14px;gap:6px}.pip{width:9px;height:9px}.heroes{grid-template-columns:repeat(2,1fr);gap:8px}.hero{min-height:0;padding:4px}.hero .nm{font-size:16px}.hero .sp{display:none}.tracks{grid-template-columns:repeat(2,1fr);gap:8px}.trk .tn{font-size:13px}.pick-card{padding:10px}}
+@media (max-width:600px){.hero .stats{font-size:12px;gap:5px}.hero .stats>span{gap:2px}.pip{width:8px;height:8px;border-width:1.5px}.heroes{grid-template-columns:repeat(2,1fr);gap:8px}.hero{min-height:0;padding:4px}.hero .nm{font-size:16px}.hero .sp{display:none}.tracks{grid-template-columns:repeat(2,1fr);gap:8px}.trk .tn{font-size:13px}.pick-card{padding:10px}}
+@media (min-width:601px) and (max-width:820px){.hero .stats{font-size:14px;gap:5px}.pip{width:9px;height:9px}.hero .nm{font-size:16px}}
+/* Comet 17: glow pulse when tapped on the picker */
+.hero.glow canvas{animation:cometGlow .95s ease-out}
+@keyframes cometGlow{0%{filter:drop-shadow(0 0 0 rgba(255,140,40,0));transform:scale(1)}30%{filter:drop-shadow(0 0 16px rgba(255,140,40,.95)) brightness(1.2);transform:scale(1.1)}100%{filter:drop-shadow(0 0 0 rgba(255,140,40,0));transform:scale(1)}}
 @keyframes bob{50%{transform:translateY(-4px)}}
 @keyframes turn{0%,100%{transform:rotateY(-18deg) translateY(0)}50%{transform:rotateY(18deg) translateY(-5px)}}
 @keyframes cheer{0%{transform:scale(1)}30%{transform:scale(1.18) rotate(-6deg)}60%{transform:scale(.95) rotate(4deg)}100%{transform:scale(1)}}
@@ -182,4 +186,6 @@ button:focus-visible,summary:focus-visible,input:focus-visible+span{outline:4px 
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 .reduced *{animation-duration:.01ms!important;animation-iteration-count:1!important}
 /* short landscape (phones on their side): slimmer pinned GO row so more of the picker shows */
-@media (max-height:500px){#pick{padding:8px}#pick .pick-card{padding:8px 12px 10px}#pick .pick-head h2{font-size:24px}#pick .pick-go{margin-top:6px;gap:10px}#pick .pick-go .cta{font-size:26px;padding:.25em 1.1em;box-shadow:0 5px 0 var(--ink)}#pick .pick-go .ghost{padding:6px 14px}}
+@media (max-height:500px){#pick{padding:8px}#pick .pick-card{padding:8px 12px 10px}#pick .pick-head h2{font-size:24px}#pick .pick-go{margin-top:6px;gap:10px}#pick .pick-go .cta{font-size:26px;padding:.25em 1.1em;box-shadow:0 5px 0 var(--ink)}#pick .pick-go .ghost{padding:6px 14px}
+  /* short landscape: 8 compact hero cards in 4 x 2, so all fit above the pinned GO row */
+  #pick .heroes{gap:6px;margin:6px 0}#pick .hero{min-height:0;padding:3px 4px 4px;border-width:3px;border-radius:16px;gap:0}#pick .hero canvas{width:auto;height:60px;max-width:100%}#pick .hero .nm{font-size:15px;line-height:1.15}#pick .hero .stats{font-size:12px;gap:5px}#pick .pip{width:8px;height:8px;border-width:1.5px}#pick .hero .sp{display:none}}
