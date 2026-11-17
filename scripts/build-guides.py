@@ -11,13 +11,14 @@ CATALOG = json.loads((ROOT / 'seo/catalog.json').read_text())
 
 def meta(title, description, path, image=None, schema=None, language='en'):
     url = ORIGIN + path
+    locale = {'de': 'de_DE', 'de-CH': 'de_CH'}.get(language, 'en_US')
     tags = [f'<title>{e(title)}</title>', f'<meta name="description" content="{e(description, quote=True)}" />',
         f'<link rel="canonical" href="{url}" />', '<meta property="og:type" content="website" />',
         '<meta property="og:site_name" content="What the Ai" />',
         f'<meta property="og:title" content="{e(title, quote=True)}" />',
         f'<meta property="og:description" content="{e(description, quote=True)}" />',
         f'<meta property="og:url" content="{url}" />',
-        f'<meta property="og:locale" content="{"de_DE" if language == "de" else "en_US"}" />',
+        f'<meta property="og:locale" content="{locale}" />',
         '<meta name="twitter:card" content="summary_large_image" />',
         f'<meta name="twitter:title" content="{e(title, quote=True)}" />',
         f'<meta name="twitter:description" content="{e(description, quote=True)}" />']
@@ -70,7 +71,7 @@ def build():
 <div class="columns"><section><h2>{'How to use it' if g['id'] in (4,6) else 'How to play'}</h2><ol>{''.join('<li>'+e(x)+'</li>' for x in g['controls'])}</ol></section><section><h2>{'Before you begin' if g['id'] in (4,6) else 'A few useful tips'}</h2>{''.join('<p>'+e(x)+'</p>' for x in g['tips'])}</section></div>
 <section id="versions"><h2>Choose a version</h2><p>Each link opens that edition directly. These are descriptions of the implementations in this project, not rankings of the underlying AI models.</p><div class="table-wrap"><table><thead><tr><th scope="col">Version</th><th scope="col">What to expect</th></tr></thead><tbody>{links}</tbody></table></div></section>
 {methodology}
-<section><h2>Free to try in your browser</h2><p>No installation or account is needed. The interactive {'board needs JavaScript and an internet connection' if g['id']==4 else 'experience needs JavaScript'}. Browser storage and network access may be used for preferences, records or shared features. <a href="/about.html">Read about the project and its data use</a>.</p><p class="byline">Guide maintained by <a href="https://github.com/Rockochamp">Rockochamp</a> · Updated October 2, 2026 · <a href="https://github.com/Rockochamp/WhatTheAi/tree/main{g['hub'].rsplit('/',1)[0]}">View this experience’s source</a></p></section>'''
+<section><h2>Free to try in your browser</h2><p>No installation or account is needed. The interactive {'board needs JavaScript and an internet connection' if g['id']==4 else 'experience needs JavaScript'}. Browser storage and network access may be used for preferences, records or shared features. <a href="/about.html">Read about the project and its data use</a>.</p><p class="byline">Guide maintained by <a href="https://github.com/Rockochamp">Rockochamp</a> · Updated {e(g.get('updated', 'October 2, 2026'))} · <a href="https://github.com/Rockochamp/WhatTheAi/tree/main{g['hub'].rsplit('/',1)[0]}">View this experience’s source</a></p></section>'''
         extra={'mainEntity':{'@type':'ItemList','numberOfItems':len(versions),'itemListElement':[{'@type':'ListItem','position':i+1,'name':g['name']+' — '+v['model'],'url':ORIGIN+v['path']} for i,v in enumerate(versions)]}}
         (ROOT/g['hub'].lstrip('/')).write_text(page(g['name']+' Guide & Versions | What the Ai',g['summary']+' Learn the controls and choose a model version.',g['hub'],body,g['image'],extra))
         for v in versions:
@@ -83,7 +84,7 @@ def build():
             head=re.sub(r'<link\b(?=[^>]*rel\s*=\s*[\'\"]canonical[\'\"])[^>]*>\s*','',head,flags=re.I)
             # Replace JSON-LD only, never executable scripts.
             head=re.sub(r'<script\b[^>]*type=[\'\"]application/ld\+json[\'\"][^>]*>[\s\S]*?</script>\s*','',head,flags=re.I)
-            lang='de' if v['path']=='/games/BananaSurvivors/game.html' else 'en'
+            lang=v.get('language', 'de' if v['path']=='/games/BananaSurvivors/game.html' else 'en')
             title=g['name']+' — '+v['model']+' | What the Ai'
             entity={'@type':'VideoGame' if g['category'].endswith('game') else 'WebApplication','name':g['name']+' — '+v['model'],'url':ORIGIN+v['path'],'description':v['description'],'inLanguage':lang,'isAccessibleForFree':True}
             schema={'@context':'https://schema.org','@graph':[entity,breadcrumbs(v['model'],v['path'],(g['name'],g['hub']))]}
@@ -95,6 +96,7 @@ def build():
 <section><h2>Playing, storage and public contributions</h2><p>The games and apps are free to open without an account. JavaScript powers their interactive features. Browser storage can retain preferences, drafts, votes or scores on your device; clearing it can reset those features.</p><p>Some games use Firebase for shared rankings. The opinion board uses it for public posts, replies and votes. Nicknames, scores and contributions can be visible to other visitors. Avoid posting private or identifying information. The site also includes Cloudflare Web Analytics, and some editions load fonts or libraries from external services.</p><p>Scoreboards are casual, client-driven features. They are not verified competition results. The <a href="/apps/agi_barometer/index.html#methodology">AGI Barometer’s fixed inputs and assumptions</a> should be read before interpreting its gauges.</p></section>
 <section><h2>How to compare fairly</h2><p>Try the same type of task in each edition: a short survival run, a ten-year reign or a conversation thread. Compare the clarity of controls, feedback and recovery from mistakes. Different mechanics and separate leaderboards mean raw scores are often not directly comparable.</p><p>For concrete differences, start with <a href="/games/cosmic_dodge/index.html">the four Cosmic Dodge editions</a>, <a href="/games/BananaSurvivors/index.html">Banana Survivors’ three combat styles</a> or <a href="/apps/yes_i_said_it/index.html">the two interfaces for Yes! I Said It.</a></p></section>'''
     (ROOT/'about.html').write_text(page('About What the Ai | AI Games & Browser Experiments','Meet the What the Ai project: free AI-built games and apps maintained by Rockochamp. Learn how versions differ, inspect the source and understand shared features.','/about.html',about,'/images/CosmicDodge.webp',kind='AboutPage'))
-    print('Built 6 static guides, About page and metadata for 15 versions.')
+    version_count = sum(len(g['versions']) for g in CATALOG)
+    print(f'Built {len(CATALOG)} static guides, About page and metadata for {version_count} versions.')
 
 if __name__=='__main__': build()

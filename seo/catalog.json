@@ -268,5 +268,33 @@
       }
     ],
     "image": "/images/leo_smash_race.webp?v=3"
+  },
+  {
+    "id": 9,
+    "name": "Smarleos Smash Racer",
+    "updated": "November 17, 2026",
+    "hub": "/games/smarleos_smash_racer/index.html",
+    "category": "Racing game",
+    "summary": "Take Leo’s real toys to the track in a top-down arcade racer built by GPT-6.1 Sol.",
+    "intro": "Race two laps against four rivals across four circuits. The garage includes a dinosaur monster truck, a twin-propeller aircraft, a toy sword and six other toys, each with its own special move and illustrated bitmap sprite.",
+    "controls": [
+      "Pick a toy, circuit and class in the garage. Crew has steering assistance and lighter damage. Pro has faster rivals.",
+      "Use A/D or the arrow keys to steer, S or Down to drift, Shift for nitro, Space to jump, F to fire and E for your special. Touch buttons appear on supported devices.",
+      "Land on boost pads, smash crates, and grab shields and repairs. Jump or use ramps to reach bonus rings."
+    ],
+    "tips": [
+      "Smashes build combos up to ×6. Your result also includes race position, finish time and vehicle condition. Each pit stop costs 500 points.",
+      "An optional 2×2 or 3×3 cube fills the Crew nitro tank if solved. Submit finished races with a preset alias to each circuit’s Crew or Pro leaderboard."
+    ],
+    "versions": [
+      {
+        "model": "GPT-6.1 Sol",
+        "path": "/games/smarleos_smash_racer/sol/game.html",
+        "language": "de-CH",
+        "detail": "A standalone follow-up to Leo’s Smash Race with free steering, nine toy racers, four circuits, damage, drift, nitro, jumps and separate global scoreboards.",
+        "description": "Smarleos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste."
+      }
+    ],
+    "image": "/games/smarleos_smash_racer/sol/art/cover.webp"
   }
 ]
