@@ -1,4 +1,4 @@
-import { COURSES, RACERS } from './sim.js';
+import { COURSES, RACERS } from './sim.js?v=2';
 
 const URL = 'https://firestore.googleapis.com/v1/projects/cosmicdodge-5ae20/databases/(default)/documents';
 export const ALIASES = ['Dino Driver', 'Turbo Leo', 'Nitro Ninja', 'Smash Star', 'Sky Pilot', 'Boxenblitz', 'Night Racer', 'Drift Kid', 'Komet', 'Rennfuchs'];

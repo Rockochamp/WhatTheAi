@@ -1,4 +1,4 @@
-import { RACERS, PROPS, pointAt, clamp } from './sim.js';
+import { RACERS, PROPS, pointAt, clamp, mix } from './sim.js?v=2';
 
 export const spriteURL = id => new URL('./art/' + id + '.webp', import.meta.url).href;
 const sprites = new Map(RACERS.map(racer => {
@@ -6,6 +6,12 @@ const sprites = new Map(RACERS.map(racer => {
   image.src = spriteURL(racer.id);
   return [racer.id, image];
 }));
+const surfaceLight = {
+  workshop: ['#efb967', '#32717d'],
+  quarry: ['#ed7639', '#ac623d'],
+  neon: ['#368fec', '#ef4fbf'],
+  overdrive: ['#a57bff', '#47dbdc'],
+};
 const palette = {
   workshop: ['#272f31', '#394945', '#2d373a'],
   quarry: ['#483329', '#624739', '#382c27'],
@@ -91,6 +97,64 @@ function paintScenery(ctx, course, rand, bounds) {
   }
 }
 
+function trackLighting(ctx, course, rand) {
+  const colors = surfaceLight[course.id];
+  for (let s = 14, index = 0; s < course.length; s += 122 + rand()*58, index++) {
+    const direction = index % 2 ? -1 : 1;
+    const p = pointAt(course,s,direction*(course.width+15));
+    const color = colors[index % 3 === 1 ? 1 : 0];
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.angle);
+    ctx.scale(1.16,.79);
+    const glow = ctx.createRadialGradient(0,0,2,0,0,100);
+    glow.addColorStop(0,color+'54');
+    glow.addColorStop(.2,color+'31');
+    glow.addColorStop(1,color+'00');
+    ctx.fillStyle = glow;
+    ctx.fillRect(-100,-100,200,200);
+    ctx.fillStyle = '#10131a';
+    ctx.fillRect(-15,-6,30,12);
+    ctx.fillStyle = color;
+    ctx.fillRect(-11,-3,22,6);
+    ctx.fillStyle = '#ffffdea8';
+    ctx.fillRect(-9,-1,18,2);
+    ctx.restore();
+  }
+}
+
+function paintTrackMarks(ctx,course,rand) {
+  for (let s = 75; s < course.length; s += 58 + rand()*66) {
+    const direction = rand() > .5 ? 1 : -1;
+    const p = pointAt(course,s,direction*(course.width-24-rand()*24));
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.angle + direction*.08);
+    ctx.beginPath();
+    ctx.strokeStyle = course.id === 'quarry' ? '#1f120928' : '#02050a49';
+    ctx.lineWidth = 2;
+    for (const y of [-9,9]) {
+      ctx.moveTo(-26,y-5);
+      ctx.quadraticCurveTo(2,y+4,32,y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+  for (let s = 85; s < course.length; s += 87) {
+    for (const side of [-1,1]) {
+      const p = pointAt(course,s,side*(course.width+8));
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = '#0b1319';
+      ctx.fillRect(-13,-3.6,26,7.2);
+      ctx.fillStyle = course.border;
+      ctx.fillRect(-9,-1.3,18,2.6);
+      ctx.restore();
+    }
+  }
+}
+
 function buildSurface(course) {
   const surface = document.createElement('canvas');
   const bound = 890;
@@ -116,25 +180,23 @@ function buildSurface(course) {
   paintScenery(ctx, course, rand, [-bound,-bound,bound,bound]);
   ctx.lineJoin = 'round';
   const width = course.width * 2;
-  line(ctx, course.nodes, width + 29, '#0006');
+  line(ctx, course.nodes, width + 58, '#0005');
+  line(ctx, course.nodes, width + 37, course.border+'26');
+  line(ctx, course.nodes, width + 29, '#11151c');
   line(ctx, course.nodes, width + 17, '#0d1419');
   line(ctx, course.nodes, width + 10, course.light);
   line(ctx, course.nodes, width + 10, course.border, [19, 19]);
   line(ctx, course.nodes, width, course.road);
-  line(ctx, course.nodes, width * .77, '#00000010');
-  line(ctx, course.nodes, 1.5, '#ddecdd63', [20, 30]);
+  line(ctx, course.nodes, width * .91, '#0003');
+  line(ctx, course.nodes, width * .87, course.road);
+  line(ctx, course.nodes, width * .48, '#ffffff06');
+  line(ctx, course.nodes, 1.5, '#ddecdd68', [16, 23]);
+  paintTrackMarks(ctx,course,rand);
+  trackLighting(ctx,course,rand);
   for (let i=0;i<16500;i++) {
     const x = rand()*bound*2-bound, y = rand()*bound*2-bound;
     ctx.fillStyle = i % 3 === 0 ? '#ffffff13' : '#00000013';
     ctx.fillRect(x, y, i%4 ? 1 : 2, i%5 ? 1 : 2);
-  }
-  for (let s=180;s<course.length;s+=125) {
-    const side = Math.sin(s) > 0 ? 1 : -1;
-    const p = pointAt(course, s, side * (course.width + 19));
-    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle);
-    ctx.fillStyle = '#0c1117'; ctx.fillRect(-16,-5,32,10);
-    ctx.fillStyle = course.border; ctx.fillRect(-12,-2,24,4);
-    ctx.restore();
   }
   const start = pointAt(course,0);
   ctx.save(); ctx.translate(start.x,start.y); ctx.rotate(start.angle);
@@ -174,12 +236,15 @@ function drawProp(ctx, course, obj, tick) {
       ctx.beginPath(); ctx.moveTo(x-7,y+5); ctx.lineTo(x+7,y-5); ctx.stroke();
     }
   } else if (obj.kind === 'pad' || obj.kind === 'ramp') {
-    ctx.fillStyle = obj.kind === 'pad' ? '#283b24' : '#533817';
+    ctx.fillStyle = '#0b151a';
+    ctx.beginPath(); ctx.roundRect(-21,-25,42,50,4); ctx.fill();
+    ctx.fillStyle = prop.color + '44';
     ctx.fillRect(-18,-21,36,42);
     ctx.strokeStyle = prop.color;
     ctx.lineWidth = 2;
     ctx.strokeRect(-18,-21,36,42);
     for(let i=-11;i<=11;i+=11) {
+      ctx.globalAlpha = .68 + .32*Math.sin(tick*.15-i*.2)**2;
       ctx.beginPath(); ctx.moveTo(i-5,-13); ctx.lineTo(i+3,0); ctx.lineTo(i-5,13); ctx.stroke();
     }
   } else {
@@ -212,7 +277,7 @@ function drawProp(ctx, course, obj, tick) {
 }
 
 function drawRacer(ctx, p, racer, options = {}) {
-  const { scale = 1, yaw = 0, air = 0, active = false, hit = false, marker = false, powered = false, shield = false, smoke = false } = options;
+  const { scale = 1, yaw = 0, air = 0, active = false, hit = false, marker = false, powered = false, shield = false } = options;
   ctx.save();
   ctx.translate(p.x,p.y);
   ctx.rotate(p.angle + Math.PI/2 + yaw);
@@ -237,8 +302,14 @@ function drawRacer(ctx, p, racer, options = {}) {
       ctx.beginPath();ctx.moveTo(x-5,h/2-5);ctx.lineTo(x+2,h/2+26);ctx.lineTo(x+5,h/2-5);ctx.fill();
     }
   }
-  if (smoke) { ctx.fillStyle = '#979b9966';ctx.beginPath();ctx.arc(4,h*.62,10,0,2*Math.PI);ctx.fill(); }
-  if (hit) ctx.globalAlpha = .55;
+  if (marker) {
+    ctx.strokeStyle = racer.color+'bc';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0,0,w*.65,h*.57,0,0,2*Math.PI);
+    ctx.stroke();
+  }
+  if (hit) ctx.globalAlpha = .67;
   if (img.complete && img.naturalWidth) ctx.drawImage(img,-spriteW/2,-h/2-air*3,spriteW,h);
   else { ctx.fillStyle = racer.color; ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,7);ctx.fill(); }
   ctx.globalAlpha = 1;
@@ -250,90 +321,224 @@ function drawRacer(ctx, p, racer, options = {}) {
   ctx.restore();
 }
 
+function wrappedAngle(from,to) {
+  return Math.atan2(Math.sin(to-from),Math.cos(to-from));
+}
+
+function racingPose(course,s,offset) {
+  const p = pointAt(course,s,offset);
+  const fore = pointAt(course,s+9);
+  const aft = pointAt(course,s-9);
+  p.angle = Math.atan2(fore.y-aft.y,fore.x-aft.x);
+  return p;
+}
+
+function animateEffects(ctx,particles,waves,delta) {
+  for (const fx of waves) {
+    fx.age += delta;
+    const progress = clamp(fx.age/fx.life,0,1);
+    const radius = 7 + fx.radius*(1-(1-progress)**2);
+    if (progress >= 1) continue;
+    ctx.save();
+    ctx.globalAlpha = (1-progress)*.78;
+    ctx.strokeStyle = fx.color;
+    ctx.lineWidth = 1 + (1-progress)*4;
+    ctx.beginPath();ctx.arc(fx.x,fx.y,radius,0,2*Math.PI);ctx.stroke();
+    if (fx.double) {
+      ctx.strokeStyle = '#fff5ca';
+      ctx.lineWidth = 2;
+      ctx.beginPath();ctx.arc(fx.x,fx.y,radius*.84,0,2*Math.PI);ctx.stroke();
+    }
+    ctx.restore();
+  }
+  for (const f of particles) {
+    f.age += delta;
+    const progress = clamp(f.age/f.life,0,1);
+    if (progress >= 1) continue;
+    f.x += f.dx*delta;
+    f.y += f.dy*delta;
+    ctx.globalAlpha = (1-progress)**1.35;
+    ctx.fillStyle = f.color;
+    if (f.kind === 'plank') {
+      ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle+progress*f.spin);
+      ctx.fillRect(-f.size,-f.size*.42,f.size*2,f.size*.84);
+      ctx.restore();
+    } else if (f.kind === 'spark') {
+      ctx.beginPath();ctx.moveTo(f.x,f.y);ctx.lineTo(f.x-f.dx*.046,f.y-f.dy*.046);
+      ctx.strokeStyle = f.color;ctx.lineWidth = 1.3;ctx.stroke();
+    } else {
+      ctx.beginPath();ctx.arc(f.x,f.y,f.size*(.5+progress),0,2*Math.PI);ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function speedLines(ctx,w,h,energy,tick) {
+  ctx.save();
+  const x = w*.5, y = h*.35;
+  ctx.lineWidth = 1.4;
+  for (let i=0;i<19;i++) {
+    const angle = i*2.39996;
+    const age = (tick*.045 + i*.618)%1;
+    const radius = .23+age*.35;
+    const scale = .09+age*.19;
+    const dx = Math.cos(angle)*w, dy = Math.sin(angle)*h;
+    ctx.globalAlpha = energy*age*.6;
+    ctx.strokeStyle = i%3 ? '#d5fd94' : '#fff';
+    ctx.beginPath();ctx.moveTo(x+dx*radius,y+dy*radius);
+    ctx.lineTo(x+dx*(radius+scale),y+dy*(radius+scale));ctx.stroke();
+  }
+  ctx.restore();
+}
+
+let lastSurface;
 export class RaceView {
   constructor(canvas, minimap, race) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: false });
     this.minimap = minimap;
     this.race = race;
-    this.scenery = buildSurface(race.circuit);
-    this.camera = pointAt(race.circuit,0).angle;
+    if (lastSurface?.course !== race.circuit) lastSurface = { course:race.circuit, ...buildSurface(race.circuit) };
+    this.scenery = lastSurface;
+    this.camera = racingPose(race.circuit,0,0).angle;
+    this.cameraOffset = 0;
+    this.zoom = 1;
     this.particles = [];
+    this.waves = [];
+    this.skids = [];
     this.shake = 0;
+    this.flash = 0;
     this.drawCount = 0;
+    this.trailAt = 0;
+    this.tickVisual = 0;
+    this.remember();
+  }
+
+  remember() {
+    const r = this.race;
+    this.previous = { distance:r.distance, offset:r.offset, side:r.side, rivals:r.rivals.map(v => [v.distance,v.offset]) };
+  }
+
+  scatter(p,count,kind,color,speed,life) {
+    for (let i=0;i<count;i++) {
+      const angle = Math.random()*Math.PI*2;
+      const velocity = speed*(.23+.77*Math.random());
+      this.particles.push({
+        x:p.x,y:p.y,dx:Math.cos(angle)*velocity,dy:Math.sin(angle)*velocity,angle,
+        spin:Math.random()*9-4.5,kind,color,size:2+Math.random()*5,age:0,life:life*(.56+.44*Math.random()),
+      });
+    }
+    if (this.particles.length > 230) this.particles.splice(0,this.particles.length-230);
   }
 
   react(event, reduced) {
-    if (reduced || (!['smash','hit','oil','special'].includes(event.type))) return;
-    const r = this.race;
-    const p = event.object ? pointAt(r.circuit,event.object.s,event.object.offset) : pointAt(r.circuit,r.distance,r.offset);
-    const count = event.type === 'smash' ? 18 : 12;
-    const tint = event.object ? PROPS[event.object.kind].color : r.racer.color;
-    for (let i=0;i<count;i++) {
-      const a = Math.random() * 2 * Math.PI, speed = 28 + Math.random()*105;
-      this.particles.push({ x:p.x,y:p.y,dx:Math.cos(a)*speed,dy:Math.sin(a)*speed,t:.25+Math.random()*.55,c:tint,w:2+Math.random()*5 });
+    const { race:r } = this;
+    const { type, object } = event;
+    const p = object ? pointAt(r.circuit,object.s,object.offset) : pointAt(r.circuit,event.distance ?? r.distance,event.offset ?? r.offset);
+    if (type === 'punch' || type === 'smash' || type === 'pickup' || type === 'special') {
+      const color = type === 'punch' ? '#ff523c' : object ? PROPS[object.kind].color : r.racer.color;
+      this.waves.push({ ...p,color,age:0,life:type==='punch' ? .57 : .4,radius:event.radius ?? (type==='special' ? 59 : 26),double:type==='punch' && !reduced });
     }
-    if (event.type === 'smash' || event.type === 'hit') this.shake = event.type === 'hit' ? 5 : 3;
+    if (reduced) return;
+    if (type === 'smash') {
+      this.scatter(p,9,'plank',PROPS[object.kind].color,112,.64);
+      this.scatter(p,15,'spark','#ffe08a',182,.42);
+      this.shake = Math.max(this.shake,3+Math.min(3,event.combo));
+    }
+    if (type === 'punch' || type === 'hit') {
+      this.scatter(p,22,'spark',type === 'punch' ? '#ffd491' : '#ff916a',192,.48);
+      this.shake = Math.max(this.shake,type === 'punch' ? 9 : 6);
+      this.flash = Math.max(this.flash,type === 'hit' ? .48 : .28);
+    }
+    if (type === 'boost' || type === 'oil') this.scatter(p,14,'dust',type === 'boost' ? '#c8ff8a66' : '#b29ad96e',92,.50);
   }
 
-  draw(reduced, delta) {
-    const { canvas, ctx, race: r, scenery } = this;
+  draw(reduced, delta, interpolation = 1) {
+    const { canvas, ctx, race:r, scenery, previous } = this;
     const W = canvas.clientWidth, H = canvas.clientHeight;
     if (!W || !H) return;
-    const dpr = Math.min(2, devicePixelRatio || 1);
+    const dpr = Math.min(devicePixelRatio || 1,Math.sqrt(3400000/(W*H)),2);
     const scaledW = Math.round(W*dpr), scaledH = Math.round(H*dpr);
     if (canvas.width !== scaledW || canvas.height !== scaledH) { canvas.width = scaledW; canvas.height = scaledH; }
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.fillStyle = r.circuit.ground; ctx.fillRect(0,0,W,H);
-    const p = pointAt(r.circuit,r.distance,r.offset);
-    const heading = pointAt(r.circuit,r.distance+12).angle;
-    this.camera += Math.atan2(Math.sin(heading-this.camera),Math.cos(heading-this.camera)) * Math.min(1,delta*8);
-    const zoom = clamp(Math.min(H/480, W/380), .56, 2.1) * (reduced ? 1 : 1 - Math.max(0,r.speed-175)*.00058);
-    this.shake = reduced ? 0 : Math.max(0,this.shake - delta*17);
+    ctx.fillStyle = r.circuit.ground;ctx.fillRect(0,0,W,H);
+    const distance = mix(previous.distance,r.distance,interpolation);
+    const offset = mix(previous.offset,r.offset,interpolation);
+    const side = mix(previous.side,r.side,interpolation);
+    const p = racingPose(r.circuit,distance,offset);
+    const ahead = racingPose(r.circuit,distance+23,0);
+    this.camera += wrappedAngle(this.camera,ahead.angle)*(1-Math.exp(-delta*7));
+    this.cameraOffset = mix(this.cameraOffset,reduced ? offset : offset*.74,1-Math.exp(-delta*8));
+    const origin = pointAt(r.circuit,distance,this.cameraOffset);
+    const powered = r.nitroFiring || r.turbo > 0;
+    const targetZoom = reduced ? 1 : 1 - Math.max(0,r.speed-170)*.00057 - (powered ? .048 : 0);
+    this.zoom = mix(this.zoom,targetZoom,1-Math.exp(-delta*9));
+    const zoom = clamp(Math.min(H/490,W/380),.51,2.05)*this.zoom;
+    this.tickVisual += delta*60;
+    this.shake = reduced ? 0 : this.shake*Math.exp(-delta*8.5);
+    this.flash = reduced ? 0 : Math.max(0,this.flash-delta*2.9);
     ctx.save();
-    ctx.translate(W/2 + this.shake*Math.sin(r.tick*1.9),H*(W < 560 ? .57 : .64));
+    ctx.translate(W/2+this.shake*Math.sin(this.tickVisual*1.6), H*(W < 560 ? .56 : .63)+this.shake*Math.cos(this.tickVisual*1.1)*.62);
     ctx.scale(zoom,zoom);
     ctx.rotate(-this.camera-Math.PI/2);
-    ctx.translate(-p.x,-p.y);
+    ctx.translate(-origin.x,-origin.y);
     ctx.drawImage(scenery.surface,-scenery.bound,-scenery.bound);
     const lap = Math.min(r.circuit.laps-1,Math.floor(r.distance/r.circuit.length));
     const round = r.distance % r.circuit.length;
     for (const o of r.objects) {
-      const far = Math.abs(o.s - round);
+      const far = Math.abs(o.s-round);
       if (Math.min(far,r.circuit.length-far) > 720) continue;
       const visibleLap = round > r.circuit.length-650 && o.s < 650 ? lap+1 : lap;
-      if (o.used < visibleLap && visibleLap < r.circuit.laps) drawProp(ctx,r.circuit,o,reduced ? 0 : r.tick);
+      if (o.used < visibleLap && visibleLap < r.circuit.laps) drawProp(ctx,r.circuit,o,reduced ? 0 : this.tickVisual);
     }
-    for (const v of r.rivals) {
+    if (!reduced) {
+      for (const skid of this.skids) {
+        ctx.save();ctx.translate(skid.x,skid.y);ctx.rotate(skid.angle);
+        ctx.strokeStyle = 'rgba(7,8,11,' + Math.max(0, .54 - (r.tick-skid.tick)/720) + ')';
+        ctx.lineCap = 'round';ctx.lineWidth = 2.7;
+        ctx.beginPath();
+        for (const side of [-1,1]) {
+          ctx.moveTo(-9,side*skid.width);
+          ctx.lineTo(7,side*skid.width);
+        }
+        ctx.stroke();ctx.restore();
+      }
+      this.skids = this.skids.filter(skid => r.tick-skid.tick < 390);
+    }
+    for (let i=0;i<r.rivals.length;i++) {
+      const v = r.rivals[i];
       if (Math.abs(v.distance-r.distance) > 640) continue;
-      drawRacer(ctx,pointAt(r.circuit,v.distance,v.offset),v.racer,{ hit:v.hit>0 && r.tick%8 < 4 });
+      const [lastDistance,lastOffset] = previous.rivals[i];
+      drawRacer(ctx,racingPose(r.circuit,mix(lastDistance,v.distance,interpolation),mix(lastOffset,v.offset,interpolation)),v.racer,
+        { hit:!reduced && v.hit>.75 });
     }
     if (r.shot > 0) {
-      const s = pointAt(r.circuit,r.distance+(1-r.shot/.28)*105+12,r.offset);
+      const shot = pointAt(r.circuit,distance+(1-r.shot/.28)*105+12,offset);
       ctx.fillStyle = r.racer.color;
-      ctx.beginPath();ctx.ellipse(s.x,s.y,9,3,s.angle,0,2*Math.PI);ctx.fill();
+      ctx.beginPath();ctx.ellipse(shot.x,shot.y,12,3,shot.angle,0,2*Math.PI);ctx.fill();
     }
+    if (!reduced && r.tick > this.trailAt && (r.drifting || powered || r.hp<38)) {
+      this.trailAt = r.tick + 2;
+      const tail = pointAt(r.circuit,distance-19,offset);
+      this.scatter(tail,2,powered ? 'spark' : 'dust',powered ? '#ddff9f' : '#9dabac7a',powered ? 63 : 39,.36);
+      if (r.drifting && this.skids.length < 132) {
+        this.skids.push({ ...tail,angle:p.angle+side/240,tick:r.tick,width:r.racer.width*.33 });
+      }
+    }
+    animateEffects(ctx,this.particles,this.waves,delta);
     const air = r.air > 0 ? Math.min(1,r.air*3.6) : 0;
     drawRacer(ctx,p,r.racer,{
-      scale: 1.08 + air*.22, yaw: clamp(r.side/190,-.56,.56), air, marker:true, active:r.specialTime>0,
-      hit: !reduced && r.hit > 0 && r.tick%6 < 3, powered:r.nitroFiring || r.turbo>0, shield:r.shield>0,
-      smoke:r.hp<38 || r.recover>0,
+      scale:1.1+air*.25,yaw:clamp(side/(r.drifting ? 151 : 212),-.66,.66),air,marker:true,active:r.specialTime>0,
+      hit:!reduced && r.hit > .32,powered,shield:r.shield>0,
     });
-    for (const particle of this.particles) {
-      particle.x += particle.dx*delta;
-      particle.y += particle.dy*delta;
-      particle.t -= delta;
-      ctx.globalAlpha = clamp(particle.t*2.8,0,1);
-      ctx.fillStyle = particle.c;
-      ctx.fillRect(particle.x,particle.y,particle.w*1.5,particle.w);
-    }
-    ctx.globalAlpha = 1;
-    this.particles = this.particles.filter(particle => particle.t > 0);
+    this.particles = this.particles.filter(f => f.age<f.life);
+    this.waves = this.waves.filter(f => f.age<f.life);
     ctx.restore();
-    const vignette = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.28,W/2,H/2,Math.max(W,H)*.69);
+    if (!reduced && powered) speedLines(ctx,W,H,clamp((r.speed-158)/211,.15,.62),this.tickVisual);
+    const vignette = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.33,W/2,H/2,Math.max(W,H)*.7);
     vignette.addColorStop(0,'transparent');
-    vignette.addColorStop(1,'#0008');
+    vignette.addColorStop(1,this.flash > 0 ? 'rgba(255,64,45,'+(this.flash+.16)+')' : '#0009');
     ctx.fillStyle = vignette;ctx.fillRect(0,0,W,H);
-    if ((this.drawCount++ % 4) === 0) drawMap(this.minimap,r.circuit,r);
+    if (this.drawCount++%5 === 0) drawMap(this.minimap,r.circuit,r);
   }
 }
