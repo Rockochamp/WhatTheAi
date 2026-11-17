@@ -8,22 +8,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Chivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=2">
 <title>Leos Smash Racer — GPT-6.1 Sol | What the Ai</title>
-<meta name="description" content="Leos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste." />
+<meta name="description" content="Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste." />
 <link rel="canonical" href="https://whatthe.ai/games/leo_smash_race/sol/game.html" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="What the Ai" />
 <meta property="og:title" content="Leos Smash Racer — GPT-6.1 Sol | What the Ai" />
-<meta property="og:description" content="Leos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste." />
+<meta property="og:description" content="Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste." />
 <meta property="og:url" content="https://whatthe.ai/games/leo_smash_race/sol/game.html" />
 <meta property="og:locale" content="de_CH" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Leos Smash Racer — GPT-6.1 Sol | What the Ai" />
-<meta name="twitter:description" content="Leos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste." />
+<meta name="twitter:description" content="Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste." />
 <meta property="og:image" content="https://whatthe.ai/games/leo_smash_race/sol/art/cover.webp" />
 <meta name="twitter:image" content="https://whatthe.ai/games/leo_smash_race/sol/art/cover.webp" />
-<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Leos Smash Racer — GPT-6.1 Sol", "url": "https://whatthe.ai/games/leo_smash_race/sol/game.html", "description": "Leos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste.", "inLanguage": "de-CH", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Leos Smash Racer", "item": "https://whatthe.ai/games/leo_smash_race/index.html"}, {"@type": "ListItem", "position": 3, "name": "GPT-6.1 Sol", "item": "https://whatthe.ai/games/leo_smash_race/sol/game.html"}]}]}</script>
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Leos Smash Racer — GPT-6.1 Sol", "url": "https://whatthe.ai/games/leo_smash_race/sol/game.html", "description": "Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste.", "inLanguage": "de-CH", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Leos Smash Racer", "item": "https://whatthe.ai/games/leo_smash_race/index.html"}, {"@type": "ListItem", "position": 3, "name": "GPT-6.1 Sol", "item": "https://whatthe.ai/games/leo_smash_race/sol/game.html"}]}]}</script>
 </head>
 <body>
   <main id="pit">
@@ -31,6 +31,7 @@
       <a class="wordmark" href="/" aria-label="Zurück zu What the Ai"><i aria-hidden="true"></i> What the Ai</a>
       <div class="top-actions">
         <button class="small-button" id="sound" type="button" aria-pressed="true">Ton an</button>
+        <button class="small-button" id="music" type="button" aria-pressed="true">Musik an</button>
         <button class="small-button" type="button" data-open="board">Weltrangliste <span aria-hidden="true">↗</span></button>
       </div>
     </header>
@@ -48,7 +49,7 @@
     <div class="shell" id="garage">
       <div class="garage-grid">
         <section class="selection" aria-labelledby="garage-title">
-          <div class="section-heading"><h2 id="garage-title">Garage</h2><span>9 Racer</span></div>
+          <div class="section-heading"><h2 id="garage-title">Garage</h2><span id="roster-count"></span></div>
           <div id="racers" class="racer-grid" role="group" aria-label="Fahrzeug auswählen"></div>
           <div class="racer-spec" id="racer-spec"></div>
         </section>
@@ -87,6 +88,9 @@
       </div>
     </div>
     <div class="race-side"><canvas id="minimap" width="144" height="128" aria-label="Streckenkarte"></canvas><div id="race-track"></div></div>
+    <div id="smash-chain" class="smash-chain" aria-hidden="true" hidden>
+      <strong id="chain-value"></strong><span>Smash-Serie</span>
+    </div>
     <div id="race-message" aria-live="polite"></div>
     <div class="drive-bottom">
       <div class="driver"><strong id="speed">000</strong><span>km/h</span></div>
@@ -135,6 +139,7 @@
   <dialog id="paused" aria-labelledby="pause-title">
     <div class="dialog-top"><h2 id="pause-title">Rennpause</h2></div>
     <button class="primary" id="resume" type="button">Weiterfahren</button>
+    <button class="secondary" id="music-pause" type="button" aria-pressed="true">Musik an</button>
     <button class="secondary" id="restart" type="button">Neu starten</button>
     <button class="secondary" id="quit" type="button">Zur Garage</button>
   </dialog>
@@ -169,6 +174,6 @@
     </div>
   </dialog>
   <noscript>Aktiviere JavaScript, um Leos Smash Racer zu spielen.</noscript>
-  <script type="module" src="./main.js"></script>
+  <script type="module" src="./main.js?v=2"></script>
 </body>
 </html>

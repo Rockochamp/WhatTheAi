@@ -1,7 +1,7 @@
-import { CIRCUITS, RACERS, INPUT, STEP, createRace, position, result, step } from './sim.js';
-import { RaceView, drawMap, spriteURL } from './render.js';
-import { RaceSound } from './audio.js';
-import { ALIASES, top, submit } from './board.js';
+import { CIRCUITS, RACERS, INPUT, STEP, createRace, position, result, step } from './sim.js?v=2';
+import { RaceView, drawMap, spriteURL } from './render.js?v=2';
+import { RaceSound } from './audio.js?v=2';
+import { ALIASES, top, submit } from './board.js?v=2';
 import { FACES, MOVES, createCube, faceColors, solved, turn } from './cube.js';
 
 const $ = id => document.getElementById(id);
@@ -22,6 +22,7 @@ const preferences = {
   course: CIRCUITS.find(c => c.id === storage.course) ?? CIRCUITS[0],
   mode: storage.mode === 'pro' ? 'pro' : 'crew',
   sound: storage.sound !== false,
+  music: storage.music !== false,
   reduced: storage.reduced ?? matchMedia('(prefers-reduced-motion: reduce)').matches,
   alias: ALIASES.includes(storage.alias) ? storage.alias : ALIASES[0],
   best: typeof storage.best === 'object' && storage.best ? storage.best : {},
@@ -44,19 +45,26 @@ function option(label, value = label) {
 }
 function pressed(button, value) { button.setAttribute('aria-pressed', String(value)); }
 function show(id) { if (!$(id).open) $(id).showModal(); }
-const audio = new RaceSound(preferences.sound);
+const audio = new RaceSound(preferences.sound,preferences.music);
+
+function menuTap() {
+  audio.unlock();
+  audio.fx('touch');
+}
 
 function createGarage() {
+  $('roster-count').textContent = RACERS.length + ' Racer';
   for (const racer of RACERS) {
     const button = el('button',undefined,'racer-card');
     button.type = 'button';
     button.dataset.id = racer.id;
+    button.style.setProperty('--racer-color',racer.color);
     const img = el('img');
     img.src = spriteURL(racer.id);
     img.alt = '';
-    img.width = img.height = 44;
+    img.width = img.height = 56;
     button.append(img,el('span',racer.name));
-    button.addEventListener('click',() => { preferences.racer = racer; refreshGarage(); save(); });
+    button.addEventListener('click',() => { menuTap(); preferences.racer = racer; refreshGarage(); save(); });
     $('racers').append(button);
   }
   for (const course of CIRCUITS) {
@@ -71,13 +79,14 @@ function createGarage() {
     const info = el('span');
     info.append(el('strong',course.name),el('small',course.type));
     button.append(canvas,info);
-    button.addEventListener('click',() => { preferences.course = course; refreshGarage(); save(); });
+    button.addEventListener('click',() => { menuTap(); preferences.course = course; refreshGarage(); save(); });
     $('courses').append(button);
     $('board-course').append(option(course.name,course.id));
   }
   for (const name of ALIASES) $('alias').append(option(name));
   $('alias').value = preferences.alias;
   for (const button of all('[data-mode]')) button.addEventListener('click',() => {
+    menuTap();
     preferences.mode = button.dataset.mode;
     refreshGarage();
     save();
@@ -105,12 +114,17 @@ function refreshGarage() {
     line.append(el('span',label),meter);
     meters.append(line);
   }
-  $('racer-spec').replaceChildren(text,meters);
+  const preview = el('img',undefined,'fighter-preview');
+  preview.src = spriteURL(r.id === 'knuckles' ? 'knuckles-garage' : r.id);
+  preview.alt = '';
+  preview.width = preview.height = 88;
+  $('racer-spec').style.setProperty('--racer-color',r.color);
+  $('racer-spec').replaceChildren(preview,text,meters);
   const best = preferences.best[preferences.course.id + ':' + preferences.mode];
   $('course-notes').textContent = preferences.course.map + (best ? ' · Bestwert ' + count(best.score) : '');
 }
 
-const hud = Object.fromEntries(['place','lap','time','points','speed','health','nitro','charge','charge-name','special-meter','touch-special','race-message'].map(id => [id,$(id)]));
+const hud = Object.fromEntries(['place','lap','time','points','speed','health','nitro','charge','charge-name','special-meter','touch-special','race-message','smash-chain','chain-value'].map(id => [id,$(id)]));
 const keyboard = new Map(Object.entries({
   ArrowLeft: INPUT.left, KeyA: INPUT.left, ArrowRight: INPUT.right, KeyD: INPUT.right,
   ArrowDown: INPUT.drift, KeyS: INPUT.drift, ShiftLeft: INPUT.boost, ShiftRight: INPUT.boost, KeyX: INPUT.boost,
@@ -122,7 +136,7 @@ let taps = 0;
 let race, view, finalRecord;
 let phase = 'garage';
 let lastFrame = 0, accumulator = 0, countdown = 0, countShown = 0, noticeUntil = 0;
-let frameId = 0;
+let frameId = 0, nextHud = 0;
 let raceWarmup = false;
 const notices = {
   hit: 'Treffer!', pit: 'Boxenstopp · Reparatur', pass: 'Überholmanöver!', oil: 'Öl auf der Strecke!',
@@ -133,10 +147,22 @@ function updateSound() {
   $('sound').textContent = preferences.sound ? 'Ton an' : 'Ton aus';
   pressed($('sound'),preferences.sound);
   pressed($('race-sound'),preferences.sound);
+  for (const id of ['music','music-pause']) {
+    $(id).textContent = preferences.music ? 'Musik an' : 'Musik aus';
+    pressed($(id),preferences.music);
+  }
 }
 function toggleSound() {
   preferences.sound = !preferences.sound;
   audio.set(preferences.sound);
+  updateSound();
+  save();
+}
+
+function toggleMusic() {
+  preferences.music = !preferences.music;
+  audio.setMusic(preferences.music);
+  menuTap();
   updateSound();
   save();
 }
@@ -180,11 +206,12 @@ function launch(warmed = false) {
   cancelAnimationFrame(frameId);
   clearInput();
   audio.unlock();
-  audio.stop();
+  audio.restart();
   raceWarmup = warmed;
   race = createRace(preferences.course.id,preferences.racer.id,preferences.mode,warmed);
   $('pit').hidden = true;
   $('race').hidden = false;
+  $('race').style.setProperty('--course-color',race.circuit.border);
   document.body.style.overflow = 'hidden';
   view = new RaceView($('track'),$('minimap'),race);
   $('race-track').textContent = race.circuit.name;
@@ -194,10 +221,12 @@ function launch(warmed = false) {
   countShown = 0;
   noticeUntil = 0;
   finalRecord = null;
+  nextHud = 0;
   accumulator = 0;
   lastFrame = 0;
   phase = 'countdown';
-  hud['race-message'].className = '';
+  hud['race-message'].className = 'countdown';
+  hud['race-message'].textContent = '';
   updateHud();
   frameId = requestAnimationFrame(frame);
 }
@@ -228,6 +257,8 @@ function updateHud() {
   hud.charge.value = r.special;
   hud['special-meter'].classList.toggle('ready',r.special >= 99.9);
   hud['touch-special'].classList.toggle('ready',r.special >= 99.9);
+  hud['smash-chain'].hidden = r.combo < 2;
+  hud['chain-value'].textContent = '×' + r.combo;
 }
 
 function announce(text, ticks, status = 'notice') {
@@ -237,8 +268,9 @@ function announce(text, ticks, status = 'notice') {
 }
 function onEvent(event) {
   view.react(event,preferences.reduced);
-  audio.fx(event.type);
-  if (event.type === 'special') announce(race.racer.move,96);
+  audio.fx(event.type,event);
+  if (event.type === 'punch') announce('Bodenbrecher ' + (event.index+1) + '/3',44,'notice impact');
+  else if (event.type === 'special') announce(race.racer.move,96,'notice impact');
   else if (event.type === 'smash') {
     if (event.combo > 1) announce('SMASH ×' + event.combo + '   +' + event.points,57);
     else announce('SMASH +' + event.points,38);
@@ -266,15 +298,19 @@ function frame(now) {
   } else {
     accumulator += delta;
     while (accumulator >= STEP && !race.finished) {
+      view.remember();
       step(race,inputMask());
       for (const event of race.events) onEvent(event);
       accumulator -= STEP;
     }
-    if (race.tick >= noticeUntil) hud['race-message'].textContent = '';
-    updateHud();
+    if (race.tick >= noticeUntil && hud['race-message'].textContent) hud['race-message'].textContent = '';
+    if (now >= nextHud || race.finished) {
+      updateHud();
+      nextHud = now + 45;
+    }
     audio.update(race);
   }
-  view.draw(preferences.reduced,delta);
+  view.draw(preferences.reduced,delta,race.finished ? 1 : accumulator/STEP);
   if (race.finished) finish();
   else frameId = requestAnimationFrame(frame);
 }
@@ -439,6 +475,7 @@ $('pause').addEventListener('click',pause);
 $('resume').addEventListener('click',resume);
 $('sound').addEventListener('click',toggleSound);
 $('race-sound').addEventListener('click',toggleSound);
+for (const id of ['music','music-pause']) $(id).addEventListener('click',toggleMusic);
 $('paused').addEventListener('cancel',event => { event.preventDefault(); resume(); });
 $('finish').addEventListener('cancel',event => { event.preventDefault(); goGarage(); });
 $('reduced').checked = preferences.reduced;
@@ -471,6 +508,7 @@ for (const button of all('[data-input]')) {
     button.setPointerCapture(event.pointerId);
     pointers.set(event.pointerId,button);
     taps |= INPUT[button.dataset.input];
+    audio.fx('touch');
     button.classList.add('held');
   });
   for (const name of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(name,event => {

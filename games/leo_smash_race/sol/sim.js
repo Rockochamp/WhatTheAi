@@ -14,6 +14,7 @@ export const RACERS = [
   { id: 'jade', name: 'Jade Racer', move: 'Magnetfeld', desc: 'Zieht Nitrozellen, Reparaturen und Schilde von der ganzen Fahrbahn an.', color: '#55ef8e', speed: 224, grip: 1.17, armor: 0.88, width: 31, reach: 115, lane: 100, duration: 2.7 },
   { id: 'pup', name: 'Plüsch-Pilot', move: 'Wirbelpfote', desc: 'Repariert deinen Kart sofort und wirbelt Hindernisse rundherum aus dem Weg.', color: '#ffc9a3', speed: 209, grip: 1.27, armor: 1.02, width: 35, reach: 38, lane: 60, duration: 1.9 },
   { id: 'blade', name: 'Neon Blade', move: 'Klingenschnitt', desc: 'Schickt einen Schnitt durch Hindernisse weit voraus und öffnet eine Überholspur.', color: '#e38eff', speed: 225, grip: 1.05, armor: 0.91, width: 32, reach: 154, lane: 31, duration: 1.2 },
+  { id: 'knuckles', name: 'Knuckles', move: 'Bodenbrecher', desc: 'Rammt die Fäuste auf den Asphalt. Drei rote Druckwellen zertrümmern Kisten und bremsen Rivalen.', color: '#ff574e', speed: 213, grip: 1.12, armor: 1.21, width: 40, reach: 0, lane: 0, duration: 1.28 },
 ];
 
 export const COURSES = [
@@ -108,13 +109,13 @@ export function createRace(courseId, racerId, mode = 'crew', warmup = false) {
   const circuit = CIRCUITS.find(c => c.id === courseId);
   const racer = RACERS.find(r => r.id === racerId);
   if (!circuit || !racer || !['crew', 'pro'].includes(mode)) throw new Error('Ungültiges Rennen');
-  const rivals = RACERS.filter(r => r !== racer);
+  const rivals = RACERS.filter(r => r !== racer && r.id !== 'knuckles');
   const offset = circuit.seed % rivals.length;
   return {
     circuit, racer, mode, objects: populate(circuit), events: [], tick: 0, input: 0, distance: 0, speed: 68,
     offset: 0, side: 0, hp: 100, nitro: mode === 'crew' && warmup ? 100 : 47, special: 75,
     specialTime: 0, boostTime: 0, turbo: 0, shield: 0, air: 0, hit: 0, recover: 0, slick: 0,
-    jumpWait: 0, fireWait: 0, shot: 0, combo: 0, comboTime: 0, bestCombo: 0,
+    jumpWait: 0, fireWait: 0, shot: 0, punchTick: 0, punchIndex: 0, combo: 0, comboTime: 0, bestCombo: 0,
     smash: 0, points: 0, rings: 0, pitStops: 0, drifting: false, nitroFiring: false, finished: false, timeout: false,
     rivals: Array.from({ length: 4 }, (_, i) => ({
       racer: rivals[(offset + i) % rivals.length], distance: [14,-18,-47,-75][i],
@@ -163,10 +164,40 @@ function useSpecial(r) {
   if (r.racer.id === 'lime') { r.shield = 3; r.air = 0.85; }
   if (r.racer.id === 'sky') r.air = r.specialTime;
   if (r.racer.id === 'comet') r.turbo = 1.7;
+  if (r.racer.id === 'knuckles') {
+    r.punchTick = r.tick;
+    r.punchIndex = 0;
+    r.shield = Math.max(r.shield, 0.9);
+  }
   if (r.racer.id === 'bat') for (const rival of r.rivals) {
     if (Math.abs(rival.distance - r.distance) < 155) rival.hit = 2.2;
   }
   emit(r, 'special');
+}
+
+const PUNCH_RADII = [64, 91, 120];
+
+function punch(r) {
+  if (r.punchTick !== r.tick) return;
+  const index = r.punchIndex++;
+  const radius = PUNCH_RADII[index];
+  r.punchTick = index < PUNCH_RADII.length - 1 ? r.tick + 16 : 0;
+  const lapLength = r.circuit.length;
+  const nearLap = Math.max(0, Math.floor((r.distance - radius) / lapLength));
+  const farLap = Math.min(r.circuit.laps - 1, Math.floor((r.distance + radius) / lapLength));
+  for (let lap = nearLap; lap <= farLap; lap++) {
+    for (const object of r.objects) {
+      const ahead = object.s + lap * lapLength - r.distance;
+      if (object.used >= lap || ahead < -20 || ahead > radius || !PROPS[object.kind].damage) continue;
+      if (Math.hypot(ahead, object.offset - r.offset) <= radius) breakProp(r, object, lap, true);
+    }
+  }
+  for (const rival of r.rivals) {
+    if (rival.finishTick === undefined && Math.hypot(rival.distance - r.distance, rival.offset - r.offset) <= radius) {
+      rival.hit = Math.max(rival.hit, 1.25 + index * 0.18);
+    }
+  }
+  emit(r, 'punch', { distance: r.distance, offset: r.offset, radius, index });
 }
 
 function collect(r, object, lap) {
@@ -194,7 +225,7 @@ function interact(r, previousDistance, previousOffset) {
       const active = r.specialTime > 0;
       const radius = prop.radius + 10;
       const specialHits = active && solid && d > -18 && d <= r.racer.reach && lateral <= r.racer.lane + prop.radius
-        && !['sky','jade'].includes(r.racer.id);
+        && !['sky','jade','knuckles'].includes(r.racer.id);
       const shotHits = r.shot > 0 && solid && d > -6 && d < (1 - r.shot / 0.28) * 112 && lateral < 12 + prop.radius;
       if (specialHits || shotHits) {
         breakProp(r, object, lap, true);
@@ -283,6 +314,7 @@ export function step(r, input) {
   r.distance += r.speed * STEP * clamp(1 - bend * r.offset / 32, 0.74, 1.23);
   r.nitro = clamp(r.nitro + 2.3 * STEP, 0, 100);
   r.special = clamp(r.special + 4.3 * STEP, 0, 100);
+  punch(r);
   interact(r, prior, beforeOffset);
   r.nitro = clamp(r.nitro, 0, 100);
   r.special = clamp(r.special, 0, 100);

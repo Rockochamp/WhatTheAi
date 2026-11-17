@@ -248,7 +248,7 @@
     "hub": "/games/leo_smash_race/index.html",
     "category": "Racing game",
     "summary": "Race, boost and smash with Leo’s toys in two different takes on his racing game.",
-    "intro": "Leo designed the racing game at age 4. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns nine of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Each edition has its own special moves, cube warm-up and world leaderboard.",
+    "intro": "Leo designed the racing game at age 4. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns ten of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Each edition has its own special moves, cube warm-up and world leaderboard.",
     "controls": [
       "Grokbot: Pick a hero and track. Solve or skip the cube warm-up, then use the arrow keys or swipe to change lanes. Hold Space or the FLY button to climb and tap BOOST when your special is charged.",
       "GPT-6.1 Sol: Pick a toy, track and class. Steer with A/D or the arrows, use Down to drift, Shift for nitro, Space to jump and E for your special. Touch controls are available on touchscreens."
@@ -262,8 +262,8 @@
         "model": "GPT-6.1 Sol",
         "path": "/games/leo_smash_race/sol/game.html",
         "language": "de-CH",
-        "detail": "Top-down circuit racing with nine toys from Leo’s collection, free steering, drifting, damage, nitro, jumps and separate Crew and Pro leaderboards.",
-        "description": "Leos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste."
+        "detail": "Top-down circuit racing with ten toy racers including Knuckles, drifting, vehicle damage, nitro and a breakbeat soundtrack that intensifies on the final lap.",
+        "description": "Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste."
       },
       {
         "model": "Grokbot",
