@@ -88,7 +88,7 @@ def build():
             title=g['name']+' — '+v['model']+' | What the Ai'
             entity={'@type':'VideoGame' if g['category'].endswith('game') else 'WebApplication','name':g['name']+' — '+v['model'],'url':ORIGIN+v['path'],'description':v['description'],'inLanguage':lang,'isAccessibleForFree':True}
             schema={'@context':'https://schema.org','@graph':[entity,breadcrumbs(v['model'],v['path'],(g['name'],g['hub']))]}
-            head=head.rstrip()+'\n'+meta(title,v['description'],v['path'],g['image'],schema,lang)+'\n'
+            head=head.rstrip()+'\n'+meta(title,v['description'],v['path'],v.get('image',g['image']),schema,lang)+'\n'
             path.write_text(head+'</head>'+body)
     about='''<section class="hero"><p class="eyebrow">The project</p><h1>Small ideas. Different AI takes.</h1><p class="lead">What the Ai is a free collection of AI-built browser games and apps, maintained by Rockochamp.</p><a class="play-button" href="/#game-grid">Explore the collection ↗</a></section>
 <section><h2>What you can try</h2><p>The collection includes arcade, rhythm, strategy and survival games, an anonymous discussion board and an experimental dashboard. Choose a model label to open its implementation, or read a guide to compare the controls and features first.</p><p>The model names describe the editions as labelled in this repository. They are not independent benchmark scores, endorsements by model providers or evidence that one model is universally better. Versions can include later edits and different rules; do not assume a controlled same-prompt comparison.</p></section>

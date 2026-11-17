@@ -244,57 +244,36 @@
   },
   {
     "id": 8,
-    "name": "Leo's Smash Race",
+    "name": "Leos Smash Racer",
     "hub": "/games/leo_smash_race/index.html",
     "category": "Racing game",
-    "summary": "Designed by Leo, age 4: solve a chunky colour cube to fill your boost, then race, fly and smash your way to the finish.",
-    "intro": "Leo's Smash Race was designed by Leo, age 4. Pick one of ten heroes (the Flame Dragster, Bibi the balance bike, the Bat Truck, the Hero Sword, the Sky Patroller, Whirly Pup, Chomp Rex, Comet 17, the Laser Racer or Ira the Mini Bull Terrier), warm up by solving a chunky 2x2 colour cube for a full boost, then race on one of four tracks: Toy Room Rally, Desert Demolition, Castle Sky Run and Bat City Night. Your hero drives by itself. Smash cones, crate towers, brick walls, barrel pyramids and sky balloons for points, chain smashes into combos up to x5, and fly up to reach the sky targets. Tap FIRE and your hero launches its own soft weapon at the next target, for a Sharp Shot bonus. The newest heroes bring big specials: Whirly Pup's Whirlwind Spin tornado pulls in everything nearby, Chomp Rex's Shark Chomp eats its way down the lane, and Comet 17's Comet Dash turns into a fireball that meteor-skips along the road, the Laser Racer's Laser Drive slices through three lanes, and Ira's Turbo Toot blasts her down the lane in a big green cloud. There is no way to lose: every race ends with a party, stars and a place on the podium. Bests and stars are saved in your browser.",
+    "summary": "Race, boost and smash with Leo’s toys in two different takes on his racing game.",
+    "intro": "Leo designed the racing game at age 4. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns nine of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Each edition has its own special moves, cube warm-up and world leaderboard.",
     "controls": [
-      "Tap PLAY, pick a hero and a track, then press GO. On the Cube Warm-up, tap the arrows (or swipe) to turn a row or column until every side is one colour. Help! appears after a few moves, and Race now skips the cube.",
-      "In the race, hold the big FLY button (Space or the Up arrow) to jump and fly; let go to glide down. Bibi bounces instead, with up to three jumps in the air.",
-      "Tap BOOST (Enter or Shift) when the ring fills to fire your hero's special move. The small arrows, a swipe up or down, or the Left and Right keys change lanes; P pauses."
+      "Grokbot: Pick a hero and track. Solve or skip the cube warm-up, then use the arrow keys or swipe to change lanes. Hold Space or the FLY button to climb and tap BOOST when your special is charged.",
+      "GPT-6.1 Sol: Pick a toy, track and class. Steer with A/D or the arrows, use Down to drift, Shift for nitro, Space to jump and E for your special. Touch controls are available on touchscreens."
     ],
     "tips": [
-      "Smashes less than 1.5 seconds apart build a combo up to x5, and a barrel pyramid is worth 300 points before the combo.",
-      "Assist mode is on by default and steers toward smashables. Grown-ups can switch it off, turn on reduced motion, or try the 3x3 Pro cube in the Grown-ups menu.",
-      "Boosting is how you beat the friendly racers to 1st place. A full boost from the cube gives you one big special right at the start."
-    ],
-    "versions": [
-      {
-        "model": "Grokbot",
-        "path": "/games/leo_smash_race/grokbot/game.html",
-        "detail": "Eight heroes with their own special moves, including the Whirlwind Spin tornado, the Shark Chomp and the Comet Dash, a 2x2 Cube Warm-up with a 3x3 Pro option, four parallax tracks, combos, flying, assist mode, synth sound and an optional world board.",
-        "description": "Play Leo's Smash Race: solve a chunky colour cube to fill your boost, then race, fly and smash crates, walls and barrel pyramids. Designed by Leo, age 4."
-      }
-    ],
-    "image": "/images/leo_smash_race.webp?v=3"
-  },
-  {
-    "id": 9,
-    "name": "Smarleos Smash Racer",
-    "updated": "November 17, 2026",
-    "hub": "/games/smarleos_smash_racer/index.html",
-    "category": "Racing game",
-    "summary": "Take Leo’s real toys to the track in a top-down arcade racer built by GPT-6.1 Sol.",
-    "intro": "Race two laps against four rivals across four circuits. The garage includes a dinosaur monster truck, a twin-propeller aircraft, a toy sword and six other toys, each with its own special move and illustrated bitmap sprite.",
-    "controls": [
-      "Pick a toy, circuit and class in the garage. Crew has steering assistance and lighter damage. Pro has faster rivals.",
-      "Use A/D or the arrow keys to steer, S or Down to drift, Shift for nitro, Space to jump, F to fire and E for your special. Touch buttons appear on supported devices.",
-      "Land on boost pads, smash crates, and grab shields and repairs. Jump or use ramps to reach bonus rings."
-    ],
-    "tips": [
-      "Smashes build combos up to ×6. Your result also includes race position, finish time and vehicle condition. Each pit stop costs 500 points.",
-      "An optional 2×2 or 3×3 cube fills the Crew nitro tank if solved. Submit finished races with a preset alias to each circuit’s Crew or Pro leaderboard."
+      "Grokbot: Assist mode steers toward smashable targets. A solved cube gives you a full boost, and quick successive smashes build a combo up to ×5.",
+      "GPT-6.1 Sol: Crew offers steering assistance and lighter damage. Use ramps to reach bonus rings, chain up to six smashes, and submit finished races under a preset alias to the leaderboard for your circuit and class."
     ],
     "versions": [
       {
         "model": "GPT-6.1 Sol",
-        "path": "/games/smarleos_smash_racer/sol/game.html",
+        "path": "/games/leo_smash_race/sol/game.html",
         "language": "de-CH",
-        "detail": "A standalone follow-up to Leo’s Smash Race with free steering, nine toy racers, four circuits, damage, drift, nitro, jumps and separate global scoreboards.",
-        "description": "Smarleos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste."
+        "detail": "Top-down circuit racing with nine toys from Leo’s collection, free steering, drifting, damage, nitro, jumps and separate Crew and Pro leaderboards.",
+        "description": "Leos Smash Racer kostenlos spielen. Neun Spielzeug-Racer mit Spezialmanövern, vier Rundkurse, Nitro, Schaden und eine Weltrangliste."
+      },
+      {
+        "model": "Grokbot",
+        "path": "/games/leo_smash_race/grokbot/game.html",
+        "detail": "Side-scrolling action with ten heroes, four tracks, lane changes, flight, assist mode, 2×2 or 3×3 cube warm-up and an optional world leaderboard.",
+        "description": "Play Leos Smash Racer by Grokbot. Solve a colour cube for boost, fly and smash through crates, walls and barrels.",
+        "image": "/images/leo_smash_race.webp?v=3"
       }
     ],
-    "image": "/games/smarleos_smash_racer/sol/art/cover.webp"
+    "image": "/games/leo_smash_race/sol/art/cover.webp",
+    "updated": "November 17, 2026"
   }
 ]
