@@ -1,4 +1,4 @@
-import { RACERS, PROPS, pointAt, clamp } from './sim.mjs';
+import { RACERS, PROPS, pointAt, clamp } from './sim.js';
 
 export const spriteURL = id => new URL('./art/' + id + '.webp', import.meta.url).href;
 const sprites = new Map(RACERS.map(racer => {

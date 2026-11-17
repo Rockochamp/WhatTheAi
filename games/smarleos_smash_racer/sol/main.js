@@ -1,8 +1,8 @@
-import { CIRCUITS, RACERS, INPUT, STEP, createRace, position, result, step } from './sim.mjs';
-import { RaceView, drawMap, spriteURL } from './render.mjs';
-import { RaceSound } from './audio.mjs';
-import { ALIASES, top, submit } from './board.mjs';
-import { FACES, MOVES, createCube, faceColors, solved, turn } from './cube.mjs';
+import { CIRCUITS, RACERS, INPUT, STEP, createRace, position, result, step } from './sim.js';
+import { RaceView, drawMap, spriteURL } from './render.js';
+import { RaceSound } from './audio.js';
+import { ALIASES, top, submit } from './board.js';
+import { FACES, MOVES, createCube, faceColors, solved, turn } from './cube.js';
 
 const $ = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
