@@ -188,6 +188,16 @@ select:focus-visible {
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
+/* Cards in each visual row share tracks for the title link, description, model and guide. */
+@supports (grid-template-rows: subgrid) {
+  .game-item {
+    display: grid;
+    grid-row: span 4;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+}
 .game-link {
   display: flex;
   flex-direction: column;
@@ -266,6 +276,7 @@ select:focus-visible {
   line-height: 1.6;
 }
 .version-select {
+  display: block;
   cursor: pointer;
 }
 .model-name {
