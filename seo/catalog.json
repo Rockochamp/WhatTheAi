@@ -275,5 +275,33 @@
     ],
     "image": "/games/leo_smash_race/sol/art/cover.webp",
     "updated": "November 17, 2026"
+  },
+  {
+    "id": 9,
+    "name": "Leo’s Fire Evolution",
+    "hub": "/games/leo_fire_evolution/index.html",
+    "category": "Adventure game",
+    "summary": "Help a flame-crowned cub relight ten little worlds. Gather sparks, wake the relics and follow the moon moths.",
+    "intro": "Leo arrives in Lantern Wood with a single spark. Each pair of sleeping relics opens a gate to another world, from the basalt seals of Cinder Caverns to the twin fire hearts of the Everheart. His flame changes with every crossing. There are no enemies or time limits.",
+    "controls": [
+      "Tap or click the ground to send Leo along a path. Use WASD or the arrow keys for individual steps.",
+      "Collect three golden sparks and light both relics. Tap a relic to walk to it and cast, or stand beside it and press Space or Cast fire.",
+      "Walk into the open stone gate to finish the trail. Enter the next world to discover Leo’s next fire form."
+    ],
+    "tips": [
+      "Each world has three optional moon moths. A cleared world earns 500 points, plus 150 per moth and one point for every step below 100. Time spent exploring never costs points.",
+      "The ember ledger keeps your ten best trails per world on this device. At the gate, choose a preset alias and use Post score to compete on that world’s shared leaderboard.",
+      "Return to the same browser to continue a saved trail. Restart begins a fresh adventure and keeps discovered forms and local records."
+    ],
+    "versions": [
+      {
+        "model": "Codex · Ember Edition",
+        "path": "/games/leo_fire_evolution/ember/game.html",
+        "detail": "A pixel-art exploration game with ten fire forms, tap-to-walk paths, hidden moon moths and a separate leaderboard for each world.",
+        "description": "Play Leo’s Fire Evolution. Walk ten pixel-art trails, find moon moths and turn a cub’s first spark into the Eternal Flame. Play with touch or keyboard."
+      }
+    ],
+    "image": "/games/leo_fire_evolution/ember/lantern-wood.webp",
+    "updated": "November 20, 2026"
   }
 ]
