@@ -1,7 +1,11 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#eef0f7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c0e1c" media="(prefers-color-scheme: dark)" />
 <title>About What the Ai | AI Games &amp; Browser Experiments</title>
 <meta name="description" content="Meet the What the Ai project: free AI-built games and apps maintained by Rockochamp. Learn how versions differ, inspect the source and understand shared features." />
 <link rel="canonical" href="https://whatthe.ai/about.html" />
@@ -14,18 +18,40 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="About What the Ai | AI Games &amp; Browser Experiments" />
 <meta name="twitter:description" content="Meet the What the Ai project: free AI-built games and apps maintained by Rockochamp. Learn how versions differ, inspect the source and understand shared features." />
-<meta property="og:image" content="https://whatthe.ai/images/CosmicDodge.webp" />
-<meta name="twitter:image" content="https://whatthe.ai/images/CosmicDodge.webp" />
-<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "AboutPage", "@id": "https://whatthe.ai/about.html#page", "url": "https://whatthe.ai/about.html", "name": "About What the Ai | AI Games & Browser Experiments", "description": "Meet the What the Ai project: free AI-built games and apps maintained by Rockochamp. Learn how versions differ, inspect the source and understand shared features.", "inLanguage": "en", "isPartOf": {"@id": "https://whatthe.ai/#website"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "About What the Ai", "item": "https://whatthe.ai/about.html"}]}]}</script>
-<link rel="icon" href="/images/favicon.ico" /><link rel="stylesheet" href="/css/guides.css?v=1" />
-</head><body>
+<meta property="og:image" content="https://whatthe.ai/images/whattheai-share.jpg" />
+<meta name="twitter:image" content="https://whatthe.ai/images/whattheai-share.jpg" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "AboutPage", "@id": "https://whatthe.ai/about.html#page", "url": "https://whatthe.ai/about.html", "name": "About What the Ai | AI Games & Browser Experiments", "description": "Meet the What the Ai project: free AI-built games and apps maintained by Rockochamp. Learn how versions differ, inspect the source and understand shared features.", "inLanguage": "en", "isPartOf": {"@id": "https://whatthe.ai/#website"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "About", "item": "https://whatthe.ai/about.html"}]}]}</script>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico?v=1.2" />
+<link rel="preload" href="/fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+<script>
+(() => {
+  let saved;
+  try { saved = localStorage.getItem("darkMode"); } catch {}
+  const dark = saved === "true" || (saved !== "false" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark-mode", dark);
+})();
+</script>
+<link rel="stylesheet" href="/css/site.css?v=4" />
+<script defer src="/js/site.js?v=4"></script>
+</head>
+<body>
 <a class="skip-link" href="#content">Skip to content</a>
-<header class="site-header"><a class="brand" href="/">What the Ai<span>Play. Explore. Compare.</span></a><nav aria-label="Main navigation"><a href="/#game-grid">Games &amp; apps</a><a href="/about.html">About the project</a></nav></header>
-<main id="content"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true"> / </span><span>About What the Ai</span></nav>
-<section class="hero"><p class="eyebrow">The project</p><h1>Small ideas. Different AI takes.</h1><p class="lead">What the Ai is a free collection of AI-built browser games and apps, maintained by Rockochamp.</p><a class="play-button" href="/#game-grid">Explore the collection ↗</a></section>
-<section><h2>What you can try</h2><p>The collection includes arcade, rhythm, strategy and survival games, an anonymous discussion board and an experimental dashboard. Choose a model label to open its implementation, or read a guide to compare the controls and features first.</p><p>The model names describe the editions as labelled in this repository. They are not independent benchmark scores, endorsements by model providers or evidence that one model is universally better. Versions can include later edits and different rules; do not assume a controlled same-prompt comparison.</p></section>
+<header class="site-header">
+<a class="brand" href="/" aria-label="What the Ai home"><img id="spin-emoji" src="/images/favicon.ico?v=1.2" alt="" width="30" height="30" /><span class="visually-hidden">What the Ai</span><span id="dynamic-title" aria-hidden="true">What the Ai</span></a>
+<nav aria-label="Main"><a href="/#games">Games and apps</a><a href="/models.html">Compare models</a><a href="/about.html" aria-current="page">About</a></nav>
+<button class="theme-toggle" id="darkModeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" hidden><svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" /></svg><svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></svg></button>
+</header>
+<main id="content" tabindex="-1">
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>About</span></nav>
+<section class="hero plain"><div class="hero-text"><h1>Small ideas, different AI takes</h1><p class="lead">What the Ai is a free collection of AI-built browser games and apps, maintained by Rockochamp. It exists to make one thing easy: playing what different models built from the same idea.</p><p class="hero-links"><a class="button" href="/#games">Browse the collection</a><a href="/models.html">Compare by model</a></p></div></section>
+<section><h2>What you can try</h2><p>The collection holds nine titles in 29 editions: arcade, rhythm, strategy, survival, racing and adventure games, a life simulation, an anonymous discussion board and an experimental dashboard. Choose a model name to open its edition, or read a guide to compare controls and features first.</p><p>The model names describe the editions as labelled in this repository. They are not independent benchmark scores, endorsements by model providers or evidence that one model is universally better. Versions can include later edits and different rules; do not assume a controlled same-prompt comparison.</p></section>
 <section><h2>Who is behind it?</h2><p><a href="https://github.com/Rockochamp">Rockochamp</a> maintains the project and its public <a href="https://github.com/Rockochamp/WhatTheAi">GitHub repository</a>. You can inspect the code, read the history and <a href="https://github.com/Rockochamp/WhatTheAi/issues">report a bug or suggest an improvement</a>. The guides describe features present in the code and are updated alongside the collection.</p><p>AI-generated artwork and music are part of the experiments too. Several game folders document their artwork, sound and implementation in their README files.</p></section>
-<section><h2>Playing, storage and public contributions</h2><p>The games and apps are free to open without an account. JavaScript powers their interactive features. Browser storage can retain preferences, drafts, votes or scores on your device; clearing it can reset those features.</p><p>Some games use Firebase for shared rankings. The opinion board uses it for public posts, replies and votes. Nicknames, scores and contributions can be visible to other visitors. Avoid posting private or identifying information. The site also includes Cloudflare Web Analytics, and some editions load fonts or libraries from external services.</p><p>Scoreboards are casual, client-driven features. They are not verified competition results. The <a href="/apps/agi_barometer/index.html#methodology">AGI Barometer’s fixed inputs and assumptions</a> should be read before interpreting its gauges.</p></section>
-<section><h2>How to compare fairly</h2><p>Try the same type of task in each edition: a short survival run, a ten-year reign or a conversation thread. Compare the clarity of controls, feedback and recovery from mistakes. Different mechanics and separate leaderboards mean raw scores are often not directly comparable.</p><p>For concrete differences, start with <a href="/games/cosmic_dodge/index.html">the four Cosmic Dodge editions</a>, <a href="/games/BananaSurvivors/index.html">Banana Survivors’ three combat styles</a> or <a href="/apps/yes_i_said_it/index.html">the two interfaces for Yes! I Said It.</a></p></section>
-</main><footer><p>Made and maintained by <a href="https://github.com/Rockochamp">Rockochamp</a>. <a href="https://github.com/Rockochamp/WhatTheAi">Explore the source on GitHub</a>.</p><p>More to try: <a href="/games/cosmic_dodge/index.html">Cosmic Dodge</a> · <a href="/games/steve_jobs_hammurabi/index.html">Steve Jobs – Hammurabi</a> · <a href="/games/crazy_clicker/index.html">Crazy Clicker</a> · <a href="/apps/yes_i_said_it/index.html">Yes! I Said It.</a> · <a href="/games/BananaSurvivors/index.html">Banana Survivors</a> · <a href="/apps/agi_barometer/index.html">AGI Probability Barometer</a> · <a href="/games/kenai/index.html">Ken.AI</a> · <a href="/games/leo_smash_race/index.html">Leos Smash Racer</a> · <a href="/games/leo_fire_evolution/index.html">Leo’s Fire Evolution</a></p></footer>
-</body></html>
+<section><h2>Playing, storage and public contributions</h2><p>The games and apps are free to open without an account. JavaScript powers their interactive features. Browser storage can retain preferences, drafts, votes or scores on your device; clearing it can reset those features.</p><p>Some games use Firebase for shared rankings. The opinion board uses it for public posts, replies and votes. Nicknames, scores and contributions can be visible to other visitors. Avoid posting private or identifying information. The homepage includes Cloudflare Web Analytics, and some editions load fonts or libraries from external services.</p><p>Scoreboards are casual, client-driven features. They are not verified competition results. The <a href="/apps/agi_barometer/index.html#methodology">AGI Barometer’s fixed inputs and assumptions</a> should be read before interpreting its gauges.</p></section>
+<section><h2>How to compare fairly</h2><p>Try the same type of task in each edition: a short survival run, a ten-year reign or a conversation thread. Compare the clarity of controls, feedback and recovery from mistakes. Different mechanics and separate leaderboards mean raw scores are often not directly comparable.</p><p>For concrete differences, start with <a href="/games/cosmic_dodge/index.html">the five Cosmic Dodge editions</a>, <a href="/games/BananaSurvivors/index.html">the four combat styles of Banana Survivors</a> or <a href="/apps/yes_i_said_it/index.html">the three interfaces for Yes! I Said It.</a> The <a href="/models.html">model comparison</a> lists every edition by model family.</p></section>
+</main>
+<footer class="site-footer">
+<nav aria-label="All games and apps"><h2>All games and apps</h2><ul><li><a href="/games/cosmic_dodge/index.html">Cosmic Dodge</a></li><li><a href="/games/steve_jobs_hammurabi/index.html">Steve Jobs – Hammurabi</a></li><li><a href="/games/crazy_clicker/index.html">Crazy Clicker</a></li><li><a href="/apps/yes_i_said_it/index.html">Yes! I Said It.</a></li><li><a href="/games/BananaSurvivors/index.html">Banana Survivors</a></li><li><a href="/apps/agi_barometer/index.html">AGI Probability Barometer</a></li><li><a href="/games/kenai/index.html">Ken.AI</a></li><li><a href="/games/leo_smash_race/index.html">Leos Smash Racer</a></li><li><a href="/games/leo_fire_evolution/index.html">Leo’s Fire Evolution</a></li></ul></nav>
+<div class="foot-line"><p>© <span id="copyright-year">2026</span> What the Ai. Made and maintained by <a href="https://github.com/Rockochamp">Rockochamp</a>.</p><p><a href="/about.html">About and data use</a> <a href="/models.html">Compare models</a> <a href="https://github.com/Rockochamp/WhatTheAi">Source on GitHub</a> <a href="https://jam.pieter.com" target="_blank" rel="noopener noreferrer">Vibe Jam 2025<span class="visually-hidden"> (opens in a new tab)</span></a></p></div>
+</footer>
+</body>
+</html>

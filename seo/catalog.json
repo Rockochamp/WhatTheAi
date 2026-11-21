@@ -22,39 +22,46 @@
         "path": "/games/cosmic_dodge/cosmic_dodge_claude_fable_5_2.html",
         "detail": "Graze hazards to build Flow, then spend it to slow time. Six sectors with walls, spinners, ice streams, comets and crossfire, a shared daily run, gamepad support and a soundtrack that grows as you climb.",
         "description": "Play Cosmic Dodge by Claude Fable 5.2: graze asteroids to build Flow, bend time to escape, and chase the daily run in this free browser arcade game.",
-        "image": "/images/cosmic-fable.webp"
+        "image": "/images/cosmic-fable.webp",
+        "thumb": "/images/thumbs/cosmic-fable.webp"
       },
       {
         "model": "GPT-6 Astra",
         "path": "/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html",
         "detail": "One life, shields, a rechargeable Burst, warned comets and level-based rankings. Includes the Terminal Velocity soundtrack.",
         "description": "Play Cosmic Dodge by GPT-6 Astra: dodge asteroids, use shields and Burst, and climb endless levels in this free browser arcade game.",
-        "image": "/images/cosmic-astra.webp"
+        "image": "/images/cosmic-astra.webp",
+        "thumb": "/images/thumbs/cosmic-astra.webp"
       },
       {
         "model": "Grok 4.6",
         "path": "/games/cosmic_dodge/cosmic_dodge_grok_4_6.html",
         "detail": "Adds gravity wells, slingshots, cluster rocks and solar shears. Close calls refund Burst recharge time.",
         "description": "Dodge asteroids and gravity wells in Cosmic Dodge by Grok 4.6. Use Burst, chase close calls and climb a separate browser-game leaderboard.",
-        "image": "/images/cosmic-astra.webp"
+        "image": "/images/cosmic-astra.webp",
+        "thumb": "/images/thumbs/cosmic-grok.webp"
       },
       {
         "model": "Gemini 3.5 Flash (High)",
         "path": "/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html",
         "detail": "A shooting-and-dodging edition with comets, giant meteors, weapon pickups and shields.",
         "description": "Play the Gemini 3.5 Flash edition of Cosmic Dodge: dodge and shoot meteors, collect weapons and shields, and chase a high score online.",
-        "image": "/images/cosmic-astra.webp"
+        "image": "/images/cosmic-astra.webp",
+        "thumb": "/images/thumbs/CosmicDodge.webp"
       },
       {
         "model": "ChatGPT o3-mini-high",
         "path": "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html",
         "detail": "The simpler asteroid-dodging challenge: one collision ends a run and every ten dodges advances the level.",
         "description": "Try the ChatGPT o3-mini-high Cosmic Dodge: a free asteroid-dodging browser game with one-life runs, rising levels and high scores.",
-        "image": "/images/cosmic-astra.webp"
+        "image": "/images/cosmic-astra.webp",
+        "thumb": "/images/thumbs/CosmicDodge.webp"
       }
     ],
     "image": "/images/cosmic-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Dodge asteroids, survive rising levels, and compare five takes on a space arcade game.",
+    "color": "#6a4dff"
   },
   {
     "id": 2,
@@ -79,25 +86,30 @@
         "path": "/games/steve_jobs_hammurabi/claude_fable_5_2/game.html",
         "detail": "The kingdom as a living mosaic, sliders with a live grain ledger, and a scribe who advises three times. Luck is fixed per reign, so you see how the scribe would have ruled the same fate, and today’s fate is shared by every player.",
         "description": "Rule a city for ten years in Hammurabi by Claude Fable 5.2. Trade land, sow, set rations, consult the scribe and try to out-rule it on today’s shared fate.",
-        "image": "/images/hammurabi-fable.webp"
+        "image": "/images/hammurabi-fable.webp",
+        "thumb": "/images/thumbs/hammurabi-fable.webp"
       },
       {
         "model": "GPT-6 Astra",
         "path": "/games/steve_jobs_hammurabi/gpt6_astra/game.html",
         "detail": "A responsive budget, annual reports, chronicle and a living 3D kingdom. A panorama fallback keeps the strategy interface available without WebGL.",
         "description": "Rule a kingdom for ten years in Hammurabi by GPT-6 Astra. Balance food, land and population with budget previews and a living 3D settlement.",
-        "image": "/images/hammurabi-astra.webp"
+        "image": "/images/hammurabi-astra.webp",
+        "thumb": "/images/thumbs/hammurabi-astra.webp"
       },
       {
         "model": "Grok 3 Reasoning",
         "path": "/games/steve_jobs_hammurabi/grok3_reasoning/game.html",
         "detail": "The original form-based strategy version, with annual decisions, resource totals, help and local/global rankings.",
         "description": "Play the original Grok 3 Reasoning Hammurabi game. Buy land, plant crops and feed your people to grow a kingdom across ten challenging years.",
-        "image": "/images/hammurabi-astra.webp"
+        "image": "/images/hammurabi-astra.webp",
+        "thumb": "/images/thumbs/Hammurabi.webp"
       }
     ],
     "image": "/images/hammurabi-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Manage food, land and population through a ten-year reign, and try to out-rule the scribe.",
+    "color": "#c98a1f"
   },
   {
     "id": 3,
@@ -122,25 +134,30 @@
         "path": "/games/crazy_clicker/claude_fable_5_2/game.html",
         "detail": "A show in acts: after eight easy beats the click leaves, the lights go out, a second drummer plays the wrong tempo and the ring starts lying. A live tape draws every tap, and the result shows where you rushed or dragged.",
         "description": "Play Crazy Clicker by Claude Fable 5.2: set a beat with two taps and hold it while the game tries to throw you off, then see your timing drawn beat by beat.",
-        "image": "/images/crazy-clicker-fable.webp"
+        "image": "/images/crazy-clicker-fable.webp",
+        "thumb": "/images/thumbs/crazy-clicker-fable.webp"
       },
       {
         "model": "Grok 4.6",
         "path": "/games/crazy_clicker/grok_4_6/game.html",
         "detail": "Visible beat rings, a ±16 millisecond perfect window, the Ember save and a reactive soundtrack.",
         "description": "Play Crazy Clicker by Grok 4.6: lock a rhythm with two taps, follow the beat rings and charge Ember to protect your streak.",
-        "image": "/images/crazy-clicker-grok.webp"
+        "image": "/images/crazy-clicker-grok.webp",
+        "thumb": "/images/thumbs/crazy-clicker-grok.webp"
       },
       {
         "model": "Gemini 2.5 Pro",
         "path": "/games/crazy_clicker/gemini_2_5_pro/game.html",
         "detail": "The original two-tap rhythm challenge, focused on repeating your chosen interval and extending a streak.",
         "description": "Test your timing in Crazy Clicker by Gemini 2.5 Pro. Set the rhythm with two taps and keep a steady streak in this free browser game.",
-        "image": "/images/crazy-clicker-grok.webp"
+        "image": "/images/crazy-clicker-grok.webp",
+        "thumb": "/images/thumbs/CrazyClicker.webp"
       }
     ],
     "image": "/images/crazy-clicker-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Set a beat with two taps, then hold it while the game tries to talk you out of it.",
+    "color": "#f0357f"
   },
   {
     "id": 4,
@@ -165,25 +182,30 @@
         "path": "/apps/yes_i_said_it/claude_fable_5_2/game.html",
         "detail": "Statements arrive one at a time on a sign. Answer yes or no by button, key or swipe, and only then see how the room split. A wall view, threads, a private hide list, and a cover over strong language until you ask to see it.",
         "description": "Yes! I Said It. by Claude Fable 5.2: judge anonymous opinions one at a time, see how the room split after you answer, and put your own statement on the shared board.",
-        "image": "/images/yes-fable.webp"
+        "image": "/images/yes-fable.webp",
+        "thumb": "/images/thumbs/yes-fable.webp"
       },
       {
         "model": "GPT-6.1 Sol Medium",
         "path": "/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html",
         "detail": "A responsive opinion board with conversation starters, saved drafts, loaded-post search, thread links and optional music.",
         "description": "Post anonymous opinions with Yes! I Said It. by GPT-6.1 Sol Medium. Vote, reply, search loaded statements and explore a shared public discussion board.",
-        "image": "/images/YesISaidIt.webp"
+        "image": "/images/YesISaidIt.webp",
+        "thumb": "/images/yes-sol.svg"
       },
       {
         "model": "Gemini 2.5 Pro",
         "path": "/apps/yes_i_said_it/gemini_2_5_pro/game.html",
         "detail": "The existing opinion-board interface, kept as an alternative for posting, voting and reading the same public conversations.",
         "description": "Try Yes! I Said It. by Gemini 2.5 Pro: share an anonymous opinion, vote and reply on the public board, or compare the new Sol interface.",
-        "image": "/images/YesISaidIt.webp"
+        "image": "/images/YesISaidIt.webp",
+        "thumb": "/images/thumbs/YesISaidIt.webp"
       }
     ],
     "image": "/images/yes-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Say yes or no to anonymous opinions, one at a time, then see how the room split.",
+    "color": "#f26a1b"
   },
   {
     "id": 5,
@@ -208,32 +230,38 @@
         "path": "/games/BananaSurvivors/claude_fable_5_2/game.html",
         "detail": "Peel Out: nobody gets shot. You throw peels, monkeys slip, and each slipping monkey bowls over the ones behind it. Pile-ups, palm crashes that rain coconuts, a dash that bowls through the crowd, fourteen upgrades and a king every two minutes. No blood.",
         "description": "Play Banana Survivors: Peel Out by Claude Fable 5.2. Throw banana peels, send monkeys sliding into each other and build pile-ups in a free, gore-free horde survival game.",
-        "image": "/images/banana-fable.webp"
+        "image": "/images/banana-fable.webp",
+        "thumb": "/images/thumbs/banana-fable.webp"
       },
       {
         "model": "GPT-6 Astra",
         "path": "/games/BananaSurvivors/gpt6_astra/game.html",
         "detail": "An illustrated jungle, automatic weapons, evolutions, stage bosses, a dash and a short death replay.",
         "description": "Play Banana Survivors by GPT-6 Astra: evolve automatic weapons, dodge monster hordes and defeat stage bosses in a free jungle survival browser game.",
-        "image": "/images/banana-astra.webp"
+        "image": "/images/banana-astra.webp",
+        "thumb": "/images/thumbs/banana-astra.webp"
       },
       {
         "model": "Grok 4.6",
         "path": "/games/BananaSurvivors/grok_4_6/game.html",
         "detail": "SPLIT puts you in a meat locker with orbiting peel-blades, a splitting dash, ripeness and hanging boss prizes.",
         "description": "Survive the meat locker in Banana Survivors SPLIT by Grok 4.6. Carve through enemies with peel-blades, Split and ripeness-powered Burst.",
-        "image": "/images/banana-astra.webp"
+        "image": "/images/banana-astra.webp",
+        "thumb": "/images/thumbs/banana-grok.webp"
       },
       {
         "model": "Gemini 3 Pro",
         "path": "/games/BananaSurvivors/game.html",
         "detail": "The German-language Gold Edition: a voxel banana, automatic combat, XP upgrades and endless boss waves.",
         "description": "Spiele Banana Survivors Gold Edition von Gemini 3 Pro kostenlos im Browser. Sammle XP, wähle Upgrades und überlebe Monsterhorden und Boss-Wellen.",
-        "image": "/images/banana-astra.webp"
+        "image": "/images/banana-astra.webp",
+        "thumb": "/images/thumbs/BananaSurvivors.webp"
       }
     ],
     "image": "/images/banana-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Survive the troop by making monkeys slip into each other. Collect upgrades and build pile-ups.",
+    "color": "#e5b700"
   },
   {
     "id": 6,
@@ -258,32 +286,38 @@
         "path": "/apps/agi_barometer/claude_fable_5_2/game.html",
         "detail": "A brass barometer you can tap. The needle shows how far five labs’ job listings sit below their peak; tapping the glass takes a live reading from three labs’ public job boards, and a second hand marks the recorded reading for comparison.",
         "description": "Claude Fable 5.2’s AGI Barometer: a tappable brass dial showing how far frontier-lab job listings sit below their peak, with live readings and plain limits. Not a probability.",
-        "image": "/images/agi-fable.webp"
+        "image": "/images/agi-fable.webp",
+        "thumb": "/images/thumbs/agi-fable.webp"
       },
       {
         "model": "Grokbot Edition",
         "path": "/apps/agi_barometer/grokbot/game.html",
         "detail": "Live job-listing counts with source links and dates, one hiring-drop index formula, a dashed live-count segment on the chart and a no-data state for labs without a verified count.",
         "description": "Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability.",
-        "image": "/images/AgiBarometer.webp"
+        "image": "/images/AgiBarometer.webp",
+        "thumb": "/images/thumbs/agi-grokbot.webp"
       },
       {
         "model": "Gemini 3.5 Flash (High)",
         "path": "/apps/agi_barometer/gemini_3_5_flash/game.html",
         "detail": "Three stored quarterly inputs per lab, a combined indicator, trend chart and interactive formula details.",
         "description": "Explore the Gemini 3.5 Flash AGI Barometer: an experimental hiring-based indicator with fixed inputs, lab comparisons and transparent methodology limits.",
-        "image": "/images/AgiBarometer.webp"
+        "image": "/images/AgiBarometer.webp",
+        "thumb": "/images/thumbs/AgiBarometer.webp"
       },
       {
         "model": "Gemini 3.1 Pro (High)",
         "path": "/apps/agi_barometer/gemini_3_1_pro/game.html",
         "detail": "The earlier two-quarter dashboard, with one gauge per lab and a simpler decline-based formula.",
         "description": "Inspect the Gemini 3.1 Pro AGI Barometer, a two-quarter hiring visualization. Learn why its fixed-input indicator is not a validated AGI probability.",
-        "image": "/images/AgiBarometer.webp"
+        "image": "/images/AgiBarometer.webp",
+        "thumb": "/images/thumbs/AgiBarometer.webp"
       }
     ],
     "image": "/images/agi-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Tap a brass barometer to read how far frontier-lab job listings sit below their peak.",
+    "color": "#16998f"
   },
   {
     "id": 7,
@@ -307,18 +341,22 @@
         "path": "/games/kenai/claude_fable_5_2/game.html",
         "detail": "A whole life in about forty choices. Each turn is a few years and three things they could go to; the times interrupt with dilemmas of their own. His life is woven into a band, one column a year, and ends with an epitaph written from what actually happened.",
         "description": "Play Ken.AI by Claude Fable 5.2: live one life from 2026 in about forty choices, watch it woven year by year, and read the epitaph your choices wrote.",
-        "image": "/images/kenai-fable.webp"
+        "image": "/images/kenai-fable.webp",
+        "thumb": "/images/thumbs/kenai-fable.webp"
       },
       {
         "model": "Grokbot",
         "path": "/games/kenai/grokbot/game.html",
         "detail": "Nine life stages with tech eras, stage goals and report cards, life forks, a life ambition, streaks, illnesses, death and replay, hand-drawn art and a browser save.",
         "description": "Play Ken.AI by Grokbot: a life simulation from 2026 onwards. Raise Ken from baby to elder through nine tech eras, make choices and see your life score.",
-        "image": "/images/kenai.webp"
+        "image": "/images/kenai.webp",
+        "thumb": "/images/thumbs/kenai.webp?v=2"
       }
     ],
     "image": "/images/kenai-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Live a whole life as Ken.AI, born in 2026, while technology changes around him. Two takes: a care sim and a life in forty choices.",
+    "color": "#3b4bd8"
   },
   {
     "id": 8,
@@ -344,7 +382,8 @@
         "path": "/games/leo_smash_race/claude_fable_5_2/game.html",
         "detail": "A road that runs into the screen, six toy cars and three roads full of block towers, cones and rubber ducks to drive through. Nothing can go wrong, a helper steers a little for small hands, and a colour cube solved in three taps fills the boost. In English and German.",
         "description": "Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German.",
-        "image": "/images/leos-smash-racer-fable.webp"
+        "image": "/images/leos-smash-racer-fable.webp",
+        "thumb": "/images/thumbs/leos-smash-racer-fable.webp"
       },
       {
         "model": "GPT-6.1 Sol",
@@ -352,18 +391,22 @@
         "language": "de-CH",
         "detail": "Top-down circuit racing with ten toy racers including Knuckles, drifting, vehicle damage, nitro and a breakbeat soundtrack that intensifies on the final lap.",
         "description": "Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste.",
-        "image": "/games/leo_smash_race/sol/art/cover.webp"
+        "image": "/games/leo_smash_race/sol/art/cover.webp",
+        "thumb": "/images/thumbs/smarleos-smash-racer.webp"
       },
       {
         "model": "Grokbot",
         "path": "/games/leo_smash_race/grokbot/game.html",
         "detail": "Side-scrolling action with ten heroes, four tracks, lane changes, flight, assist mode, 2×2 or 3×3 cube warm-up and an optional world leaderboard.",
         "description": "Play Leos Smash Racer by Grokbot. Solve a colour cube for boost, fly and smash through crates, walls and barrels.",
-        "image": "/images/leo_smash_race.webp?v=3"
+        "image": "/images/leo_smash_race.webp?v=3",
+        "thumb": "/images/thumbs/leo_smash_race.webp?v=3"
       }
     ],
     "image": "/images/leos-smash-racer-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Race, boost and smash with Leo’s toys in three different takes on the racing game he designed at age 4.",
+    "color": "#ef4444"
   },
   {
     "id": 9,
@@ -388,17 +431,21 @@
         "path": "/games/leo_fire_evolution/claude_fable_5_2/game.html",
         "detail": "A walk through ten places in the dark. Leo’s flame is the only light until he finds the lanterns, and each one he lights adds a note to the place’s tune. Fireflies follow him, wind blows them home, a roar lights what is near, and his fire takes a new form with a new ability in every place. In English and German.",
         "description": "Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms.",
-        "image": "/images/leo-fire-evolution-fable.webp"
+        "image": "/images/leo-fire-evolution-fable.webp",
+        "thumb": "/images/thumbs/leo-fire-evolution-fable.webp"
       },
       {
         "model": "GPT 6.2 Astra",
         "path": "/games/leo_fire_evolution/ember/game.html",
         "detail": "A pixel-art exploration game with ten fire forms, tap-to-walk paths, hidden moon moths and a separate leaderboard for each world.",
         "description": "Play Leo’s Fire Evolution. Walk ten pixel-art trails, find moon moths and turn a cub’s first spark into the Eternal Flame. Play with touch or keyboard.",
-        "image": "/games/leo_fire_evolution/ember/lantern-wood.webp"
+        "image": "/games/leo_fire_evolution/ember/lantern-wood.webp",
+        "thumb": "/images/thumbs/leo-fire-evolution.webp"
       }
     ],
     "image": "/images/leo-fire-evolution-fable.webp",
-    "updated": "November 21, 2026"
+    "updated": "November 21, 2026",
+    "card": "Help a lion cub with a small flame relight ten dark places and grow his fire through ten forms. Two takes: a walk by firelight and a pixel-art trail.",
+    "color": "#f08c1a"
   }
 ]
