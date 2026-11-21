@@ -1,0 +1,561 @@
+@import url("/css/fable.css?v=1");
+@font-face {
+  font-family: "Fredoka";
+  src: url("/fonts/fredoka-latin-wght-normal.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
+/* A toy box: navy ink, primary-colour blocks, buttons big enough for small hands. */
+:root {
+  --ink: #1c2340;
+  --paper: #fffaf0;
+  --red: #ff4d4d;
+  --yellow: #ffd23b;
+  --blue: #3d7bff;
+  --green: #4fd06a;
+  --f-bg: #62c7ff;
+  --f-ink: var(--ink);
+  --f-soft: rgba(28, 35, 64, 0.78);
+  --f-line: rgba(28, 35, 64, 0.25);
+  --f-surface: var(--paper);
+  --f-accent: var(--yellow);
+  --f-on-accent: var(--ink);
+  --f-warn: #b3002d;
+  --f-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --f-body: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-weight: 500;
+  font-size: 18px;
+}
+.game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#road {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+.bar {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: max(10px, env(safe-area-inset-top)) 14px 10px;
+  z-index: 5;
+}
+.game[data-state="race"] .bar,
+.game[data-state="race"] .credit {
+  display: none;
+}
+.home {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 99px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+}
+.bar nav {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.chip {
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  font-weight: 600;
+  min-height: 44px;
+}
+.chip.icon {
+  width: 44px;
+}
+.garage,
+.card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(640px, calc(100vw - 20px));
+  max-height: calc(100dvh - 84px);
+  overflow: auto;
+  padding: clamp(16px, 3vw, 26px);
+  border: 4px solid var(--ink);
+  border-radius: 28px;
+  background: var(--paper);
+  box-shadow: 0 8px 0 var(--ink);
+  z-index: 4;
+}
+.garage {
+  top: calc(50% + 24px);
+}
+#title {
+  margin: 0;
+  font: 700 clamp(36px, 8vw, 64px) / 0.95 var(--f-display);
+  letter-spacing: -0.01em;
+}
+#title span {
+  color: var(--red);
+}
+.by {
+  margin: 8px 0 0;
+  color: var(--f-soft);
+}
+h2 {
+  margin: 16px 0 8px;
+  font: 700 21px var(--f-display);
+}
+.picks {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.picks.tracks {
+  grid-template-columns: repeat(3, 1fr);
+}
+.pick {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px 4px 8px;
+  border: 3px solid var(--f-line);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.pick canvas {
+  width: 100%;
+  max-width: 84px;
+  aspect-ratio: 4 / 3;
+}
+.pick[aria-checked="true"] {
+  border-color: var(--ink);
+  background: var(--yellow);
+  box-shadow: 0 4px 0 var(--ink);
+}
+.tracks .pick {
+  padding: 0 0 8px;
+  overflow: hidden;
+}
+.tracks .pick i {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin-bottom: 6px;
+}
+.helper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 16px;
+}
+.helper input {
+  width: 26px;
+  height: 26px;
+  accent-color: var(--blue);
+}
+.go-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.primary {
+  flex: 2 1 220px;
+  min-height: 60px;
+  border: 4px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 0 5px 0 var(--ink);
+  font: 700 21px var(--f-display);
+}
+.primary:active,
+.pad:active {
+  translate: 0 3px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.ghost {
+  flex: 1 1 120px;
+  min-height: 60px;
+  border: 4px solid var(--ink);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--ink);
+  font: 600 19px var(--f-display);
+}
+.fine {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: var(--f-soft);
+}
+#cube {
+  text-align: center;
+}
+#cube h2 {
+  margin-top: 0;
+  font-size: 26px;
+}
+#cube p {
+  margin: 4px 0;
+}
+#cube-view {
+  width: min(100%, 360px);
+  height: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.hud[hidden] {
+  display: none;
+}
+.hud {
+  position: absolute;
+  inset: max(10px, env(safe-area-inset-top)) 12px auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  z-index: 3;
+  pointer-events: none;
+}
+.hud .chip {
+  pointer-events: auto;
+}
+.place {
+  padding: 2px 14px 4px;
+  border: 4px solid var(--ink);
+  border-radius: 18px;
+  background: var(--yellow);
+  line-height: 1;
+}
+.place strong {
+  font: 700 clamp(34px, 8vmin, 56px) / 1 var(--f-display);
+}
+.place span {
+  font-weight: 600;
+}
+.mid {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+.progress {
+  width: min(100%, 420px);
+  height: 16px;
+  border: 3px solid var(--ink);
+  border-radius: 99px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: var(--red);
+}
+#score {
+  font: 700 26px/1 var(--f-display);
+  color: #fff;
+  -webkit-text-stroke: 5px var(--ink);
+  paint-order: stroke fill;
+  font-variant-numeric: tabular-nums;
+}
+.count {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  translate: -50% -50%;
+  font: 700 clamp(90px, 28vmin, 220px) / 1 var(--f-display);
+  color: var(--yellow);
+  -webkit-text-stroke: 10px var(--ink);
+  paint-order: stroke fill;
+  pointer-events: none;
+  z-index: 3;
+}
+.count.pop {
+  animation: pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+@keyframes pop {
+  from {
+    scale: 0.3;
+    opacity: 0;
+  }
+}
+.pads {
+  position: absolute;
+  inset: auto max(12px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  z-index: 3;
+  pointer-events: none;
+}
+.pads[hidden] {
+  display: none;
+}
+.side {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.side + .side {
+  justify-items: end;
+}
+.pad {
+  pointer-events: auto;
+  width: clamp(88px, 22vmin, 124px);
+  height: clamp(88px, 22vmin, 124px);
+  border: 4px solid var(--ink);
+  border-radius: 28px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 700 40px var(--f-display);
+  box-shadow: 0 5px 0 var(--ink);
+  touch-action: none;
+}
+.pad.held {
+  background: var(--yellow);
+}
+.pad.boost {
+  height: clamp(60px, 14vmin, 76px);
+  border-radius: 99px;
+  font-size: 22px;
+  background: linear-gradient(90deg, var(--red) var(--fill, 0%), var(--paper) 0);
+}
+.pad.boost.ready {
+  background: var(--red);
+  color: #fff;
+  animation: ready 0.6s ease-in-out infinite alternate;
+}
+@keyframes ready {
+  to {
+    scale: 1.07;
+  }
+}
+.pad.honk {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 28px;
+  background: var(--blue);
+  color: #fff;
+}
+#finish {
+  text-align: center;
+}
+#finish h2 {
+  margin: 0;
+  font-size: clamp(44px, 12vmin, 80px);
+  line-height: 1;
+}
+.stars {
+  margin: 6px 0 0;
+  font-size: 48px;
+  letter-spacing: 6px;
+  color: var(--yellow);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+}
+.stars .off {
+  color: #fff;
+}
+.final {
+  margin: 6px 0 0;
+}
+.final strong {
+  font-size: 40px;
+}
+.detail {
+  margin: 4px 0 0;
+  color: var(--f-soft);
+  font-size: 16px;
+}
+.alias {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 16px;
+}
+.alias > span {
+  flex-basis: 100%;
+}
+.alias select {
+  min-height: 48px;
+  padding: 0 10px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: #fff;
+  font-weight: 600;
+}
+.alias .ghost {
+  flex: 0 1 auto;
+  min-height: 48px;
+  padding: 0 16px;
+  font-size: 17px;
+}
+.credit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink);
+  z-index: 2;
+}
+dialog {
+  background: var(--paper);
+  border: 4px solid var(--ink);
+}
+.tabs {
+  background: rgba(28, 35, 64, 0.1);
+}
+@media (max-width: 560px) {
+  .picks {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .fine {
+    display: none;
+  }
+}
+/* A phone on its side: everything in two columns so nothing needs scrolling. */
+@media (max-height: 520px) and (min-width: 620px) {
+  .garage,
+  .card {
+    width: min(860px, calc(100vw - 20px));
+    max-height: calc(100dvh - 72px);
+    top: calc(50% + 26px);
+    padding: 12px 18px 14px;
+    border-radius: 22px;
+  }
+  .garage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 22px;
+  }
+  .garage[hidden] {
+    display: none;
+  }
+  #title {
+    font-size: 30px;
+  }
+  .by,
+  .fine {
+    display: none;
+  }
+  h2 {
+    margin: 8px 0 6px;
+    font-size: 18px;
+  }
+  .picks {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .pick canvas {
+    max-width: 54px;
+  }
+  .helper {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+  .primary,
+  .ghost {
+    min-height: 50px;
+    font-size: 18px;
+  }
+  .go-row {
+    margin-top: 10px;
+  }
+  #cube:not([hidden]) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "view title" "view how" "view status" "view buttons";
+    gap: 0 22px;
+    align-items: center;
+  }
+  #cube h2 {
+    grid-area: title;
+    font-size: 22px;
+  }
+  #cube > p {
+    grid-area: how;
+  }
+  #cube > .status {
+    grid-area: status;
+  }
+  #cube .go-row {
+    grid-area: buttons;
+  }
+  #cube-view {
+    grid-area: view;
+    width: auto;
+    height: min(330px, calc(100dvh - 104px));
+  }
+  #finish:not([hidden]) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "title alias" "stars alias" "final status" "detail buttons";
+    gap: 0 22px;
+    align-items: center;
+  }
+  #finish h2 {
+    grid-area: title;
+  }
+  .stars {
+    grid-area: stars;
+    font-size: 36px;
+  }
+  .final {
+    grid-area: final;
+  }
+  .detail {
+    grid-area: detail;
+  }
+  .alias {
+    grid-area: alias;
+    margin-top: 0;
+  }
+  #save-status {
+    grid-area: status;
+  }
+  #finish .go-row {
+    grid-area: buttons;
+    margin-top: 6px;
+  }
+  .pad {
+    width: 84px;
+    height: 84px;
+  }
+  .pad.boost {
+    height: 54px;
+  }
+  .pad.honk {
+    width: 54px;
+    height: 54px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pad.boost.ready,
+  .count.pop {
+    animation: none;
+  }
+}

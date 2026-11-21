@@ -325,23 +325,34 @@
     "name": "Leos Smash Racer",
     "hub": "/games/leo_smash_race/index.html",
     "category": "Racing game",
-    "summary": "Race, boost and smash with Leo’s toys in two different takes on his racing game.",
-    "intro": "Leo designed the racing game at age 4. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns ten of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Each edition has its own special moves, cube warm-up and world leaderboard.",
+    "summary": "Race, boost and smash with Leo’s toys in three different takes on his racing game.",
+    "intro": "Leo designed the racing game at age 4. Claude Fable 5.2 built it for a four-year-old to actually play: a road that runs into the screen, block towers, cones and rubber ducks to drive straight through, two big steering buttons and a race that cannot be lost. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns ten of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Each edition has its own cube warm-up and leaderboard.",
     "controls": [
+      "Claude: pick a car and a road. Steer with the two big buttons, a finger on the left or right half of the screen, or the arrow keys. Press Boost (or Space) when the button turns red, and H or the blue button to honk. Solve the colour cube first by tapping its sides, or skip it.",
       "Grokbot: Pick a hero and track. Solve or skip the cube warm-up, then use the arrow keys or swipe to change lanes. Hold Space or the FLY button to climb and tap BOOST when your special is charged.",
       "GPT-6.1 Sol: Pick a toy, track and class. Steer with A/D or the arrows, use Down to drift, Shift for nitro, Space to jump and E for your special. Touch controls are available on touchscreens."
     ],
     "tips": [
+      "Claude: every toy you hit fills the boost a little, and hits in quick succession build a chain up to ×5. Points count double while the boost burns, so save it for a stretch with a lot to smash.",
+      "Claude: with the helper on the car drifts toward the next toy by itself; turn it off for sharper bends and faster rivals. Racing names come from two lists, so nobody types anything.",
       "Grokbot: Assist mode steers toward smashable targets. A solved cube gives you a full boost, and quick successive smashes build a combo up to ×5.",
       "GPT-6.1 Sol: Crew offers steering assistance and lighter damage. Use ramps to reach bonus rings, chain up to six smashes, and submit finished races under a preset alias to the leaderboard for your circuit and class."
     ],
     "versions": [
       {
+        "model": "Claude Fable 5.2",
+        "path": "/games/leo_smash_race/claude_fable_5_2/game.html",
+        "detail": "A road that runs into the screen, six toy cars and three roads full of block towers, cones and rubber ducks to drive through. Nothing can go wrong, a helper steers a little for small hands, and a colour cube solved in three taps fills the boost. In English and German.",
+        "description": "Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German.",
+        "image": "/images/leos-smash-racer-fable.webp"
+      },
+      {
         "model": "GPT-6.1 Sol",
         "path": "/games/leo_smash_race/sol/game.html",
         "language": "de-CH",
         "detail": "Top-down circuit racing with ten toy racers including Knuckles, drifting, vehicle damage, nitro and a breakbeat soundtrack that intensifies on the final lap.",
-        "description": "Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste."
+        "description": "Leos Smash Racer kostenlos spielen. Zehn Spielzeug-Racer inklusive Knuckles, vier Rundkurse, Nitro, Spezialmanöver, Breakbeat-Soundtrack und eine Weltrangliste.",
+        "image": "/games/leo_smash_race/sol/art/cover.webp"
       },
       {
         "model": "Grokbot",
@@ -351,8 +362,8 @@
         "image": "/images/leo_smash_race.webp?v=3"
       }
     ],
-    "image": "/games/leo_smash_race/sol/art/cover.webp",
-    "updated": "November 17, 2026"
+    "image": "/images/leos-smash-racer-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 9,
