@@ -4,44 +4,57 @@
     "name": "Cosmic Dodge",
     "hub": "/games/cosmic_dodge/index.html",
     "category": "Arcade game",
-    "summary": "Dodge asteroids, survive rising levels, and compare four takes on a space arcade game.",
-    "intro": "Cosmic Dodge is a free browser arcade game about keeping your ship alive in a falling asteroid field. The four versions share that starting idea, but add different hazards, weapons and scoring rules. Try the direct survival challenge first, then see how each model changes the experience.",
+    "summary": "Dodge asteroids, survive rising levels, and compare five takes on a space arcade game.",
+    "intro": "Cosmic Dodge is a free browser arcade game about keeping your ship alive in a falling asteroid field. The five versions share that starting idea, but add different hazards, tools and scoring rules. The Claude Fable 5.2 edition rewards flying close: near misses build Flow, Flow multiplies your score, and you can spend it to slow time. Try it first, then see how each model changes the experience.",
     "controls": [
-      "In the Astra and Grok editions, move with WASD or arrow keys, or drag with a mouse or finger.",
-      "Press Space or the Burst button for brief protection. P or Escape pauses the run.",
-      "Ten cleared asteroids advance a level in Astra and Grok. Style points are tracked separately from level progression."
+      "In the Claude edition, steer with WASD, the arrow keys, the mouse, a finger or a gamepad. Hold Space, Shift, the left mouse button or a second finger to warp time. P or Escape pauses.",
+      "In the Astra and Grok editions, move with WASD or arrow keys, or drag with a mouse or finger. Press Space or the Burst button for brief protection.",
+      "Ten cleared asteroids advance a level in the Claude, Astra and Grok editions. Claude ranks by points; Astra and Grok rank by level."
     ],
     "tips": [
-      "Leave room to escape instead of hugging a corner. Save Burst for crowded passages.",
-      "Astra and Grok have separate records. Different mechanics mean a score in one version is not an equivalent result in another."
+      "In the Claude edition, a graze is a pass within a hair of a hazard. Grazes fill Flow up to an ×8 multiplier, and warping burns Flow, so every escape costs some score.",
+      "Today’s run in the Claude edition uses one seed for every player and has its own ranking, which resets at midnight UTC.",
+      "Each edition keeps separate records. Different mechanics mean a score in one version is not an equivalent result in another."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/games/cosmic_dodge/cosmic_dodge_claude_fable_5_2.html",
+        "detail": "Graze hazards to build Flow, then spend it to slow time. Six sectors with walls, spinners, ice streams, comets and crossfire, a shared daily run, gamepad support and a soundtrack that grows as you climb.",
+        "description": "Play Cosmic Dodge by Claude Fable 5.2: graze asteroids to build Flow, bend time to escape, and chase the daily run in this free browser arcade game.",
+        "image": "/images/cosmic-fable.webp"
+      },
       {
         "model": "GPT-6 Astra",
         "path": "/games/cosmic_dodge/cosmic_dodge_gpt6_astra.html",
         "detail": "One life, shields, a rechargeable Burst, warned comets and level-based rankings. Includes the Terminal Velocity soundtrack.",
-        "description": "Play Cosmic Dodge by GPT-6 Astra: dodge asteroids, use shields and Burst, and climb endless levels in this free browser arcade game."
+        "description": "Play Cosmic Dodge by GPT-6 Astra: dodge asteroids, use shields and Burst, and climb endless levels in this free browser arcade game.",
+        "image": "/images/cosmic-astra.webp"
       },
       {
         "model": "Grok 4.6",
         "path": "/games/cosmic_dodge/cosmic_dodge_grok_4_6.html",
         "detail": "Adds gravity wells, slingshots, cluster rocks and solar shears. Close calls refund Burst recharge time.",
-        "description": "Dodge asteroids and gravity wells in Cosmic Dodge by Grok 4.6. Use Burst, chase close calls and climb a separate browser-game leaderboard."
+        "description": "Dodge asteroids and gravity wells in Cosmic Dodge by Grok 4.6. Use Burst, chase close calls and climb a separate browser-game leaderboard.",
+        "image": "/images/cosmic-astra.webp"
       },
       {
         "model": "Gemini 3.5 Flash (High)",
         "path": "/games/cosmic_dodge/cosmic_dodge_gemini_3_5_flash.html",
         "detail": "A shooting-and-dodging edition with comets, giant meteors, weapon pickups and shields.",
-        "description": "Play the Gemini 3.5 Flash edition of Cosmic Dodge: dodge and shoot meteors, collect weapons and shields, and chase a high score online."
+        "description": "Play the Gemini 3.5 Flash edition of Cosmic Dodge: dodge and shoot meteors, collect weapons and shields, and chase a high score online.",
+        "image": "/images/cosmic-astra.webp"
       },
       {
         "model": "ChatGPT o3-mini-high",
         "path": "/games/cosmic_dodge/cosmic_dodge_chatgpt_o3_mini_high.html",
         "detail": "The simpler asteroid-dodging challenge: one collision ends a run and every ten dodges advances the level.",
-        "description": "Try the ChatGPT o3-mini-high Cosmic Dodge: a free asteroid-dodging browser game with one-life runs, rising levels and high scores."
+        "description": "Try the ChatGPT o3-mini-high Cosmic Dodge: a free asteroid-dodging browser game with one-life runs, rising levels and high scores.",
+        "image": "/images/cosmic-astra.webp"
       }
     ],
-    "image": "/images/cosmic-astra.webp"
+    "image": "/images/cosmic-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 2,
