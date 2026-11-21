@@ -148,31 +148,42 @@
     "hub": "/apps/yes_i_said_it/index.html",
     "category": "Discussion app",
     "summary": "Post an opinion, agree or disagree, and follow the conversation.",
-    "intro": "Yes! I Said It. is an anonymous opinion board. Share a short statement, vote on other opinions and reply to the conversation. GPT-6.1 Sol Medium is the default edition, and Gemini 2.5 Pro remains available. Both versions connect to the same public discussion board.",
+    "intro": "Yes! I Said It. is an anonymous opinion board. Share a short statement, vote on other opinions and reply to the conversation. All three editions read and write the same public board. The Claude Fable 5.2 edition shows statements one at a time and reveals the split only after you answer, so the room cannot lead you; the GPT-6.1 Sol Medium and Gemini 2.5 Pro editions present the board as a feed.",
     "controls": [
-      "Write an opinion, then use the publish button. Sol accepts up to 420 characters and keeps a local draft.",
-      "Open a statement to read and add replies. Agree or disagree using the voting controls.",
-      "In Sol, switch between Latest, Loved, Hated and Divisive; load more posts or search the statements already loaded."
+      "In the Claude edition, answer the sign with the Yes! or No. paddle, the arrow keys or a swipe; Pass skips a statement. Switch to The wall to browse everything loaded, sorted by latest, most yes, most no or most split.",
+      "Write an opinion with Say something (Claude) or the composer (Sol, Gemini). Statements can be up to 420 characters.",
+      "Open a statement to read and add replies. Pressing the same answer again takes your vote back."
     ],
     "tips": [
       "Posts are public. Avoid personal information, threats, hate and spam. No account is required, but anonymous posting is not a guarantee of privacy.",
-      "Sol can hide posts on your device and restore them later. This does not remove them from the shared board. An internet connection is needed for the live discussion."
+      "Hiding a statement only affects your own browser in the Claude and Sol editions; it stays on the shared board. The Claude edition also covers statements with strong language until you ask to see them.",
+      "An internet connection is needed for the live discussion. Votes are remembered per browser, so they are casual signals rather than a verified poll."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/apps/yes_i_said_it/claude_fable_5_2/game.html",
+        "detail": "Statements arrive one at a time on a sign. Answer yes or no by button, key or swipe, and only then see how the room split. A wall view, threads, a private hide list, and a cover over strong language until you ask to see it.",
+        "description": "Yes! I Said It. by Claude Fable 5.2: judge anonymous opinions one at a time, see how the room split after you answer, and put your own statement on the shared board.",
+        "image": "/images/yes-fable.webp"
+      },
       {
         "model": "GPT-6.1 Sol Medium",
         "path": "/apps/yes_i_said_it/gpt_6_1_sol_medium/game.html",
         "detail": "A responsive opinion board with conversation starters, saved drafts, loaded-post search, thread links and optional music.",
-        "description": "Post anonymous opinions with Yes! I Said It. by GPT-6.1 Sol Medium. Vote, reply, search loaded statements and explore a shared public discussion board."
+        "description": "Post anonymous opinions with Yes! I Said It. by GPT-6.1 Sol Medium. Vote, reply, search loaded statements and explore a shared public discussion board.",
+        "image": "/images/YesISaidIt.webp"
       },
       {
         "model": "Gemini 2.5 Pro",
         "path": "/apps/yes_i_said_it/gemini_2_5_pro/game.html",
         "detail": "The existing opinion-board interface, kept as an alternative for posting, voting and reading the same public conversations.",
-        "description": "Try Yes! I Said It. by Gemini 2.5 Pro: share an anonymous opinion, vote and reply on the public board, or compare the new Sol interface."
+        "description": "Try Yes! I Said It. by Gemini 2.5 Pro: share an anonymous opinion, vote and reply on the public board, or compare the new Sol interface.",
+        "image": "/images/YesISaidIt.webp"
       }
     ],
-    "image": "/images/YesISaidIt.webp"
+    "image": "/images/yes-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 5,
