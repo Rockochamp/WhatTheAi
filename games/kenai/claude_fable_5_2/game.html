@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#e7e1d4" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="game.css?v=1" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="game.js?v=1"></script>
+<title>Ken.AI — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Play Ken.AI by Claude Fable 5.2: live one life from 2026 in about forty choices, watch it woven year by year, and read the epitaph your choices wrote." />
+<link rel="canonical" href="https://whatthe.ai/games/kenai/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Ken.AI — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Play Ken.AI by Claude Fable 5.2: live one life from 2026 in about forty choices, watch it woven year by year, and read the epitaph your choices wrote." />
+<meta property="og:url" content="https://whatthe.ai/games/kenai/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Ken.AI — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Play Ken.AI by Claude Fable 5.2: live one life from 2026 in about forty choices, watch it woven year by year, and read the epitaph your choices wrote." />
+<meta property="og:image" content="https://whatthe.ai/images/kenai-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/kenai-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Ken.AI — Claude Fable 5.2", "url": "https://whatthe.ai/games/kenai/claude_fable_5_2/game.html", "description": "Play Ken.AI by Claude Fable 5.2: live one life from 2026 in about forty choices, watch it woven year by year, and read the epitaph your choices wrote.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Ken.AI", "item": "https://whatthe.ai/games/kenai/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/games/kenai/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body data-phase="start">
+    <header class="bar">
+      <a class="home" href="/" aria-label="What the Ai home">whatthe.ai</a>
+      <a class="crumb" href="/games/kenai/index.html">Ken.AI</a>
+      <nav aria-label="Game options">
+        <button class="chip" id="btn-ranks" type="button">Rankings</button>
+        <button class="chip" id="btn-help" type="button">About</button>
+      </nav>
+    </header>
+
+    <main>
+      <figure class="loom" aria-label="Ken's life as a woven band">
+        <canvas id="weave" role="img" aria-label="No years woven yet"></canvas>
+        <figcaption>
+          <span class="key"><i style="--c: var(--moss)"></i>Health</span><span class="key"><i style="--c: var(--weld)"></i>Joy</span><span class="key"><i style="--c: var(--madder)"></i>Bonds</span><span class="key"><i style="--c: var(--indigo)"></i>Craft</span><span class="key"><i style="--c: var(--umber)"></i>Means</span>
+          <span class="key note">One column a year. A knot marks something worth remembering.</span>
+        </figcaption>
+      </figure>
+
+      <section class="start" id="start" aria-labelledby="title">
+        <h1 id="title">Ken.AI</h1>
+        <p class="lede">Ken was born in 2026. He gets one life, about forty choices long, in a century that keeps handing more of itself to machines. You make the choices.</p>
+        <form id="begin" novalidate>
+          <fieldset>
+            <legend>What does he want out of it?</legend>
+            <div class="wishes" id="wishes"></div>
+          </fieldset>
+          <label class="field-label" for="player">Your name, for the rankings</label>
+          <input id="player" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Anonymous" aria-describedby="name-error" />
+          <p class="error" id="name-error" role="alert"></p>
+          <div class="row">
+            <button class="primary" type="submit">Begin his life</button>
+            <button class="ghost" type="button" id="btn-continue" hidden>Carry on</button>
+          </div>
+          <p class="fine">Speculative fiction, not a forecast. Your place is saved in this browser.</p>
+        </form>
+      </section>
+
+      <section class="life" id="life" hidden>
+        <div class="when">
+          <p class="age"><strong id="age">0</strong> <span id="year">2026</span></p>
+          <p class="era"><strong id="stage">Baby</strong> <span id="era">The Assistant Era</span></p>
+        </div>
+        <dl class="spools" id="spools"></dl>
+        <div class="table" id="table" aria-live="polite">
+          <h2 id="prompt">What do these years go to?</h2>
+          <p class="event-text" id="event-text" hidden></p>
+          <div class="cards" id="cards"></div>
+        </div>
+      </section>
+
+      <section class="stone" id="stone" hidden aria-labelledby="stone-title">
+        <p class="kicker" id="stone-kicker"></p>
+        <h2 id="stone-title">Ken.AI</h2>
+        <div class="epitaph" id="epitaph"></div>
+        <p class="score"><strong id="score">0</strong> <span id="grade"></span></p>
+        <p class="status" id="save-status" role="status"></p>
+        <div class="row">
+          <button class="primary" type="button" id="btn-again">Another life</button>
+          <button class="ghost" type="button" id="btn-share">Share</button>
+          <button class="ghost" type="button" id="btn-stone-ranks">Rankings</button>
+        </div>
+      </section>
+
+      <section class="story" id="story-wrap" hidden aria-labelledby="story-title">
+        <h2 id="story-title">The story so far</h2>
+        <ol id="story"></ol>
+      </section>
+      <p class="credit">Made with Claude Fable 5.2. Another edition is in the <a href="/games/kenai/index.html">guide</a>.</p>
+    </main>
+
+    <dialog id="dlg-ranks" aria-labelledby="ranks-title">
+      <div class="dlg-head">
+        <h2 id="ranks-title">Rankings</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close rankings">×</button>
+      </div>
+      <div class="tabs" role="group" aria-label="Ranking">
+        <button type="button" data-board="global" aria-pressed="false">Everyone</button>
+        <button type="button" data-board="local" aria-pressed="true">This device</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="status" id="board-status" role="status"></p>
+    </dialog>
+    <dialog id="dlg-help" aria-labelledby="help-title">
+      <div class="dlg-head">
+        <h2 id="help-title">About Ken’s life</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <div class="help">
+        <p>Each turn is a few years. You are shown three things those years could go to and pick one. Now and then the times interrupt with a decision of their own.</p>
+        <p>Five threads run through his life: health, joy, bonds, craft and means. Every choice pulls some up and lets others slip, and all of them fray a little each year if left alone. Bonds fray fastest.</p>
+        <p>He can die of poor health at any age, and from sixty on of being old. The better his health, the longer the odds.</p>
+        <p>At the end his life is scored: joy and bonds across the whole span, his craft at its best, the years he had, the things worth remembering, and how close he came to what he wanted. A short life counts for less.</p>
+        <p>Keys: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> choose.</p>
+      </div>
+    </dialog>
+    <noscript>Ken.AI needs JavaScript. The <a href="/games/kenai/index.html">guide</a> explains the game.</noscript>
+  </body>
+</html>
