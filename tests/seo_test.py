@@ -37,7 +37,7 @@ class DiscoveryTests(unittest.TestCase):
         cls.urls=[n.text for n in ET.parse(ROOT/'sitemap.xml').findall('.//{*}loc')]
         cls.pages={url:Page(local(urlsplit(url).path).read_text()) for url in cls.urls}
     def test_all_public_versions_and_guides_in_sitemap(self):
-        expected={ORIGIN+'/',ORIGIN+'/about.html'}
+        expected={ORIGIN+'/',ORIGIN+'/about.html',ORIGIN+'/models.html'}
         for g in self.catalog:
             expected.add(ORIGIN+g['hub']);expected.update(ORIGIN+v['path'] for v in g['versions'])
         self.assertEqual(set(self.urls),expected);self.assertEqual(len(self.urls),len(expected))
@@ -59,7 +59,7 @@ class DiscoveryTests(unittest.TestCase):
             for v in g['versions']:self.assertIn(v['path'],links)
         self.assertEqual(home.h1,1)
     def test_guides_have_working_navigation_and_single_heading(self):
-        paths=['/about.html']+[g['hub'] for g in self.catalog]
+        paths=['/about.html','/models.html']+[g['hub'] for g in self.catalog]
         for path in paths:
             p=self.pages[ORIGIN+path];self.assertEqual(p.h1,1)
             for link in p.links:
@@ -75,4 +75,24 @@ class DiscoveryTests(unittest.TestCase):
             seen.add(url)
             pending += [urljoin(url,x).split('#')[0].split('?')[0] for x in self.pages[url].links]
         self.assertEqual(seen,set(self.urls))
+    def test_model_comparison_and_structured_data(self):
+        models=self.pages[ORIGIN+'/models.html'];links={urlsplit(x).path for x in models.links}
+        for g in self.catalog:
+            self.assertIn(g['hub'],links)
+            for v in g['versions']:self.assertIn(v['path'],links)
+        for family in ('claude','gpt','gemini','grok'):self.assertIn(family,models.ids)
+        home=self.pages[ORIGIN+'/'];types={n['@type'] for s in home.schemas for n in s['@graph']}
+        self.assertTrue({'WebSite','Organization','CollectionPage'}<=types)
+        for g in self.catalog:
+            graph=[n for s in self.pages[ORIGIN+g['hub']].schemas for n in s['@graph']]
+            about=next(n['about'] for n in graph if 'about' in n)
+            self.assertIn(about['@type'],('VideoGame','WebApplication'));self.assertEqual(about['offers']['price'],'0')
+            for v in g['versions']:
+                self.assertTrue((ROOT/v['thumb'].split('?')[0].lstrip('/')).is_file(),v['thumb'])
+                entity=self.pages[ORIGIN+v['path']].schemas[0]['@graph'][0]
+                self.assertNotIn('aggregateRating',entity);self.assertNotIn('review',entity)
+    def test_not_found_page_is_kept_out_of_search(self):
+        page=Page((ROOT/'404.html').read_text())
+        self.assertIn('noindex',' '.join(page.meta.get('robots',[])));self.assertNotIn(ORIGIN+'/404.html',self.urls);self.assertEqual(page.h1,1)
+        for name in ('css/site.css','js/site.js','images/whattheai-share.jpg'):self.assertTrue((ROOT/name).is_file(),name)
 if __name__=='__main__':unittest.main()

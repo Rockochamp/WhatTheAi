@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#eef0f7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c0e1c" media="(prefers-color-scheme: dark)" />
+<title>Page not found | What the Ai</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico?v=1.2" />
+<link rel="preload" href="/fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+<script>
+(() => {
+  let saved;
+  try { saved = localStorage.getItem("darkMode"); } catch {}
+  const dark = saved === "true" || (saved !== "false" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark-mode", dark);
+})();
+</script>
+<link rel="stylesheet" href="/css/site.css?v=4" />
+<script defer src="/js/site.js?v=4"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+<a class="brand" href="/" aria-label="What the Ai home"><img id="spin-emoji" src="/images/favicon.ico?v=1.2" alt="" width="30" height="30" /><span class="visually-hidden">What the Ai</span><span id="dynamic-title" aria-hidden="true">What the Ai</span></a>
+<nav aria-label="Main"><a href="/#games">Games and apps</a><a href="/models.html">Compare models</a><a href="/about.html">About</a></nav>
+<button class="theme-toggle" id="darkModeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" hidden><svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" /></svg><svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></svg></button>
+</header>
+<main id="content" tabindex="-1">
+<section class="hero plain"><div class="hero-text"><h1>That page is not here</h1><p class="lead">The address may have changed, or the game may have moved to a new edition. Everything that exists is one step from the homepage.</p><p class="hero-links"><a class="button" href="/">Go to the games</a><a href="/models.html">Compare by model</a></p></div></section>
+<section><h2>All titles</h2><ul class="plain-list"><li><a href="/games/cosmic_dodge/index.html">Cosmic Dodge</a></li><li><a href="/games/steve_jobs_hammurabi/index.html">Steve Jobs – Hammurabi</a></li><li><a href="/games/crazy_clicker/index.html">Crazy Clicker</a></li><li><a href="/apps/yes_i_said_it/index.html">Yes! I Said It.</a></li><li><a href="/games/BananaSurvivors/index.html">Banana Survivors</a></li><li><a href="/apps/agi_barometer/index.html">AGI Probability Barometer</a></li><li><a href="/games/kenai/index.html">Ken.AI</a></li><li><a href="/games/leo_smash_race/index.html">Leos Smash Racer</a></li><li><a href="/games/leo_fire_evolution/index.html">Leo’s Fire Evolution</a></li></ul></section>
+</main>
+<footer class="site-footer">
+
+<div class="foot-line"><p>© <span id="copyright-year">2026</span> What the Ai. Made and maintained by <a href="https://github.com/Rockochamp">Rockochamp</a>.</p><p><a href="/about.html">About and data use</a> <a href="/models.html">Compare models</a> <a href="https://github.com/Rockochamp/WhatTheAi">Source on GitHub</a> <a href="https://jam.pieter.com" target="_blank" rel="noopener noreferrer">Vibe Jam 2025<span class="visually-hidden"> (opens in a new tab)</span></a></p></div>
+</footer>
+</body>
+</html>

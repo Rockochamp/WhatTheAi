@@ -28,8 +28,8 @@ class Catalog(HTMLParser):
         if tag == 'article' and 'data-game-id' in a:
             self.card = {'name': '', 'url': ''}
             self.cards.append(self.card)
-        if tag == 'a' and a.get('href') == '/about.html':
-            self.routes.add('/about.html')
+        if tag == 'a' and a.get('href') in ('/about.html', '/models.html'):
+            self.routes.add(a['href'])
         if self.card is not None:
             if tag == 'h2' and a.get('class') == 'game-title':
                 self.in_title = True
@@ -63,11 +63,16 @@ def build():
     catalog = Catalog()
     catalog.feed(content)
     assert catalog.cards and all(c['name'].strip() and c['url'] for c in catalog.cards)
+    described = re.search(r'<meta name="description" content="([^"]*)"', content)
+    description = described.group(1).replace('&amp;', '&') if described else 'Free browser games and apps built by different AI models.'
     data = {
         '@context': 'https://schema.org',
         '@graph': [
-            {'@type': 'WebSite', '@id': ORIGIN + '/#website', 'name': 'What the Ai', 'alternateName': 'whatthe.ai', 'url': ORIGIN + '/', 'inLanguage': 'en'},
-            {'@type': 'CollectionPage', '@id': ORIGIN + '/#catalog', 'url': ORIGIN + '/', 'name': 'Free AI Games & Browser Apps', 'isPartOf': {'@id': ORIGIN + '/#website'}, 'description': 'Free browser games and apps built with different AI models. Play and compare their versions.', 'inLanguage': 'en', 'mainEntity': {'@type': 'ItemList', 'numberOfItems': len(catalog.cards), 'itemListElement': [
+            {'@type': 'WebSite', '@id': ORIGIN + '/#website', 'name': 'What the Ai', 'alternateName': ['whatthe.ai', 'WhatTheAi'], 'url': ORIGIN + '/', 'description': description, 'inLanguage': 'en', 'publisher': {'@id': ORIGIN + '/#publisher'}},
+            {'@type': 'Organization', '@id': ORIGIN + '/#publisher', 'name': 'What the Ai', 'url': ORIGIN + '/', 'founder': {'@type': 'Person', 'name': 'Rockochamp', 'url': 'https://github.com/Rockochamp'}, 'sameAs': ['https://github.com/Rockochamp/WhatTheAi']},
+            {'@type': 'CollectionPage', '@id': ORIGIN + '/#catalog', 'url': ORIGIN + '/', 'name': 'Free AI-built browser games and apps, compared by model', 'isPartOf': {'@id': ORIGIN + '/#website'}, 'description': description, 'inLanguage': 'en', 'isAccessibleForFree': True,
+             'about': [{'@type': 'Thing', 'name': 'Browser games'}, {'@type': 'Thing', 'name': 'AI-generated software'}, {'@type': 'Thing', 'name': 'Large language model comparison'}],
+             'mainEntity': {'@type': 'ItemList', 'numberOfItems': len(catalog.cards), 'itemListElement': [
                 {'@type': 'ListItem', 'position': i + 1, 'name': ' '.join(card['name'].split()), 'url': card['url']} for i, card in enumerate(catalog.cards)
             ]}}
         ]

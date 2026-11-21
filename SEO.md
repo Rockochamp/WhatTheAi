@@ -1,31 +1,42 @@
 # Search visibility and maintenance
 
-The public catalogue now links to six static guides, all fifteen model editions and an About page. `sitemap.xml` contains 23 canonical URLs. `/index.html` and homepage query variants retain the canonical `https://whatthe.ai/`; game cache parameters are excluded from their canonical URLs. The unlisted school app remains outside the catalogue and sitemap.
+## What the site tells a search engine
 
-Every listed edition has a unique title and description, canonical, Open Graph/Twitter metadata and descriptive JSON-LD. The homepage describes the collection and points its structured list to the guides. The guides provide actual controls, implementation differences, public source links and related experiences. Structured data contains no invented ratings, reviews or awards.
+What the Ai is a free arcade of browser games and small apps in which each idea was built several times by different AI models. Every page says so in plain text:
 
-All versions are ordinary HTML links in the homepage's native “All versions” disclosures, available with or without JavaScript. The existing play links, model dropdowns, game engines, records, local storage keys and discussion backend are preserved. GPT-6.1 Sol Medium remains the default Yes! I Said It. edition and Gemini 2.5 Pro remains selectable.
+- **Homepage** (`/`): one `h1`, a paragraph stating what the site is, and one block per title with its category, a one-line description and an ordinary link to every edition, labelled with the model's name. Below that, a "Compare by model" section and five short answers to the questions people ask first (is it free, what "built by an AI model" means, which version to try, what is shared, where the code is).
+- **Guides** (`/games/<title>/index.html`, `/apps/<title>/index.html`): what the title is, every edition with its artwork and a description of how it differs, controls and tips.
+- **Model comparison** (`/models.html`): a table of every title against the four model families (Claude, GPT, Gemini, Grok) and a section per family listing its editions. This is the page for searches such as "games made by Claude" or "GPT vs Gemini game".
+- **About** (`/about.html`): who maintains the project, data use, and how to compare fairly.
+- **Editions**: each keeps its own page, with a unique title, description, canonical URL, Open Graph and Twitter tags.
 
-The AGI guides and dashboard copy explain that the stored inputs are unverified examples and the formulas are not calibrated AGI probabilities. Calculations, numeric inputs and interactive controls remain unchanged. No source provenance was invented for those numbers.
+Structured data states facts only. The homepage carries `WebSite`, `Organization` and a `CollectionPage` with an `ItemList` of the guides. Each guide is a `CollectionPage` about a `VideoGame` or `WebApplication` (free, runs in a web browser) with an `ItemList` of its editions and a `BreadcrumbList`. Each edition is a `VideoGame` or `WebApplication` with a `BreadcrumbList`. There are no ratings, reviews or awards, because none exist.
+
+`sitemap.xml` lists the homepage, About, the model comparison, every guide and every edition. `robots.txt` allows crawling and points to the sitemap. `/index.html` and query variants resolve to the canonical `https://whatthe.ai/`. `404.html` is marked `noindex`. The unlisted school app stays out of the catalogue and the sitemap.
+
+Every link works without JavaScript. Scripts only add the theme switch, the typing brand and thumbnail previews.
 
 ## Performance
 
-Catalogue thumbnails live in `images/thumbs/`, resized to at most 480 pixels and encoded as WebP at quality 78. The five raster images on the default homepage total 289,278 bytes, down from 1,440,030 bytes (79.9% smaller). The Sol SVG remains 718 bytes. All 12 thumbnail variants total 413,036 bytes, down from 1,839,546 bytes. Original images and in-game assets remain intact. Explicit image dimensions, deferred homepage JavaScript and existing lazy loading are preserved. These byte savings are not a claim of measured field Core Web Vitals.
+One stylesheet (`css/site.css`) and one deferred script (`js/site.js`) serve the homepage, guides, model comparison and About. Two fonts are self-hosted from `/fonts` with `font-display: swap`; the display font is preloaded. Thumbnails live in `images/thumbs/`, at most 480 pixels wide, WebP. All images carry explicit dimensions; images below the first row load lazily. Nothing here is a claim about measured field Core Web Vitals.
 
 ## Updating the catalogue
 
-1. Update `seo/catalog.json` with descriptions grounded in the implementation, controls and real model routes. Keep the homepage cards/options consistent.
-2. Run `python scripts/build-guides.py`. It generates the six guides, About page and per-version head metadata, preserving executable scripts, styles and bodies. The guides and About text templates live in this script.
-3. Run `python scripts/update-seo.py` to update homepage JSON-LD and the sitemap. It reads actual card links, uses guide destinations for the catalogue, and uses content modification dates from Git.
-4. Run `python tests/seo_test.py` and `node --test tests/*.test.mjs`. Check the homepage model options, mobile layout, guide links and any changed app in a browser.
-5. Commit the generated HTML and sitemap. Hosting needs no new build step or dependencies.
+`seo/catalog.json` is the single source for the homepage, guides, model comparison, About and every edition's metadata.
 
-For new thumbnails, use the same WebP settings and update both the homepage image and its option's `data-thumbnail`. Metadata uses the original social-preview artwork. Bump the homepage CSS query when changing its styles.
+1. Edit `seo/catalog.json`. A title needs `id`, `name`, `hub`, `category`, `summary`, `card` (the line on the homepage), `color` (the block behind its artwork), `intro`, `controls`, `tips`, `image` and `versions`. A version needs `model`, `path`, `thumb`, `detail` and `description`, and may set `image` and `language`. The first version listed is the default. Describe what the code does; do not invent features.
+2. Run `python scripts/build-guides.py`. It writes `index.html`, the guides, `models.html`, `about.html`, `404.html` and the head metadata of each edition. Edition scripts, styles and bodies are never touched. The page templates live in this script.
+3. Run `python scripts/update-seo.py`. It fills in the homepage's structured data from the cards and rebuilds `sitemap.xml` with modification dates from Git.
+4. Run `python tests/seo_test.py` and `node --test tests/*.test.mjs`, then look at the homepage and a guide in a browser, in light and dark mode and at phone width.
+5. Commit the generated HTML and the sitemap. The host needs no build step.
 
-## Search Console and production follow-up
+Model families are worked out from the start of the model label (`Claude…`, `GPT…`/`ChatGPT…`, `Gemini…`, `Grok…`) in `family()` in the build script. When changing `css/site.css` or `js/site.js`, bump `ASSETS` in the build script so browsers fetch the new files. The share image `images/whattheai-share.jpg` (1200×630) is a screenshot of the homepage hero; retake it when the hero changes.
 
-`robots.txt` allows crawling and advertises the sitemap. Authenticated Google Search Console access is not available through this repository connection; no domain verification or sitemap submission has been claimed. In the verified domain property, submit `https://whatthe.ai/sitemap.xml`, inspect the homepage and representative guides, then monitor indexing, impressions, clicks and Core Web Vitals. Record a baseline and compare equivalent date ranges after Google recrawls.
+## What only the site owner can do
 
-Check both `/` and `/index.html` after deployment: a previously cached root response can lag behind the current HTML file. A hosting/CDN cache purge requires the relevant hosting account. Do not add provider-specific redirects or headers without confirming the host. Rankings, rich results and indexing are not guaranteed.
+- **Google Search Console.** Nothing in this repository can verify the domain or submit a sitemap. In the verified property, submit `https://whatthe.ai/sitemap.xml`, request indexing for the homepage and `/models.html`, and check the Page indexing and Enhancements reports after the next crawl. Bing Webmaster Tools accepts the same sitemap.
+- **Cache.** After a deploy, check both `/` and `/index.html`; a cached root can lag behind. Purging needs the hosting or CDN account.
+- **Measurement.** Record impressions, clicks and average position for the homepage before and after, over equal date ranges. Rankings, rich results and indexing are never guaranteed.
+- **Analytics.** Cloudflare Web Analytics is on the homepage only, as before. Adding it to guides is a one-line change in `shell()` if wanted; the About page's data-use paragraph should then be updated to match.
 
-References: [Google's JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [helpful content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content), [sitemaps](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [canonical URLs](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls).
+References: [Google's SEO starter guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide), [helpful content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content), [structured data guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies), [sitemaps](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [canonical URLs](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls).
