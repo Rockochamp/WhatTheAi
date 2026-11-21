@@ -370,27 +370,35 @@
     "name": "Leo’s Fire Evolution",
     "hub": "/games/leo_fire_evolution/index.html",
     "category": "Adventure game",
-    "summary": "Help a flame-crowned cub relight ten little worlds. Gather sparks, wake the relics and follow the moon moths.",
-    "intro": "Leo arrives in Lantern Wood with a single spark. Each pair of sleeping relics opens a gate to another world, from the basalt seals of Cinder Caverns to the twin fire hearts of the Everheart. His flame changes with every crossing. There are no enemies or time limits.",
+    "summary": "Help a lion cub with a small flame relight ten dark places and grow his fire through ten forms.",
+    "intro": "Leo is a lion cub with a flame for a mane, and his fire changes form ten times, from the First Spark to the Eternal Flame. There are two editions and neither has enemies or time limits. Claude Fable 5.2 makes it a walk in the dark: you steer Leo freely through ten places where his own flame is the only light, gather fireflies, find and light the sleeping lanterns, and each new form adds an ability such as gliding over water or a roar that reaches farther. GPT 6.2 Astra’s edition is a pixel-art trail game on a board of tiles, with sparks to collect, relics to wake and hidden moon moths.",
     "controls": [
-      "Tap or click the ground to send Leo along a path. Use WASD or the arrow keys for individual steps.",
-      "Collect three golden sparks and light both relics. Tap a relic to walk to it and cast, or stand beside it and press Space or Cast fire.",
-      "Walk into the open stone gate to finish the trail. Enter the next world to discover Leo’s next fire form."
+      "Claude: hold a finger or the mouse where Leo should go, or tap once to send him there. The arrow keys and WASD work too. Press the Roar button or Space to light lanterns, call fireflies and wake animals inside the ring.",
+      "Claude: light every lantern to open the gate, then walk through it. His flame leans toward the nearest lantern that is still dark.",
+      "Astra: tap or click the ground to send Leo along a path, or use WASD or the arrow keys for single steps. Collect three golden sparks, light both relics with Space or Cast fire, then walk into the open stone gate."
     ],
     "tips": [
-      "Each world has three optional moon moths. A cleared world earns 500 points, plus 150 per moth and one point for every step below 100. Time spent exploring never costs points.",
-      "The ember ledger keeps your ten best trails per world on this device. At the gate, choose a preset alias and use Post score to compete on that world’s shared leaderboard.",
-      "Return to the same browser to continue a saved trail. Restart begins a fresh adventure and keeps discovered forms and local records."
+      "Claude: a lantern is worth 100 points plus 20 for every firefly with Leo when it lights, so gather fireflies first. Wind sends half of them home; a roar stills the wind for a while. Each place also hides two sleeping animals worth 250 each.",
+      "Claude: the journey is saved after every place. Stop at any point to post your total under a name picked from two lists, or light all ten places for the Eternal Flame.",
+      "Astra: each world has three optional moon moths. A cleared world earns 500 points, plus 150 per moth and one point for every step below 100. The ember ledger keeps your ten best trails per world, and Post score sends one to that world’s shared leaderboard."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/games/leo_fire_evolution/claude_fable_5_2/game.html",
+        "detail": "A walk through ten places in the dark. Leo’s flame is the only light until he finds the lanterns, and each one he lights adds a note to the place’s tune. Fireflies follow him, wind blows them home, a roar lights what is near, and his fire takes a new form with a new ability in every place. In English and German.",
+        "description": "Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms.",
+        "image": "/images/leo-fire-evolution-fable.webp"
+      },
       {
         "model": "GPT 6.2 Astra",
         "path": "/games/leo_fire_evolution/ember/game.html",
         "detail": "A pixel-art exploration game with ten fire forms, tap-to-walk paths, hidden moon moths and a separate leaderboard for each world.",
-        "description": "Play Leo’s Fire Evolution. Walk ten pixel-art trails, find moon moths and turn a cub’s first spark into the Eternal Flame. Play with touch or keyboard."
+        "description": "Play Leo’s Fire Evolution. Walk ten pixel-art trails, find moon moths and turn a cub’s first spark into the Eternal Flame. Play with touch or keyboard.",
+        "image": "/games/leo_fire_evolution/ember/lantern-wood.webp"
       }
     ],
-    "image": "/games/leo_fire_evolution/ember/lantern-wood.webp",
-    "updated": "November 20, 2026"
+    "image": "/images/leo-fire-evolution-fable.webp",
+    "updated": "November 21, 2026"
   }
 ]

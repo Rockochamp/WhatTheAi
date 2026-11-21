@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#140a1c" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/caprasimo-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="game.css?v=1" />
+    <script type="module" src="game.js?v=1"></script>
+<title>Leo’s Fire Evolution — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms." />
+<link rel="canonical" href="https://whatthe.ai/games/leo_fire_evolution/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Leo’s Fire Evolution — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms." />
+<meta property="og:url" content="https://whatthe.ai/games/leo_fire_evolution/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Leo’s Fire Evolution — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms." />
+<meta property="og:image" content="https://whatthe.ai/images/leo-fire-evolution-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/leo-fire-evolution-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Leo’s Fire Evolution — Claude Fable 5.2", "url": "https://whatthe.ai/games/leo_fire_evolution/claude_fable_5_2/game.html", "description": "Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Leo’s Fire Evolution", "item": "https://whatthe.ai/games/leo_fire_evolution/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/games/leo_fire_evolution/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body>
+    <main class="game" id="game" data-state="title">
+      <canvas id="night" aria-label="Leo in the dark">Leo's Fire Evolution needs a browser with canvas support.</canvas>
+
+      <header class="bar">
+        <a class="home" href="/" aria-label="What the Ai home">whatthe.ai</a>
+        <nav aria-label="Game options">
+          <button class="chip" id="btn-forms" type="button" data-t="forms">Fire forms</button>
+          <button class="chip" id="btn-ranks" type="button" data-t="ranks">Rankings</button>
+          <button class="chip" id="btn-lang" type="button" aria-label="Sprache wechseln: Deutsch">DE</button>
+          <button class="chip icon" id="btn-sound" type="button" aria-pressed="true" aria-label="Sound"></button>
+        </nav>
+      </header>
+
+      <section class="card title" id="title" aria-labelledby="name">
+        <h1 id="name">Leo’s Fire Evolution</h1>
+        <p class="lead" data-t="lead">Ten places have gone dark. A lion cub with a small flame can light them again, and his fire grows into something new in each one.</p>
+        <div class="row">
+          <button class="primary" id="btn-start" type="button">Start</button>
+          <button class="ghost" id="btn-fresh" type="button" hidden data-t="fresh">Start over</button>
+        </div>
+        <p class="fine" data-t="how">Hold a finger or the mouse where Leo should go, or use the arrow keys. Space makes him roar.</p>
+      </section>
+
+      <div class="hud" id="hud" hidden>
+        <div class="where">
+          <strong id="place"></strong>
+          <span id="form"></span>
+        </div>
+        <div class="count">
+          <div class="pips" id="pips" role="img"></div>
+          <strong id="score">0</strong>
+        </div>
+        <button class="chip icon" id="btn-leave" type="button" aria-label="Back to the start">×</button>
+      </div>
+      <p class="say" id="say" role="status"></p>
+      <button class="roar" id="btn-roar" type="button" hidden><span data-t="roar">Roar</span></button>
+
+      <section class="card" id="done" hidden aria-labelledby="done-title">
+        <h2 id="done-title"></h2>
+        <p class="stars" id="stars" role="img"><span>★</span><span>★</span><span>★</span></p>
+        <dl class="sums" id="sums"></dl>
+        <div class="evolve" id="evolve">
+          <canvas id="next-form" width="220" height="220"></canvas>
+          <div>
+            <p class="small" data-t="evolved">Leo’s fire has changed</p>
+            <h3 id="next-name"></h3>
+            <p id="next-gift"></p>
+          </div>
+        </div>
+        <div class="row">
+          <button class="primary" id="btn-next" type="button" data-t="next">On to the next place</button>
+          <button class="ghost" id="btn-stop" type="button" data-t="stop">Stop here</button>
+        </div>
+      </section>
+
+      <section class="card" id="end" hidden aria-labelledby="end-title">
+        <h2 id="end-title"></h2>
+        <p id="end-text"></p>
+        <p class="total"><strong id="end-score">0</strong> <span data-t="points">points</span></p>
+        <div class="alias">
+          <span data-t="alias">Name for the board:</span>
+          <select id="alias-a" aria-label="First word"></select>
+          <select id="alias-b" aria-label="Second word"></select>
+          <button class="ghost" id="btn-post" type="button" data-t="post">Post my score</button>
+        </div>
+        <p class="status" id="post-status" role="status"></p>
+        <div class="row">
+          <button class="primary" id="btn-again" type="button" data-t="again">A new journey</button>
+        </div>
+      </section>
+      <p class="credit">Made with Claude Fable 5.2</p>
+    </main>
+
+    <dialog id="dlg-forms" aria-labelledby="forms-title">
+      <div class="dlg-head">
+        <h2 id="forms-title" data-t="forms">Fire forms</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <ol class="forms" id="forms"></ol>
+    </dialog>
+    <dialog id="dlg-ranks" aria-labelledby="ranks-title">
+      <div class="dlg-head">
+        <h2 id="ranks-title" data-t="ranks">Rankings</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <div class="tabs" role="group" aria-label="Ranking">
+        <button type="button" data-board="global" aria-pressed="false" data-t="everyone">Everyone</button>
+        <button type="button" data-board="local" aria-pressed="true" data-t="device">This device</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="status" id="board-status" role="status"></p>
+    </dialog>
+    <noscript>Leo’s Fire Evolution needs JavaScript. The <a href="/games/leo_fire_evolution/index.html">guide</a> explains the game.</noscript>
+  </body>
+</html>
