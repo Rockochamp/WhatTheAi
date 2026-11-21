@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1c2340" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/fredoka-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="game.css?v=1" />
+    <script type="module" src="game.js?v=1"></script>
+<title>Leos Smash Racer — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German." />
+<link rel="canonical" href="https://whatthe.ai/games/leo_smash_race/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Leos Smash Racer — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German." />
+<meta property="og:url" content="https://whatthe.ai/games/leo_smash_race/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Leos Smash Racer — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German." />
+<meta property="og:image" content="https://whatthe.ai/images/leos-smash-racer-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/leos-smash-racer-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Leos Smash Racer — Claude Fable 5.2", "url": "https://whatthe.ai/games/leo_smash_race/claude_fable_5_2/game.html", "description": "Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Leos Smash Racer", "item": "https://whatthe.ai/games/leo_smash_race/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/games/leo_smash_race/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body>
+    <main class="game" id="game" data-state="garage">
+      <canvas id="road" aria-label="Race track">Leos Smash Racer needs a browser with canvas support.</canvas>
+
+      <header class="bar">
+        <a class="home" href="/" aria-label="What the Ai home">whatthe.ai</a>
+        <nav aria-label="Game options">
+          <button class="chip" id="btn-ranks" type="button" data-t="ranks">Rankings</button>
+          <button class="chip" id="btn-lang" type="button" aria-label="Sprache wechseln: Deutsch">DE</button>
+          <button class="chip icon" id="btn-sound" type="button" aria-pressed="true" aria-label="Sound"></button>
+        </nav>
+      </header>
+
+      <section class="garage" id="garage" aria-labelledby="title">
+        <div class="g-a">
+          <h1 id="title"><span>Leos</span> Smash Racer</h1>
+          <p class="by" data-t="by">A racing game designed by Leo, age 4. Smash everything.</p>
+          <h2 data-t="pickCar">Pick a car</h2>
+          <div class="picks" id="cars" role="radiogroup" aria-label="Car"></div>
+        </div>
+        <div class="g-b">
+          <h2 data-t="pickTrack">Pick a road</h2>
+          <div class="picks tracks" id="tracks" role="radiogroup" aria-label="Road"></div>
+          <label class="helper"><input type="checkbox" id="assist" checked /> <span data-t="helper">Helper on: the car steers a little by itself</span></label>
+          <div class="go-row">
+            <button class="primary" id="btn-cube" type="button" data-t="cubeFirst">Cube first, for a full boost</button>
+            <button class="ghost" id="btn-race" type="button" data-t="raceNow">Race now</button>
+          </div>
+          <p class="fine" data-t="keys">Steer with the arrow keys or the big buttons. Space is boost. H honks.</p>
+        </div>
+      </section>
+
+      <section class="card" id="cube" hidden aria-labelledby="cube-title">
+        <h2 id="cube-title" data-t="cubeTitle">Make every side one colour</h2>
+        <p data-t="cubeHow">Tap a side to turn it.</p>
+        <canvas id="cube-view" width="360" height="330" role="img" aria-label="Colour cube"></canvas>
+        <p class="status" id="cube-status" role="status"></p>
+        <div class="go-row">
+          <button class="ghost" id="btn-hint" type="button" data-t="hint">Show me</button>
+          <button class="ghost" id="btn-skip" type="button" data-t="skip">Skip</button>
+        </div>
+      </section>
+
+      <div class="hud" id="hud" hidden>
+        <div class="place"><strong id="place">8</strong><span>/ 8</span></div>
+        <div class="mid">
+          <div class="progress" role="img" aria-label="Race progress"><i id="progress"></i></div>
+          <strong id="score">0</strong>
+        </div>
+        <button class="chip icon" id="btn-quit" type="button" aria-label="Back to the garage">×</button>
+      </div>
+      <div class="count" id="count" aria-live="assertive"></div>
+      <div class="pads" id="pads" hidden>
+        <div class="side">
+          <button class="pad honk" id="pad-honk" type="button" aria-label="Honk">♪</button>
+          <button class="pad" id="pad-left" type="button" aria-label="Steer left">◀</button>
+        </div>
+        <div class="side">
+          <button class="pad boost" id="pad-boost" type="button" aria-label="Boost"><span data-t="boost">Boost</span></button>
+          <button class="pad" id="pad-right" type="button" aria-label="Steer right">▶</button>
+        </div>
+      </div>
+
+      <section class="card" id="finish" hidden aria-labelledby="finish-title">
+        <h2 id="finish-title">1st!</h2>
+        <p class="stars" id="stars" role="img" aria-label="Stars"><span>★</span><span>★</span><span>★</span></p>
+        <p class="final"><strong id="final-score">0</strong> <span data-t="points">points</span></p>
+        <p class="detail" id="detail"></p>
+        <div class="alias">
+          <span data-t="alias">Your racing name:</span>
+          <select id="alias-a" aria-label="First word"></select>
+          <select id="alias-b" aria-label="Second word"></select>
+          <button class="ghost" id="btn-save" type="button" data-t="save">Put it on the board</button>
+        </div>
+        <p class="status" id="save-status" role="status"></p>
+        <div class="go-row">
+          <button class="primary" id="btn-again" type="button" data-t="again">Again</button>
+          <button class="ghost" id="btn-garage" type="button" data-t="garage">Garage</button>
+        </div>
+      </section>
+      <p class="credit">Made with Claude Fable 5.2</p>
+    </main>
+
+    <dialog id="dlg-ranks" aria-labelledby="ranks-title">
+      <div class="dlg-head">
+        <h2 id="ranks-title" data-t="ranks">Rankings</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <div class="tabs" role="group" aria-label="Ranking">
+        <button type="button" data-board="global" aria-pressed="false" data-t="everyone">Everyone</button>
+        <button type="button" data-board="local" aria-pressed="true" data-t="device">This device</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="status" id="board-status" role="status"></p>
+    </dialog>
+    <noscript>Leos Smash Racer needs JavaScript. The <a href="/games/leo_smash_race/index.html">guide</a> explains the game.</noscript>
+  </body>
+</html>
