@@ -62,31 +62,42 @@
     "hub": "/games/steve_jobs_hammurabi/index.html",
     "category": "Strategy game",
     "summary": "Manage food, land and population through a ten-year reign.",
-    "intro": "Steve Jobs – Hammurabi is a free turn-based resource management game. Each year, choose how much land to buy or sell, how many acres to plant, and how well to feed your population. Your aim is to finish a ten-year reign with as many people as possible while surviving shortages and random events.",
+    "intro": "Steve Jobs – Hammurabi is a free turn-based resource management game. Each year, choose how much land to buy or sell, how many acres to plant, and how well to feed your population. Your aim is to finish a ten-year reign with as many people as possible while surviving shortages and random events. All three editions share the same economy. The Claude Fable 5.2 edition fixes each reign’s luck in advance, so a built-in scribe can rule the same fate for comparison and every player can attempt the same daily fate.",
     "controls": [
-      "Enter a ruler name if you want, then start a reign.",
-      "Set annual land, planting and feeding decisions. Buying and selling land cannot happen in the same year.",
+      "Enter a ruler name if you want, then start a reign. In the Claude edition, choose today’s shared fate or a new one.",
+      "Set annual land, planting and feeding decisions. The Claude edition uses sliders with a live ledger; the Astra and Grok editions use number fields. Buying and selling land cannot happen in the same year.",
       "Confirm the year and read the report before making the next decisions. A reign ends after ten years or when population reaches zero."
     ],
     "tips": [
-      "One person can farm ten acres; planting also costs food for seed. Keep enough food to feed people before expanding.",
-      "Harvests and events vary. The Astra budget and feeding-risk preview help you check decisions, but cannot guarantee the next harvest."
+      "One person can farm ten acres; planting also costs food for seed. The starting granary cannot feed a hundred people for long, so land comes first.",
+      "Hunger builds when rations fall below twenty bushels a person and only kills past a breaking point. A lean year is survivable; several in a row are not.",
+      "In the Claude edition the scribe advises three times per reign, and the ranking places unaided reigns above aided ones with the same score."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/games/steve_jobs_hammurabi/claude_fable_5_2/game.html",
+        "detail": "The kingdom as a living mosaic, sliders with a live grain ledger, and a scribe who advises three times. Luck is fixed per reign, so you see how the scribe would have ruled the same fate, and today’s fate is shared by every player.",
+        "description": "Rule a city for ten years in Hammurabi by Claude Fable 5.2. Trade land, sow, set rations, consult the scribe and try to out-rule it on today’s shared fate.",
+        "image": "/images/hammurabi-fable.webp"
+      },
       {
         "model": "GPT-6 Astra",
         "path": "/games/steve_jobs_hammurabi/gpt6_astra/game.html",
         "detail": "A responsive budget, annual reports, chronicle and a living 3D kingdom. A panorama fallback keeps the strategy interface available without WebGL.",
-        "description": "Rule a kingdom for ten years in Hammurabi by GPT-6 Astra. Balance food, land and population with budget previews and a living 3D settlement."
+        "description": "Rule a kingdom for ten years in Hammurabi by GPT-6 Astra. Balance food, land and population with budget previews and a living 3D settlement.",
+        "image": "/images/hammurabi-astra.webp"
       },
       {
         "model": "Grok 3 Reasoning",
         "path": "/games/steve_jobs_hammurabi/grok3_reasoning/game.html",
         "detail": "The original form-based strategy version, with annual decisions, resource totals, help and local/global rankings.",
-        "description": "Play the original Grok 3 Reasoning Hammurabi game. Buy land, plant crops and feed your people to grow a kingdom across ten challenging years."
+        "description": "Play the original Grok 3 Reasoning Hammurabi game. Buy land, plant crops and feed your people to grow a kingdom across ten challenging years.",
+        "image": "/images/hammurabi-astra.webp"
       }
     ],
-    "image": "/images/hammurabi-astra.webp"
+    "image": "/images/hammurabi-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 3,
