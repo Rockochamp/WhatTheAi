@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#5b3df5" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/big-shoulders-display-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="app.css?v=1" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="app.js?v=1"></script>
+<title>Yes! I Said It. — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Yes! I Said It. by Claude Fable 5.2: judge anonymous opinions one at a time, see how the room split after you answer, and put your own statement on the shared board." />
+<link rel="canonical" href="https://whatthe.ai/apps/yes_i_said_it/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Yes! I Said It. — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Yes! I Said It. by Claude Fable 5.2: judge anonymous opinions one at a time, see how the room split after you answer, and put your own statement on the shared board." />
+<meta property="og:url" content="https://whatthe.ai/apps/yes_i_said_it/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Yes! I Said It. — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Yes! I Said It. by Claude Fable 5.2: judge anonymous opinions one at a time, see how the room split after you answer, and put your own statement on the shared board." />
+<meta property="og:image" content="https://whatthe.ai/images/yes-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/yes-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "name": "Yes! I Said It. — Claude Fable 5.2", "url": "https://whatthe.ai/apps/yes_i_said_it/claude_fable_5_2/game.html", "description": "Yes! I Said It. by Claude Fable 5.2: judge anonymous opinions one at a time, see how the room split after you answer, and put your own statement on the shared board.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Yes! I Said It.", "item": "https://whatthe.ai/apps/yes_i_said_it/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/apps/yes_i_said_it/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body>
+    <header class="bar">
+      <a class="home" href="/" aria-label="What the Ai home">whatthe.ai</a>
+      <h1 class="name">Yes! I Said It.</h1>
+      <nav aria-label="Board">
+        <div class="views" role="group" aria-label="View">
+          <button type="button" id="tab-deck" aria-pressed="true">One at a time</button>
+          <button type="button" id="tab-wall" aria-pressed="false">The wall</button>
+        </div>
+        <button class="say" id="btn-say" type="button">Say something</button>
+        <button class="chip icon" id="btn-music" type="button" aria-pressed="false" aria-label="Play music">♪</button>
+        <button class="chip icon" id="btn-about" type="button" aria-label="About this board">?</button>
+      </nav>
+    </header>
+    <p class="preview" id="preview" hidden>Preview room: these are sample statements. Nothing you do here reaches the public board.</p>
+
+    <main>
+      <section class="deck" id="deck-view" aria-label="Statements, one at a time">
+        <p class="status big" id="deck-status" role="status">Opening the board…</p>
+        <div class="march" id="march" hidden>
+          <article class="sign" id="sign" aria-live="polite">
+            <p class="sign-text" id="sign-text"></p>
+            <button class="unmask" id="sign-unmask" type="button" hidden>This one uses strong language. Show it</button>
+            <p class="sign-meta" id="sign-meta"></p>
+          </article>
+          <div class="stick" aria-hidden="true"></div>
+        </div>
+        <div class="paddles" id="paddles" hidden>
+          <button class="paddle no" id="btn-no" type="button">No.</button>
+          <button class="pass" id="btn-pass" type="button">Pass</button>
+          <button class="paddle yes" id="btn-yes" type="button">Yes!</button>
+        </div>
+        <div class="verdict" id="verdict" hidden>
+          <div class="bar-split" id="split-bar" role="img"><i class="y"></i><i class="n"></i></div>
+          <p class="split-line"><strong id="split-yes"></strong><span id="split-total"></span><strong id="split-no"></strong></p>
+          <div class="after">
+            <button class="ghost" id="btn-thread" type="button">Replies</button>
+            <button class="primary" id="btn-next" type="button">Next statement</button>
+          </div>
+        </div>
+        <div class="empty" id="deck-empty" hidden>
+          <h2>You have judged everything here.</h2>
+          <p>Somebody has to say the next thing.</p>
+          <button class="primary" type="button" id="btn-say-empty">Say something</button>
+        </div>
+        <p class="tally" id="tally"></p>
+        <p class="keys">Keys: <kbd>←</kbd> no, <kbd>→</kbd> yes, <kbd>Space</kbd> pass or next.</p>
+      </section>
+
+      <section class="wall" id="wall-view" hidden aria-label="All statements">
+        <div class="wall-tools">
+          <div class="sorts" role="group" aria-label="Order">
+            <button type="button" data-mode="latest" aria-pressed="true">Latest</button>
+            <button type="button" data-mode="yes" aria-pressed="false">Most yes</button>
+            <button type="button" data-mode="no" aria-pressed="false">Most no</button>
+            <button type="button" data-mode="split" aria-pressed="false">Most split</button>
+          </div>
+          <label class="sr" for="search">Search loaded statements</label>
+          <input id="search" type="search" placeholder="Search what is loaded" autocomplete="off" />
+        </div>
+        <ul class="rows" id="wall"></ul>
+        <p class="status" id="wall-status" role="status"></p>
+        <button class="ghost" id="btn-more" type="button" hidden>Load more</button>
+        <button class="linklike" id="btn-unhide" type="button" hidden>Show the statements I hid</button>
+      </section>
+      <p class="credit">Made with Claude Fable 5.2. Two other editions of this board are in the <a href="/apps/yes_i_said_it/index.html">guide</a>.</p>
+    </main>
+
+    <dialog id="dlg-say" aria-labelledby="say-title">
+      <form id="say-form" novalidate>
+        <div class="dlg-head">
+          <h2 id="say-title">Say something</h2>
+          <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+        </div>
+        <label class="sr" for="say-text">Your statement</label>
+        <textarea id="say-text" rows="5" placeholder="Something you believe and would say out loud." aria-describedby="say-count say-error"></textarea>
+        <div class="count-row"><span id="say-count">420 left</span><span class="sparks" id="sparks"></span></div>
+        <p class="error" id="say-error" role="alert"></p>
+        <p class="fine">It goes on a public board, without your name. Leave out anything private, yours or anyone else’s.</p>
+        <button class="primary" type="submit" id="say-send">Put it on the board</button>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-thread" aria-labelledby="thread-text">
+      <div class="dlg-head">
+        <button class="linklike" type="button" id="thread-parent" hidden></button>
+        <span></span>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <p class="thread-text" id="thread-text"></p>
+      <p class="sign-meta" id="thread-meta"></p>
+      <div class="thread-vote">
+        <button class="pill no" id="thread-no" type="button" aria-pressed="false">No.</button>
+        <div class="bar-split" id="thread-bar" role="img"><i class="y"></i><i class="n"></i></div>
+        <button class="pill yes" id="thread-yes" type="button" aria-pressed="false">Yes!</button>
+      </div>
+      <p class="split-line small" id="thread-split"></p>
+      <h3 id="replies-title">Replies</h3>
+      <ul class="replies" id="replies"></ul>
+      <p class="status" id="thread-status" role="status"></p>
+      <form id="reply-form" novalidate>
+        <label class="sr" for="reply-text">Your reply</label>
+        <textarea id="reply-text" rows="2" placeholder="Reply to this"></textarea>
+        <p class="error" id="reply-error" role="alert"></p>
+        <div class="thread-actions">
+          <button class="primary" type="submit" id="reply-send">Reply</button>
+          <button class="ghost" type="button" id="thread-link">Copy link</button>
+          <button class="ghost" type="button" id="thread-hide">Hide for me</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-about" aria-labelledby="about-title">
+      <div class="dlg-head">
+        <h2 id="about-title">About this board</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <div class="help">
+        <p>Anyone can put a statement on the board, and anyone can say yes or no to it. Nobody signs in and nothing carries a name.</p>
+        <p><strong>One at a time</strong> shows statements you have not judged yet. You see how the room split only after you answer. <strong>The wall</strong> shows everything that is loaded, in the order you pick.</p>
+        <p>Your votes and hidden statements are remembered in this browser only. Pressing the same answer again takes it back.</p>
+        <p>This is a public, unmoderated board. Statements with strong language stay covered until you ask to see them. “Hide for me” removes a statement from your view; it stays on the board for everyone else.</p>
+        <p>All three editions of this app read and write the same board.</p>
+      </div>
+    </dialog>
+    <audio id="soundtrack" src="/music/YesISaidIt.m4a" preload="none" loop></audio>
+    <noscript>This board needs JavaScript. The <a href="/apps/yes_i_said_it/index.html">guide</a> explains how it works.</noscript>
+  </body>
+</html>
