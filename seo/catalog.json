@@ -105,31 +105,42 @@
     "hub": "/games/crazy_clicker/index.html",
     "category": "Rhythm game",
     "summary": "Set a beat with two taps, then keep your timing steady.",
-    "intro": "Crazy Clicker is a timing game rather than an idle clicker. Your first two taps establish a rhythm; keep matching that interval to build a streak. The challenge is consistency, not clicking as fast as possible. Both editions run in the browser and offer a different way to feel the beat.",
+    "intro": "Crazy Clicker is a timing game rather than an idle clicker. Your first two taps establish a rhythm; keep matching that interval to build a streak. The challenge is consistency, not clicking as fast as possible. All three editions use a ±50 millisecond window. The Claude Fable 5.2 edition turns the streak into a show: every eight beats a new act tries to pull you off your tempo, and at the end you see every tap drawn against the beat.",
     "controls": [
-      "In the Grok edition, tap, click or press Space. Two taps lock the beat, with a minimum interval of 70 milliseconds.",
-      "Stay within the timing window to keep the streak alive. Grok uses a ±50 millisecond hit window and a tighter perfect window.",
-      "P or Escape pauses Grok. Check each edition’s on-screen instructions before starting."
+      "Tap, click or press Space. Two taps lock the beat. The Claude edition accepts 60 to 200 beats a minute; the Grok edition needs at least 70 milliseconds between the two taps.",
+      "Stay within the timing window to keep the streak alive. In the Claude and Grok editions the ring closes on the drum exactly on the beat.",
+      "In the Claude edition Escape leaves a run; in the Grok edition P or Escape pauses. Check each edition’s on-screen instructions before starting."
     ],
     "tips": [
-      "Choose a comfortable pace you can repeat. Watch the collapsing rings in Grok to anticipate the next beat.",
-      "Grok rewards five consecutive perfect hits with Ember, a one-hit save. Leaderboards are separate between editions."
+      "Choose a comfortable pace you can repeat. In the Claude edition, count out loud when the lights go out and ignore the second drummer.",
+      "Claude gives one forgiven miss for eight hits in a row within 16 milliseconds, up to two. Grok rewards five consecutive perfect hits with Ember, a one-hit save.",
+      "Leaderboards are separate between editions."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/games/crazy_clicker/claude_fable_5_2/game.html",
+        "detail": "A show in acts: after eight easy beats the click leaves, the lights go out, a second drummer plays the wrong tempo and the ring starts lying. A live tape draws every tap, and the result shows where you rushed or dragged.",
+        "description": "Play Crazy Clicker by Claude Fable 5.2: set a beat with two taps and hold it while the game tries to throw you off, then see your timing drawn beat by beat.",
+        "image": "/images/crazy-clicker-fable.webp"
+      },
       {
         "model": "Grok 4.6",
         "path": "/games/crazy_clicker/grok_4_6/game.html",
         "detail": "Visible beat rings, a ±16 millisecond perfect window, the Ember save and a reactive soundtrack.",
-        "description": "Play Crazy Clicker by Grok 4.6: lock a rhythm with two taps, follow the beat rings and charge Ember to protect your streak."
+        "description": "Play Crazy Clicker by Grok 4.6: lock a rhythm with two taps, follow the beat rings and charge Ember to protect your streak.",
+        "image": "/images/crazy-clicker-grok.webp"
       },
       {
         "model": "Gemini 2.5 Pro",
         "path": "/games/crazy_clicker/gemini_2_5_pro/game.html",
         "detail": "The original two-tap rhythm challenge, focused on repeating your chosen interval and extending a streak.",
-        "description": "Test your timing in Crazy Clicker by Gemini 2.5 Pro. Set the rhythm with two taps and keep a steady streak in this free browser game."
+        "description": "Test your timing in Crazy Clicker by Gemini 2.5 Pro. Set the rhythm with two taps and keep a steady streak in this free browser game.",
+        "image": "/images/crazy-clicker-grok.webp"
       }
     ],
-    "image": "/images/crazy-clicker-grok.webp"
+    "image": "/images/crazy-clicker-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 4,

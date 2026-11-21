@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffd60a" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/bungee-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="game.css?v=1" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="game.js?v=1"></script>
+<title>Crazy Clicker — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Play Crazy Clicker by Claude Fable 5.2: set a beat with two taps and hold it while the game tries to throw you off, then see your timing drawn beat by beat." />
+<link rel="canonical" href="https://whatthe.ai/games/crazy_clicker/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Crazy Clicker — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Play Crazy Clicker by Claude Fable 5.2: set a beat with two taps and hold it while the game tries to throw you off, then see your timing drawn beat by beat." />
+<meta property="og:url" content="https://whatthe.ai/games/crazy_clicker/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Crazy Clicker — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Play Crazy Clicker by Claude Fable 5.2: set a beat with two taps and hold it while the game tries to throw you off, then see your timing drawn beat by beat." />
+<meta property="og:image" content="https://whatthe.ai/images/crazy-clicker-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/crazy-clicker-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Crazy Clicker — Claude Fable 5.2", "url": "https://whatthe.ai/games/crazy_clicker/claude_fable_5_2/game.html", "description": "Play Crazy Clicker by Claude Fable 5.2: set a beat with two taps and hold it while the game tries to throw you off, then see your timing drawn beat by beat.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Crazy Clicker", "item": "https://whatthe.ai/games/crazy_clicker/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/games/crazy_clicker/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body data-phase="start">
+    <main class="game" id="game">
+      <div class="sway" id="sway"><canvas id="stage" aria-hidden="true"></canvas></div>
+
+      <header class="bar">
+        <a class="home" href="/" aria-label="What the Ai home">whatthe.ai</a>
+        <a class="crumb" href="/games/crazy_clicker/index.html">Crazy Clicker</a>
+        <nav aria-label="Game options">
+          <button class="chip" id="btn-ranks" type="button">Rankings</button>
+          <button class="chip" id="btn-help" type="button">How it works</button>
+          <button class="chip icon" id="btn-sound" type="button" aria-pressed="true" aria-label="Sound on"></button>
+        </nav>
+      </header>
+
+      <div class="readout" id="readout" hidden>
+        <strong id="score" aria-live="off">0</strong>
+        <span class="grace" id="grace" role="img" aria-label="No spare misses"></span>
+        <span id="tempo"></span>
+      </div>
+      <p class="caption" id="caption" role="status" aria-live="polite" hidden><strong id="cap-title"></strong><span id="cap-line"></span></p>
+
+      <section class="card" id="start" aria-labelledby="title">
+        <h1 id="title"><span>Crazy</span><span>Clicker</span></h1>
+        <p class="lede">Tap twice to set a beat. Keep tapping it. The game will spend the rest of your run trying to talk you out of it.</p>
+        <form id="begin" novalidate>
+          <label class="field-label" for="player">Nickname for the rankings</label>
+          <input id="player" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Anonymous" aria-describedby="name-error" />
+          <p class="error" id="name-error" role="alert"></p>
+          <button class="primary" type="submit">I have a beat</button>
+        </form>
+        <p class="keys"><span class="desk">Tap, click or press <kbd>Space</kbd>.</span> Best with sound on. <button class="linklike" type="button" id="btn-best">Your best: <strong id="best">nothing yet</strong></button></p>
+      </section>
+
+      <section class="card result" id="result" hidden aria-labelledby="result-title">
+        <p class="kicker" id="result-kicker">The beat is gone</p>
+        <h2 id="result-title"><strong id="final-score">0</strong> beats</h2>
+        <p class="verdict" id="verdict"></p>
+        <dl class="stats">
+          <div><dt>Your tempo</dt><dd id="st-bpm">–</dd></div>
+          <div><dt>Acts survived</dt><dd id="st-acts">0</dd></div>
+          <div><dt>Average miss</dt><dd id="st-error">–</dd></div>
+          <div><dt>Dead-on hits</dt><dd id="st-perfect">0</dd></div>
+        </dl>
+        <figure class="trace">
+          <canvas id="trace" role="img" aria-label="Your timing, beat by beat"></canvas>
+          <figcaption id="trace-note"></figcaption>
+        </figure>
+        <p class="status" id="save-status" role="status"></p>
+        <div class="actions">
+          <button class="primary" id="btn-again" type="button">Again</button>
+          <button class="ghost" id="btn-share" type="button">Share</button>
+          <button class="ghost" id="btn-result-ranks" type="button">Rankings</button>
+        </div>
+      </section>
+
+      <p class="credit">Made with Claude Fable 5.2</p>
+    </main>
+
+    <dialog id="dlg-ranks" aria-labelledby="ranks-title">
+      <div class="dlg-head">
+        <h2 id="ranks-title">Rankings</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close rankings">×</button>
+      </div>
+      <div class="tabs" role="group" aria-label="Ranking">
+        <button type="button" data-board="global" aria-pressed="false">Everyone</button>
+        <button type="button" data-board="local" aria-pressed="true">This device</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="status" id="board-status" role="status"></p>
+    </dialog>
+
+    <dialog id="dlg-help" aria-labelledby="help-title">
+      <div class="dlg-head">
+        <h2 id="help-title">How it works</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <div class="help">
+        <h3>Set a beat</h3>
+        <p>Your first two taps set the tempo: anything from 60 to 200 beats a minute. Every tap after that has to land within 50 milliseconds of the beat. Each tap you keep is a point.</p>
+        <h3>Read the ring and the tape</h3>
+        <p>The ring closes on the drum exactly on the beat. The tape at the bottom draws every tap: above the line you were early, below it late.</p>
+        <h3>The acts</h3>
+        <p>After eight easy beats the acts begin, eight beats each, with four beats of rest between them. The click leaves. The lights go out. A second drummer arrives at the wrong tempo. The ring starts lying. After seven acts they come back two at a time.</p>
+        <h3>Spare misses</h3>
+        <p>Eight dead-on hits in a row (within 16 milliseconds) earn one forgiven miss. You can hold two.</p>
+      </div>
+      <div class="settings">
+        <button class="ghost" id="btn-motion" type="button" aria-pressed="false">Reduce motion: off</button>
+        <p class="fine">With reduced motion, the room stays still and nothing flashes; the sound still tries to fool you.</p>
+      </div>
+    </dialog>
+    <noscript>Crazy Clicker needs JavaScript. The <a href="/games/crazy_clicker/index.html">guide</a> explains the game.</noscript>
+  </body>
+</html>
