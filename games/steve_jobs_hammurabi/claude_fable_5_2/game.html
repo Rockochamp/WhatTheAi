@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f1f52" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="game.css?v=1" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="game.js?v=1"></script>
+<title>Steve Jobs – Hammurabi — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Rule a city for ten years in Hammurabi by Claude Fable 5.2. Trade land, sow, set rations, consult the scribe and try to out-rule it on today’s shared fate." />
+<link rel="canonical" href="https://whatthe.ai/games/steve_jobs_hammurabi/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Steve Jobs – Hammurabi — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Rule a city for ten years in Hammurabi by Claude Fable 5.2. Trade land, sow, set rations, consult the scribe and try to out-rule it on today’s shared fate." />
+<meta property="og:url" content="https://whatthe.ai/games/steve_jobs_hammurabi/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Steve Jobs – Hammurabi — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Rule a city for ten years in Hammurabi by Claude Fable 5.2. Trade land, sow, set rations, consult the scribe and try to out-rule it on today’s shared fate." />
+<meta property="og:image" content="https://whatthe.ai/images/hammurabi-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/hammurabi-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Steve Jobs – Hammurabi — Claude Fable 5.2", "url": "https://whatthe.ai/games/steve_jobs_hammurabi/claude_fable_5_2/game.html", "description": "Rule a city for ten years in Hammurabi by Claude Fable 5.2. Trade land, sow, set rations, consult the scribe and try to out-rule it on today’s shared fate.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Steve Jobs – Hammurabi", "item": "https://whatthe.ai/games/steve_jobs_hammurabi/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/games/steve_jobs_hammurabi/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body>
+    <header class="bar">
+      <a class="home" href="/" aria-label="What the Ai home">whatthe<span>.ai</span></a>
+      <a class="crumb" href="/games/steve_jobs_hammurabi/index.html">Steve Jobs – Hammurabi</a>
+      <nav aria-label="Game options">
+        <button class="chip" id="btn-ranks" type="button">Rankings</button>
+        <button class="chip" id="btn-help" type="button">Rules</button>
+        <button class="chip icon" id="btn-sound" type="button" aria-pressed="false" aria-label="Sound off"></button>
+      </nav>
+    </header>
+
+    <main id="game" data-phase="start">
+      <section class="stage" aria-label="Your kingdom">
+        <svg id="frieze" role="img" aria-label="The kingdom"></svg>
+        <dl class="tally" id="tally">
+          <div><dt>Year</dt><dd id="t-year">1 of 10</dd></div>
+          <div><dt>People</dt><dd id="t-people">100</dd></div>
+          <div><dt>Grain</dt><dd id="t-food">4,000</dd></div>
+          <div><dt>Land</dt><dd id="t-land">100</dd></div>
+          <div><dt>Mood</dt><dd id="t-mood">Well fed</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel start" id="start" aria-labelledby="title">
+        <div>
+          <h1 id="title">Steve Jobs <span>–</span> Hammurabi</h1>
+          <p class="lede">You have ten years, a hundred people and a granary that will not feed them for long. Buy land, sow it, set the rations, and leave more people than you found.</p>
+          <p class="par" id="par"></p>
+        </div>
+        <form id="begin" novalidate>
+          <fieldset class="modes">
+            <legend class="sr">Choose a reign</legend>
+            <label><input type="radio" name="mode" value="daily" checked /><span>Today’s fate</span></label>
+            <label><input type="radio" name="mode" value="free" /><span>A new fate</span></label>
+          </fieldset>
+          <p class="note" id="mode-note"></p>
+          <label class="field-label" for="ruler">Your name, for the rankings</label>
+          <input id="ruler" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Anonymous" aria-describedby="name-error" />
+          <p class="error" id="name-error" role="alert"></p>
+          <button class="primary" type="submit">Begin the reign</button>
+          <button class="linklike" type="button" id="btn-best">Your best reign: <strong id="best">none yet</strong></button>
+        </form>
+      </section>
+
+      <section class="panel work" id="work" hidden>
+        <form class="decree" id="decree" novalidate aria-labelledby="decree-title">
+          <h2 id="decree-title">Decree for year 1</h2>
+          <div class="control">
+            <label for="land-range">Land <span id="land-price">at 24 bushels an acre</span></label>
+            <div class="inputs">
+              <input id="land-range" type="range" step="1" />
+              <input id="land-num" type="number" inputmode="numeric" step="1" aria-label="Acres to buy, or negative to sell" />
+            </div>
+            <p class="hint" id="land-hint"></p>
+          </div>
+          <div class="control">
+            <label for="plant-range">Sow <span>one bushel of seed an acre</span></label>
+            <div class="inputs">
+              <input id="plant-range" type="range" min="0" step="1" />
+              <input id="plant-num" type="number" inputmode="numeric" min="0" step="1" aria-label="Acres to sow" />
+            </div>
+            <p class="hint" id="plant-hint"></p>
+          </div>
+          <div class="control">
+            <label for="feed-range">Rations <span>bushels a person</span></label>
+            <div class="inputs">
+              <input id="feed-range" type="range" min="0" step="1" list="feed-marks" />
+              <input id="feed-num" type="number" inputmode="numeric" min="0" step="1" aria-label="Bushels per person" />
+            </div>
+            <datalist id="feed-marks"><option value="20"></option><option value="30"></option></datalist>
+            <p class="hint" id="feed-hint"></p>
+          </div>
+          <p class="error" id="plan-error" role="alert"></p>
+          <div class="seal-row">
+            <button class="primary" type="submit" id="btn-seal">Seal the year</button>
+            <button class="ghost" type="button" id="btn-scribe">Ask the scribe</button>
+          </div>
+          <p class="counsel" id="counsel" role="status"></p>
+        </form>
+        <aside class="ledger" aria-labelledby="ledger-title">
+          <h2 id="ledger-title">The ledger</h2>
+          <div class="grain" id="grain" role="img" aria-label="How the grain is spent"><i class="g-land"></i><i class="g-seed"></i><i class="g-feed"></i><i class="g-keep"></i></div>
+          <dl class="lines">
+            <div><dt><i class="sw g-land"></i>Land trade</dt><dd id="l-trade">0</dd></div>
+            <div><dt><i class="sw g-seed"></i>Seed</dt><dd id="l-seed">0</dd></div>
+            <div><dt><i class="sw g-feed"></i>Rations</dt><dd id="l-feed">0</dd></div>
+            <div><dt><i class="sw g-keep"></i>Left in the granary</dt><dd id="l-keep">0</dd></div>
+          </dl>
+          <dl class="omens">
+            <div><dt>Harvest</dt><dd id="o-harvest">–</dd></div>
+            <div><dt>Hunger</dt><dd><span class="meter" id="hunger" role="img"><i></i></span><span id="o-hunger">–</span></dd></div>
+            <div><dt>Newcomers</dt><dd id="o-arrive">–</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="panel report" id="report" hidden aria-labelledby="report-title">
+        <h2 id="report-title">Year 1</h2>
+        <ul class="lines-out" id="report-lines"></ul>
+        <dl class="deltas">
+          <div><dt>People</dt><dd id="d-people">0</dd></div>
+          <div><dt>Grain</dt><dd id="d-food">0</dd></div>
+          <div><dt>Land</dt><dd id="d-land">0</dd></div>
+        </dl>
+        <button class="primary" type="button" id="btn-next">Go to year 2</button>
+      </section>
+
+      <section class="panel legacy" id="legacy" hidden aria-labelledby="legacy-name">
+        <p class="kicker" id="legacy-kicker">The reign is over</p>
+        <h2 id="legacy-name">Anonymous the Steward</h2>
+        <p class="big"><strong id="legacy-score">100</strong> <span>people in the city</span></p>
+        <p class="versus" id="legacy-versus"></p>
+        <p class="status" id="save-status" role="status"></p>
+        <div class="actions">
+          <button class="primary" type="button" id="btn-again">Rule again</button>
+          <button class="ghost" type="button" id="btn-share">Share</button>
+          <button class="ghost" type="button" id="btn-legacy-ranks">Rankings</button>
+          <button class="ghost" type="button" id="btn-home">Change fate</button>
+        </div>
+      </section>
+
+      <section class="chronicle" id="chronicle-wrap" hidden aria-labelledby="chronicle-title">
+        <h2 id="chronicle-title">Chronicle</h2>
+        <ol id="chronicle"></ol>
+      </section>
+
+      <p class="credit">Made with Claude Fable 5.2. The other editions are in the <a href="/games/steve_jobs_hammurabi/index.html">guide</a>.</p>
+    </main>
+
+    <dialog id="dlg-ranks" aria-labelledby="ranks-title">
+      <div class="dlg-head">
+        <h2 id="ranks-title">Rankings</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close rankings">×</button>
+      </div>
+      <div class="tabs" role="group" aria-label="Ranking">
+        <button type="button" data-board="daily" aria-pressed="false">Today</button>
+        <button type="button" data-board="global" aria-pressed="false">All time</button>
+        <button type="button" data-board="local" aria-pressed="true">This device</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="status" id="board-status" role="status"></p>
+    </dialog>
+
+    <dialog id="dlg-help" aria-labelledby="help-title">
+      <div class="dlg-head">
+        <h2 id="help-title">Rules</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close rules">×</button>
+      </div>
+      <div class="help">
+        <h3>Each year</h3>
+        <p>Trade land at the year’s price, sow up to ten acres a person, and set how many bushels each person eats. Seed costs one bushel an acre. The harvest returns three to seven bushels for each acre sown.</p>
+        <h3>Hunger</h3>
+        <p>Twenty bushels a person holds hunger steady and slowly heals it. Less than twenty makes hunger build. Past the breaking point people starve, so a lean year or two is survivable and a third is not.</p>
+        <h3>Growth</h3>
+        <p>The better the rations, the likelier newcomers arrive; at thirty bushels it is certain. A bigger city with more land draws more of them, up to fifty a year. Rats, plague and a generous river come when they come.</p>
+        <h3>Fate and the scribe</h3>
+        <p>A reign’s luck is fixed when it begins. Today’s fate is the same for every player and has its own ranking, so you can try it again with what you learned. The scribe will advise you three times in a reign. At the end you see what the scribe would have made of the same luck.</p>
+        <h3>Score</h3>
+        <p>The people left after ten years. A reign ends early if nobody is left.</p>
+      </div>
+      <div class="settings">
+        <label for="music-volume">Lyre volume</label>
+        <input id="music-volume" type="range" min="0" max="100" value="50" />
+      </div>
+    </dialog>
+    <noscript>This game needs JavaScript. The <a href="/games/steve_jobs_hammurabi/index.html">guide</a> explains how it works.</noscript>
+  </body>
+</html>
