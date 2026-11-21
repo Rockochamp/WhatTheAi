@@ -191,37 +191,49 @@
     "hub": "/games/BananaSurvivors/index.html",
     "category": "Survival game",
     "summary": "Survive monster hordes, collect upgrades and face escalating bosses.",
-    "intro": "Banana Survivors turns a banana into the hero of a horde-survival game. Keep moving, gather experience and choose upgrades while enemies close in. The three editions offer noticeably different combat: an illustrated jungle auto-shooter, a close-contact blade game, and the original German-language Gold Edition. The newer editions include blood and gore.",
+    "intro": "Banana Survivors turns a banana into the hero of a horde-survival game. Keep moving, gather experience and choose upgrades while enemies close in. The four editions offer noticeably different combat: Claude Fable 5.2’s Peel Out is slapstick, with peels, sliding monkeys and chain-reaction pile-ups and no blood; GPT-6 Astra is an illustrated jungle auto-shooter; Grok 4.6 is a close-contact blade game; and Gemini 3 Pro is the original German-language Gold Edition. The Astra and Grok editions include blood and gore.",
     "controls": [
-      "Astra and Grok support WASD, arrow keys, mouse steering and touch controls.",
-      "In Astra, weapons fire automatically. Use Space, Shift, right-click or the touch button to dash, then collect XP and choose upgrades.",
-      "In Grok, the same action triggers Split. Orbiting peel-blades deal contact damage, so positioning is central to combat."
+      "All newer editions support WASD, arrow keys, mouse steering and touch controls. Claude also supports a gamepad.",
+      "In Claude, peels are thrown automatically at the nearest monkey. Space, Shift, right-click, a second finger or the Dash button dashes: you are untouchable for a moment and bowl over anything in your way.",
+      "In Astra, weapons fire automatically and the same action dashes. In Grok it triggers Split, and orbiting peel-blades deal contact damage."
     ],
     "tips": [
-      "In Astra, a 50-second hunt leads to a boss showdown. Read the attack warnings and keep an escape route open.",
-      "In Grok, kills and standing in blood build ripeness toward Burst. These rules differ from Astra, and the editions keep separate scoreboards."
+      "In Claude, thick crowds make long chains: five tumbles from one peel is a Domino, ten is a Strike. Monkeys that slide into a palm crash hard and shake coconuts down on the rest.",
+      "The king in Claude cannot be tipped. He charges in a straight line, so stand with a palm behind you and step aside.",
+      "In Astra, a 50-second hunt leads to a boss showdown. In Grok, kills and standing in blood build ripeness toward Burst. The editions keep separate scoreboards."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/games/BananaSurvivors/claude_fable_5_2/game.html",
+        "detail": "Peel Out: nobody gets shot. You throw peels, monkeys slip, and each slipping monkey bowls over the ones behind it. Pile-ups, palm crashes that rain coconuts, a dash that bowls through the crowd, fourteen upgrades and a king every two minutes. No blood.",
+        "description": "Play Banana Survivors: Peel Out by Claude Fable 5.2. Throw banana peels, send monkeys sliding into each other and build pile-ups in a free, gore-free horde survival game.",
+        "image": "/images/banana-fable.webp"
+      },
       {
         "model": "GPT-6 Astra",
         "path": "/games/BananaSurvivors/gpt6_astra/game.html",
         "detail": "An illustrated jungle, automatic weapons, evolutions, stage bosses, a dash and a short death replay.",
-        "description": "Play Banana Survivors by GPT-6 Astra: evolve automatic weapons, dodge monster hordes and defeat stage bosses in a free jungle survival browser game."
+        "description": "Play Banana Survivors by GPT-6 Astra: evolve automatic weapons, dodge monster hordes and defeat stage bosses in a free jungle survival browser game.",
+        "image": "/images/banana-astra.webp"
       },
       {
         "model": "Grok 4.6",
         "path": "/games/BananaSurvivors/grok_4_6/game.html",
         "detail": "SPLIT puts you in a meat locker with orbiting peel-blades, a splitting dash, ripeness and hanging boss prizes.",
-        "description": "Survive the meat locker in Banana Survivors SPLIT by Grok 4.6. Carve through enemies with peel-blades, Split and ripeness-powered Burst."
+        "description": "Survive the meat locker in Banana Survivors SPLIT by Grok 4.6. Carve through enemies with peel-blades, Split and ripeness-powered Burst.",
+        "image": "/images/banana-astra.webp"
       },
       {
         "model": "Gemini 3 Pro",
         "path": "/games/BananaSurvivors/game.html",
         "detail": "The German-language Gold Edition: a voxel banana, automatic combat, XP upgrades and endless boss waves.",
-        "description": "Spiele Banana Survivors Gold Edition von Gemini 3 Pro kostenlos im Browser. Sammle XP, wähle Upgrades und überlebe Monsterhorden und Boss-Wellen."
+        "description": "Spiele Banana Survivors Gold Edition von Gemini 3 Pro kostenlos im Browser. Sammle XP, wähle Upgrades und überlebe Monsterhorden und Boss-Wellen.",
+        "image": "/images/banana-astra.webp"
       }
     ],
-    "image": "/images/banana-astra.webp"
+    "image": "/images/banana-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 6,

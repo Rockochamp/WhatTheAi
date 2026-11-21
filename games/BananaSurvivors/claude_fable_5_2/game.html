@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0e3b2b" />
+    <link rel="icon" href="/images/favicon.ico" />
+    <link rel="preload" href="/fonts/fredoka-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="game.css?v=1" />
+    <script src="/js/common/blocklist.js" defer></script>
+    <script type="module" src="game.js?v=1"></script>
+<title>Banana Survivors — Claude Fable 5.2 | What the Ai</title>
+<meta name="description" content="Play Banana Survivors: Peel Out by Claude Fable 5.2. Throw banana peels, send monkeys sliding into each other and build pile-ups in a free, gore-free horde survival game." />
+<link rel="canonical" href="https://whatthe.ai/games/BananaSurvivors/claude_fable_5_2/game.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="What the Ai" />
+<meta property="og:title" content="Banana Survivors — Claude Fable 5.2 | What the Ai" />
+<meta property="og:description" content="Play Banana Survivors: Peel Out by Claude Fable 5.2. Throw banana peels, send monkeys sliding into each other and build pile-ups in a free, gore-free horde survival game." />
+<meta property="og:url" content="https://whatthe.ai/games/BananaSurvivors/claude_fable_5_2/game.html" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Banana Survivors — Claude Fable 5.2 | What the Ai" />
+<meta name="twitter:description" content="Play Banana Survivors: Peel Out by Claude Fable 5.2. Throw banana peels, send monkeys sliding into each other and build pile-ups in a free, gore-free horde survival game." />
+<meta property="og:image" content="https://whatthe.ai/images/banana-fable.webp" />
+<meta name="twitter:image" content="https://whatthe.ai/images/banana-fable.webp" />
+<script type="application/ld+json" id="page-structured-data">{"@context": "https://schema.org", "@graph": [{"@type": "VideoGame", "name": "Banana Survivors — Claude Fable 5.2", "url": "https://whatthe.ai/games/BananaSurvivors/claude_fable_5_2/game.html", "description": "Play Banana Survivors: Peel Out by Claude Fable 5.2. Throw banana peels, send monkeys sliding into each other and build pile-ups in a free, gore-free horde survival game.", "inLanguage": "en", "isAccessibleForFree": true}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "What the Ai", "item": "https://whatthe.ai/"}, {"@type": "ListItem", "position": 2, "name": "Banana Survivors", "item": "https://whatthe.ai/games/BananaSurvivors/index.html"}, {"@type": "ListItem", "position": 3, "name": "Claude Fable 5.2", "item": "https://whatthe.ai/games/BananaSurvivors/claude_fable_5_2/game.html"}]}]}</script>
+</head>
+  <body>
+    <main class="game" id="game" data-state="menu">
+      <canvas id="field" tabindex="0" aria-label="Banana Survivors play field. Move with W A S D or the arrow keys. Space dashes. P pauses.">Banana Survivors needs a browser with canvas support.</canvas>
+
+      <header class="bar">
+        <a class="home" href="/" aria-label="What the Ai home">whatthe.ai</a>
+        <a class="crumb" href="/games/BananaSurvivors/index.html">Banana Survivors</a>
+        <nav aria-label="Game options">
+          <button class="chip" id="btn-ranks" type="button">Rankings</button>
+          <button class="chip" id="btn-help" type="button">How to play</button>
+          <button class="chip icon" id="btn-sound" type="button" aria-pressed="true" aria-label="Sound on"></button>
+        </nav>
+      </header>
+
+      <div class="hud" id="hud" hidden>
+        <div class="vitals">
+          <div class="meter hp" id="hp" role="img" aria-label="Health"><i></i><span id="hp-text">100</span></div>
+          <div class="meter xp" id="xp" role="img" aria-label="Experience"><i></i><span id="level">Level 1</span></div>
+        </div>
+        <div class="counts">
+          <strong id="score">0</strong>
+          <span id="clock">0:00</span>
+          <span id="kills">0 tumbled</span>
+        </div>
+        <button class="chip icon" id="btn-pause" type="button" aria-label="Pause">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+        </button>
+      </div>
+      <div class="banner" id="banner" role="status" aria-live="polite"></div>
+      <button class="dash" id="btn-dash" type="button" hidden aria-label="Dash"><span>Dash</span></button>
+      <div class="stick" id="stick" hidden aria-hidden="true"><i></i></div>
+
+      <section class="menu" id="menu" aria-labelledby="title">
+        <h1 id="title"><span>Banana</span><span>Survivors</span><em>Peel Out</em></h1>
+        <p class="lede">You throw peels. Monkeys slip. A slipping monkey takes the next three with it.</p>
+        <form id="begin" novalidate>
+          <label class="field-label" for="player">Nickname for the rankings</label>
+          <input id="player" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Anonymous" aria-describedby="name-error" />
+          <p class="error" id="name-error" role="alert"></p>
+          <button class="primary" type="submit">Start running</button>
+        </form>
+        <p class="keys"><span class="desk">Move with <kbd>W A S D</kbd> or arrows, dash with <kbd>Space</kbd>.</span><span class="touch">Drag to run, tap Dash to bowl through.</span> <button class="linklike" type="button" id="btn-best">Your best: <strong id="best">none yet</strong></button></p>
+      </section>
+
+      <section class="card" id="choose" hidden aria-labelledby="choose-title">
+        <h2 id="choose-title">Level 2. Pick one</h2>
+        <div class="choices" id="choices"></div>
+      </section>
+
+      <section class="card" id="pause" hidden aria-labelledby="pause-title">
+        <h2 id="pause-title">Paused</h2>
+        <ul class="build" id="build"></ul>
+        <div class="actions">
+          <button class="primary" id="btn-resume" type="button">Keep running</button>
+          <button class="ghost" id="btn-quit" type="button">Give up</button>
+        </div>
+      </section>
+
+      <section class="card" id="over" hidden aria-labelledby="over-title">
+        <p class="kicker" id="over-kicker">The troop got you</p>
+        <h2 id="over-title"><strong id="final-score">0</strong> points</h2>
+        <dl class="stats">
+          <div><dt>Survived</dt><dd id="st-time">0:00</dd></div>
+          <div><dt>Monkeys tumbled</dt><dd id="st-kills">0</dd></div>
+          <div><dt>Longest pile-up</dt><dd id="st-chain">0</dd></div>
+          <div><dt>Level</dt><dd id="st-level">1</dd></div>
+        </dl>
+        <p class="status" id="save-status" role="status"></p>
+        <div class="actions">
+          <button class="primary" id="btn-again" type="button">Run again</button>
+          <button class="ghost" id="btn-share" type="button">Share</button>
+          <button class="ghost" id="btn-over-ranks" type="button">Rankings</button>
+          <button class="ghost" id="btn-menu" type="button">Menu</button>
+        </div>
+      </section>
+      <p class="credit">Made with Claude Fable 5.2</p>
+    </main>
+
+    <dialog id="dlg-ranks" aria-labelledby="ranks-title">
+      <div class="dlg-head">
+        <h2 id="ranks-title">Rankings</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close rankings">×</button>
+      </div>
+      <div class="tabs" role="group" aria-label="Ranking">
+        <button type="button" data-board="global" aria-pressed="false">Everyone</button>
+        <button type="button" data-board="local" aria-pressed="true">This device</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="status" id="board-status" role="status"></p>
+    </dialog>
+
+    <dialog id="dlg-help" aria-labelledby="help-title">
+      <div class="dlg-head">
+        <h2 id="help-title">How to play</h2>
+        <button class="chip icon" type="button" data-close aria-label="Close">×</button>
+      </div>
+      <div class="help">
+        <h3>Nobody gets hurt. Much.</h3>
+        <p>You are a banana and the monkeys are hungry. You throw peels on your own. A monkey that takes a peel slides away from you and knocks into whoever is behind it, and they slide too.</p>
+        <h3>Make a pile-up</h3>
+        <p>Thick crowds make long chains. Five tumbles from one peel is a Domino, ten is a Strike. Monkeys that slide into a palm crash hard and shake coconuts down on their friends.</p>
+        <h3>Dash</h3>
+        <p>Dashing makes you untouchable for a moment and bowls over anything in your way. Use it to break out when you are surrounded.</p>
+        <h3>Who is chasing you</h3>
+        <p>Small ones are fast. Ones with a red band stay back and lob coconuts: step out of the red circle. Gorillas are heavy and flatten a whole row when they finally go over. Every two minutes the king arrives. He cannot be tipped, but he charges in a straight line, and palms do not move.</p>
+        <h3>Grow</h3>
+        <p>Green drops fill your level. Each level you pick one of three upgrades.</p>
+      </div>
+      <div class="settings">
+        <label for="music-volume">Music volume</label>
+        <input id="music-volume" type="range" min="0" max="100" value="55" />
+        <button class="ghost" id="btn-motion" type="button" aria-pressed="false">Reduce effects: off</button>
+      </div>
+    </dialog>
+    <noscript>Banana Survivors needs JavaScript. The <a href="/games/BananaSurvivors/index.html">guide</a> explains the game.</noscript>
+  </body>
+</html>
