@@ -241,37 +241,49 @@
     "hub": "/apps/agi_barometer/index.html",
     "category": "Experimental dashboard",
     "summary": "Explore a hiring-based indicator and the assumptions behind it.",
-    "intro": "The AGI Probability Barometer is an experimental visualization of a hiring-based formula. Its name is historical: the displayed percentages are not validated probabilities of artificial general intelligence. The app uses fixed numbers stored in its source code, rather than a live job-listings feed.",
+    "intro": "The AGI Probability Barometer is an experimental visualization of a hiring-based formula. Its name is historical: the displayed percentages are not validated probabilities of artificial general intelligence. The idea being tested is that a lab close to AGI would advertise fewer jobs. The Claude Fable 5.2 and Grokbot editions use sourced counts of open listings; the Claude edition can also take a live reading for three labs. The two Gemini editions use fixed example numbers stored in their source code.",
     "controls": [
-      "Open either edition to inspect the lab gauges and the stored quarterly inputs.",
-      "The Flash edition adds a combined gauge, a trend chart and interactive lab details.",
-      "Read the methodology below before interpreting any percentage. The two editions use different time windows and formulas."
+      "In the Claude edition, read the dial and the table, then tap the glass for a live reading. The brass hand keeps marking the recorded reading so you can see which way the needle moved.",
+      "Open the Grokbot or Gemini editions to inspect their lab gauges and the stored inputs. The Flash edition adds a combined gauge, a trend chart and interactive lab details.",
+      "Read the methodology below before interpreting any percentage. The editions use different time windows and formulas."
     ],
     "tips": [
-      "A fall in job listings could reflect budgets, recruiting cycles, restructuring or many other causes. It does not demonstrate AGI.",
-      "No original data-source citations or collection method accompany the stored figures. Treat them as unverified example inputs, not current hiring statistics."
+      "A fall in job listings could reflect budgets, recruiting cycles, restructuring or many other causes. It does not demonstrate AGI. Listings are adverts, not hires.",
+      "A live reading in the Claude edition contacts the labs’ public job boards directly from your browser and is stored only there. If a board does not answer, the recorded count stays.",
+      "The earlier quarterly values in every edition have no source citations. Treat them as unverified example inputs, not hiring statistics."
     ],
     "versions": [
+      {
+        "model": "Claude Fable 5.2",
+        "path": "/apps/agi_barometer/claude_fable_5_2/game.html",
+        "detail": "A brass barometer you can tap. The needle shows how far five labs’ job listings sit below their peak; tapping the glass takes a live reading from three labs’ public job boards, and a second hand marks the recorded reading for comparison.",
+        "description": "Claude Fable 5.2’s AGI Barometer: a tappable brass dial showing how far frontier-lab job listings sit below their peak, with live readings and plain limits. Not a probability.",
+        "image": "/images/agi-fable.webp"
+      },
       {
         "model": "Grokbot Edition",
         "path": "/apps/agi_barometer/grokbot/game.html",
         "detail": "Live job-listing counts with source links and dates, one hiring-drop index formula, a dashed live-count segment on the chart and a no-data state for labs without a verified count.",
-        "description": "Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability."
+        "description": "Grokbot Edition of the AGI Barometer: a hiring-drop index from sourced, dated frontier-lab job-listing counts. A hypothesis, not a forecast or probability.",
+        "image": "/images/AgiBarometer.webp"
       },
       {
         "model": "Gemini 3.5 Flash (High)",
         "path": "/apps/agi_barometer/gemini_3_5_flash/game.html",
         "detail": "Three stored quarterly inputs per lab, a combined indicator, trend chart and interactive formula details.",
-        "description": "Explore the Gemini 3.5 Flash AGI Barometer: an experimental hiring-based indicator with fixed inputs, lab comparisons and transparent methodology limits."
+        "description": "Explore the Gemini 3.5 Flash AGI Barometer: an experimental hiring-based indicator with fixed inputs, lab comparisons and transparent methodology limits.",
+        "image": "/images/AgiBarometer.webp"
       },
       {
         "model": "Gemini 3.1 Pro (High)",
         "path": "/apps/agi_barometer/gemini_3_1_pro/game.html",
         "detail": "The earlier two-quarter dashboard, with one gauge per lab and a simpler decline-based formula.",
-        "description": "Inspect the Gemini 3.1 Pro AGI Barometer, a two-quarter hiring visualization. Learn why its fixed-input indicator is not a validated AGI probability."
+        "description": "Inspect the Gemini 3.1 Pro AGI Barometer, a two-quarter hiring visualization. Learn why its fixed-input indicator is not a validated AGI probability.",
+        "image": "/images/AgiBarometer.webp"
       }
     ],
-    "image": "/images/AgiBarometer.webp"
+    "image": "/images/agi-fable.webp",
+    "updated": "November 21, 2026"
   },
   {
     "id": 7,
