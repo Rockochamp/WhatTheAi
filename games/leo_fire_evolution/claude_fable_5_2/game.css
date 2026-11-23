@@ -313,14 +313,10 @@ h3 {
 .alias {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 15.5px;
-}
-.alias > span {
-  flex-basis: 100%;
 }
 .alias select {
   min-height: 46px;
@@ -328,9 +324,6 @@ h3 {
   border: 1px solid var(--f-line);
   border-radius: 12px;
   background: var(--plum-2);
-}
-.alias .ghost {
-  min-height: 46px;
 }
 .credit {
   position: absolute;
@@ -379,6 +372,12 @@ dialog {
   width: min(720px, calc(100vw - 20px));
 }
 @media (max-width: 620px) {
+  .alias > span {
+    flex-basis: 100%;
+  }
+  .alias select {
+    flex: 1;
+  }
   .card.title {
     left: 10px;
     right: 10px;
@@ -418,7 +417,7 @@ dialog {
   #done:not([hidden]) {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "title evolve" "stars evolve" "sums row";
+    grid-template-areas: "title evolve" "stars evolve" "sums status" "sums row";
     gap: 4px 20px;
     align-items: center;
   }
@@ -459,7 +458,7 @@ dialog {
   #end:not([hidden]) {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "title alias" "text alias" "total status" "total row";
+    grid-template-areas: "title total" "text status" "text row";
     gap: 2px 20px;
     align-items: center;
   }
@@ -474,10 +473,6 @@ dialog {
   #end .total {
     grid-area: total;
   }
-  #end .alias {
-    grid-area: alias;
-    margin-top: 0;
-  }
   #end .status {
     grid-area: status;
     margin: 0;
@@ -486,11 +481,15 @@ dialog {
     grid-area: row;
     margin-top: 0;
   }
-  .alias > span {
-    flex-basis: auto;
+  .alias {
+    margin-top: 8px;
   }
-  .total strong {
-    font-size: 34px;
+  .alias select {
+    min-height: 40px;
+  }
+  #share-status {
+    grid-area: status;
+    margin: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

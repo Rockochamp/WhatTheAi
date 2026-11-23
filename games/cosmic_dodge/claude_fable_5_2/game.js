@@ -384,7 +384,7 @@ function showResult() {
   if (run.score <= 0) status.textContent = "No points this time. Graze a rock to get on the board.";
   else if (!isLiveSite()) status.textContent = `${local} Shared rankings work on whatthe.ai.`;
   else {
-    const which = run.mode === "daily" ? "today’s ranking" : "the all-time ranking",
+    const which = run.mode === "daily" ? "today’s ranking and the all-time ranking" : "the all-time ranking",
       mine = id;
     status.textContent = `Sending your score to ${which}…`;
     board.saveGlobal(record, { sub: run.mode === "daily" ? "_daily" : "" }).then(
@@ -425,7 +425,8 @@ async function openBoard(which) {
     const records =
       which === "daily"
         ? await board.fetchGlobal({ limit: 20, where: ["day", dayKey()], sub: "_daily" })
-        : await board.fetchGlobal({ limit: 20 });
+        : // all time means every run: the free ones and the daily ones
+          board.rank((await Promise.all([board.fetchGlobal({ limit: 20 }), board.fetchGlobal({ limit: 20, sub: "_daily" })])).flat(), 20);
     if (request === boardRequest)
       fillBoard(records, which === "daily" ? "Nobody has flown today’s run yet. Be the first." : "No scores yet. Be the first.");
   } catch {

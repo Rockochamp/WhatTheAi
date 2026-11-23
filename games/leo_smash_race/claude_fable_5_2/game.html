@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#1c2340" />
     <link rel="icon" href="/images/favicon.ico" />
     <link rel="preload" href="/fonts/fredoka-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="game.css?v=1" />
-    <script type="module" src="game.js?v=1"></script>
+    <link rel="stylesheet" href="game.css?v=2" />
+    <script type="module" src="game.js?v=2"></script>
 <title>Leos Smash Racer — Claude Fable 5.2 | What the Ai</title>
 <meta name="description" content="Play Leos Smash Racer by Claude Fable 5.2: a 3D toy road for small children. Smash block towers, chain up to ×5, boost past seven rivals. English and German." />
 <link rel="canonical" href="https://whatthe.ai/games/leo_smash_race/claude_fable_5_2/game.html" />
@@ -48,6 +48,11 @@
           <h2 data-t="pickTrack">Pick a road</h2>
           <div class="picks tracks" id="tracks" role="radiogroup" aria-label="Road"></div>
           <label class="helper"><input type="checkbox" id="assist" checked /> <span data-t="helper">Helper on: the car steers a little by itself</span></label>
+          <div class="alias">
+            <span data-t="alias">Racing name:</span>
+            <select id="alias-a" aria-label="First word"></select>
+            <select id="alias-b" aria-label="Second word"></select>
+          </div>
           <div class="go-row">
             <button class="primary" id="btn-cube" type="button" data-t="cubeFirst">Cube first, for a full boost</button>
             <button class="ghost" id="btn-race" type="button" data-t="raceNow">Race now</button>
@@ -92,12 +97,6 @@
         <p class="stars" id="stars" role="img" aria-label="Stars"><span>★</span><span>★</span><span>★</span></p>
         <p class="final"><strong id="final-score">0</strong> <span data-t="points">points</span></p>
         <p class="detail" id="detail"></p>
-        <div class="alias">
-          <span data-t="alias">Your racing name:</span>
-          <select id="alias-a" aria-label="First word"></select>
-          <select id="alias-b" aria-label="Second word"></select>
-          <button class="ghost" id="btn-save" type="button" data-t="save">Put it on the board</button>
-        </div>
         <p class="status" id="save-status" role="status"></p>
         <div class="go-row">
           <button class="primary" id="btn-again" type="button" data-t="again">Again</button>

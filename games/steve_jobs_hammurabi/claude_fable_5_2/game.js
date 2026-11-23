@@ -235,7 +235,7 @@ function showLegacy() {
   if (state.people > previous && previous >= 0) $("legacy-kicker").textContent += ". Your best reign yet";
   if (!isLiveSite()) status.textContent = `${local} Shared rankings work on whatthe.ai.`;
   else {
-    const which = mode === "daily" ? "today’s ranking" : "the all-time ranking",
+    const which = mode === "daily" ? "today’s ranking and the all-time ranking" : "the all-time ranking",
       mine = id;
     status.textContent = `Sending your reign to ${which}…`;
     board.saveGlobal(record, { sub: mode === "daily" ? "_daily" : "" }).then(
@@ -338,7 +338,8 @@ async function openBoard(which) {
     const records =
       which === "daily"
         ? await board.fetchGlobal({ limit: 25, where: ["day", dayKey()], sub: "_daily" })
-        : await board.fetchGlobal({ limit: 25 });
+        : // all time means every reign: the free ones and the daily ones
+          board.rank((await Promise.all([board.fetchGlobal({ limit: 25 }), board.fetchGlobal({ limit: 25, sub: "_daily" })])).flat(), 25);
     if (request === boardRequest)
       fillBoard(records, which === "daily" ? "Nobody has ruled today’s fate yet." : "No reigns yet. Be the first.");
   } catch {

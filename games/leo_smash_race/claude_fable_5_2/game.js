@@ -30,8 +30,7 @@ const TEXT = {
     skip: "Skip",
     boost: "Boost",
     points: "points",
-    alias: "Your racing name:",
-    save: "Put it on the board",
+    alias: "Racing name:",
     again: "Again",
     garage: "Garage",
     ranks: "Rankings",
@@ -41,11 +40,11 @@ const TEXT = {
     place: ["1st!", "2nd!", "3rd!", "4th", "5th", "6th", "7th", "8th"],
     detail: (n, combo, time) => `${n} toys smashed, best chain ×${combo}, ${time} seconds`,
     best: "New best on this device!",
-    savedLocal: "Saved on this device.",
     notSaved: "This browser would not keep the record.",
     previewOnly: "The shared board works on whatthe.ai. This copy keeps records on this device.",
     sending: "Sending…",
-    sent: "On the shared board!",
+    sent: (name) => `${name} is on the shared board!`,
+    refused: "The shared board refused this score. This board still has to be allowed in the site’s Firebase rules.",
     sendFailed: "The shared board did not answer. The record is still on this device.",
     empty: "No races here yet.",
     loading: "Loading…",
@@ -72,8 +71,7 @@ const TEXT = {
     skip: "Überspringen",
     boost: "Turbo",
     points: "Punkte",
-    alias: "Dein Rennname:",
-    save: "Auf die Tafel damit",
+    alias: "Rennname:",
     again: "Nochmal",
     garage: "Garage",
     ranks: "Bestenliste",
@@ -83,11 +81,11 @@ const TEXT = {
     place: ["1. Platz!", "2. Platz!", "3. Platz!", "4. Platz", "5. Platz", "6. Platz", "7. Platz", "8. Platz"],
     detail: (n, combo, time) => `${n} Sachen umgefahren, beste Kette ×${combo}, ${time} Sekunden`,
     best: "Neuer Rekord auf diesem Gerät!",
-    savedLocal: "Auf diesem Gerät gespeichert.",
     notSaved: "Dieser Browser wollte den Rekord nicht behalten.",
     previewOnly: "Die gemeinsame Bestenliste gibt es auf whatthe.ai. Diese Kopie speichert nur auf diesem Gerät.",
     sending: "Wird gesendet…",
-    sent: "Steht auf der gemeinsamen Tafel!",
+    sent: (name) => `${name} steht auf der gemeinsamen Tafel!`,
+    refused: "Die gemeinsame Tafel hat das Ergebnis abgelehnt. Sie muss in den Firebase-Regeln der Seite noch erlaubt werden.",
     sendFailed: "Die gemeinsame Tafel antwortet nicht. Der Rekord bleibt auf diesem Gerät.",
     empty: "Hier ist noch niemand gefahren.",
     loading: "Lädt…",
@@ -453,37 +451,31 @@ function finish() {
   record = makeRecord(race, alias(), runId());
   const { persisted } = board.addLocal(record);
   showFinishText();
-  $("save-status").textContent = !persisted ? t("notSaved") : race.score > best && best > 0 ? t("best") : t("savedLocal");
-  $("btn-save").disabled = false;
+  sendShared(record, !persisted ? t("notSaved") : race.score > best && best > 0 ? t("best") : "");
   setTimeout(() => {
     if (race?.status !== "finished" || attract) return;
     setState("finish");
     $("btn-again").focus();
   }, 1400);
 }
-async function saveShared() {
-  if (!record) return;
-  const status = $("save-status");
-  record = { ...record, playerName: alias() };
-  store.set("aliasA", $("alias-a").value);
-  store.set("aliasB", $("alias-b").value);
-  board.addLocal(record);
-  if (!isLiveSite()) return void (status.textContent = t("previewOnly"));
-  $("btn-save").disabled = true;
-  status.textContent = t("sending");
+// Every finished race goes to the shared board by itself, under the name picked in the garage.
+async function sendShared(mine, note) {
+  const status = $("save-status"),
+    say = (text) => record === mine && (status.textContent = [note, text].filter(Boolean).join(" "));
+  if (!isLiveSite()) return say(t("previewOnly"));
+  say(t("sending"));
   try {
-    await board.saveGlobal(record);
-    status.textContent = t("sent");
-  } catch {
-    status.textContent = t("sendFailed");
-    $("btn-save").disabled = false;
+    await board.saveGlobal(mine);
+    say(t("sent")(mine.playerName));
+  } catch (error) {
+    say(error?.code === "permission-denied" ? t("refused") : t("sendFailed"));
   }
 }
 for (const [sel, list, key] of [[$("alias-a"), NAME_A, "aliasA"], [$("alias-b"), NAME_B, "aliasB"]]) {
   for (const word of list) sel.append(new Option(word, word));
   if (list.includes(store.get(key))) sel.value = store.get(key);
+  sel.addEventListener("change", () => store.set(key, sel.value));
 }
-$("btn-save").addEventListener("click", saveShared);
 $("btn-again").addEventListener("click", () => startRace(0));
 $("btn-garage").addEventListener("click", showGarage);
 $("btn-quit").addEventListener("click", showGarage);

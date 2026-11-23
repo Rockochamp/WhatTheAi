@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#140a1c" />
     <link rel="icon" href="/images/favicon.ico" />
     <link rel="preload" href="/fonts/caprasimo-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="game.css?v=1" />
-    <script type="module" src="game.js?v=1"></script>
+    <link rel="stylesheet" href="game.css?v=2" />
+    <script type="module" src="game.js?v=2"></script>
 <title>Leo’s Fire Evolution — Claude Fable 5.2 | What the Ai</title>
 <meta name="description" content="Play Leo’s Fire Evolution by Claude Fable 5.2: guide a lion cub through ten dark places, gather fireflies, light every lantern and unlock ten fire forms." />
 <link rel="canonical" href="https://whatthe.ai/games/leo_fire_evolution/claude_fable_5_2/game.html" />
@@ -41,6 +41,11 @@
       <section class="card title" id="title" aria-labelledby="name">
         <h1 id="name">Leo’s Fire Evolution</h1>
         <p class="lead" data-t="lead">Ten places have gone dark. A lion cub with a small flame can light them again, and his fire grows into something new in each one.</p>
+        <div class="alias">
+          <span data-t="alias">Name for the board:</span>
+          <select id="alias-a" aria-label="First word"></select>
+          <select id="alias-b" aria-label="Second word"></select>
+        </div>
         <div class="row">
           <button class="primary" id="btn-start" type="button">Start</button>
           <button class="ghost" id="btn-fresh" type="button" hidden data-t="fresh">Start over</button>
@@ -74,6 +79,7 @@
             <p id="next-gift"></p>
           </div>
         </div>
+        <p class="status" id="share-status" role="status"></p>
         <div class="row">
           <button class="primary" id="btn-next" type="button" data-t="next">On to the next place</button>
           <button class="ghost" id="btn-stop" type="button" data-t="stop">Stop here</button>
@@ -84,12 +90,6 @@
         <h2 id="end-title"></h2>
         <p id="end-text"></p>
         <p class="total"><strong id="end-score">0</strong> <span data-t="points">points</span></p>
-        <div class="alias">
-          <span data-t="alias">Name for the board:</span>
-          <select id="alias-a" aria-label="First word"></select>
-          <select id="alias-b" aria-label="Second word"></select>
-          <button class="ghost" id="btn-post" type="button" data-t="post">Post my score</button>
-        </div>
         <p class="status" id="post-status" role="status"></p>
         <div class="row">
           <button class="primary" id="btn-again" type="button" data-t="again">A new journey</button>

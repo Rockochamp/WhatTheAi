@@ -388,28 +388,18 @@ h2 {
 .alias {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
   font-size: 16px;
 }
-.alias > span {
-  flex-basis: 100%;
-}
 .alias select {
-  min-height: 48px;
-  padding: 0 10px;
+  min-height: 46px;
+  padding: 0 8px;
   border: 3px solid var(--ink);
   border-radius: 14px;
   background: #fff;
   font-weight: 600;
-}
-.alias .ghost {
-  flex: 0 1 auto;
-  min-height: 48px;
-  padding: 0 16px;
-  font-size: 17px;
 }
 .credit {
   position: absolute;
@@ -432,6 +422,12 @@ dialog {
 @media (max-width: 560px) {
   .picks {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .by {
+    display: none;
+  }
+  h2 {
+    margin: 12px 0 6px;
   }
   .fine {
     display: none;
@@ -510,10 +506,17 @@ dialog {
     width: auto;
     height: min(330px, calc(100dvh - 104px));
   }
+  .alias {
+    margin-top: 8px;
+    font-size: 15px;
+  }
+  .alias select {
+    min-height: 40px;
+  }
   #finish:not([hidden]) {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "title alias" "stars alias" "final status" "detail buttons";
+    grid-template-areas: "title final" "title detail" "stars status" "stars buttons";
     gap: 0 22px;
     align-items: center;
   }
@@ -529,10 +532,6 @@ dialog {
   }
   .detail {
     grid-area: detail;
-  }
-  .alias {
-    grid-area: alias;
-    margin-top: 0;
   }
   #save-status {
     grid-area: status;

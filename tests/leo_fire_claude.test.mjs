@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 globalThis.offensiveWords ??= [];
 const dir = "../games/leo_fire_evolution/claude_fable_5_2/";
 const { Visit, guide, buildWorld, maxScore, starsFor, PLACES, FORMS, POINTS, STEP, LEO_R, RULESET, SLEEPERS } = await import(dir + "world.js?v=1");
-const { validRecord, makeRecord, compareRecords, validName, NAME_A, NAME_B, SLUG, MAX_TOTAL, board } = await import(dir + "records.js?v=1");
+const { validRecord, makeRecord, sharedRecord, latestPerJourney, compareRecords, validName, NAME_A, NAME_B, SLUG, MAX_TOTAL, board } = await import(dir + "records.js?v=1");
 
 const far = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 function walk(index, options, limit = 60 * 600) {
@@ -214,6 +214,24 @@ test("records: names from two lists, and no score higher than the places allow",
   assert.deepEqual(board.readLocal(memory).map((r) => [r.id, r.score]), [["j-1", 4500]], "one row per journey, kept up to date");
 });
 
+test("the shared board gets a new row for every place, and each journey is listed once", () => {
+  const after = (next, total, stars) => sharedRecord({ id: "j-1", next, total, stars }, "Kind Comet");
+  const one = after(1, 1500, [3]),
+    two = after(2, 4200, [3, 2]);
+  assert.deepEqual([one.id, two.id], ["j-1-p1", "j-1-p2"], "a row is never rewritten, so each place has its own");
+  assert.equal(one.journey, "j-1");
+  assert.ok(validRecord(one) && validRecord(two));
+  assert.ok(!validRecord({ ...one, journey: "" }) && !validRecord({ ...one, journey: 5 }) && !validRecord({ ...one, journey: "x".repeat(65) }));
+  const other = sharedRecord({ id: "j-2", next: 1, total: 1600, stars: [3] }, "Wild Star"),
+    old = makeRecord({ id: "j-0", next: 1, total: 900, stars: [1] }, "Swift Cub"); // a row saved before journeys were tied together
+  const listed = board.rank(latestPerJourney([one, other, two, old]), 25);
+  assert.deepEqual(listed.map((r) => [r.journey ?? r.id, r.places, r.score]), [["j-1", 2, 4200], ["j-2", 1, 1600], ["j-0", 1, 900]]);
+  assert.deepEqual(latestPerJourney([]), []);
+  const js = readFileSync(new URL(dir + "game.js", import.meta.url), "utf8");
+  assert.match(js, /shareJourney\(/, "the page sends the journey itself; there is no button to forget");
+  assert.ok(!/btn-post/.test(js));
+});
+
 test("the page: no remote code or fonts, nothing typed by players, both languages complete", () => {
   const read = (f) => readFileSync(new URL(dir + f, import.meta.url), "utf8");
   const html = read("game.html"),
@@ -231,6 +249,12 @@ test("the page: no remote code or fonts, nothing typed by players, both language
   assert.ok(keys("en").length > 40);
   for (const key of html.match(/data-t="(\w+)"/g).map((m) => m.slice(8, -1))) assert.ok(keys("en").includes(key), `text for ${key}`);
   for (const kind of SLEEPERS) assert.ok(block("en").includes(`${kind}:`) && block("de").includes(`${kind}:`));
+  const seen = {};
   for (const f of ["world.js", "render.js", "records.js", "game.js"])
-    for (const m of read(f).matchAll(/from "(\.[^"]+)"/g)) assert.ok(m[1].endsWith("?v=1"), `${f}: ${m[1]}`);
+    for (const m of read(f).matchAll(/from "(\.[^"]+)"/g)) {
+      // one query per file, so a module is never loaded twice under two addresses
+      const [file, query] = m[1].split("?");
+      assert.match(query ?? "", /^v=\d+$/, `${f}: ${m[1]}`);
+      assert.equal((seen[file] ??= query), query, `${file} is imported under two versions`);
+    }
 });
