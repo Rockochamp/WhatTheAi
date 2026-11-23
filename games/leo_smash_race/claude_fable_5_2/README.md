@@ -21,8 +21,9 @@ play alone on a phone or tablet, and for an adult to enjoy for one more race.
 - **The cube is three taps.** Only the three sides you can see ever turn,
   and the scramble is three turns, so a child can undo it. "Show me" makes
   the right side glow. Solving it fills the boost before the start.
-- **No typing.** Racing names are picked from two short lists, so nothing a
-  child types ends up anywhere and nothing unkind ends up on the board.
+- **No typing.** The racing name is picked from two short lists in the
+  garage, so nothing a child types ends up anywhere and nothing unkind ends
+  up on the board. Every finished race goes to the shared board by itself.
 - **English and German**, chosen from the browser and switchable.
 
 ## Files

@@ -204,6 +204,15 @@ test("the page: no remote code or fonts, nothing typed by players, both language
   const keys = (lang) => [...block(lang).matchAll(/^    (\w+):/gm)].map((m) => m[1]).sort();
   assert.deepEqual(keys("en"), keys("de"));
   for (const key of html.match(/data-t="(\w+)"/g).map((m) => m.slice(8, -1))) assert.ok(keys("en").includes(key), `text for ${key}`);
+  assert.match(js, /sendShared\(record/, "a finished race is sent to the shared board without a button");
+  assert.ok(!/btn-save/.test(js + html));
+  assert.ok(html.indexOf('id="alias-a"') < html.indexOf('id="cube"'), "the racing name is picked in the garage, before the race");
+  const seen = {};
   for (const f of ["sim.js", "render.js", "cube.js", "records.js", "game.js"])
-    for (const m of read(f).matchAll(/from "(\.[^"]+)"/g)) assert.ok(m[1].endsWith("?v=1"), `${f}: ${m[1]}`);
+    for (const m of read(f).matchAll(/from "(\.[^"]+)"/g)) {
+      // one query per file, so a module is never loaded twice under two addresses
+      const [file, query] = m[1].split("?");
+      assert.match(query ?? "", /^v=\d+$/, `${f}: ${m[1]}`);
+      assert.equal((seen[file] ??= query), query, `${file} is imported under two versions`);
+    }
 });

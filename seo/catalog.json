@@ -372,7 +372,7 @@
     ],
     "tips": [
       "Claude: every toy you hit fills the boost a little, and hits in quick succession build a chain up to ×5. Points count double while the boost burns, so save it for a stretch with a lot to smash.",
-      "Claude: with the helper on the car drifts toward the next toy by itself; turn it off for sharper bends and faster rivals. Racing names come from two lists, so nobody types anything.",
+      "Claude: with the helper on the car drifts toward the next toy by itself; turn it off for sharper bends and faster rivals. Pick a racing name from the two lists in the garage; every finished race then goes to the shared board by itself.",
       "Grokbot: Assist mode steers toward smashable targets. A solved cube gives you a full boost, and quick successive smashes build a combo up to ×5.",
       "GPT-6.1 Sol: Crew offers steering assistance and lighter damage. Use ramps to reach bonus rings, chain up to six smashes, and submit finished races under a preset alias to the leaderboard for your circuit and class."
     ],
@@ -422,7 +422,7 @@
     ],
     "tips": [
       "Claude: a lantern is worth 100 points plus 20 for every firefly with Leo when it lights, so gather fireflies first. Wind sends half of them home; a roar stills the wind for a while. Each place also hides two sleeping animals worth 250 each.",
-      "Claude: the journey is saved after every place. Stop at any point to post your total under a name picked from two lists, or light all ten places for the Eternal Flame.",
+      "Claude: your total goes to the shared board after every place, under a name picked from two lists on the start card. You can end the journey at any point, or light all ten places for the Eternal Flame.",
       "Astra: each world has three optional moon moths. A cleared world earns 500 points, plus 150 per moth and one point for every step below 100. The ember ledger keeps your ten best trails per world, and Post score sends one to that world’s shared leaderboard."
     ],
     "versions": [

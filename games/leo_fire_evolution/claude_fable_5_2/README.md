@@ -32,7 +32,7 @@ leaves each place his fire has taken a new form.
 | `world.js` | The rules without drawing: the ten forms and places, layout from a seed, one `Visit` with walking, fireflies, lanterns, wind, roar and scoring, and a scripted walker used by tests and the start screen. |
 | `render.js` | Draws a place, the dark over it, the cub and his flame in each form. |
 | `game.js` | Start card, controls, music, form book, end card, rankings, both languages. |
-| `records.js` | Record format and checks. One row per journey. Shared board: Firestore collection `leaderboard_leo_fire_evolution_claude_fable_5_2_v1`, used only on whatthe.ai. |
+| `records.js` | Record format and checks. The journey so far is sent to the shared board after every place; rows there cannot be changed, so each place adds a row and the board lists every journey once. Shared board: Firestore collection `leaderboard_leo_fire_evolution_claude_fable_5_2_v1`, used only on whatthe.ai. |
 
 Tests: `node --test tests/leo_fire_claude.test.mjs`. They walk all ten places
 with the scripted walker, so a layout that could trap the cub fails the build.

@@ -4,7 +4,7 @@
 import { prefs, formatInt, runId, isLiveSite, clamp, Sound, Sequencer, midi } from "../../../js/fable/kit.js?v=1";
 import { Visit, FORMS, PLACES, POINTS, STEP, guide } from "./world.js?v=1";
 import { Renderer, portrait } from "./render.js?v=1";
-import { board, makeRecord, NAME_A, NAME_B } from "./records.js?v=1";
+import { board, makeRecord, sharedRecord, latestPerJourney, NAME_A, NAME_B } from "./records.js?v=2";
 
 const $ = (id) => document.getElementById(id);
 const store = prefs("leoFireFable.");
@@ -28,10 +28,9 @@ const TEXT = {
     roar: "Roar",
     points: "points",
     alias: "Name for the board:",
-    post: "Post my score",
     again: "A new journey",
     next: "On to the next place",
-    stop: "Stop here",
+    stop: "End the journey here",
     evolved: "Leo’s fire has changed",
     lit: (name) => `${name} is lit`,
     coach1: "Hold a finger where Leo should go.",
@@ -51,11 +50,11 @@ const TEXT = {
     endAllText: "All ten places are bright again, and Leo carries the Eternal Flame.",
     endSome: (n) => (n === 1 ? "One place lit" : `${n} places lit`),
     endSomeText: "The journey ends here for now. The dark places will wait.",
-    savedLocal: "Saved on this device.",
     notSaved: "This browser would not keep the record.",
     previewOnly: "The shared board works on whatthe.ai. This copy keeps records on this device.",
     sending: "Sending…",
-    sent: "On the shared board!",
+    sent: (name) => `${name} is on the shared board.`,
+    refused: "The shared board refused this score. This board still has to be allowed in the site’s Firebase rules.",
     sendFailed: "The shared board did not answer. The record is still on this device.",
     empty: "No journeys here yet.",
     loading: "Loading…",
@@ -81,10 +80,9 @@ const TEXT = {
     roar: "Brüll",
     points: "Punkte",
     alias: "Name für die Tafel:",
-    post: "Punkte eintragen",
     again: "Eine neue Reise",
     next: "Weiter zum nächsten Ort",
-    stop: "Hier aufhören",
+    stop: "Die Reise hier beenden",
     evolved: "Leos Feuer hat sich verwandelt",
     lit: (name) => `${name} leuchtet wieder`,
     coach1: "Halte den Finger dorthin, wo Leo hingehen soll.",
@@ -104,11 +102,11 @@ const TEXT = {
     endAllText: "Alle zehn Orte leuchten wieder, und Leo trägt die Ewige Flamme.",
     endSome: (n) => (n === 1 ? "Ein Ort leuchtet" : `${n} Orte leuchten`),
     endSomeText: "Hier endet die Reise fürs Erste. Die dunklen Orte warten.",
-    savedLocal: "Auf diesem Gerät gespeichert.",
     notSaved: "Dieser Browser wollte den Eintrag nicht behalten.",
     previewOnly: "Die gemeinsame Bestenliste gibt es auf whatthe.ai. Diese Kopie speichert nur auf diesem Gerät.",
     sending: "Wird gesendet…",
-    sent: "Steht auf der gemeinsamen Tafel!",
+    sent: (name) => `${name} steht auf der gemeinsamen Tafel.`,
+    refused: "Die gemeinsame Tafel hat das Ergebnis abgelehnt. Sie muss in den Firebase-Regeln der Seite noch erlaubt werden.",
     sendFailed: "Die gemeinsame Tafel antwortet nicht. Der Eintrag bleibt auf diesem Gerät.",
     empty: "Hier ist noch niemand gereist.",
     loading: "Lädt…",
@@ -273,8 +271,9 @@ function finishVisit() {
   known = clamp(Math.max(known, i + 2), 1, FORMS.length);
   store.set("known", String(known));
   const last = journey.next >= PLACES.length;
-  board.addLocal(makeRecord(journey, alias()));
+  const { persisted } = board.addLocal(makeRecord(journey, alias()));
   if (!last) store.setJson("journey", journey);
+  shareJourney({ ...journey, stars: [...journey.stars] }, persisted);
   setTimeout(() => {
     if (visit !== v) return;
     $("done-title").textContent = t("lit")(v.world.name[lang]);
@@ -310,6 +309,19 @@ function finishVisit() {
   }, 1500);
 }
 const alias = () => `${$("alias-a").value} ${$("alias-b").value}`;
+// After every place the journey so far goes to the shared board by itself.
+async function shareJourney(snapshot, persisted) {
+  const record = sharedRecord(snapshot, alias()),
+    say = (text) => ($("share-status").textContent = $("post-status").textContent = text);
+  if (!isLiveSite()) return say(persisted ? t("previewOnly") : t("notSaved"));
+  say(t("sending"));
+  try {
+    await board.saveGlobal(record);
+    say(t("sent")(record.playerName));
+  } catch (error) {
+    say(error?.code === "permission-denied" ? t("refused") : t("sendFailed"));
+  }
+}
 let finished = null;
 function showEnd() {
   finished = { ...journey, stars: [...journey.stars] };
@@ -317,35 +329,15 @@ function showEnd() {
   $("end-title").textContent = all ? t("endAll") : t("endSome")(finished.next);
   $("end-text").textContent = all ? t("endAllText") : t("endSomeText");
   $("end-score").textContent = formatInt(finished.total);
-  const { persisted } = board.addLocal(makeRecord(finished, alias()));
-  $("post-status").textContent = persisted ? t("savedLocal") : t("notSaved");
-  $("btn-post").disabled = false;
   journey = freshJourney();
   store.setJson("journey", journey);
   startDemo();
   setState("end");
 }
-async function post() {
-  if (!finished) return;
-  const status = $("post-status"),
-    record = makeRecord(finished, alias());
-  store.set("aliasA", $("alias-a").value);
-  store.set("aliasB", $("alias-b").value);
-  board.addLocal(record);
-  if (!isLiveSite()) return void (status.textContent = t("previewOnly"));
-  $("btn-post").disabled = true;
-  status.textContent = t("sending");
-  try {
-    await board.saveGlobal(record);
-    status.textContent = t("sent");
-  } catch {
-    status.textContent = t("sendFailed");
-    $("btn-post").disabled = false;
-  }
-}
 for (const [sel, list, key] of [[$("alias-a"), NAME_A, "aliasA"], [$("alias-b"), NAME_B, "aliasB"]]) {
   for (const word of list) sel.append(new Option(word, word));
   if (list.includes(store.get(key))) sel.value = store.get(key);
+  sel.addEventListener("change", () => store.set(key, sel.value));
 }
 
 // ---------- buttons, keys, fingers ----------
@@ -364,7 +356,6 @@ $("btn-fresh").addEventListener("click", () => {
 });
 $("btn-next").addEventListener("click", () => (journey.next >= PLACES.length ? showEnd() : startVisit()));
 $("btn-stop").addEventListener("click", showEnd);
-$("btn-post").addEventListener("click", post);
 $("btn-again").addEventListener("click", showTitle);
 $("btn-leave").addEventListener("click", showTitle);
 $("btn-roar").addEventListener("pointerdown", (e) => {
@@ -464,7 +455,7 @@ function fillBoard(records, emptyText) {
     extra.textContent = t("places")(r.places);
     score.className = "score";
     score.textContent = formatInt(r.score);
-    if (r.id === journey.id || r.id === finished?.id) li.className = "me";
+    if ([journey.id, finished?.id].includes(r.journey ?? r.id)) li.className = "me";
     li.append(name, extra, score);
     list.append(li);
   }
@@ -475,7 +466,8 @@ async function showBoard(which) {
   fillBoard([], isLiveSite() ? t("loading") : t("previewOnly"));
   if (!isLiveSite()) return;
   try {
-    fillBoard(await board.fetchGlobal({ limit: 25 }), t("empty"));
+    // the shared board holds a row for every place of a journey; show each journey once
+    fillBoard(board.rank(latestPerJourney(await board.fetchGlobal({ limit: 100 })), 25), t("empty"));
   } catch {
     $("board-status").textContent = t("loadFailed");
   }
