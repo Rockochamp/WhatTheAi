@@ -6,6 +6,7 @@ Run: python scripts/build-guides.py && python scripts/update-seo.py
 """
 import json
 import re
+from datetime import datetime
 from html import escape as e
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
@@ -156,7 +157,8 @@ def home():
     groups, listed = family_groups()
     title = 'What the Ai — Free AI-Built Browser Games, Compared by Model'
     description = f'Play {number(len(CATALOG))} free browser games and apps, each built by several AI models: {listed}. No download, no account. Pick a version and compare.'
-    star = max(CATALOG, key=lambda g: len({v['thumb'] for v in g['versions']}))
+    star = max(CATALOG, key=lambda g: (len({v['thumb'] for v in g['versions']}),
+        datetime.strptime(g.get('updated', 'October 2, 2026'), '%B %d, %Y')))
     seen, strip = set(), []
     for v in star['versions']:
         if v['thumb'] in seen: continue
