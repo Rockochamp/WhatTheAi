@@ -1,4 +1,4 @@
-import { DRIVERS, RAIL, clamp } from './sim.mjs';
+import { DRIVERS, RAIL, clamp } from './sim.js';
 
 const art = new Map();
 function image(path) {

@@ -1,5 +1,5 @@
-import { DT, DRIVERS, TABLES, clamp, start, step } from './sim.mjs';
-import { Display } from './render.mjs';
+import { DT, DRIVERS, TABLES, clamp, start, step } from './sim.js';
+import { Display } from './render.js';
 import { RaceSound } from '../sol/audio.js?v=2';
 
 const $ = id=>document.getElementById(id);

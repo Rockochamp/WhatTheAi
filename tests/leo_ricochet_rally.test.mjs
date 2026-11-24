@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DRIVERS,TABLES,RAIL,start,step} from '../games/leo_smash_race/astra_6_2/sim.mjs';
+import {DRIVERS,TABLES,RAIL,start,step} from '../games/leo_smash_race/astra_6_2/sim.js';
 
 test('every toy finishes every table and the finish awards points once',()=>{
   for(const d of DRIVERS) for(const t of TABLES) for(const assist of [false,true]){
