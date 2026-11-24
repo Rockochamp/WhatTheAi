@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://whatthe.ai/</loc>
-    <lastmod>2026-11-21</lastmod>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/about.html</loc>
-    <lastmod>2026-11-21</lastmod>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/apps/agi_barometer/claude_fable_5_2/game.html</loc>
@@ -129,6 +129,10 @@
     <lastmod>2026-11-23</lastmod>
   </url>
   <url>
+    <loc>https://whatthe.ai/games/leo_smash_race/astra_6_2/game.html</loc>
+    <lastmod>2026-11-24</lastmod>
+  </url>
+  <url>
     <loc>https://whatthe.ai/games/leo_smash_race/claude_fable_5_2/game.html</loc>
     <lastmod>2026-11-23</lastmod>
   </url>
@@ -138,7 +142,7 @@
   </url>
   <url>
     <loc>https://whatthe.ai/games/leo_smash_race/index.html</loc>
-    <lastmod>2026-11-23</lastmod>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://whatthe.ai/games/leo_smash_race/sol/game.html</loc>
@@ -162,6 +166,6 @@
   </url>
   <url>
     <loc>https://whatthe.ai/models.html</loc>
-    <lastmod>2026-11-21</lastmod>
+    <lastmod>2026-11-24</lastmod>
   </url>
 </urlset>

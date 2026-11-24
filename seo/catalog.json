@@ -363,20 +363,30 @@
     "name": "Leos Smash Racer",
     "hub": "/games/leo_smash_race/index.html",
     "category": "Racing game",
-    "summary": "Race, boost and smash with Leo’s toys in three different takes on his racing game.",
-    "intro": "Leo designed the racing game at age 4. Claude Fable 5.2 built it for a four-year-old to actually play: a road that runs into the screen, block towers, cones and rubber ducks to drive straight through, two big steering buttons and a race that cannot be lost. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns ten of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Each edition has its own cube warm-up and leaderboard.",
+    "summary": "Race, boost and smash with Leo’s toys in four different takes on his racing game.",
+    "intro": "Leo designed the racing game at age 4. Claude Fable 5.2 built it for a four-year-old to actually play: a road that runs into the screen, block towers, cones and rubber ducks to drive straight through, two big steering buttons and a race that cannot be lost. Grokbot’s side-scrolling edition lets you pick a hero, change lanes, fly and chain smashes. GPT-6.1 Sol turns ten of Leo’s real toys into racers for four top-down circuits, with free steering, drifting, rival cars and vehicle damage. Those three editions have a cube warm-up and leaderboard. GPT 6.2 Astra puts Leo’s Crystal Golem on a racing pinball table in Ricochet Rally. Rail shots, pop bumpers and three-key vaults reward a different line on every run.",
     "controls": [
+      "GPT 6.2 Astra: pick a racer and table, then press Race now. Steer with the arrows or A/D, Space to ricochet and E for your special. On touchscreens, drag to steer or use the on-screen buttons.",
       "Claude: pick a car and a road. Steer with the two big buttons, a finger on the left or right half of the screen, or the arrow keys. Press Boost (or Space) when the button turns red, and H or the blue button to honk. Solve the colour cube first by tapping its sides, or skip it.",
       "Grokbot: Pick a hero and track. Solve or skip the cube warm-up, then use the arrow keys or swipe to change lanes. Hold Space or the FLY button to climb and tap BOOST when your special is charged.",
       "GPT-6.1 Sol: Pick a toy, track and class. Steer with A/D or the arrows, use Down to drift, Shift for nitro, Space to jump and E for your special. Touch controls are available on touchscreens."
     ],
     "tips": [
+      "Ricochet Rally: a ricochet follows your last steering direction. Bounce off a rail to gain speed, then aim for three gold keys and a vault. Your fastest finish leaves a ghost for the same racer and table on this device.",
       "Claude: every toy you hit fills the boost a little, and hits in quick succession build a chain up to ×5. Points count double while the boost burns, so save it for a stretch with a lot to smash.",
       "Claude: with the helper on the car drifts toward the next toy by itself; turn it off for sharper bends and faster rivals. Pick a racing name from the two lists in the garage; every finished race then goes to the shared board by itself.",
       "Grokbot: Assist mode steers toward smashable targets. A solved cube gives you a full boost, and quick successive smashes build a combo up to ×5.",
       "GPT-6.1 Sol: Crew offers steering assistance and lighter damage. Use ramps to reach bonus rings, chain up to six smashes, and submit finished races under a preset alias to the leaderboard for your circuit and class."
     ],
     "versions": [
+      {
+        "model": "GPT 6.2 Astra",
+        "path": "/games/leo_smash_race/astra_6_2/game.html",
+        "detail": "Ricochet Rally turns the racetrack into a pinball table. Race as Leo’s Crystal Golem, Dino Rex or Knuckles on three tables. Bank off rails, open vaults and chase your fastest ghost.",
+        "description": "Play Ricochet Rally in Leo’s Smash Racer by GPT 6.2 Astra. Race the Crystal Golem on three pinball tables, smash crates, open vaults and chase your ghost.",
+        "image": "/games/leo_smash_race/astra_6_2/art/cover.webp",
+        "thumb": "/images/thumbs/leo-ricochet-rally.webp"
+      },
       {
         "model": "Claude Fable 5.2",
         "path": "/games/leo_smash_race/claude_fable_5_2/game.html",
@@ -403,9 +413,9 @@
         "thumb": "/images/thumbs/leo_smash_race.webp?v=3"
       }
     ],
-    "image": "/images/leos-smash-racer-fable.webp",
-    "updated": "November 21, 2026",
-    "card": "Race, boost and smash with Leo’s toys in three different takes on the racing game he designed at age 4.",
+    "image": "/games/leo_smash_race/astra_6_2/art/cover.webp",
+    "updated": "November 24, 2026",
+    "card": "Four takes on Leo’s toy racer. In Ricochet Rally, bank his Crystal Golem off pinball rails and crack a three-key vault.",
     "color": "#ef4444"
   },
   {
